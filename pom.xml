@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cz.cvut.kbss</groupId>
+        <artifactId>kbss-project-parent</artifactId>
+        <version>0.0.5</version>
+    </parent>
+
+    <groupId>cz.cvut.kbss.opppr</groupId>
+    <artifactId>termit</artifactId>
+    <version>0.0.1</version>
+    <name>TermIt</name>
+    <description>Terminology manager based on Semantic Web technologies.</description>
+
+    <repositories>
+        <repository>
+            <id>kbss</id>
+            <url>http://kbss.felk.cvut.cz/m2repo</url>
+        </repository>
+    </repositories>
+
+    <properties>
+        <org.springframework.version>5.0.7.RELEASE</org.springframework.version>
+        <org.springframework.security.version>5.0.6.RELEASE</org.springframework.security.version>
+        <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
+        <cz.cvut.kbss.jopa.version>0.10.2</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jsonld.version>0.3.2</cz.cvut.kbss.jsonld.version>
+    </properties>
+
+</project>
