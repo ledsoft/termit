@@ -1,0 +1,275 @@
+@prefix : <http://onto.fel.cvut.cz/ontologies/opppr/termit#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://onto.fel.cvut.cz/ontologies/termit> .
+
+<http://onto.fel.cvut.cz/ontologies/termit> rdf:type owl:Ontology ;
+                                            
+                                            owl:imports <http://onto.fel.cvut.cz/ontologies/ufo/1.0.2> ,
+                                                        <http://purl.org/dc/terms> ,
+                                                        <http://www.w3.org/2004/02/skos/core> ,
+                                                        <http://www.w3.org/ns/oa#> .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/has-source
+
+<http://onto.fel.cvut.cz/ontologies/termit/has-source> rdf:type owl:AnnotationProperty ;
+                                                       
+                                                       rdfs:comment "Binds a target to a specific source document"@en ;
+                                                       
+                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/document> ;
+                                                       
+                                                       rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/target> ;
+                                                       
+                                                       rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasSource> .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/has-target
+
+<http://onto.fel.cvut.cz/ontologies/termit/has-target> rdf:type owl:AnnotationProperty ;
+                                                       
+                                                       rdfs:comment "Relates a term occurrence to its target"@en ;
+                                                       
+                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/target> ;
+                                                       
+                                                       rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> ;
+                                                       
+                                                       rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasTarget> .
+
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/has-occurrence
+
+<http://onto.fel.cvut.cz/ontologies/termit/has-occurrence> rdf:type owl:ObjectProperty ;
+                                                           
+                                                           rdfs:label "has occurrence"@en ;
+                                                           
+                                                           rdfs:comment "Denotes a relationship between a term and its occurrence in a document"@en ;
+                                                           
+                                                           rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term> ;
+                                                           
+                                                           rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/has-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/has-selector> rdf:type owl:ObjectProperty ;
+                                                         
+                                                         rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/selector> ;
+                                                         
+                                                         rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/target> ;
+                                                         
+                                                         rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasSelector> .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/css-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/css-selector> rdf:type owl:Class ;
+                                                         
+                                                         rdfs:label "CSS Selector"@en ;
+                                                         
+                                                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
+                                                                         <http://www.w3.org/ns/oa#CssSelector> ;
+                                                         
+                                                         rdfs:comment "A CssSelector describes a Segment of interest in a representation that conforms to the Document Object Model through the use of the CSS selector specification."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/dataset
+
+<http://onto.fel.cvut.cz/ontologies/termit/dataset> rdf:type owl:Class ;
+                                                    
+                                                    rdfs:label "Dataset"@en ;
+                                                    
+                                                    rdfs:comment "A generic container of data"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/document
+
+<http://onto.fel.cvut.cz/ontologies/termit/document> rdf:type owl:Class ;
+                                                     
+                                                     rdfs:label "Document"@en ;
+                                                     
+                                                     rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ,
+                                                                     <http://www.w3.org/ns/oa#ResourceSelection> ;
+                                                     
+                                                     rdfs:comment "Represents a physical, usually textual, document"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/fragment-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/fragment-selector> rdf:type owl:Class ;
+                                                              
+                                                              rdfs:label "Fragment Selector"@en ;
+                                                              
+                                                              rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
+                                                                              <http://www.w3.org/ns/oa#FragmentSelector> ;
+                                                              
+                                                              rdfs:comment "The FragmentSelector class is used to record the segment of a representation using the IRI fragment specification defined by the representation's media type."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/selector> rdf:type owl:Class ;
+                                                     
+                                                     rdfs:label "Selector"@en ;
+                                                     
+                                                     rdfs:subClassOf <http://www.w3.org/ns/oa#Selector> ;
+                                                     
+                                                     rdfs:comment "Denotes a term occurrence location in a document"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/state
+
+<http://onto.fel.cvut.cz/ontologies/termit/state> rdf:type owl:Class ;
+                                                  
+                                                  rdfs:label "State"@en ;
+                                                  
+                                                  rdfs:comment "Denotes a state of a term"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/target
+
+<http://onto.fel.cvut.cz/ontologies/termit/target> rdf:type owl:Class ;
+                                                   
+                                                   rdfs:label "Target"@en ;
+                                                   
+                                                   rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
+                                                   
+                                                   rdfs:comment "Represents a target of an annotation, binding it to a specific source document"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/term
+
+<http://onto.fel.cvut.cz/ontologies/termit/term> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:label "Term"@en ;
+                                                 
+                                                 rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ,
+                                                                 <http://www.w3.org/2004/02/skos/core#Concept> ;
+                                                 
+                                                 rdfs:comment "A vocabulary term which may occurr in documents"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/term-occurrence
+
+<http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> rdf:type owl:Class ;
+                                                            
+                                                            rdfs:label "Term Occurrence"@en ;
+                                                            
+                                                            rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> ;
+                                                            
+                                                            rdfs:comment "Occurrence of a term in a document"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/text-position-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/text-position-selector> rdf:type owl:Class ;
+                                                                   
+                                                                   rdfs:label "Text Position Selector"@en ;
+                                                                   
+                                                                   rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
+                                                                                   <http://www.w3.org/ns/oa#TextPositionSelector> ;
+                                                                   
+                                                                   rdfs:comment "The TextPositionSelector describes a range of text by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first character, position 1 would be immediately before the second character, and so on."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector> rdf:type owl:Class ;
+                                                                
+                                                                rdfs:label "Text Quote Selector"@en ;
+                                                                
+                                                                rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
+                                                                                <http://www.w3.org/ns/oa#TextQuoteSelector> ;
+                                                                
+                                                                rdfs:comment "The TextQuoteSelector describes a range of text by copying it, and including some of the text immediately before (a prefix) and after (a suffix) it to distinguish between multiple copies of the same sequence of characters."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/user
+
+<http://onto.fel.cvut.cz/ontologies/termit/user> rdf:type owl:Class ;
+                                                 
+                                                 rdfs:label "User"@en ;
+                                                 
+                                                 rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/person> ;
+                                                 
+                                                 rdfs:comment "Represents a user of the vocabulary manager"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/vocabulary
+
+<http://onto.fel.cvut.cz/ontologies/termit/vocabulary> rdf:type owl:Class ;
+                                                       
+                                                       rdfs:label "Vocabulary"@en ;
+                                                       
+                                                       rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/dataset> ;
+                                                       
+                                                       rdfs:comment "Contains terms used in a dataset"@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/xpath-selector
+
+<http://onto.fel.cvut.cz/ontologies/termit/xpath-selector> rdf:type owl:Class ;
+                                                           
+                                                           rdfs:label "XPath Selector"@en ;
+                                                           
+                                                           rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
+                                                                           <http://www.w3.org/ns/oa#XPathSelector> ;
+                                                           
+                                                           rdfs:comment "An XPathSelector is used to select elements and content within a resource that supports the Document Object Model via a specified XPath value."@en .
+
+
+
+###  http://www.w3.org/ns/oa#Annotation
+
+<http://www.w3.org/ns/oa#Annotation> rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> .
+
+
+
+
+###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
+
