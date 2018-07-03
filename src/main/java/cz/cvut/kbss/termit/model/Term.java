@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
@@ -14,10 +14,10 @@ public class Term {
     private URI uri;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
+    @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String label;
 
-    @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_COMMENT)
+    @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
     @Inferred

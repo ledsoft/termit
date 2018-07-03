@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.CommonVocabulary;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -12,7 +12,7 @@ public class Vocabulary implements Serializable {
     @Id
     private URI uri;
 
-    @OWLAnnotationProperty(iri = CommonVocabulary.RDFS_LABEL)
+    @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String name;
 
     @ParticipationConstraints(nonEmpty = true)
