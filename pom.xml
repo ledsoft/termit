@@ -252,7 +252,7 @@
                 <artifactId>jopa-maven-plugin</artifactId>
                 <version>${cz.cvut.kbss.jopa.version}</version>
                 <configuration>
-                    <package>cz.cvut.kbss.termit.model</package>
+                    <package>cz.cvut.kbss.termit.util</package>
                     <output-directory>${project.basedir}/src/main/generated-sources</output-directory>
                     <ontology-iri>http://onto.fel.cvut.cz/ontologies/termit</ontology-iri>
                     <mapping-file>${project.basedir}/src/main/resources/mapping</mapping-file>
