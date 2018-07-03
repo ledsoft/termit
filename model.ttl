@@ -689,7 +689,7 @@ xsd:date rdf:type rdfs:Datatype .
                                                       
                                                       rdfs:comment "A vocabulary describes a logical document" ;
                                                       
-                                                      rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/vocabulary> ;
+                                                      rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary> ;
                                                       
                                                       rdfs:range <http://xmlns.com/foaf/0.1/Document> .
 
@@ -1100,6 +1100,18 @@ xsd:date rdf:type rdfs:Datatype .
 #################################################################
 
 
+###  http://onto.fel.cvut.cz/ontologies/termit/file-location
+
+<http://onto.fel.cvut.cz/ontologies/termit/file-location> rdf:type owl:DatatypeProperty ;
+                                                          
+                                                          rdfs:label "file location"@en ;
+                                                          
+                                                          rdfs:comment "denotes the location of a file. Could be local or remote."@en ;
+                                                          
+                                                          <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+
+
+
 ###  http://onto.fel.cvut.cz/ontologies/termit/password
 
 <http://onto.fel.cvut.cz/ontologies/termit/password> rdf:type owl:DatatypeProperty ,
@@ -1381,6 +1393,24 @@ rdf:value rdf:type owl:DatatypeProperty .
                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
                                                      
                                                      rdfs:comment "Represents a logical, usually textual, document. A document may consist of multiple physical files."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary
+
+<http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary> rdf:type owl:Class ;
+                                                                
+                                                                rdfs:label "Document Vocabulary"@en ;
+                                                                
+                                                                rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/vocabulary> ,
+                                                                                [ rdf:type owl:Restriction ;
+                                                                                  owl:onProperty <http://onto.fel.cvut.cz/ontologies/termit/describes> ;
+                                                                                  owl:someValuesFrom <http://xmlns.com/foaf/0.1/Document>
+                                                                                ] ;
+                                                                
+                                                                <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
+                                                                
+                                                                rdfs:comment "A vocabulary which is related to a document."@en .
 
 
 
@@ -3229,9 +3259,11 @@ rdf:value rdf:type owl:DatatypeProperty .
                                        
                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^xsd:date ;
                                        
-                                       rdfs:comment "An account of the resource."@en ;
-                                       
                                        <http://purl.org/dc/terms/description> "Description may include but is not limited to: an abstract, a table of contents, a graphical representation, or a free-text account of the resource."@en ;
+                                       
+                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
+                                       
+                                       rdfs:comment "An account of the resource."@en ;
                                        
                                        <http://purl.org/dc/terms/hasVersion> <http://dublincore.org/usage/terms/history/#descriptionT-001> ;
                                        
@@ -3285,6 +3317,22 @@ rdf:value rdf:type owl:DatatypeProperty .
 
 
 
+<http://purl.org/dc/terms/W3CDTF> rdfs:label "W3C-DTF"@en ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^xsd:date ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^xsd:date ;
+                                  
+                                  rdfs:comment "The set of dates and times constructed according to the W3C Date and Time Formats Specification."@en ;
+                                  
+                                  <http://purl.org/dc/terms/hasVersion> <http://dublincore.org/usage/terms/history/#W3CDTF-003> ;
+                                  
+                                  rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+                                  
+                                  rdfs:seeAlso <http://www.w3.org/TR/NOTE-datetime> .
+
+
+
 <http://purl.org/dc/terms/ProvenanceStatement> rdfs:label "Provenance Statement"@en ;
                                                
                                                <http://purl.org/dc/terms/issued> "2008-01-14"^^xsd:date ;
@@ -3306,22 +3354,6 @@ rdf:value rdf:type owl:DatatypeProperty .
                                            <http://purl.org/dc/terms/hasVersion> <http://dublincore.org/usage/terms/history/#LicenseDocument-001> ;
                                            
                                            rdfs:isDefinedBy <http://purl.org/dc/terms/> .
-
-
-
-<http://purl.org/dc/terms/W3CDTF> rdfs:label "W3C-DTF"@en ;
-                                  
-                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^xsd:date ;
-                                  
-                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^xsd:date ;
-                                  
-                                  rdfs:comment "The set of dates and times constructed according to the W3C Date and Time Formats Specification."@en ;
-                                  
-                                  <http://purl.org/dc/terms/hasVersion> <http://dublincore.org/usage/terms/history/#W3CDTF-003> ;
-                                  
-                                  rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
-                                  
-                                  rdfs:seeAlso <http://www.w3.org/TR/NOTE-datetime> .
 
 
 

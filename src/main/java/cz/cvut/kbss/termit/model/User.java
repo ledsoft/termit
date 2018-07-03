@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.io.Serializable;
 import java.net.URI;

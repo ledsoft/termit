@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.model.selector;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.util.Vocabulary;
 
 @OWLClass(iri = Vocabulary.s_c_text_position_selector)
 public class TextPositionSelector extends TermSelector {
