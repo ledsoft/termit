@@ -20,6 +20,9 @@ public class Term {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
+    @OWLObjectProperty(iri = Vocabulary.s_p_has_narrower, fetch = FetchType.EAGER)
+    private Set<Term> subTerms;
+
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_has_occurrence, fetch = FetchType.EAGER)
     private Set<TermOccurrence> occurrences;
@@ -49,6 +52,14 @@ public class Term {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Set<Term> getSubTerms() {
+        return subTerms;
+    }
+
+    public void setSubTerms(Set<Term> subTerms) {
+        this.subTerms = subTerms;
     }
 
     public Set<TermOccurrence> getOccurrences() {
