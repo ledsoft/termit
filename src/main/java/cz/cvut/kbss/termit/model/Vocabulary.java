@@ -23,6 +23,9 @@ public class Vocabulary implements Serializable {
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_model, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Model model;
 
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_version_info, fetch = FetchType.EAGER)
+    private VersionInfo versionInfo;
+
     public URI getUri() {
         return uri;
     }
@@ -55,12 +58,21 @@ public class Vocabulary implements Serializable {
         this.model = model;
     }
 
+    public VersionInfo getVersionInfo() {
+        return versionInfo;
+    }
+
+    public void setVersionInfo(VersionInfo versionInfo) {
+        this.versionInfo = versionInfo;
+    }
+
     @Override
     public String toString() {
         return "Vocabulary{" +
                 "uri=" + uri +
                 ", name='" + name + '\'' +
                 ", glossary=" + glossary +
+                ", version=" + versionInfo +
                 '}';
     }
 }
