@@ -15,6 +15,7 @@
     <name>TermIt</name>
     <description>Terminology manager based on Semantic Web technologies.</description>
 
+    <!-- Required for the KBSS parent project -->
     <repositories>
         <repository>
             <id>kbss</id>
@@ -25,10 +26,12 @@
     <properties>
         <org.springframework.version>5.0.7.RELEASE</org.springframework.version>
         <org.springframework.security.version>5.0.6.RELEASE</org.springframework.security.version>
+        <org.springframework.data.version>2.0.8.RELEASE</org.springframework.data.version>
         <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
-        <cz.cvut.kbss.jopa.version>0.10.2</cz.cvut.kbss.jopa.version>
-        <cz.cvut.kbss.jsonld.version>0.3.2</cz.cvut.kbss.jsonld.version>
+        <cz.cvut.kbss.jopa.version>0.10.3</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jsonld.version>0.3.4</cz.cvut.kbss.jsonld.version>
         <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
+        <org.mockito.version>2.19.1</org.mockito.version>
     </properties>
 
     <dependencies>
@@ -49,12 +52,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <version>${org.springframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -75,6 +72,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${org.springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>${org.springframework.data.version}</version>
         </dependency>
 
         <!-- Spring Security -->
@@ -111,7 +113,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -126,6 +128,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${org.junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${org.mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -162,7 +170,6 @@
                         <version>2.4</version>
                         <configuration>
                             <failOnMissingWebXml>false</failOnMissingWebXml>
-                            <warSourceExcludes>node_modules/**</warSourceExcludes>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -181,17 +188,57 @@
                         <version>2.4</version>
                         <configuration>
                             <warName>termit</warName>
-                            <warSourceExcludes>node_modules/**</warSourceExcludes>
                             <failOnMissingWebXml>false</failOnMissingWebXml>
-                            <webResources>
-                                <resource>
-                                    <directory>profiles/production/src/main/webapp</directory>
-                                </resource>
-                            </webResources>
-                            <packagingExcludes>
-                                <!-- Exclude JS source files -->
-                            </packagingExcludes>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>replacer</artifactId>
+                        <version>1.5.3</version>
+                        <executions>
+                            <!--<execution>-->
+                            <!--<id>admin-jmx-name</id>-->
+                            <!--<phase>process-sources</phase>-->
+                            <!--<goals>-->
+                            <!--<goal>replace</goal>-->
+                            <!--</goals>-->
+                            <!--<configuration>-->
+                            <!--<file>-->
+                            <!--${project.basedir}/src/main/java/cz/cvut/kbss/reporting/service/jmx/AppAdminBean.java-->
+                            <!--</file>-->
+                            <!--<outputFile>-->
+                            <!--${project.basedir}/src/main/java/cz/cvut/kbss/reporting/service/jmx/AppAdminBean.java-->
+                            <!--</outputFile>-->
+                            <!--<regex>false</regex>-->
+                            <!--<token>INBASAdminBean</token>-->
+                            <!--<value>${deployment}-AdminBean</value>-->
+                            <!--</configuration>-->
+                            <!--</execution>-->
+                            <execution>
+                                <id>project-version</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                                <configuration>
+                                    <file>
+                                        ${project.basedir}/src/main/java/cz/cvut/kbss/termit/util/Constants.java
+                                    </file>
+                                    <outputFile>
+                                        ${project.basedir}/src/main/java/cz/cvut/kbss/termit/util/Constants.java
+                                    </outputFile>
+                                    <regex>false</regex>
+                                    <token>$VERSION$</token>
+                                    <value>${project.version}</value>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
