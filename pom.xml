@@ -46,6 +46,12 @@
             <artifactId>ontodriver-sesame</artifactId>
             <version>${cz.cvut.kbss.jopa.version}</version>
         </dependency>
+        <!-- Spring declarative transactions with JOPA -->
+        <dependency>
+            <groupId>com.github.ledsoft</groupId>
+            <artifactId>jopa-spring-transaction</artifactId>
+            <version>0.0.3</version>
+        </dependency>
 
         <!-- Spring -->
         <dependency>
