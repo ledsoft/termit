@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 
 /**
- * Entry point of the application invoked by application server on deploy.
+ * Entry point of the application invoked by the application server on deploy.
  */
 public class DispatcherServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -47,7 +47,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
     }
 
     private void printStartupMessage() {
-        final String msg = "TermIt " + Constants.VERSION;
+        final String msg = "* TermIt " + Constants.VERSION + " *";
         LOG.info(String.join("", Collections.nCopies(msg.length(), "*")));
         LOG.info(msg);
         LOG.info(String.join("", Collections.nCopies(msg.length(), "*")));
