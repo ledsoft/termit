@@ -67,7 +67,14 @@ public class MainPersistenceFactory {
         }
     }
 
-    private static Map<String, String> defaultParams() {
+    /**
+     * Default persistence unit configuration parameters.
+     * <p>
+     * These include: package scan for entities, provider specification
+     *
+     * @return Map with defaults
+     */
+    public static Map<String, String> defaultParams() {
         final Map<String, String> map = new HashMap<>();
         map.put(SCAN_PACKAGE, "cz.cvut.kbss.termit.model");
         map.put(JPA_PERSISTENCE_PROVIDER, JOPAPersistenceProvider.class.getName());
