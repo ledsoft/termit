@@ -46,7 +46,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         servletContext.getSessionCookieConfig().setName(SecurityConstants.SESSION_COOKIE_NAME);
     }
 
-    private void printStartupMessage() {
+    private static void printStartupMessage() {
         final String msg = "* TermIt " + Constants.VERSION + " *";
         LOG.info(String.join("", Collections.nCopies(msg.length(), "*")));
         LOG.info(msg);
@@ -56,7 +56,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
     /**
      * Initializes Spring Security servlet filter
      */
-    private void initSecurityFilter(ServletContext servletContext) {
+    private static void initSecurityFilter(ServletContext servletContext) {
         FilterRegistration.Dynamic securityFilter = servletContext.addFilter("springSecurityFilterChain",
                 DelegatingFilterProxy.class);
         final EnumSet<DispatcherType> es = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
@@ -66,7 +66,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
     /**
      * Initializes diagnostics context filter for logging session info
      */
-    private void initMdcFilter(ServletContext servletContext) {
+    private static void initMdcFilter(ServletContext servletContext) {
         FilterRegistration.Dynamic mdcFilter = servletContext
                 .addFilter("diagnosticsContextFilter", new DiagnosticsContextFilter());
         final EnumSet<DispatcherType> es = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
@@ -81,7 +81,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
     /**
      * Configures multipart processing (for file upload).
      */
-    private MultipartConfigElement getMultipartConfigElement() {
+    private static MultipartConfigElement getMultipartConfigElement() {
         return new MultipartConfigElement(Constants.UPLOADED_FILE_LOCATION, Constants.MAX_UPLOADED_FILE_SIZE,
                 Constants.MAX_UPLOAD_REQUEST_SIZE, Constants.UPLOADED_FILE_SIZE_THRESHOLD);
     }

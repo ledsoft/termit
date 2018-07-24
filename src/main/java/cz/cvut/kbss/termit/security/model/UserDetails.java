@@ -65,6 +65,23 @@ public class UserDetails implements org.springframework.security.core.userdetail
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserDetails)) {
+            return false;
+        }
+        UserDetails that = (UserDetails) o;
+        return Objects.equals(user, that.user) && Objects.equals(authorities, that.authorities);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user, authorities);
+    }
+
+    @Override
     public String toString() {
         return "UserDetails{" +
                 "user=" + user +

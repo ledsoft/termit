@@ -4,11 +4,12 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_term)
-public class Term {
+public class Term implements Serializable {
 
     @Id
     private URI uri;

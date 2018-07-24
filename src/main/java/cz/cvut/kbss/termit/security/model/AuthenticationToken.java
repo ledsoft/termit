@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Objects;
 
 public class AuthenticationToken extends AbstractAuthenticationToken implements Principal {
 
@@ -25,6 +26,26 @@ public class AuthenticationToken extends AbstractAuthenticationToken implements 
     @Override
     public Object getPrincipal() {
         return userDetails;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuthenticationToken)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AuthenticationToken that = (AuthenticationToken) o;
+        return Objects.equals(userDetails, that.userDetails);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), userDetails);
     }
 
     @Override
