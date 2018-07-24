@@ -6,7 +6,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableMBeanExport
-@Import({PersistenceConfig.class})
+@Import({PersistenceConfig.class, ServiceConfig.class})
 @PropertySource("classpath:config.properties")
 public class AppConfig {
 
