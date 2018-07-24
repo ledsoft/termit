@@ -4,7 +4,6 @@ import cz.cvut.kbss.jopa.Persistence;
 import cz.cvut.kbss.jopa.model.EntityManagerFactory;
 import cz.cvut.kbss.jopa.model.JOPAPersistenceProvider;
 import cz.cvut.kbss.ontodriver.config.OntoDriverProperties;
-import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +47,7 @@ public class MainPersistenceFactory {
         final Map<String, String> properties = defaultParams();
         properties.put(ONTOLOGY_PHYSICAL_URI_KEY, config.get(REPOSITORY_URL));
         properties.put(DATA_SOURCE_CLASS, config.get(DRIVER));
-        properties.put(LANG, config.get(LANGUAGE, Constants.DEFAULT_LANGUAGE));
+        properties.put(LANG, config.get(LANGUAGE));
         if (config.contains(REPO_USERNAME)) {
             properties.put(OntoDriverProperties.DATA_SOURCE_USERNAME, config.get(REPO_USERNAME));
             properties.put(OntoDriverProperties.DATA_SOURCE_PASSWORD, config.get(REPO_PASSWORD));
