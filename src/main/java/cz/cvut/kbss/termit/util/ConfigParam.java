@@ -8,27 +8,27 @@ public enum ConfigParam {
     /**
      * URL of the main application repository.
      */
-    REPOSITORY_URL("repositoryUrl"),
+    REPOSITORY_URL("repository.url"),
 
     /**
      * OntoDriver class for the repository.
      */
-    DRIVER("driver"),
+    DRIVER("persistence.driver"),
 
     /**
-     * Language used to store texts in the repository (persistence unit language).
+     * Language used to store strings in the repository (persistence unit language).
      */
-    LANGUAGE("language"),
+    LANGUAGE("persistence.language"),
 
     /**
      * Username for connecting to the application repository.
      */
-    REPO_USERNAME("repositoryUsername"),
+    REPO_USERNAME("repository.username"),
 
     /**
      * Password for connecting to the application repository.
      */
-    REPO_PASSWORD("repositoryPassword");
+    REPO_PASSWORD("repository.password");
 
     private final String parameter;
 

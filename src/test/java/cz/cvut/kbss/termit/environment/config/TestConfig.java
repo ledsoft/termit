@@ -1,14 +1,13 @@
-package cz.cvut.kbss.termit.config;
+package cz.cvut.kbss.termit.environment.config;
 
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@EnableMBeanExport
-@Import({PersistenceConfig.class})
 @PropertySource("classpath:config.properties")
-public class AppConfig {
+public class TestConfig {
 
     @Bean
     public cz.cvut.kbss.termit.config.Configuration configuration(Environment environment) {
