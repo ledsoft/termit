@@ -2,12 +2,11 @@ package cz.cvut.kbss.termit.config;
 
 import cz.cvut.kbss.ontodriver.sesame.SesameDataSource;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigurationTest {
@@ -30,9 +29,14 @@ class ConfigurationTest {
     }
 
     @Test
-    void getThrowsIllegalStateExceptionWhenPropertyIsNotConfigured() {
+    void getReturnsPredefinedDefaultValueWhenItExists() {
+        assertEquals(Constants.DEFAULT_LANGUAGE, sut.get(ConfigParam.LANGUAGE));
+    }
+
+    @Test
+    void getThrowsIllegalStateExceptionWhenPropertyIsNotConfiguredAndHasNoDefault() {
         final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> sut.get(ConfigParam.DRIVER));
-        assertThat(ex.getMessage(), containsString("Value of key " + ConfigParam.DRIVER + " not configured."));
+        assertEquals("Value of key \'" + ConfigParam.DRIVER + "\' not configured.", ex.getMessage());
     }
 
     @Test
