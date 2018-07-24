@@ -4,12 +4,11 @@ import cz.cvut.kbss.jopa.Persistence;
 import cz.cvut.kbss.jopa.model.EntityManagerFactory;
 import cz.cvut.kbss.jopa.model.JOPAPersistenceProvider;
 import cz.cvut.kbss.ontodriver.config.OntoDriverProperties;
+import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -24,16 +23,15 @@ import static cz.cvut.kbss.termit.util.ConfigParam.*;
  * Sets up persistence and provides {@link EntityManagerFactory} as Spring bean.
  */
 @Configuration
-@PropertySource("classpath:config.properties")
 public class MainPersistenceFactory {
 
-    private final Environment environment;
+    private final cz.cvut.kbss.termit.config.Configuration config;
 
     private EntityManagerFactory emf;
 
     @Autowired
-    public MainPersistenceFactory(Environment environment) {
-        this.environment = environment;
+    public MainPersistenceFactory(cz.cvut.kbss.termit.config.Configuration config) {
+        this.config = config;
     }
 
     @Bean
@@ -48,14 +46,12 @@ public class MainPersistenceFactory {
         // Temporary, should be configurable via JOPA
         System.setProperty("http.maxConnections", "20");
         final Map<String, String> properties = defaultParams();
-        properties.put(ONTOLOGY_PHYSICAL_URI_KEY, environment.getProperty(REPOSITORY_URL.toString()));
-        properties.put(DATA_SOURCE_CLASS, environment.getProperty(DRIVER.toString()));
-        properties.put(LANG, environment.getProperty(LANGUAGE.toString()));
-        if (environment.containsProperty(REPO_USERNAME.toString())) {
-            properties
-                    .put(OntoDriverProperties.DATA_SOURCE_USERNAME, environment.getProperty(REPO_USERNAME.toString()));
-            properties
-                    .put(OntoDriverProperties.DATA_SOURCE_PASSWORD, environment.getProperty(REPO_PASSWORD.toString()));
+        properties.put(ONTOLOGY_PHYSICAL_URI_KEY, config.get(REPOSITORY_URL));
+        properties.put(DATA_SOURCE_CLASS, config.get(DRIVER));
+        properties.put(LANG, config.get(LANGUAGE, Constants.DEFAULT_LANGUAGE));
+        if (config.contains(REPO_USERNAME)) {
+            properties.put(OntoDriverProperties.DATA_SOURCE_USERNAME, config.get(REPO_USERNAME));
+            properties.put(OntoDriverProperties.DATA_SOURCE_PASSWORD, config.get(REPO_PASSWORD));
         }
         this.emf = Persistence.createEntityManagerFactory("termitPU", properties);
     }

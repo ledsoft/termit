@@ -34,6 +34,11 @@ public class Constants {
     public static final String VERSION = "$VERSION$";
 
     /**
+     * Default persistence unit language.
+     */
+    public static final String DEFAULT_LANGUAGE = "en";
+
+    /**
      * Default page specification, corresponding to a find all query with no page specification.
      * <p>
      * I.e., the request asks for the first page (number = 0) and its size is {@link Integer#MAX_VALUE}.
