@@ -9,6 +9,10 @@ public class PersistenceException extends TermItException {
         super(message);
     }
 
+    public PersistenceException(Throwable cause) {
+        super(cause);
+    }
+
     public PersistenceException(String message, Throwable cause) {
         super(message, cause);
     }

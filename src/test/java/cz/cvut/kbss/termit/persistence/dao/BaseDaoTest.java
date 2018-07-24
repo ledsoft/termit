@@ -1,18 +1,25 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
+import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("dao")
@@ -111,6 +118,41 @@ class BaseDaoTest extends BaseDaoTestRunner {
         transactional(() -> sut.persist(user));
         transactional(() -> sut.remove(user.getUri()));
         assertFalse(sut.find(user.getUri()).isPresent());
+    }
+
+    // TODO Re-enable with new release of JOPA, where the exception hierarchy is updated
+    @Disabled
+    @Test
+    void exceptionDuringPersistIsWrappedInPersistenceException() {
+        final PersistenceException e = assertThrows(PersistenceException.class, () -> {
+            final User user = Generator.generateUser();
+            transactional(() -> sut.persist(user));
+        });
+        assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
+    }
+
+    // TODO dtto
+    @Disabled
+    @Test
+    void exceptionDuringCollectionPersistIsWrappedInPersistenceException() {
+        final List<User> users = Collections.singletonList(Generator.generateUser());
+        users.forEach(u -> u.setUri(Generator.generateUri()));
+        transactional(() -> sut.persist(users));
+
+        final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.persist(users)));
+        assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
+    }
+
+    // TODO dtto
+    @Disabled
+    @Test
+    void exceptionDuringUpdateIsWrappedInPersistenceException() {
+        final User user = Generator.generateUser();
+        user.setUri(Generator.generateUri());
+        transactional(() -> sut.persist(user));
+        user.setUri(null);
+        final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.update(user)));
+        assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
     }
 
     private static class BaseDaoImpl extends BaseDao<User> {

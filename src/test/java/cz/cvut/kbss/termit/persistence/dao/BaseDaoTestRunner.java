@@ -15,7 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public abstract class BaseDaoTestRunner {
 
     @Autowired
-    private PlatformTransactionManager txManager;
+    protected PlatformTransactionManager txManager;
 
     /**
      * Since JOPA does not understand SPARQL queries, any DAO method using a query will not be able to see uncommitted
