@@ -1,8 +1,6 @@
-package cz.cvut.kbss.termit.config;
+package cz.cvut.kbss.termit.util;
 
 import cz.cvut.kbss.ontodriver.sesame.SesameDataSource;
-import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;

@@ -1,7 +1,5 @@
-package cz.cvut.kbss.termit.config;
+package cz.cvut.kbss.termit.util;
 
-import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.core.env.Environment;
 
 import java.util.EnumMap;

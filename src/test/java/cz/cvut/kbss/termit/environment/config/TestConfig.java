@@ -10,7 +10,7 @@ import org.springframework.core.env.Environment;
 public class TestConfig {
 
     @Bean
-    public cz.cvut.kbss.termit.config.Configuration configuration(Environment environment) {
-        return new cz.cvut.kbss.termit.config.Configuration(environment);
+    public cz.cvut.kbss.termit.util.Configuration configuration(Environment environment) {
+        return new cz.cvut.kbss.termit.util.Configuration(environment);
     }
 }

@@ -24,12 +24,12 @@ import static cz.cvut.kbss.termit.util.ConfigParam.*;
 @Configuration
 public class MainPersistenceFactory {
 
-    private final cz.cvut.kbss.termit.config.Configuration config;
+    private final cz.cvut.kbss.termit.util.Configuration config;
 
     private EntityManagerFactory emf;
 
     @Autowired
-    public MainPersistenceFactory(cz.cvut.kbss.termit.config.Configuration config) {
+    public MainPersistenceFactory(cz.cvut.kbss.termit.util.Configuration config) {
         this.config = config;
     }
 
