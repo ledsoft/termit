@@ -54,4 +54,8 @@ public class SecurityConstants {
      * Maximum number of unsuccessful login attempts.
      */
     public static final int MAX_LOGIN_ATTEMPTS = 5;
+
+    private SecurityConstants() {
+        throw new AssertionError();
+    }
 }
