@@ -9,7 +9,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
 
     private User user;
 
-    protected final Set<GrantedAuthority> authorities;
+    private final Set<GrantedAuthority> authorities;
 
     public UserDetails(User user) {
         Objects.requireNonNull(user);

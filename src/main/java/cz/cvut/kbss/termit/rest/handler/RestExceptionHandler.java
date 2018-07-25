@@ -25,15 +25,15 @@ public class RestExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    private void logException(RuntimeException ex) {
+    private static void logException(RuntimeException ex) {
         logException("Exception caught.", ex);
     }
 
-    private void logException(String message, RuntimeException ex) {
+    private static void logException(String message, RuntimeException ex) {
         LOG.error(message, ex);
     }
 
-    private ErrorInfo errorInfo(HttpServletRequest request, Throwable e) {
+    private static ErrorInfo errorInfo(HttpServletRequest request, Throwable e) {
         return new ErrorInfo(e.getMessage(), request.getRequestURI());
     }
 

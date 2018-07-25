@@ -11,10 +11,11 @@ import java.util.stream.Collectors;
  */
 public class ValidationException extends TermItException {
 
-    private ValidationResult<?> validationResult;
+    private final ValidationResult<?> validationResult;
 
     public ValidationException(String message) {
         super(message);
+        this.validationResult = null;
     }
 
     public ValidationException(ValidationResult<?> validationResult) {
