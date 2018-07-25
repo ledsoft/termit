@@ -30,6 +30,7 @@ This section briefly lists the main technologies and principles used (or planned
 - JSON Web Tokens*
 - SLF4J + Logback
 - CSRF* (was disabled in RT because of Liferay), CORS* (for separate frontend)
+- Java bean validation (JSR 380)*
 
 _* Technology not used in INBAS RT_
 
