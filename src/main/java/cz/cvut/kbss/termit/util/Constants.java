@@ -9,6 +9,11 @@ import org.springframework.data.domain.Pageable;
 public class Constants {
 
     /**
+     * UTF-8 encoding identifier.
+     */
+    public static final String UTF_8_ENCODING = "UTF-8";
+
+    /**
      * Temporary location where uploaded files will be stored.
      */
     public static final String UPLOADED_FILE_LOCATION = "/tmp/";
