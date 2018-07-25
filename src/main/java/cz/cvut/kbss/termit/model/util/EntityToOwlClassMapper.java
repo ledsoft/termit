@@ -20,7 +20,7 @@ public class EntityToOwlClassMapper {
     public static String getOwlClassForEntity(Class<?> entityClass) {
         final OWLClass owlClass = entityClass.getDeclaredAnnotation(OWLClass.class);
         if (owlClass == null) {
-            throw new IllegalArgumentException("Class " + entityClass + " is not an entity.");
+            throw new IllegalArgumentException("Class " + entityClass + " is not an OWL entity.");
         }
         return owlClass.iri();
     }

@@ -37,6 +37,17 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void persistGeneratesIdentifierForUser() {
+        final User user = Generator.generateUser();
+        sut.persist(user);
+        assertNotNull(user.getUri());
+
+        final User result = em.find(User.class, user.getUri());
+        assertNotNull(result);
+        assertEquals(user, result);
+    }
+
+    @Test
     void persistEncodesUserPassword() {
         final User user = Generator.generateUser();
         user.setUri(Generator.generateUri());
