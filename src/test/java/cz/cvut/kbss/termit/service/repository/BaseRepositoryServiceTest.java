@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Tag("service")
 class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired

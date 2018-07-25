@@ -1,12 +1,11 @@
 package cz.cvut.kbss.termit.config;
 
 import org.springframework.context.annotation.*;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableMBeanExport
-@Import({PersistenceConfig.class, ServiceConfig.class})
+@Import({PersistenceConfig.class, ServiceConfig.class, WebAppConfig.class})
 @PropertySource("classpath:config.properties")
 public class AppConfig {
 
