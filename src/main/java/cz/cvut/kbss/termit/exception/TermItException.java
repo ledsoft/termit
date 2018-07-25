@@ -7,6 +7,9 @@ package cz.cvut.kbss.termit.exception;
  */
 public class TermItException extends RuntimeException {
 
+    protected TermItException() {
+    }
+
     public TermItException(String message) {
         super(message);
     }
