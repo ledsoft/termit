@@ -18,6 +18,8 @@ public class IdentifierUtils {
      * <li>Replacing white spaces with dashes</li>
      * </ul>
      *
+     * Based on <a href="https://gist.github.com/rponte/893494">https://gist.github.com/rponte/893494</a>
+     *
      * @param value The value to normalize
      * @return Normalized string
      */
