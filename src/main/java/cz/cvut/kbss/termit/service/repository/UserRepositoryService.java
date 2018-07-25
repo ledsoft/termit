@@ -3,9 +3,11 @@ package cz.cvut.kbss.termit.service.repository;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.util.IdentifierUtils;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
 import cz.cvut.kbss.termit.util.ValidationResult;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,8 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
     @Override
     protected void prePersist(User instance) {
         validateInstance(instance);
+        instance.setUri(IdentifierUtils
+                .generateIdentifier(Vocabulary.ONTOLOGY_IRI_termit, instance.getFirstName(), instance.getLastName()));
         instance.setPassword(passwordEncoder.encode(instance.getPassword()));
     }
 
