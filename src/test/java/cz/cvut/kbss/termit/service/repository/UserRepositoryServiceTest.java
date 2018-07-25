@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
-    private UserRepositoryService sut;
-
-    @Autowired
     private EntityManager em;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserRepositoryService sut;
 
     @Test
     void existsByUsernameReturnsTrueForExistingUsername() {
