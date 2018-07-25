@@ -89,12 +89,27 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateExecutesPreUpdateMethodBeforeUpdateOnDao() {
         final User user = Generator.generateUser();
+        when(userDaoMock.update(any())).thenReturn(user);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
 
         sut.update(user);
         final InOrder inOrder = Mockito.inOrder(sut, userDaoMock);
         inOrder.verify(sut).preUpdate(user);
         inOrder.verify(userDaoMock).update(user);
+    }
+
+    @Test
+    void updateInvokesPostUpdateAfterUpdateOnDao() {
+        final User user = Generator.generateUser();
+        final User returned = Generator.generateUser();
+        when(userDaoMock.update(any())).thenReturn(returned);
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+
+        final User result = sut.update(user);
+        final InOrder inOrder = Mockito.inOrder(sut, userDaoMock);
+        inOrder.verify(userDaoMock).update(user);
+        inOrder.verify(sut).postUpdate(returned);
+        assertEquals(returned, result);
     }
 
     @Test

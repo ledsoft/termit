@@ -92,10 +92,13 @@ public abstract class BaseRepositoryService<T> {
      * @param instance The instance to merge
      */
     @Transactional
-    public void update(T instance) {
+    public T update(T instance) {
         Objects.requireNonNull(instance);
         preUpdate(instance);
-        getPrimaryDao().update(instance);
+        final T result = getPrimaryDao().update(instance);
+        assert result != null;
+        postUpdate(result);
+        return result;
     }
 
     /**
@@ -104,6 +107,15 @@ public abstract class BaseRepositoryService<T> {
      * @param instance The instance to be updated, not {@code null}
      */
     protected void preUpdate(@NonNull T instance) {
+        // Do nothing
+    }
+
+    /**
+     * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     *
+     * @param instance The updated instance which will be returned by {@link #update(Object)}, not {@code null}
+     */
+    protected void postUpdate(@NonNull T instance) {
         // Do nothing
     }
 
