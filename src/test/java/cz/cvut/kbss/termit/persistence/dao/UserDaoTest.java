@@ -37,4 +37,18 @@ class UserDaoTest extends BaseDaoTestRunner {
         assertNotNull(result);
         assertFalse(result.isPresent());
     }
+
+    @Test
+    void existsByUsernameReturnsTrueForExistingUsername() {
+        final User user = Generator.generateUser();
+        user.setUri(Generator.generateUri());
+        transactional(() -> em.persist(user));
+
+        assertTrue(sut.exists(user.getUsername()));
+    }
+
+    @Test
+    void existsByUsernameReturnsFalseForUnknownUsername() {
+        assertFalse(sut.exists("unknownUsername"));
+    }
 }

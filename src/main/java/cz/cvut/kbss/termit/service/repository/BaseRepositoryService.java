@@ -24,14 +24,21 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseRepositoryService<T> {
 
+    /**
+     * Gets primary DAO which is used to implement the CRUD methods in this service.
+     *
+     * @return Data access object
+     */
     protected abstract GenericDao<T> getPrimaryDao();
+
+    // Read methods are intentionally not transactional because, for example, when postLoad manipulates the resulting
+    // entity in any way, transaction commit would attempt to insert the change into the repository, which is not desired
 
     /**
      * Loads all instances of the type managed by this service from the repository.
      *
      * @return List of all matching instances
      */
-    @Transactional(readOnly = true)
     public List<T> findAll() {
         final List<T> loaded = getPrimaryDao().findAll();
         return loaded.stream().map(this::postLoad).collect(Collectors.toList());
@@ -43,7 +50,6 @@ public abstract class BaseRepositoryService<T> {
      * @param id Identifier of the object to load
      * @return {@link Optional} with the loaded object or an empty one
      */
-    @Transactional(readOnly = true)
     public Optional<T> find(URI id) {
         final Optional<T> result = getPrimaryDao().find(id);
         return result.isPresent() ? Optional.ofNullable(postLoad(result.get())) : result;
@@ -127,7 +133,6 @@ public abstract class BaseRepositoryService<T> {
      * @param id ID to check
      * @return {@code true} if the instance exists, {@code false} otherwise
      */
-    @Transactional(readOnly = true)
     public boolean exists(URI id) {
         return getPrimaryDao().exists(id);
     }

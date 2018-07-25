@@ -4,7 +4,6 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Objects;
@@ -85,6 +84,16 @@ public class User implements Serializable {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    /**
+     * Erases the password in this instance.
+     * <p>
+     * This should be used for security reasons when passing the instance throughout the application and especially when
+     * it to be send from the REST API to the client.
+     */
+    public void erasePassword() {
+        this.password = null;
     }
 
     @Override

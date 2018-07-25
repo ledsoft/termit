@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
@@ -34,21 +35,45 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
     }
 
     /**
-     * Finds a user with the specified username.
+     * Checks whether a user with the specified username exists.
      *
      * @param username Username to search by
-     * @return User with matching username
+     * @return {@code true} if a user with the specifier username exists
      */
-    public Optional<User> findByUsername(String username) {
-        return userDao.findByUsername(username);
+    public boolean exists(String username) {
+        return userDao.exists(username);
+    }
+
+    @Override
+    protected User postLoad(User instance) {
+        instance.erasePassword();
+        return instance;
     }
 
     @Override
     protected void prePersist(User instance) {
+        validateInstance(instance);
+        instance.setPassword(passwordEncoder.encode(instance.getPassword()));
+    }
+
+    private void validateInstance(User instance) {
         final ValidationResult<User> validationResult = ValidationResult.of(validator.validate(instance));
         if (!validationResult.isValid()) {
             throw new ValidationException(validationResult);
         }
-        instance.setPassword(passwordEncoder.encode(instance.getPassword()));
+    }
+
+    @Override
+    protected void preUpdate(User instance) {
+        final Optional<User> orig = userDao.find(instance.getUri());
+        if (!orig.isPresent()) {
+            throw new NotFoundException("User " + instance + " does not exist.");
+        }
+        if (instance.getPassword() != null) {
+            instance.setPassword(passwordEncoder.encode(instance.getPassword()));
+        } else {
+            instance.setPassword(orig.get().getPassword());
+        }
+        validateInstance(instance);
     }
 }
