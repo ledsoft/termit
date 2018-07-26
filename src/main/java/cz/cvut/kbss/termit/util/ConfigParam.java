@@ -28,7 +28,12 @@ public enum ConfigParam {
     /**
      * Password for connecting to the application repository.
      */
-    REPO_PASSWORD("repository.password");
+    REPO_PASSWORD("repository.password"),
+
+    /**
+     * Secret key used when hashing a JWT.
+     */
+    JWT_SECRET_KEY("jwt.secretKey");
 
     private final String parameter;
 

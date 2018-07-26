@@ -13,7 +13,7 @@ import java.util.Collection;
  */
 public class ValidationResult<T> {
 
-    private transient final Collection<ConstraintViolation<T>> violations;
+    private final Collection<ConstraintViolation<T>> violations;
 
     private ValidationResult(Collection<ConstraintViolation<T>> violations) {
         this.violations = violations;

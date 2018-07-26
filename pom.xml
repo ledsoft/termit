@@ -104,6 +104,13 @@
             <version>${org.springframework.security.version}</version>
         </dependency>
 
+        <!-- JWT support for Java -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
         <!-- Jackson for JSON serialization -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
