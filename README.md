@@ -27,9 +27,9 @@ This section briefly lists the main technologies and principles used (or planned
 - JOPA
 - JUnit 5* (RT used 4), Mockito 2* (RT used 1)
 - Servlet API 4* (RT used 3.0.1)
-- JSON Web Tokens*
+- JSON Web Tokens* (CSRF protection not necessary for JWT)
 - SLF4J + Logback
-- CSRF* (was disabled in RT because of Liferay), CORS* (for separate frontend)
+- CORS* (for separate frontend)
 - Java bean validation (JSR 380)*
 
 _* Technology not used in INBAS RT_

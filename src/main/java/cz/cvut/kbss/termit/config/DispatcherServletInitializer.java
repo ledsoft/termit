@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.config;
 
 import cz.cvut.kbss.termit.rest.servlet.DiagnosticsContextFilter;
-import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,6 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         initSecurityFilter(servletContext);
         initMdcFilter(servletContext);
         servletContext.addListener(new RequestContextListener());
-        servletContext.getSessionCookieConfig().setName(SecurityConstants.SESSION_COOKIE_NAME);
     }
 
     private static void printStartupMessage() {

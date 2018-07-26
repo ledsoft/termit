@@ -6,19 +6,9 @@ package cz.cvut.kbss.termit.security;
 public class SecurityConstants {
 
     /**
-     * Name of the cookie holding user session info.
-     */
-    public static final String SESSION_COOKIE_NAME = "TermIt_JSESSIONID";
-
-    /**
      * Cookie used for the remember-me function
      */
     public static final String REMEMBER_ME_COOKIE_NAME = "remember-me";
-
-    /**
-     * CSRF protection cookie
-     */
-    public static final String CSRF_COOKIE_NAME = "CSRF-TOKEN";
 
     /**
      * Username parameter for the login form
@@ -44,6 +34,26 @@ public class SecurityConstants {
      * Base URI for the application cookies
      */
     public static final String COOKIE_URI = "/";
+
+    /**
+     * Request/response header used to store authentication info.
+     */
+    public static final String AUTHENTICATION_HEADER = "Authentication";
+
+    /**
+     * String prefix added to JWT tokens in the {@link #AUTHENTICATION_HEADER}.
+     */
+    public static final String JWT_TOKEN_PREFIX = "Bearer ";
+
+    /**
+     * JWT claim used to store user's global roles in the system.
+     */
+    public static final String JWT_ROLE_CLAIM = "role";
+
+    /**
+     * Delimiter used to separate roles in a JWT.
+     */
+    public static final String JWT_ROLE_DELIMITER = "-";
 
     /**
      * Session timeout in seconds. 30 minutes.

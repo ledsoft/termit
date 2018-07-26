@@ -15,8 +15,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.servlet.http.HttpSession;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(classes = {TestSecurityConfig.class})
@@ -29,9 +27,6 @@ class AuthenticationSuccessTest extends BaseServiceTestRunner {
 
     @Autowired
     private ObjectMapper mapper;
-
-    @Autowired
-    private HttpSession session;
 
     @Test
     void authenticationSuccessReturnsResponseContainingUsername() throws Exception {
@@ -70,13 +65,5 @@ class AuthenticationSuccessTest extends BaseServiceTestRunner {
         assertFalse(status.isLoggedIn());
         assertNull(status.getUsername());
         assertNull(status.getErrorMessage());
-    }
-
-    @Test
-    void authenticationSuccessSetsDefaultSessionMaxInterval() throws Exception {
-        final MockHttpServletRequest request = request();
-        final MockHttpServletResponse response = response();
-        success.onAuthenticationSuccess(request, response, generateAuthenticationToken());
-        assertEquals(SecurityConstants.SESSION_TIMEOUT, session.getMaxInactiveInterval());
     }
 }
