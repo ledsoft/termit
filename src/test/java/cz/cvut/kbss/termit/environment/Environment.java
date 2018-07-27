@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 public class Environment {
 
@@ -49,9 +50,9 @@ public class Environment {
      *
      * @return Current user authentication as principal or {@code null} if there is no current user
      */
-    public static Principal getCurrentUserPrincipal() {
-        return SecurityContextHolder.getContext() != null ? SecurityContextHolder.getContext().getAuthentication() :
-               null;
+    public static Optional<Principal> getCurrentUserPrincipal() {
+        return SecurityContextHolder.getContext() != null ?
+               Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
     }
 
     public static User getCurrentUser() {

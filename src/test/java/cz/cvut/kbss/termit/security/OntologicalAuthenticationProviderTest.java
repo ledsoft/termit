@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,6 +26,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("security")
 @ContextConfiguration(classes = {TestSecurityConfig.class})
 class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 

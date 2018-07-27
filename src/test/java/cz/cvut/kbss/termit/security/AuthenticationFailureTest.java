@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.security.model.LoginStatus;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -16,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("security")
 @ContextConfiguration(classes = {TestSecurityConfig.class})
 class AuthenticationFailureTest extends BaseServiceTestRunner {
 
