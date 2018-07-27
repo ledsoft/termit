@@ -27,8 +27,11 @@ import javax.servlet.FilterChain;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @Tag("security")
@@ -54,13 +57,16 @@ class JwtAuthorizationFilterTest {
     @Mock
     private SecurityUtils securityUtilsMock;
 
+    private JwtUtils jwtUtilsSpy;
+
     private JwtAuthorizationFilter sut;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         this.user = Generator.generateUserWithId();
-        this.sut = new JwtAuthorizationFilter(authManagerMock, new JwtUtils(config), securityUtilsMock);
+        this.jwtUtilsSpy = spy(new JwtUtils(config));
+        this.sut = new JwtAuthorizationFilter(authManagerMock, jwtUtilsSpy, securityUtilsMock);
     }
 
     @Test
@@ -83,7 +89,7 @@ class JwtAuthorizationFilterTest {
         return Jwts.builder().setSubject(user.getUsername())
                    .setId(user.getUri().toString())
                    .setIssuedAt(new Date())
-                   .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.SESSION_TIMEOUT))
+                   .setExpiration(new Date(System.currentTimeMillis() + 10000))
                    .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
     }
 
@@ -109,5 +115,15 @@ class JwtAuthorizationFilterTest {
         sut.doFilterInternal(mockRequest, mockResponse, chainMock);
         verify(chainMock).doFilter(mockRequest, mockResponse);
         verify(securityUtilsMock, never()).setCurrentUser(any());
+    }
+
+    @Test
+    void doFilterInternalRefreshesUserTokenOnSuccessfulAuthorization() throws Exception {
+        generateJwtIntoRequest();
+        sut.doFilterInternal(mockRequest, mockResponse, chainMock);
+        assertTrue(mockResponse.containsHeader(SecurityConstants.AUTHENTICATION_HEADER));
+        assertNotEquals(mockRequest.getHeader(SecurityConstants.AUTHENTICATION_HEADER),
+                mockResponse.getHeader(SecurityConstants.AUTHENTICATION_HEADER));
+        verify(jwtUtilsSpy).refreshToken(any());
     }
 }

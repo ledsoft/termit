@@ -175,4 +175,35 @@ class JwtUtilsTest {
                                  .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
         assertThrows(TokenExpiredException.class, () -> sut.extractUserInfo(token));
     }
+
+    @Test
+    void refreshTokenUpdatesIssuedDate() {
+        final Date oldIssueDate = new Date(System.currentTimeMillis() - 10000);
+        final String token = Jwts.builder().setSubject(user.getUsername())
+                                 .setId(user.getUri().toString())
+                                 .setIssuedAt(oldIssueDate)
+                                 .setExpiration(new Date(oldIssueDate.getTime() + SecurityConstants.SESSION_TIMEOUT))
+                                 .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
+
+        final String result = sut.refreshToken(token);
+        final Claims claims = Jwts.parser().setSigningKey(config.get(ConfigParam.JWT_SECRET_KEY)).parseClaimsJws(result)
+                                  .getBody();
+        assertTrue(claims.getIssuedAt().after(oldIssueDate));
+    }
+
+    @Test
+    void refreshTokenUpdatesExpirationDate() {
+        final Date oldIssueDate = new Date();
+        final Date oldExpiration = new Date(oldIssueDate.getTime() + 10000);
+        final String token = Jwts.builder().setSubject(user.getUsername())
+                                 .setId(user.getUri().toString())
+                                 .setIssuedAt(oldIssueDate)
+                                 .setExpiration(oldExpiration)
+                                 .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
+
+        final String result = sut.refreshToken(token);
+        final Claims claims = Jwts.parser().setSigningKey(config.get(ConfigParam.JWT_SECRET_KEY)).parseClaimsJws(result)
+                                  .getBody();
+        assertTrue(claims.getExpiration().after(oldExpiration));
+    }
 }

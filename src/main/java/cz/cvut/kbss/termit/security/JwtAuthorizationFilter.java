@@ -5,7 +5,6 @@ import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,7 +16,6 @@ import java.io.IOException;
  * This filter retrieves JWT from the incoming request and validates it, ensuring that the user is authorized to access
  * the application.
  */
-@Component
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final JwtUtils jwtUtils;
@@ -45,7 +43,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         final String authToken = authHeader.substring(SecurityConstants.JWT_TOKEN_PREFIX.length());
         final UserDetails userDetails = jwtUtils.extractUserInfo(authToken);
         securityUtils.setCurrentUser(userDetails);
+        refreshToken(authToken, response);
 
         chain.doFilter(request, response);
+    }
+
+    private void refreshToken(String authToken, HttpServletResponse response) {
+        final String newToken = jwtUtils.refreshToken(authToken);
+        response.setHeader(SecurityConstants.AUTHENTICATION_HEADER, SecurityConstants.JWT_TOKEN_PREFIX + newToken);
     }
 }

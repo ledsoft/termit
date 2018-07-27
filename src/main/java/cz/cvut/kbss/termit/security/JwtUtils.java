@@ -58,21 +58,28 @@ public class JwtUtils {
      * @return User info retrieved from the specified token
      */
     public UserDetails extractUserInfo(String token) {
+        Objects.requireNonNull(token);
         try {
-            final Claims claims = Jwts.parser().setSigningKey(config.get(ConfigParam.JWT_SECRET_KEY))
-                                      .parseClaimsJws(token).getBody();
+            final Claims claims = getClaimsFromToken(token);
             verifyAttributePresence(claims);
             final User user = new User();
             user.setUri(URI.create(claims.getId()));
             user.setUsername(claims.getSubject());
             final String roles = claims.get(SecurityConstants.JWT_ROLE_CLAIM, String.class);
             return new UserDetails(user, mapClaimToAuthorities(roles));
+        } catch (IllegalArgumentException e) {
+            throw new JwtException("Unable to parse user identifier from the specified JWT.");
+        }
+    }
+
+    private Claims getClaimsFromToken(String token) {
+        try {
+            return Jwts.parser().setSigningKey(config.get(ConfigParam.JWT_SECRET_KEY))
+                       .parseClaimsJws(token).getBody();
         } catch (MalformedJwtException e) {
             throw new JwtException("Unable to parse the specified JWT.", e);
         } catch (ExpiredJwtException e) {
             throw new TokenExpiredException(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new JwtException("Unable to parse user identifier from the specified JWT.");
         }
     }
 
@@ -98,5 +105,21 @@ public class JwtUtils {
             authorities.add(new SimpleGrantedAuthority(role));
         }
         return authorities;
+    }
+
+    /**
+     * Updates issuing and expiration date of the specified token, generating a new one.
+     *
+     * @param token The token to refresh
+     * @return Newly generated token with updated expiration date
+     */
+    public String refreshToken(String token) {
+        Objects.requireNonNull(token);
+        final Claims claims = getClaimsFromToken(token);
+        final Date issuedAt = new Date();
+        claims.setIssuedAt(issuedAt);
+        claims.setExpiration(new Date(issuedAt.getTime() + SecurityConstants.SESSION_TIMEOUT));
+        return Jwts.builder().setClaims(claims)
+                   .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
     }
 }
