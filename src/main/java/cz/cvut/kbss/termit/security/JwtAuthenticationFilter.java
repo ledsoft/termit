@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.security.model.UserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 

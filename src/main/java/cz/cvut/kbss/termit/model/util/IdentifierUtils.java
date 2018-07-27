@@ -9,6 +9,10 @@ import java.util.Objects;
  */
 public class IdentifierUtils {
 
+    private IdentifierUtils() {
+        throw new AssertionError();
+    }
+
     /**
      * Normalizes the specified value which includes:
      * <ul>
