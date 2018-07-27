@@ -1,12 +1,14 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
+import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.util.IdentifierUtils;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
+import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ValidationResult;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.slf4j.Logger;
@@ -28,13 +30,17 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
 
     private final UserDao userDao;
 
+    private final SecurityUtils securityUtils;
+
     private final PasswordEncoder passwordEncoder;
 
     private final Validator validator;
 
     @Autowired
-    public UserRepositoryService(UserDao userDao, PasswordEncoder passwordEncoder, Validator validator) {
+    public UserRepositoryService(UserDao userDao, SecurityUtils securityUtils, PasswordEncoder passwordEncoder,
+                                 Validator validator) {
         this.userDao = userDao;
+        this.securityUtils = securityUtils;
         this.passwordEncoder = passwordEncoder;
         this.validator = validator;
     }
@@ -77,6 +83,10 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
 
     @Override
     protected void preUpdate(User instance) {
+        if (!securityUtils.getCurrentUser().getUri().equals(instance.getUri())) {
+            throw new AuthorizationException(
+                    "User " + securityUtils.getCurrentUser() + " attempted to update a different user's account.");
+        }
         final Optional<User> orig = userDao.find(instance.getUri());
         if (!orig.isPresent()) {
             throw new NotFoundException("User " + instance + " does not exist.");

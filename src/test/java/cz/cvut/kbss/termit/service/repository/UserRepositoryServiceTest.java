@@ -1,7 +1,9 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
@@ -76,6 +78,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateEncodesPasswordWhenItWasChanged() {
         final User user = persistUser();
+        Environment.setCurrentUser(user);
         final String plainPassword = "updatedPassword01";
         user.setPassword(plainPassword);
 
@@ -90,6 +93,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         final String plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
+        Environment.setCurrentUser(user);
         user.setPassword(null); // Simulate instance being loaded from repo
         final String newLastName = "newLastName";
         user.setLastName(newLastName);
@@ -103,6 +107,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateThrowsNotFoundExceptionWhenUserDoesNotExist() {
         final User user = Generator.generateUserWithId();
+        Environment.setCurrentUser(user);
         final NotFoundException ex = assertThrows(NotFoundException.class, () -> sut.update(user));
         assertEquals("User " + user + " does not exist.", ex.getMessage());
     }
@@ -126,6 +131,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateThrowsValidationExceptionWhenUpdatedInstanceIsMissingValues() {
         final User user = persistUser();
+        Environment.setCurrentUser(user);
 
         user.setUsername(null);
         user.setPassword(null); // Simulate instance being loaded from repo
@@ -177,5 +183,16 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         sut.enable(user);
         final User result = em.find(User.class, user.getUri());
         assertTrue(result.isEnabled());
+    }
+
+    @Test
+    void updateThrowsAuthorizationExceptionWhenUserAttemptsToUpdateAnotherUser() {
+        final User user = Generator.generateUserWithId();
+        transactional(() -> em.persist(user));
+        Environment.setCurrentUser(user);
+        final User toUpdate = Generator.generateUserWithId();
+
+        final AuthorizationException ex = assertThrows(AuthorizationException.class, () -> sut.update(toUpdate));
+        assertEquals("User " + user + " attempted to update a different user's account.", ex.getMessage());
     }
 }
