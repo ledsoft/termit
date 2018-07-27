@@ -14,7 +14,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,7 +40,7 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
     }
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) {
         final String username = authentication.getPrincipal().toString();
         verifyUsernameNotEmpty(username);
         LOG.debug("Authenticating user {}", username);
@@ -57,13 +56,13 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
         return securityUtils.setCurrentUser(userDetails);
     }
 
-    private void verifyUsernameNotEmpty(String username) {
+    private static void verifyUsernameNotEmpty(String username) {
         if (username.isEmpty()) {
             throw new UsernameNotFoundException("Username cannot be empty.");
         }
     }
 
-    private void verifyAccountStatus(User user) {
+    private static void verifyAccountStatus(User user) {
         if (user.isLocked()) {
             throw new LockedException("Account of user " + user + " is locked.");
         }
