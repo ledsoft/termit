@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.environment.config.TestConfig;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.security.UserDetailsService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import io.jsonwebtoken.Jwts;
@@ -20,19 +21,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.FilterChain;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @Tag("security")
 @ExtendWith(SpringExtension.class)
@@ -55,6 +54,9 @@ class JwtAuthorizationFilterTest {
     private AuthenticationManager authManagerMock;
 
     @Mock
+    private UserDetailsService detailsServiceMock;
+
+    @Mock
     private SecurityUtils securityUtilsMock;
 
     private JwtUtils jwtUtilsSpy;
@@ -66,7 +68,8 @@ class JwtAuthorizationFilterTest {
         MockitoAnnotations.initMocks(this);
         this.user = Generator.generateUserWithId();
         this.jwtUtilsSpy = spy(new JwtUtils(config));
-        this.sut = new JwtAuthorizationFilter(authManagerMock, jwtUtilsSpy, securityUtilsMock);
+        this.sut = new JwtAuthorizationFilter(authManagerMock, jwtUtilsSpy, securityUtilsMock, detailsServiceMock);
+        when(detailsServiceMock.loadUserByUsername(user.getUsername())).thenReturn(new UserDetails(user));
     }
 
     @Test
@@ -125,5 +128,21 @@ class JwtAuthorizationFilterTest {
         assertNotEquals(mockRequest.getHeader(SecurityConstants.AUTHENTICATION_HEADER),
                 mockResponse.getHeader(SecurityConstants.AUTHENTICATION_HEADER));
         verify(jwtUtilsSpy).refreshToken(any());
+    }
+
+    @Test
+    void doFilterInternalThrowsLockedExceptionWhenUserAccountIsLocked() {
+        generateJwtIntoRequest();
+        user.lock();
+        final LockedException ex = assertThrows(LockedException.class, () -> sut.doFilterInternal(mockRequest, mockResponse, chainMock));
+        assertEquals("Account of user " + user + " is locked.", ex.getMessage());
+    }
+
+    @Test
+    void doFilterInternalThrowsDisabledExceptionWhenUserAccountIsDisabled() {
+        generateJwtIntoRequest();
+        user.disable();
+        final DisabledException ex = assertThrows(DisabledException.class, () -> sut.doFilterInternal(mockRequest, mockResponse, chainMock));
+        assertEquals("Account of user " + user + " is disabled.", ex.getMessage());
     }
 }

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.security.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -21,13 +22,14 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final SecurityUtils securityUtils;
 
-    // TODO The filter should eventually also load the current user record from repository and verify that the account is not disabled/locked
+    private final UserDetailsService userDetailsService;
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                                  SecurityUtils securityUtils) {
+                                  SecurityUtils securityUtils, UserDetailsService userDetailsService) {
         super(authenticationManager);
         this.jwtUtils = jwtUtils;
         this.securityUtils = securityUtils;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -40,7 +42,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
         final String authToken = authHeader.substring(SecurityConstants.JWT_TOKEN_PREFIX.length());
         final UserDetails userDetails = jwtUtils.extractUserInfo(authToken);
-        securityUtils.setCurrentUser(userDetails);
+        final UserDetails existingDetails = userDetailsService.loadUserByUsername(userDetails.getUsername());
+        SecurityUtils.verifyAccountStatus(existingDetails.getUser());
+        securityUtils.setCurrentUser(existingDetails);
         refreshToken(authToken, response);
 
         chain.doFilter(request, response);

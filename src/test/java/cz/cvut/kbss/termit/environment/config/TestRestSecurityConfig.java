@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.security.JwtAuthenticationFilter;
 import cz.cvut.kbss.termit.security.JwtAuthorizationFilter;
 import cz.cvut.kbss.termit.security.JwtUtils;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.security.UserDetailsService;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class TestRestSecurityConfig extends WebSecurityConfigurerAdapter {
     @Mock
     private AuthenticationProvider authenticationProvider;
 
+    @Mock
+    private UserDetailsService userDetailsService;
+
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -69,7 +73,7 @@ public class TestRestSecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and().cors().and().csrf().disable()
             .addFilter(new JwtAuthenticationFilter(jwtUtils))
-            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils))
+            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
             .formLogin().successHandler(authenticationSuccessHandler)
             .failureHandler(authenticationFailureHandler).and().sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

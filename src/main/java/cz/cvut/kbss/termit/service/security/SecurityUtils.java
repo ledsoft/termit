@@ -4,6 +4,8 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -11,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -104,6 +107,21 @@ public class SecurityUtils {
         final User currentUser = getCurrentUser();
         if (!passwordEncoder.matches(password, currentUser.getPassword())) {
             throw new IllegalArgumentException("The specified password does not match the original one.");
+        }
+    }
+
+    /**
+     * Verifies that the specified user is enabled and not locked.
+     *
+     * @param user User to check
+     */
+    public static void verifyAccountStatus(User user) {
+        Objects.requireNonNull(user);
+        if (user.isLocked()) {
+            throw new LockedException("Account of user " + user + " is locked.");
+        }
+        if (!user.isEnabled()) {
+            throw new DisabledException("Account of user " + user + " is disabled.");
         }
     }
 }
