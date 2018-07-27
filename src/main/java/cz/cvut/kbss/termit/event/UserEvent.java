@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Base class for user-related events.
  */
-public abstract class UserEvent {
+abstract class UserEvent {
 
     private final User user;
 

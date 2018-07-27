@@ -556,6 +556,20 @@ rdf:value rdf:type owl:DatatypeProperty .
 #################################################################
 
 
+###  http://onto.fel.cvut.cz/ontologies/termit/admin
+
+<http://onto.fel.cvut.cz/ontologies/termit/admin> rdf:type owl:Class ;
+                                                  
+                                                  rdfs:label "Admin"@en ;
+                                                  
+                                                  rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
+                                                  
+                                                  rdfs:comment "User who is in the administrator role"@en ;
+                                                  
+                                                  <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+
+
+
 ###  http://onto.fel.cvut.cz/ontologies/termit/css-selector
 
 <http://onto.fel.cvut.cz/ontologies/termit/css-selector> rdf:type owl:Class ;

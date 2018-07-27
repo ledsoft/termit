@@ -99,7 +99,8 @@ class JwtUtilsTest {
 
         final UserDetails result = sut.extractUserInfo(token);
         assertEquals(user, result.getUser());
-        assertTrue(result.getAuthorities().isEmpty());
+        assertEquals(1, result.getAuthorities().size());
+        assertTrue(result.getAuthorities().contains(UserDetails.DEFAULT_AUTHORITY));
     }
 
     @Test
