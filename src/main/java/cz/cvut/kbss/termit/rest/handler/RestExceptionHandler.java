@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest.handler;
 
 import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
+import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.exception.UsernameExistsException;
@@ -57,6 +58,13 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorInfo> resourceNotFound(HttpServletRequest request, NotFoundException e) {
+        // Not necessary to log NotFoundException, they may be quite frequent and do not show an issue with the application
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ErrorInfo> authorizationException(HttpServletRequest request, AuthorizationException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.FORBIDDEN);
     }
 }
