@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,9 +75,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateEncodesPasswordWhenItWasChanged() {
-        final User user = Generator.generateUserWithId();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        transactional(() -> em.persist(user));
+        final User user = persistUser();
         final String plainPassword = "updatedPassword01";
         user.setPassword(plainPassword);
 
@@ -110,24 +109,73 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void postLoadErasesPasswordFromInstance() {
-        final User user = Generator.generateUserWithId();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        transactional(() -> em.persist(user));
+        final User user = persistUser();
 
         final Optional<User> result = sut.find(user.getUri());
         assertTrue(result.isPresent());
         assertNull(result.get().getPassword());
     }
 
-    @Test
-    void updateThrowsValidationExceptionWhenUpdatedInstanceIsMissingValues() {
+    private User persistUser() {
         final User user = Generator.generateUserWithId();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
+        return user;
+    }
+
+    @Test
+    void updateThrowsValidationExceptionWhenUpdatedInstanceIsMissingValues() {
+        final User user = persistUser();
 
         user.setUsername(null);
         user.setPassword(null); // Simulate instance being loaded from repo
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.update(user));
         assertThat(ex.getMessage(), containsString("username must not be empty"));
+    }
+
+    @Test
+    void locksUserAccountWhenLoginLimitExceededEventIsReceived() {
+        final User user = persistUser();
+        assertFalse(user.isLocked());
+        final LoginAttemptsThresholdExceeded event = new LoginAttemptsThresholdExceeded(user);
+        sut.onLoginAttemptsThresholdExceeded(event);
+
+        final User result = em.find(User.class, user.getUri());
+        assertTrue(result.isLocked());
+    }
+
+    @Test
+    void unlockRemovesLockedClassFromUserAndSetsHimNewPassword() {
+        final User user = Generator.generateUserWithId();
+        user.lock();
+        transactional(() -> em.persist(user));
+        final String newPassword = "newPassword";
+
+        sut.unlock(user, newPassword);
+        final User result = em.find(User.class, user.getUri());
+        assertFalse(result.isLocked());
+        assertTrue(passwordEncoder.matches(newPassword, result.getPassword()));
+    }
+
+    @Test
+    void disableDisablesUserAccount() {
+        final User user = persistUser();
+        assertTrue(user.isEnabled());
+
+        sut.disable(user);
+        final User result = em.find(User.class, user.getUri());
+        assertFalse(result.isEnabled());
+    }
+
+    @Test
+    void enableEnablesDisabledUserAccount() {
+        final User user = Generator.generateUserWithId();
+        user.disable();
+        transactional(() -> em.persist(user));
+        assertFalse(user.isEnabled());
+
+        sut.enable(user);
+        final User result = em.find(User.class, user.getUri());
+        assertTrue(result.isEnabled());
     }
 }

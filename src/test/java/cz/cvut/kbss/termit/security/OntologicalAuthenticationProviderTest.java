@@ -2,6 +2,8 @@ package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
+import cz.cvut.kbss.termit.event.LoginFailureEvent;
+import cz.cvut.kbss.termit.event.LoginSuccessEvent;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
@@ -11,9 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,10 +28,19 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+@Configuration
 @Tag("security")
-@ContextConfiguration(classes = {TestSecurityConfig.class})
+@ContextConfiguration(classes = {TestSecurityConfig.class, OntologicalAuthenticationProviderTest.class})
 class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
+
+    @Bean
+    public Listener listener() {
+        return spy(new Listener());
+    }
 
     @Autowired
     private AuthenticationProvider provider;
@@ -38,6 +50,9 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private Listener listener;
 
     private User user;
     private String plainPassword;
@@ -99,5 +114,54 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
         final UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class,
                 () -> provider.authenticate(auth));
         assertThat(ex.getMessage(), containsString("Username cannot be empty."));
+    }
+
+    @Test
+    void successfulLoginEmitsLoginSuccessEvent() {
+        final Authentication auth = authentication(user.getUsername(), plainPassword);
+        provider.authenticate(auth);
+        verify(listener).onSuccess(any());
+        assertEquals(user, listener.user);
+    }
+
+    @Test
+    void failedLoginEmitsLoginFailureEvent() {
+        final Authentication auth = authentication(user.getUsername(), "unknownPassword");
+        assertThrows(BadCredentialsException.class, () -> provider.authenticate(auth));
+        verify(listener).onFailure(any());
+        assertEquals(user, listener.user);
+    }
+
+    @Test
+    void authenticateThrowsLockedExceptionForLockedUser() {
+        user.lock();
+        transactional(() -> userDao.update(user));
+        final Authentication auth = authentication(user.getUsername(), plainPassword);
+        final LockedException ex = assertThrows(LockedException.class, () -> provider.authenticate(auth));
+        assertEquals("Account of user " + user + " is locked.", ex.getMessage());
+    }
+
+    @Test
+    void authenticationThrowsDisabledExceptionForDisabledUser() {
+        user.disable();
+        transactional(() -> userDao.update(user));
+        final Authentication auth = authentication(user.getUsername(), plainPassword);
+        final DisabledException ex = assertThrows(DisabledException.class, () -> provider.authenticate(auth));
+        assertEquals("Account of user " + user + " is disabled.", ex.getMessage());
+    }
+
+    public static class Listener {
+
+        private User user;
+
+        @EventListener
+        public void onSuccess(LoginSuccessEvent event) {
+            this.user = event.getUser();
+        }
+
+        @EventListener
+        public void onFailure(LoginFailureEvent event) {
+            this.user = event.getUser();
+        }
     }
 }
