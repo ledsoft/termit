@@ -31,11 +31,6 @@ public class SecurityConstants {
     public static final String LOGOUT_URI = "/j_spring_security_logout";
 
     /**
-     * Base URI for the application cookies
-     */
-    public static final String COOKIE_URI = "/";
-
-    /**
      * Request/response header used to store authentication info.
      */
     public static final String AUTHENTICATION_HEADER = "Authentication";
@@ -64,6 +59,16 @@ public class SecurityConstants {
      * Maximum number of unsuccessful login attempts.
      */
     public static final int MAX_LOGIN_ATTEMPTS = 5;
+
+    /**
+     * System administrator role
+     */
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
+    /**
+     * Regular system user role
+     */
+    public static final String ROLE_USER = "ROLE_USER";
 
     private SecurityConstants() {
         throw new AssertionError();
