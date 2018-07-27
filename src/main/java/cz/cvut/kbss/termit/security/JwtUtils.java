@@ -44,7 +44,7 @@ public class JwtUtils {
                    .compact();
     }
 
-    private String mapAuthoritiesToClaim(Collection<? extends GrantedAuthority> authorities) {
+    private static String mapAuthoritiesToClaim(Collection<? extends GrantedAuthority> authorities) {
         return authorities.stream().map(GrantedAuthority::getAuthority)
                           .collect(Collectors.joining(SecurityConstants.JWT_ROLE_DELIMITER));
     }
@@ -76,7 +76,7 @@ public class JwtUtils {
         }
     }
 
-    private void verifyAttributePresence(Claims claims) {
+    private static void verifyAttributePresence(Claims claims) {
         if (claims.getSubject() == null) {
             throw new IncompleteJwtException("JWT is missing subject.");
         }
@@ -88,7 +88,7 @@ public class JwtUtils {
         }
     }
 
-    private List<GrantedAuthority> mapClaimToAuthorities(String claim) {
+    private static List<GrantedAuthority> mapClaimToAuthorities(String claim) {
         if (claim == null) {
             return Collections.emptyList();
         }
