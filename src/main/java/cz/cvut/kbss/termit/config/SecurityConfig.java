@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.config;
 
 import cz.cvut.kbss.termit.security.*;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.security.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -37,18 +38,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final SecurityUtils securityUtils;
 
+    private final UserDetailsService userDetailsService;
+
     @Autowired
     public SecurityConfig(AuthenticationProvider authenticationProvider,
                           AuthenticationEntryPoint authenticationEntryPoint,
                           AuthenticationSuccess authenticationSuccessHandler,
                           AuthenticationFailureHandler authenticationFailureHandler,
-                          JwtUtils jwtUtils, SecurityUtils securityUtils) {
+                          JwtUtils jwtUtils, SecurityUtils securityUtils,
+                          UserDetailsService userDetailsService) {
         this.authenticationProvider = authenticationProvider;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.jwtUtils = jwtUtils;
         this.securityUtils = securityUtils;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -62,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and().cors().and().csrf().disable()
             .addFilter(new JwtAuthenticationFilter(jwtUtils))
-            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils))
+            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
             .formLogin().successHandler(authenticationSuccessHandler)
             .failureHandler(authenticationFailureHandler)
             .loginProcessingUrl(SecurityConstants.SECURITY_CHECK_URI)

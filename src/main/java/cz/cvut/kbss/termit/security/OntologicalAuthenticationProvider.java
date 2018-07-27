@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +48,7 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
         LOG.debug("Authenticating user {}", username);
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        verifyAccountStatus(userDetails.getUser());
+        SecurityUtils.verifyAccountStatus(userDetails.getUser());
         final String password = (String) authentication.getCredentials();
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             onLoginFailure(userDetails.getUser());
@@ -59,15 +61,6 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
     private static void verifyUsernameNotEmpty(String username) {
         if (username.isEmpty()) {
             throw new UsernameNotFoundException("Username cannot be empty.");
-        }
-    }
-
-    private static void verifyAccountStatus(User user) {
-        if (user.isLocked()) {
-            throw new LockedException("Account of user " + user + " is locked.");
-        }
-        if (!user.isEnabled()) {
-            throw new DisabledException("Account of user " + user + " is disabled.");
         }
     }
 
