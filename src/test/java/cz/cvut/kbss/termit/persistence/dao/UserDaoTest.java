@@ -22,8 +22,7 @@ class UserDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findByUsernameReturnsMatchingUser() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
 
         final Optional<User> result = sut.findByUsername(user.getUsername());
@@ -40,8 +39,7 @@ class UserDaoTest extends BaseDaoTestRunner {
 
     @Test
     void existsByUsernameReturnsTrueForExistingUsername() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
 
         assertTrue(sut.exists(user.getUsername()));

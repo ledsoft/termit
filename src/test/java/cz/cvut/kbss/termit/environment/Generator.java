@@ -75,7 +75,7 @@ public class Generator {
     }
 
     /**
-     * Creates a randomized instance of {@link User}.
+     * Creates a random instance of {@link User}.
      *
      * @return New {@code User} instance
      */
@@ -85,6 +85,19 @@ public class Generator {
         user.setLastName("Lastname" + randomInt());
         user.setUsername("user" + randomInt() + "@kbss.felk.cvut.cz");
         user.setPassword(Integer.toString(randomInt()));
+        return user;
+    }
+
+    /**
+     * Creates a random instance of {@link User} with a generated identifier.
+     * <p>
+     * The presence of identifier is the only difference between this method and {@link #generateUser()}.
+     *
+     * @return New {@code User} instance
+     */
+    public static User generateUserWithId() {
+        final User user = generateUser();
+        user.setUri(Generator.generateUri());
         return user;
     }
 }

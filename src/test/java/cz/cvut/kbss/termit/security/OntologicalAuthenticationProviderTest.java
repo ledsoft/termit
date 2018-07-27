@@ -42,8 +42,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 
     @BeforeEach
     void setUp() {
-        this.user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        this.user = Generator.generateUserWithId();
         this.plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(plainPassword));
         transactional(() -> userDao.persist(user));

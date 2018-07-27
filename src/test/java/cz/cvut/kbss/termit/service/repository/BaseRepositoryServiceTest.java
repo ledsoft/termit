@@ -52,8 +52,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistExecutesTransactionalPersist() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
 
         sut.persist(user);
         assertTrue(userDao.exists(user.getUri()));
@@ -72,8 +71,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateExecutesTransactionalUpdate() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> userDao.persist(user));
 
         final String updatedLastName = "Married";
@@ -114,8 +112,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeExecutesTransactionalRemove() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> userDao.persist(user));
 
         sut.remove(user);
@@ -124,8 +121,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeByIdExecutesTransactionalRemove() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> userDao.persist(user));
 
         sut.remove(user.getUri());
@@ -134,8 +130,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findExecutesPostLoadAfterLoadingEntityFromDao() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         when(userDaoMock.find(user.getUri())).thenReturn(Optional.of(user));
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
 
@@ -149,11 +144,8 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findAllExecutesPostLoadForEachLoadedEntity() {
-        final List<User> users = IntStream.range(0, 5).mapToObj(i -> {
-            final User u = Generator.generateUser();
-            u.setUri(Generator.generateUri());
-            return u;
-        }).collect(Collectors.toList());
+        final List<User> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserWithId())
+                                          .collect(Collectors.toList());
         when(userDaoMock.findAll()).thenReturn(users);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
 

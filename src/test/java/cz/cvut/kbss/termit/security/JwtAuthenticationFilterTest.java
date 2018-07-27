@@ -47,8 +47,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        this.user = Generator.generateUserWithId();
         this.mockRequest = new MockHttpServletRequest();
         this.mockResponse = new MockHttpServletResponse();
         this.sut = new JwtAuthenticationFilter(new JwtUtils(config));

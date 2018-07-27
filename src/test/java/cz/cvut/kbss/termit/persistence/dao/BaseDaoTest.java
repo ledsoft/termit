@@ -64,8 +64,7 @@ class BaseDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findReturnsNonEmptyOptionalForExistingEntity() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         final Optional<User> result = sut.find(user.getUri());
         assertTrue(result.isPresent());
@@ -81,8 +80,7 @@ class BaseDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateReturnsManagedInstance() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         final String lastNameUpdate = "updatedLastName";
         user.setLastName(lastNameUpdate);
@@ -96,8 +94,7 @@ class BaseDaoTest extends BaseDaoTestRunner {
 
     @Test
     void removeRemovesEntity() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         transactional(() -> sut.remove(user));
         assertFalse(sut.exists(user.getUri()));
@@ -105,16 +102,14 @@ class BaseDaoTest extends BaseDaoTestRunner {
 
     @Test
     void removeHandlesNonexistentEntity() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.remove(user));
         assertFalse(sut.exists(user.getUri()));
     }
 
     @Test
     void removeByIdRemovesEntityWithSpecifiedIdentifier() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         transactional(() -> sut.remove(user.getUri()));
         assertFalse(sut.find(user.getUri()).isPresent());
@@ -135,8 +130,7 @@ class BaseDaoTest extends BaseDaoTestRunner {
     @Disabled
     @Test
     void exceptionDuringCollectionPersistIsWrappedInPersistenceException() {
-        final List<User> users = Collections.singletonList(Generator.generateUser());
-        users.forEach(u -> u.setUri(Generator.generateUri()));
+        final List<User> users = Collections.singletonList(Generator.generateUserWithId());
         transactional(() -> sut.persist(users));
 
         final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.persist(users)));
@@ -147,8 +141,7 @@ class BaseDaoTest extends BaseDaoTestRunner {
     @Disabled
     @Test
     void exceptionDuringUpdateIsWrappedInPersistenceException() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         user.setUri(null);
         final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.update(user)));

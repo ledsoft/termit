@@ -29,8 +29,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void existsByUsernameReturnsTrueForExistingUsername() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
 
         assertTrue(sut.exists(user.getUsername()));
@@ -49,8 +48,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistEncodesUserPassword() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         final String plainPassword = user.getPassword();
 
         sut.persist(user);
@@ -60,8 +58,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsValidationExceptionWhenPasswordIsNull() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         user.setPassword(null);
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
         assertThat(ex.getMessage(), containsString("password must not be empty"));
@@ -69,8 +66,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsValidationExceptionWhenPasswordIsEmpty() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         user.setPassword("");
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
         assertThat(ex.getMessage(), containsString("password must not be empty"));
@@ -78,8 +74,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateEncodesPasswordWhenItWasChanged() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
         final String plainPassword = "updatedPassword01";
@@ -92,8 +87,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateRetainsOriginalPasswordWhenItDoesNotChange() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         final String plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
@@ -109,16 +103,14 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateThrowsNotFoundExceptionWhenUserDoesNotExist() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         final NotFoundException ex = assertThrows(NotFoundException.class, () -> sut.update(user));
         assertEquals("User " + user + " does not exist.", ex.getMessage());
     }
 
     @Test
     void postLoadErasesPasswordFromInstance() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
 
@@ -129,8 +121,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateThrowsValidationExceptionWhenUpdatedInstanceIsMissingValues() {
-        final User user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        final User user = Generator.generateUserWithId();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
 
