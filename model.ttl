@@ -585,6 +585,20 @@ rdf:value rdf:type owl:DatatypeProperty .
 
 
 
+###  http://onto.fel.cvut.cz/ontologies/termit/disabled-user
+
+<http://onto.fel.cvut.cz/ontologies/termit/disabled-user> rdf:type owl:Class ;
+                                                          
+                                                          rdfs:label "Disabled User"@en ;
+                                                          
+                                                          rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
+                                                          
+                                                          <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
+                                                          
+                                                          rdfs:comment "A user whose account has been disabled, e.g., by an application admin"@en .
+
+
+
 ###  http://onto.fel.cvut.cz/ontologies/termit/document
 
 <http://onto.fel.cvut.cz/ontologies/termit/document> rdf:type owl:Class ;
@@ -658,6 +672,20 @@ rdf:value rdf:type owl:DatatypeProperty .
                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
                                                      
                                                      rdfs:comment "Glossary contains terms used in a vocabulary but without any deeper relationship between them. It is usually made using SKOS."@en .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/termit/locked-user
+
+<http://onto.fel.cvut.cz/ontologies/termit/locked-user> rdf:type owl:Class ;
+                                                        
+                                                        rdfs:label "Locked User"@en ;
+                                                        
+                                                        rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
+                                                        
+                                                        rdfs:comment "A user whose account has been locked for security reasons, e.g., when an attacker tries to gues the user's password in an aplication"@en ;
+                                                        
+                                                        <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
 
 
 

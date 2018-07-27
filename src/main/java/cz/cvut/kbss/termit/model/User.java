@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -86,6 +87,14 @@ public class User implements Serializable {
         this.types = types;
     }
 
+    public void addType(String type) {
+        Objects.requireNonNull(type);
+        if (types == null) {
+            this.types = new HashSet<>(4);
+        }
+        types.add(type);
+    }
+
     /**
      * Erases the password in this instance.
      * <p>
@@ -94,6 +103,60 @@ public class User implements Serializable {
      */
     public void erasePassword() {
         this.password = null;
+    }
+
+    /**
+     * Checks whether the account represented by this instance is locked.
+     *
+     * @return Locked status
+     */
+    public boolean isLocked() {
+        return types != null && types.contains(Vocabulary.s_c_locked_user);
+    }
+
+    /**
+     * Locks the account represented by this instance.
+     */
+    public void lock() {
+        addType(Vocabulary.s_c_locked_user);
+    }
+
+    /**
+     * Unlocks the account represented by this instance.
+     */
+    public void unlock() {
+        if (types == null) {
+            return;
+        }
+        types.remove(Vocabulary.s_c_locked_user);
+    }
+
+    /**
+     * Enables the account represented by this instance.
+     * <p>
+     * Does nothing if the account is already enabled.
+     */
+    public void enable() {
+        if (types == null) {
+            return;
+        }
+        types.remove(Vocabulary.s_c_disabled_user);
+    }
+
+    /**
+     * Checks whether the account represented by this instance is enabled.
+     */
+    public boolean isEnabled() {
+        return types == null || !types.contains(Vocabulary.s_c_disabled_user);
+    }
+
+    /**
+     * Disables the account represented by this instance.
+     * <p>
+     * Disabled account cannot be logged into and cannot be used to view/modify data.
+     */
+    public void disable() {
+        addType(Vocabulary.s_c_disabled_user);
     }
 
     @Override
