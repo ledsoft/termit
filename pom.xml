@@ -14,6 +14,7 @@
     <version>0.0.1</version>
     <name>TermIt</name>
     <description>Terminology manager based on Semantic Web technologies.</description>
+    <packaging>war</packaging>
 
     <!-- Required for the KBSS parent project -->
     <repositories>

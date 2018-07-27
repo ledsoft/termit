@@ -26,7 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebMvc
-@Import({RestConfig.class})
+@Import({RestConfig.class, SecurityConfig.class})
 public class WebAppConfig implements WebMvcConfigurer {
 
     @Bean(name = "multipartResolver")

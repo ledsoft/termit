@@ -16,7 +16,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final JwtUtils jwtUtils;
 
-    @Autowired
     public JwtAuthenticationFilter(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
     }

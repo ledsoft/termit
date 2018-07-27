@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -24,7 +23,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     // TODO The filter should eventually also load the current user record from repository and verify that the account is not disabled/locked
 
-    @Autowired
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
                                   SecurityUtils securityUtils) {
         super(authenticationManager);
