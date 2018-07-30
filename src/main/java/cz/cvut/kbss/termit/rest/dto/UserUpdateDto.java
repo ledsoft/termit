@@ -5,6 +5,11 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.util.Objects;
+
+/**
+ * DTO used for user updating so that original password can be validated.
+ */
 @OWLClass(iri = Vocabulary.s_c_user)
 public class UserUpdateDto extends User {
 
@@ -35,5 +40,19 @@ public class UserUpdateDto extends User {
         user.setPassword(getPassword());
         user.setTypes(getTypes());
         return user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserUpdateDto)) return false;
+        if (!super.equals(o)) return false;
+        UserUpdateDto that = (UserUpdateDto) o;
+        return Objects.equals(originalPassword, that.originalPassword);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), originalPassword);
     }
 }
