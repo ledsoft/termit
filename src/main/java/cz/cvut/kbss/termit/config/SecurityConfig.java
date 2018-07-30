@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.config;
 import cz.cvut.kbss.termit.security.*;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,6 +20,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @ComponentScan(basePackageClasses = Security.class)
@@ -79,8 +82,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        // We're allowing all methods from all origins so that the application API is usable also by other clients
+        // than just the UI.
+        // This behavior can be restricted later.
+        final CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+        corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
+        corsConfiguration.setAllowedOrigins(Collections.singletonList("*"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        source.registerCorsConfiguration(Constants.REST_MAPPING_PATH + "/**", corsConfiguration);
         return source;
     }
 }

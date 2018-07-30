@@ -32,7 +32,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
         this.authorities.addAll(authorities);
     }
 
-    private Set<GrantedAuthority> resolveAuthorities(User user) {
+    private static Set<GrantedAuthority> resolveAuthorities(User user) {
         final Set<GrantedAuthority> authorities = new HashSet<>(4);
         authorities.add(DEFAULT_AUTHORITY);
         if (user.getTypes() != null) {

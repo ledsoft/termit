@@ -9,6 +9,11 @@ import org.springframework.data.domain.Pageable;
 public class Constants {
 
     /**
+     * URL path to the application's REST API.
+     */
+    public static final String REST_MAPPING_PATH = "/rest";
+
+    /**
      * UTF-8 encoding identifier.
      */
     public static final String UTF_8_ENCODING = "UTF-8";
