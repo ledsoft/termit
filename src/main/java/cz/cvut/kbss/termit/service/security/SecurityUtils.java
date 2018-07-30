@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.security;
 
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
@@ -106,7 +107,7 @@ public class SecurityUtils {
     public void verifyCurrentUserPassword(String password) {
         final User currentUser = getCurrentUser();
         if (!passwordEncoder.matches(password, currentUser.getPassword())) {
-            throw new IllegalArgumentException("The specified password does not match the original one.");
+            throw new ValidationException("The specified password does not match the original one.");
         }
     }
 

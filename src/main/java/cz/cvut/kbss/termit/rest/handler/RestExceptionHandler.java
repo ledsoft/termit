@@ -1,10 +1,7 @@
 package cz.cvut.kbss.termit.rest.handler;
 
 import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
-import cz.cvut.kbss.termit.exception.AuthorizationException;
-import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.exception.UsernameExistsException;
+import cz.cvut.kbss.termit.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -66,5 +63,11 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorInfo> authorizationException(HttpServletRequest request, AuthorizationException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorInfo> validationException(HttpServletRequest request, ValidationException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
 }

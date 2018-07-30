@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.security;
 
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
@@ -80,7 +81,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     void verifyCurrentUserPasswordThrowsIllegalArgumentWhenPasswordDoesNotMatch() {
         Environment.setCurrentUser(user);
         final String password = "differentPassword";
-        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        final ValidationException ex = assertThrows(ValidationException.class,
                 () -> securityUtils.verifyCurrentUserPassword(password));
         assertThat(ex.getMessage(), containsString("does not match"));
 

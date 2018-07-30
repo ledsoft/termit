@@ -35,11 +35,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -146,5 +145,39 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
                                            .andExpect(status().isOk()).andReturn();
         final User result = readValue(mvcResult, User.class);
         assertEquals(user, result);
+    }
+
+    @Test
+    void unlockThrowsForbiddenForNonAdmin() throws Exception {
+        // This one is not an admin
+        Environment.setCurrentUser(Generator.generateUserWithId());
+        final User toUnlock = Generator.generateUserWithId();
+
+        mockMvc.perform(
+                delete(BASE_URL + "/lock").param("uri", toUnlock.getUri().toString()).content(toUnlock.getPassword()))
+               .andExpect(status().isForbidden());
+        verify(userService, never()).unlock(any(), any());
+    }
+
+    @Test
+    void enableThrowsForbiddenForNonAdmin() throws Exception {
+        // This one is not an admin
+        Environment.setCurrentUser(Generator.generateUserWithId());
+        final User toEnable = Generator.generateUserWithId();
+
+        mockMvc.perform(post(BASE_URL + "/status").param("uri", toEnable.getUri().toString()))
+               .andExpect(status().isForbidden());
+        verify(userService, never()).enable(any());
+    }
+
+    @Test
+    void disableThrowsForbiddenForNonAdmin() throws Exception {
+        // This one is not an admin
+        Environment.setCurrentUser(Generator.generateUserWithId());
+        final User toDisable = Generator.generateUserWithId();
+
+        mockMvc.perform(delete(BASE_URL + "/status").param("uri", toDisable.getUri().toString()))
+               .andExpect(status().isForbidden());
+        verify(userService, never()).disable(any());
     }
 }
