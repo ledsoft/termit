@@ -143,6 +143,16 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void findDoesNotExecutePostLoadWhenNoEntityIsFoundByDao() {
+        when(userDaoMock.find(any())).thenReturn(Optional.empty());
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+
+        final Optional<User> result = sut.find(Generator.generateUri());
+        assertFalse(result.isPresent());
+        verify(sut, never()).postLoad(any());
+    }
+
+    @Test
     void findAllExecutesPostLoadForEachLoadedEntity() {
         final List<User> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserWithId())
                                           .collect(Collectors.toList());
