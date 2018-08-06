@@ -44,9 +44,15 @@ public class UserUpdateDto extends User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserUpdateDto)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserUpdateDto)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         UserUpdateDto that = (UserUpdateDto) o;
         return Objects.equals(originalPassword, that.originalPassword);
     }

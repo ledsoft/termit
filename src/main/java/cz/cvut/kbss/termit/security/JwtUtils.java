@@ -68,7 +68,7 @@ public class JwtUtils {
             final String roles = claims.get(SecurityConstants.JWT_ROLE_CLAIM, String.class);
             return new UserDetails(user, mapClaimToAuthorities(roles));
         } catch (IllegalArgumentException e) {
-            throw new JwtException("Unable to parse user identifier from the specified JWT.");
+            throw new JwtException("Unable to parse user identifier from the specified JWT.", e);
         }
     }
 

@@ -111,6 +111,19 @@ class UserControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
+    void updateCurrentSkipsPasswordVerificationWhenNoPasswordIsSpecified() throws Exception {
+        final UserUpdateDto dto = dtoForUpdate();
+        dto.setPassword(null);
+        dto.setOriginalPassword(null);
+
+        mockMvc.perform(
+                put(BASE_URL + "/current").content(toJson(dto)).contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(status().isNoContent());
+        verify(securityUtilsMock, never()).verifyCurrentUserPassword(anyString());
+        verify(userService).update(user);
+    }
+
+    @Test
     void unlockUnlocksUser() throws Exception {
         final String newPassword = "newPassword";
 
