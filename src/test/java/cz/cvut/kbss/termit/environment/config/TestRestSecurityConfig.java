@@ -72,7 +72,7 @@ public class TestRestSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().anyRequest().permitAll().and()
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and().cors().and().csrf().disable()
-            .addFilter(new JwtAuthenticationFilter(jwtUtils))
+            .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtUtils))
             .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
             .formLogin().successHandler(authenticationSuccessHandler)
             .failureHandler(authenticationFailureHandler).and().sessionManagement()

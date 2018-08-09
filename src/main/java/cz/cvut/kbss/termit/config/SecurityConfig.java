@@ -68,15 +68,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().anyRequest().permitAll().and()
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and().cors().and().csrf().disable()
-            .addFilter(new JwtAuthenticationFilter(jwtUtils))
-            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
-            .formLogin().successHandler(authenticationSuccessHandler)
-            .failureHandler(authenticationFailureHandler)
-            .loginProcessingUrl(SecurityConstants.SECURITY_CHECK_URI)
-            .usernameParameter(SecurityConstants.USERNAME_PARAM).passwordParameter(SecurityConstants.PASSWORD_PARAM)
-            .and().logout().logoutUrl(SecurityConstants.LOGOUT_URI).logoutSuccessHandler(authenticationSuccessHandler)
-            .and()
+            .addFilter(authenticationFilter())
+            .addFilter(
+                    new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter authenticationFilter() throws Exception {
+        final JwtAuthenticationFilter authenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
+                jwtUtils);
+        authenticationFilter.setFilterProcessesUrl(SecurityConstants.SECURITY_CHECK_URI);
+        authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+        authenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        return authenticationFilter;
     }
 
     @Bean
