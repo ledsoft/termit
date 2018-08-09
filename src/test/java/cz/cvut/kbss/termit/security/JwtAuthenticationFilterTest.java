@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -26,6 +27,7 @@ import javax.servlet.FilterChain;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @Tag("security")
 @ExtendWith(SpringExtension.class)
@@ -52,11 +54,11 @@ class JwtAuthenticationFilterTest {
         this.user = Generator.generateUserWithId();
         this.mockRequest = new MockHttpServletRequest();
         this.mockResponse = new MockHttpServletResponse();
-        this.sut = new JwtAuthenticationFilter(new JwtUtils(config));
+        this.sut = new JwtAuthenticationFilter(mock(AuthenticationManager.class), new JwtUtils(config));
     }
 
     @Test
-    void successfulAuthenticationAddsJWTToResponse() {
+    void successfulAuthenticationAddsJWTToResponse() throws Exception {
         final AuthenticationToken token = new AuthenticationToken(Collections.emptySet(), new UserDetails(user));
         sut.successfulAuthentication(mockRequest, mockResponse, filterChain, token);
         assertTrue(mockResponse.containsHeader(SecurityConstants.AUTHENTICATION_HEADER));
