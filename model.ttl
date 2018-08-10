@@ -717,6 +717,20 @@ rdf:value rdf:type owl:DatatypeProperty .
 
 
 
+###  http://onto.fel.cvut.cz/ontologies/termit/restricted-user
+
+<http://onto.fel.cvut.cz/ontologies/termit/restricted-user> rdf:type owl:Class ;
+                                                            
+                                                            rdfs:label "Restricted User"@en ;
+                                                            
+                                                            rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
+                                                            
+                                                            rdfs:comment "User with restricted access rights. This can be for example newly registered user, whose access rights have to be approved by an application admin."@en ;
+                                                            
+                                                            <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+
+
+
 ###  http://onto.fel.cvut.cz/ontologies/termit/selector
 
 <http://onto.fel.cvut.cz/ontologies/termit/selector> rdf:type owl:Class ;

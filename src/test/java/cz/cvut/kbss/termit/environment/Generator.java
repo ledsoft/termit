@@ -76,8 +76,11 @@ public class Generator {
 
     /**
      * Creates a random instance of {@link User}.
+     * <p>
+     * The instance has no identifier set.
      *
      * @return New {@code User} instance
+     * @see #generateUserWithId()
      */
     public static User generateUser() {
         final User user = new User();

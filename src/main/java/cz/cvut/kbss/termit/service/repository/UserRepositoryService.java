@@ -72,6 +72,8 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
         instance.setUri(IdentifierUtils
                 .generateIdentifier(Vocabulary.ONTOLOGY_IRI_termit, instance.getFirstName(), instance.getLastName()));
         instance.setPassword(passwordEncoder.encode(instance.getPassword()));
+        instance.addType(Vocabulary.s_c_restricted_user);
+        instance.removeType(Vocabulary.s_c_admin);
     }
 
     private void validateInstance(User instance) {

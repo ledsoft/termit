@@ -9,6 +9,7 @@ import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -194,5 +195,24 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
         final AuthorizationException ex = assertThrows(AuthorizationException.class, () -> sut.update(toUpdate));
         assertEquals("User " + user + " attempted to update a different user's account.", ex.getMessage());
+    }
+
+    @Test
+    void persistAddsUserRestrictedType() {
+        final User user = Generator.generateUser();
+        sut.persist(user);
+
+        final User result = em.find(User.class, user.getUri());
+        assertTrue(result.getTypes().contains(Vocabulary.s_c_restricted_user));
+    }
+
+    @Test
+    void persistEnsuresAdminTypeIsNotPresentInUserAccount() {
+        final User user = Generator.generateUser();
+        user.addType(Vocabulary.s_c_admin);
+        sut.persist(user);
+
+        final User result = em.find(User.class, user.getUri());
+        assertFalse(result.getTypes().contains(Vocabulary.s_c_admin));
     }
 }

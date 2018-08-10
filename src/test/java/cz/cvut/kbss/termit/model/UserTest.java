@@ -9,53 +9,58 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserTest {
 
-    private User user = new User();
+    private User sut = new User();
 
     @Test
     void erasePasswordRemovesPasswordFromInstance() {
-        user.setPassword("test");
-        user.erasePassword();
-        assertNull(user.getPassword());
+        sut.setPassword("test");
+        sut.erasePassword();
+        assertNull(sut.getPassword());
     }
 
     @Test
     void isLockedReturnsFalseForNonLockedInstance() {
-        assertFalse(user.isLocked());
+        assertFalse(sut.isLocked());
     }
 
     @Test
     void isLockedReturnsTrueForLockedInstance() {
-        user.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_locked_user);
-        assertTrue(user.isLocked());
+        sut.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_locked_user);
+        assertTrue(sut.isLocked());
     }
 
     @Test
     void lockSetsLockedStatusOfInstance() {
-        assertFalse(user.isLocked());
-        user.lock();
-        assertTrue(user.isLocked());
+        assertFalse(sut.isLocked());
+        sut.lock();
+        assertTrue(sut.isLocked());
     }
 
     @Test
     void unlockRemovesLockedStatusOfInstance() {
-        user.lock();
-        assertTrue(user.isLocked());
-        user.unlock();
-        assertFalse(user.isLocked());
+        sut.lock();
+        assertTrue(sut.isLocked());
+        sut.unlock();
+        assertFalse(sut.isLocked());
     }
 
     @Test
     void disableAddsDisabledTypeToInstance() {
-        assertTrue(user.isEnabled());
-        user.disable();
-        assertFalse(user.isEnabled());
+        assertTrue(sut.isEnabled());
+        sut.disable();
+        assertFalse(sut.isEnabled());
     }
 
     @Test
     void enableRemovesDisabledTypeFromInstance() {
-        user.addType(Vocabulary.s_c_disabled_user);
-        assertFalse(user.isEnabled());
-        user.enable();
-        assertTrue(user.isEnabled());
+        sut.addType(Vocabulary.s_c_disabled_user);
+        assertFalse(sut.isEnabled());
+        sut.enable();
+        assertTrue(sut.isEnabled());
+    }
+
+    @Test
+    void removeTypeHandlesNullTypesAttribute() {
+        sut.removeType(Vocabulary.s_c_admin);
     }
 }
