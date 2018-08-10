@@ -100,4 +100,10 @@ public class UserController extends BaseController {
         userService.disable(user);
         LOG.debug("User {} successfully disabled.", user);
     }
+
+    @PreAuthorize("permitAll()")
+    @RequestMapping(value = "/username")
+    public Boolean exists(@RequestParam(name = "username") String username) {
+        return userService.exists(username);
+    }
 }
