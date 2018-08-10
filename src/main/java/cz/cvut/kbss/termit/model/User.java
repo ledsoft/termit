@@ -95,6 +95,14 @@ public class User implements Serializable {
         types.add(type);
     }
 
+    public void removeType(String type) {
+        Objects.requireNonNull(type);
+        if (types == null) {
+            return;
+        }
+        types.remove(type);
+    }
+
     /**
      * Erases the password in this instance.
      * <p>
