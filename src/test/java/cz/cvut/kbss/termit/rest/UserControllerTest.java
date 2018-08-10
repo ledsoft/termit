@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -182,5 +183,14 @@ class UserControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(delete(BASE_URL + "/status").param("uri", user.getUri().toString()))
                .andExpect(status().isNotFound());
         verify(userService, never()).disable(any());
+    }
+
+    @Test
+    void existsChecksForUsernameExistence() throws Exception {
+        when(userService.exists(user.getUsername())).thenReturn(true);
+        final MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/username").param("username", user.getUsername()))
+                                           .andReturn();
+        final Boolean result = readValue(mvcResult, Boolean.class);
+        assertTrue(result);
     }
 }
