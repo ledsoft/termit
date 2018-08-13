@@ -6,7 +6,6 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,8 +114,6 @@ class BaseDaoTest extends BaseDaoTestRunner {
         assertFalse(sut.find(user.getUri()).isPresent());
     }
 
-    // TODO Re-enable with new release of JOPA, where the exception hierarchy is updated
-    @Disabled
     @Test
     void exceptionDuringPersistIsWrappedInPersistenceException() {
         final PersistenceException e = assertThrows(PersistenceException.class, () -> {
@@ -126,25 +123,23 @@ class BaseDaoTest extends BaseDaoTestRunner {
         assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
     }
 
-    // TODO dtto
-    @Disabled
     @Test
     void exceptionDuringCollectionPersistIsWrappedInPersistenceException() {
         final List<User> users = Collections.singletonList(Generator.generateUserWithId());
         transactional(() -> sut.persist(users));
 
-        final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.persist(users)));
+        final PersistenceException e = assertThrows(PersistenceException.class,
+                () -> transactional(() -> sut.persist(users)));
         assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
     }
 
-    // TODO dtto
-    @Disabled
     @Test
     void exceptionDuringUpdateIsWrappedInPersistenceException() {
         final User user = Generator.generateUserWithId();
         transactional(() -> sut.persist(user));
         user.setUri(null);
-        final PersistenceException e = assertThrows(PersistenceException.class, () -> transactional(() -> sut.update(user)));
+        final PersistenceException e = assertThrows(PersistenceException.class,
+                () -> transactional(() -> sut.update(user)));
         assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
     }
 
