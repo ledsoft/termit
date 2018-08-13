@@ -31,6 +31,14 @@ public class SecurityConstants {
     public static final String LOGOUT_URI = "/j_spring_security_logout";
 
     /**
+     * Header specifying which security-related headers should be accessible to the client application in browser.
+     * <p>
+     * This header's value must include the authentication header ({@link #AUTHENTICATION_HEADER}), otherwise,
+     * application is not able to extract the authentication token from response.
+     */
+    public static final String EXPOSE_HEADERS_HEADER = "Access-Control-Expose-Headers";
+
+    /**
      * Request/response header used to store authentication info.
      */
     public static final String AUTHENTICATION_HEADER = "Authentication";
