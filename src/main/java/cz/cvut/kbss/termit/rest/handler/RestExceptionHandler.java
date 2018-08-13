@@ -55,7 +55,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorInfo> resourceNotFound(HttpServletRequest request, NotFoundException e) {
-        // Not necessary to log NotFoundException, they may be quite frequent and do not show an issue with the application
+        // Not necessary to log NotFoundException, they may be quite frequent and do not represent an issue with the application
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.NOT_FOUND);
     }
 

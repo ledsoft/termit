@@ -39,6 +39,12 @@ _* Technology not used in INBAS RT_
 We are using `basePackageClasses` instead of `basePackages` in `ComponentScan`. This is more resilient to refactoring errors 
 because it uses classes instead of String-based package info. Thus, any errors are discovered during compilation.
 
+### Validation
+
+The application uses JSR 380 validation API. This provides a generic, easy-to-use API for bean validation based on annotations.
+Use it to verify input data. See `User` and its validation in `BaseRepositoryService`/`UserRepositoryService`.
+`ValidationException` is then handled by `RestExceptionHandler` and an appropriate response is returned to the client.
+
 ## TODO
 
 - __CONSIDER__: OAuth for authentication
