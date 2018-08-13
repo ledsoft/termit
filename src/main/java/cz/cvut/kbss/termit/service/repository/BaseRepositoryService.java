@@ -1,9 +1,12 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
+import cz.cvut.kbss.termit.util.ValidationResult;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Validator;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +26,12 @@ import java.util.stream.Collectors;
  * @param <T> Domain object type managed by this service
  */
 public abstract class BaseRepositoryService<T> {
+
+    private final Validator validator;
+
+    protected BaseRepositoryService(Validator validator) {
+        this.validator = validator;
+    }
 
     /**
      * Gets primary DAO which is used to implement the CRUD methods in this service.
@@ -147,5 +156,20 @@ public abstract class BaseRepositoryService<T> {
      */
     public boolean exists(URI id) {
         return getPrimaryDao().exists(id);
+    }
+
+    /**
+     * Validates the specified instance, using JSR 380.
+     * <p>
+     * This assumes that the type contains JSR 380 validation annotations.
+     *
+     * @param instance The instance to validate
+     * @throws ValidationException In case the instance is not valid
+     */
+    protected void validate(T instance) {
+        final ValidationResult<T> validationResult = ValidationResult.of(validator.validate(instance));
+        if (!validationResult.isValid()) {
+            throw new ValidationException(validationResult);
+        }
     }
 }

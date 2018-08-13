@@ -14,7 +14,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import javax.validation.Validator;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -31,14 +33,22 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     private UserDao userDao;
 
     @Autowired
+    private Validator validator;
+
+    @Autowired
     private BaseRepositoryServiceImpl sut;
 
     @Configuration
     public static class Config {
 
         @Bean
-        public BaseRepositoryServiceImpl baseRepositoryService(UserDao userDao) {
-            return new BaseRepositoryServiceImpl(userDao);
+        public BaseRepositoryServiceImpl baseRepositoryService(UserDao userDao, Validator validator) {
+            return new BaseRepositoryServiceImpl(userDao, validator);
+        }
+
+        @Bean
+        public LocalValidatorFactoryBean validatorFactoryBean() {
+            return new LocalValidatorFactoryBean();
         }
     }
 
@@ -61,7 +71,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void persistExecutesPrePersistMethodBeforePersistOnDao() {
         final User user = Generator.generateUser();
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         sut.persist(user);
         final InOrder inOrder = Mockito.inOrder(sut, userDaoMock);
@@ -88,7 +98,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     void updateExecutesPreUpdateMethodBeforeUpdateOnDao() {
         final User user = Generator.generateUser();
         when(userDaoMock.update(any())).thenReturn(user);
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         sut.update(user);
         final InOrder inOrder = Mockito.inOrder(sut, userDaoMock);
@@ -101,7 +111,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
         final User user = Generator.generateUser();
         final User returned = Generator.generateUser();
         when(userDaoMock.update(any())).thenReturn(returned);
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         final User result = sut.update(user);
         final InOrder inOrder = Mockito.inOrder(sut, userDaoMock);
@@ -132,7 +142,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     void findExecutesPostLoadAfterLoadingEntityFromDao() {
         final User user = Generator.generateUserWithId();
         when(userDaoMock.find(user.getUri())).thenReturn(Optional.of(user));
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         final Optional<User> result = sut.find(user.getUri());
         assertTrue(result.isPresent());
@@ -145,7 +155,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void findDoesNotExecutePostLoadWhenNoEntityIsFoundByDao() {
         when(userDaoMock.find(any())).thenReturn(Optional.empty());
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         final Optional<User> result = sut.find(Generator.generateUri());
         assertFalse(result.isPresent());
@@ -157,7 +167,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
         final List<User> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserWithId())
                                           .collect(Collectors.toList());
         when(userDaoMock.findAll()).thenReturn(users);
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
 
         final List<User> result = sut.findAll();
         assertEquals(users, result);
@@ -169,7 +179,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void existsInvokesDao() {
         final URI id = Generator.generateUri();
-        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userDaoMock, validator));
         assertFalse(sut.exists(id));
         verify(userDaoMock).exists(id);
     }
