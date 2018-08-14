@@ -40,6 +40,6 @@ public class Glossary extends AbstractEntity {
     public String toString() {
         return "Glossary{" +
                 "term count=" + (terms != null ? terms.size() : 0) +
-                "} " + super.toString();
+                " " + super.toString() + "}";
     }
 }
