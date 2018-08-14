@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.net.URI;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_vocabulary)
-public class Vocabulary implements Serializable {
+public class Vocabulary extends HasProvenanceData implements Serializable {
 
     @Id
     private URI uri;

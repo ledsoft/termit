@@ -40,6 +40,8 @@ public class Constants {
 
     /**
      * Version of this application.
+     * <p>
+     * Injected by Maven during production build.
      */
     public static final String VERSION = "$VERSION$";
 

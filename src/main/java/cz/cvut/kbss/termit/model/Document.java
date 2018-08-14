@@ -6,11 +6,10 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Date;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_document)
-public class Document implements Serializable {
+public class Document extends HasProvenanceData implements Serializable {
 
     @Id
     private URI uri;
@@ -21,14 +20,6 @@ public class Document implements Serializable {
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
-
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_author, fetch = FetchType.EAGER)
-    private User author;
-
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_created)
-    private Date dateCreated;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_has_file, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<File> files;
@@ -61,22 +52,6 @@ public class Document implements Serializable {
         this.description = description;
     }
 
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
     public Set<File> getFiles() {
         return files;
     }
@@ -99,8 +74,8 @@ public class Document implements Serializable {
                 "uri=" + uri +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", author=" + author +
-                ", dateCreated=" + dateCreated +
+                ", author=" + getAuthor() +
+                ", dateCreated=" + getDateCreated() +
                 ", files=" + files +
                 '}';
     }
