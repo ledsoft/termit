@@ -27,12 +27,10 @@ public class VocabularyController extends BaseController {
 
     private final VocabularyRepositoryService vocabularyService;
 
-    private final IdentifierResolver idResolver;
-
     @Autowired
     public VocabularyController(VocabularyRepositoryService vocabularyService, IdentifierResolver idResolver) {
+        super(idResolver);
         this.vocabularyService = vocabularyService;
-        this.idResolver = idResolver;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
