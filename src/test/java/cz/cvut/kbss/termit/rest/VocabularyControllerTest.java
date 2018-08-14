@@ -1,10 +1,13 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cz.cvut.kbss.termit.rest.BaseController.ID_QUERY_PARAM;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -34,6 +36,9 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private VocabularyRepositoryService serviceMock;
+
+    @Mock
+    private IdentifierResolver idResolverMock;
 
     @InjectMocks
     private VocabularyController sut;
@@ -83,22 +88,26 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     void createVocabularyReturnsResponseWithLocationHeader() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
+        final String fragment = Environment.extractFragment(vocabulary.getUri());
+        when(idResolverMock.extractIdentifierFragment(vocabulary.getUri())).thenReturn(fragment);
 
         final MvcResult mvcResult = mockMvc.perform(
                 post("/vocabularies").content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
-        verifyLocationEquals("/vocabularies?" + ID_QUERY_PARAM + "=" + vocabulary.getUri().toString(), mvcResult);
+        verifyLocationEquals("/vocabularies/" + fragment, mvcResult);
     }
 
     @Test
     void getByIdLoadsVocabularyFromRepository() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
+        final String fragment = Environment.extractFragment(vocabulary.getUri());
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment.substring(1)))
+                .thenReturn(vocabulary.getUri());
         when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
 
         final MvcResult mvcResult = mockMvc
-                .perform(get("/vocabularies/instance").param(ID_QUERY_PARAM, vocabulary.getUri().toString())
-                                                      .accept(MediaType.APPLICATION_JSON_VALUE))
+                .perform(get("/vocabularies" + fragment).accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk()).andReturn();
         final Vocabulary result = readValue(mvcResult, Vocabulary.class);
         assertNotNull(result);
@@ -108,10 +117,13 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getByIdReturnsNotFoundForUnknownVocabularyId() throws Exception {
-        final String id = Generator.generateUri().toString();
+        final URI unknownUri = Generator.generateUri();
+        final String fragment = Environment.extractFragment(unknownUri);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment.substring(1)))
+                .thenReturn(unknownUri);
         when(serviceMock.find(any())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/vocabularies/instance").param(ID_QUERY_PARAM, id)).andExpect(status().isNotFound());
-        verify(serviceMock).find(URI.create(id));
+        mockMvc.perform(get("/vocabularies" + fragment)).andExpect(status().isNotFound());
+        verify(serviceMock).find(unknownUri);
     }
 }

@@ -6,8 +6,10 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +34,14 @@ public class UserController extends BaseController {
 
     private final SecurityUtils securityUtils;
 
+    private final IdentifierResolver idResolver;
+
     @Autowired
-    public UserController(UserRepositoryService userService, SecurityUtils securityUtils) {
+    public UserController(UserRepositoryService userService, SecurityUtils securityUtils,
+                          IdentifierResolver idResolver) {
         this.userService = userService;
         this.securityUtils = securityUtils;
+        this.idResolver = idResolver;
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
@@ -72,31 +78,34 @@ public class UserController extends BaseController {
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
-    @RequestMapping(value = "/lock", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{fragment}/lock", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unlock(@RequestParam(name = ID_QUERY_PARAM) String identifier, @RequestBody String newPassword) {
-        final Optional<User> toUnlock = userService.find(URI.create(identifier));
-        final User user = toUnlock.orElseThrow(() -> NotFoundException.create("User", identifier));
+    public void unlock(@PathVariable(name = "fragment") String identifierFragment, @RequestBody String newPassword) {
+        final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
+        final Optional<User> toUnlock = userService.find(id);
+        final User user = toUnlock.orElseThrow(() -> NotFoundException.create("User", id));
         userService.unlock(user, newPassword);
         LOG.debug("User {} successfully unlocked.", user);
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
-    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    @RequestMapping(value = "/{fragment}/status", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void enable(@RequestParam(name = ID_QUERY_PARAM) String identifier) {
-        final Optional<User> toEnable = userService.find(URI.create(identifier));
-        final User user = toEnable.orElseThrow(() -> NotFoundException.create("User", identifier));
+    public void enable(@PathVariable(name = "fragment") String identifierFragment) {
+        final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
+        final Optional<User> toEnable = userService.find(id);
+        final User user = toEnable.orElseThrow(() -> NotFoundException.create("User", id));
         userService.enable(user);
         LOG.debug("User {} successfully enabled.", user);
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
-    @RequestMapping(value = "/status", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{fragment}/status", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void disable(@RequestParam(name = ID_QUERY_PARAM) String identifier) {
-        final Optional<User> toDisable = userService.find(URI.create(identifier));
-        final User user = toDisable.orElseThrow(() -> NotFoundException.create("User", identifier));
+    public void disable(@PathVariable(name = "fragment") String identifierFragment) {
+        final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
+        final Optional<User> toDisable = userService.find(id);
+        final User user = toDisable.orElseThrow(() -> NotFoundException.create("User", id));
         userService.disable(user);
         LOG.debug("User {} successfully disabled.", user);
     }

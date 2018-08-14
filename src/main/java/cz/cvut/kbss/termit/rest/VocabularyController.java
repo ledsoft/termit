@@ -4,7 +4,9 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.rest.util.RestUtils;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,12 @@ public class VocabularyController extends BaseController {
 
     private final VocabularyRepositoryService vocabularyService;
 
+    private final IdentifierResolver idResolver;
+
     @Autowired
-    public VocabularyController(VocabularyRepositoryService vocabularyService) {
+    public VocabularyController(VocabularyRepositoryService vocabularyService, IdentifierResolver idResolver) {
         this.vocabularyService = vocabularyService;
+        this.idResolver = idResolver;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
@@ -40,13 +45,15 @@ public class VocabularyController extends BaseController {
         vocabularyService.persist(vocabulary);
         LOG.debug("Vocabulary {} created.", vocabulary);
         final HttpHeaders headers = RestUtils
-                .createLocationHeaderFromCurrentUriWithQueryParam(ID_QUERY_PARAM, vocabulary.getUri());
+                .createLocationHeaderFromCurrentUriWithPath("/{fragment}",
+                        idResolver.extractIdentifierFragment(vocabulary.getUri()));
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/instance", method = RequestMethod.GET)
-    public Vocabulary getById(@RequestParam(ID_QUERY_PARAM) String id) {
-        return vocabularyService.find(URI.create(id))
+    @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
+    public Vocabulary getById(@PathVariable("fragment") String fragment) {
+        final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
+        return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }
 }
