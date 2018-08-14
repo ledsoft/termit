@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.rest.BaseController.ID_QUERY_PARAM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -130,7 +131,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
         mockMvc.perform(delete(BASE_URL + "/lock")
-                .param("uri", user.getUri().toString())
+                .param(ID_QUERY_PARAM, user.getUri().toString())
                 .content(newPassword))
                .andExpect(status().isNoContent());
         verify(userService).unlock(user, newPassword);
@@ -143,7 +144,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(userService.find(uri)).thenReturn(Optional.empty());
         mockMvc.perform(delete(BASE_URL + "/lock")
-                .param("uri", uri.toString())
+                .param(ID_QUERY_PARAM, uri.toString())
                 .content(newPassword))
                .andExpect(status().isNotFound());
         verify(userService, never()).unlock(any(), any());
@@ -152,7 +153,7 @@ class UserControllerTest extends BaseControllerTestRunner {
     @Test
     void enableEnablesUser() throws Exception {
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
-        mockMvc.perform(post(BASE_URL + "/status").param("uri", user.getUri().toString()))
+        mockMvc.perform(post(BASE_URL + "/status").param(ID_QUERY_PARAM, user.getUri().toString()))
                .andExpect(status().isNoContent());
         verify(userService).enable(user);
     }
@@ -162,7 +163,7 @@ class UserControllerTest extends BaseControllerTestRunner {
         final URI uri = Generator.generateUri();
 
         when(userService.find(uri)).thenReturn(Optional.empty());
-        mockMvc.perform(post(BASE_URL + "/status").param("uri", user.getUri().toString()))
+        mockMvc.perform(post(BASE_URL + "/status").param(ID_QUERY_PARAM, user.getUri().toString()))
                .andExpect(status().isNotFound());
         verify(userService, never()).enable(any());
     }
@@ -170,7 +171,7 @@ class UserControllerTest extends BaseControllerTestRunner {
     @Test
     void disableDisablesUser() throws Exception {
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
-        mockMvc.perform(delete(BASE_URL + "/status").param("uri", user.getUri().toString()))
+        mockMvc.perform(delete(BASE_URL + "/status").param(ID_QUERY_PARAM, user.getUri().toString()))
                .andExpect(status().isNoContent());
         verify(userService).disable(user);
     }
@@ -180,7 +181,7 @@ class UserControllerTest extends BaseControllerTestRunner {
         final URI uri = Generator.generateUri();
 
         when(userService.find(uri)).thenReturn(Optional.empty());
-        mockMvc.perform(delete(BASE_URL + "/status").param("uri", user.getUri().toString()))
+        mockMvc.perform(delete(BASE_URL + "/status").param(ID_QUERY_PARAM, user.getUri().toString()))
                .andExpect(status().isNotFound());
         verify(userService, never()).disable(any());
     }

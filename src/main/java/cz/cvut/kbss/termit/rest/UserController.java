@@ -74,7 +74,7 @@ public class UserController extends BaseController {
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
     @RequestMapping(value = "/lock", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unlock(@RequestParam(name = "uri") String identifier, @RequestBody String newPassword) {
+    public void unlock(@RequestParam(name = ID_QUERY_PARAM) String identifier, @RequestBody String newPassword) {
         final Optional<User> toUnlock = userService.find(URI.create(identifier));
         final User user = toUnlock.orElseThrow(() -> NotFoundException.create("User", identifier));
         userService.unlock(user, newPassword);
@@ -84,7 +84,7 @@ public class UserController extends BaseController {
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
     @RequestMapping(value = "/status", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void enable(@RequestParam(name = "uri") String identifier) {
+    public void enable(@RequestParam(name = ID_QUERY_PARAM) String identifier) {
         final Optional<User> toEnable = userService.find(URI.create(identifier));
         final User user = toEnable.orElseThrow(() -> NotFoundException.create("User", identifier));
         userService.enable(user);
@@ -94,7 +94,7 @@ public class UserController extends BaseController {
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
     @RequestMapping(value = "/status", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void disable(@RequestParam(name = "uri") String identifier) {
+    public void disable(@RequestParam(name = ID_QUERY_PARAM) String identifier) {
         final Optional<User> toDisable = userService.find(URI.create(identifier));
         final User user = toDisable.orElseThrow(() -> NotFoundException.create("User", identifier));
         userService.disable(user);
