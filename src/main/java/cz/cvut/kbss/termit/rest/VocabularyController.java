@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.rest.util.RestUtils;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
@@ -11,11 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -43,5 +42,11 @@ public class VocabularyController extends BaseController {
         final HttpHeaders headers = RestUtils
                 .createLocationHeaderFromCurrentUriWithQueryParam(ID_QUERY_PARAM, vocabulary.getUri());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/instance", method = RequestMethod.GET)
+    public Vocabulary getById(@RequestParam(ID_QUERY_PARAM) String id) {
+        return vocabularyService.find(URI.create(id))
+                                .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }
 }
