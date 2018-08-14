@@ -10,4 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 @PreAuthorize("hasRole('" + SecurityConstants.ROLE_USER + "')")
 public class BaseController {
+
+    /**
+     * Name of the query parameter representing instance identifier
+     */
+    static final String ID_QUERY_PARAM = "id";
 }
