@@ -36,11 +36,24 @@ public enum ConfigParam {
     JWT_SECRET_KEY("jwt.secretKey"),
 
     /**
-     * Base for possible generation of vocabulary identifier.
-     *
-     * This allows each deployment to specify base IRI from which vocabulary identifiers will be derived.
+     * Namespace for vocabulary identifiers.
      */
-    VOCABULARY_BASE_IRI("vocabulary.baseIri");
+    NAMESPACE_VOCABULARY("namespace.vocabulary"),
+
+    /**
+     * Namespace for user identifiers.
+     */
+    NAMESPACE_USER("namespace.user"),
+
+    /**
+     * Namespace for document identifiers.
+     */
+    NAMESPACE_DOCUMENT("namespace.document"),
+
+    /**
+     * Namespace for term identifiers.
+     */
+    NAMESPACE_TERM("namespace.term");
 
     private final String parameter;
 

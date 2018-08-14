@@ -6,8 +6,8 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.model.util.IdentifierUtils;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertThat(result.getUri().toString(), containsString(IdentifierUtils.normalize(vocabulary.getName())));
+        assertThat(result.getUri().toString(), containsString(IdentifierResolver.normalize(vocabulary.getName())));
     }
 
     @Test

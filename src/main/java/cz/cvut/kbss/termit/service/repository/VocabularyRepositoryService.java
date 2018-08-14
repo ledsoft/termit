@@ -1,12 +1,11 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.model.util.IdentifierUtils;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +17,18 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
 
     private final SecurityUtils securityUtils;
 
-    private final Configuration config;
+    private final IdentifierResolver idResolver;
 
     private final VocabularyDao vocabularyDao;
 
     @Autowired
-    public VocabularyRepositoryService(VocabularyDao vocabularyDao, SecurityUtils securityUtils, Configuration config,
+    public VocabularyRepositoryService(VocabularyDao vocabularyDao, SecurityUtils securityUtils,
+                                       IdentifierResolver idResolver,
                                        Validator validator) {
         super(validator);
         this.vocabularyDao = vocabularyDao;
         this.securityUtils = securityUtils;
-        this.config = config;
+        this.idResolver = idResolver;
     }
 
     @Override
@@ -42,8 +42,7 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
         instance.setDateCreated(new Date());
         instance.setAuthor(securityUtils.getCurrentUser());
         if (instance.getUri() == null) {
-            instance.setUri(IdentifierUtils
-                    .generateIdentifier(config.get(ConfigParam.VOCABULARY_BASE_IRI), instance.getName()));
+            instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getName()));
         }
     }
 

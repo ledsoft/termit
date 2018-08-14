@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
@@ -102,5 +103,9 @@ public class Environment {
 
     public static HttpMessageConverter<?> createResourceMessageConverter() {
         return new ResourceHttpMessageConverter();
+    }
+
+    public static String extractFragment(URI uri) {
+        return uri.toString().substring(uri.toString().lastIndexOf('/'));
     }
 }
