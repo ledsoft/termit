@@ -51,8 +51,14 @@ public class VocabularyController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
-    public Vocabulary getById(@PathVariable("fragment") String fragment) {
-        final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
+    public Vocabulary getById(@PathVariable("fragment") String fragment,
+                              @RequestParam(name = "namespace", required = false) String namespace) {
+        final URI id;
+        if (namespace != null) {
+            id = idResolver.resolveIdentifier(namespace, fragment);
+        } else {
+            id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
+        }
         return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }

@@ -126,4 +126,21 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(get("/vocabularies" + fragment)).andExpect(status().isNotFound());
         verify(serviceMock).find(unknownUri);
     }
+
+    @Test
+    void getByIdUsesSpecifiedNamespaceInsteadOfDefaultOneForResolvingIdentifier() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final String fragment = Environment.extractFragment(vocabulary.getUri()).substring(1);
+        final String namespace = vocabulary.getUri().toString()
+                                           .substring(0, vocabulary.getUri().toString().lastIndexOf('/'));
+        when(idResolverMock.resolveIdentifier(namespace, fragment)).thenReturn(vocabulary.getUri());
+        when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
+
+        final MvcResult mvcResult = mockMvc.perform(
+                get("/vocabularies/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE).param("namespace", namespace))
+                                           .andReturn();
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        verify(idResolverMock).resolveIdentifier(namespace, fragment);
+    }
 }
