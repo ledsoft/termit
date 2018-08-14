@@ -14,14 +14,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.termit.rest.BaseController.ID_QUERY_PARAM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -86,5 +88,30 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                 post("/vocabularies").content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
         verifyLocationEquals("/vocabularies?" + ID_QUERY_PARAM + "=" + vocabulary.getUri().toString(), mvcResult);
+    }
+
+    @Test
+    void getByIdLoadsVocabularyFromRepository() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get("/vocabularies/instance").param(ID_QUERY_PARAM, vocabulary.getUri().toString())
+                                                      .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk()).andReturn();
+        final Vocabulary result = readValue(mvcResult, Vocabulary.class);
+        assertNotNull(result);
+        assertEquals(vocabulary.getUri(), result.getUri());
+        assertEquals(vocabulary.getName(), result.getName());
+    }
+
+    @Test
+    void getByIdReturnsNotFoundForUnknownVocabularyId() throws Exception {
+        final String id = Generator.generateUri().toString();
+        when(serviceMock.find(any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/vocabularies/instance").param(ID_QUERY_PARAM, id)).andExpect(status().isNotFound());
+        verify(serviceMock).find(URI.create(id));
     }
 }
