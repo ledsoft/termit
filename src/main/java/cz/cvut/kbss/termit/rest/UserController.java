@@ -34,14 +34,12 @@ public class UserController extends BaseController {
 
     private final SecurityUtils securityUtils;
 
-    private final IdentifierResolver idResolver;
-
     @Autowired
     public UserController(UserRepositoryService userService, SecurityUtils securityUtils,
                           IdentifierResolver idResolver) {
+        super(idResolver);
         this.userService = userService;
         this.securityUtils = securityUtils;
-        this.idResolver = idResolver;
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
