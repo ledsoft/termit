@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.HashSet;
@@ -16,22 +16,22 @@ public class User implements Serializable {
     @Id
     private URI uri;
 
-    @NotEmpty
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_givenName)
     private String firstName;
 
-    @NotEmpty
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_familyName)
     private String lastName;
 
-    @NotEmpty
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_username)
     private String username;
 
-    @NotEmpty
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_password)
     private String password;

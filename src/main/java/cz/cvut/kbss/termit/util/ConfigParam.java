@@ -33,7 +33,14 @@ public enum ConfigParam {
     /**
      * Secret key used when hashing a JWT.
      */
-    JWT_SECRET_KEY("jwt.secretKey");
+    JWT_SECRET_KEY("jwt.secretKey"),
+
+    /**
+     * Base for possible generation of vocabulary identifier.
+     *
+     * This allows each deployment to specify base IRI from which vocabulary identifiers will be derived.
+     */
+    VOCABULARY_BASE_IRI("vocabulary.baseIri");
 
     private final String parameter;
 
