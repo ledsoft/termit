@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.util;
 
 import javax.validation.ConstraintViolation;
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Collection;
  *
  * @param <T> The validated type
  */
-public class ValidationResult<T> {
+public class ValidationResult<T> implements Serializable {
 
     private final Collection<ConstraintViolation<T>> violations;
 

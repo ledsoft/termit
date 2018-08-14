@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
 
@@ -12,6 +13,8 @@ public class Vocabulary implements Serializable {
     @Id
     private URI uri;
 
+    @NotBlank
+    @ParticipationConstraints(nonEmpty = true)
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String name;
 
