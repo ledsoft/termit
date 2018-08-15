@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -214,5 +215,16 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
         final User result = em.find(User.class, user.getUri());
         assertFalse(result.getTypes().contains(Vocabulary.s_c_admin));
+    }
+
+    @Test
+    void persistDoesNotGenerateUriIfItIsAlreadyPresent() {
+        final User user = Generator.generateUserWithId();
+        final URI originalUri = user.getUri();
+        sut.persist(user);
+
+        final User result = em.find(User.class, originalUri);
+        assertNotNull(result);
+        assertEquals(originalUri, result.getUri());
     }
 }
