@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -142,5 +143,16 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                                            .andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
         verify(idResolverMock).resolveIdentifier(namespace, fragment);
+    }
+
+    @Test
+    void generateIdentifierReturnsIdentifierGeneratedForSpecifiedName() throws Exception {
+        final String name = "Metropolitní plán";
+        final URI uri = URI.create(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/" +
+                IdentifierResolver.normalize(name));
+        when(idResolverMock.generateIdentifier(any(ConfigParam.class), eq(name))).thenReturn(uri);
+        final MvcResult mvcResult = mockMvc.perform(get("/vocabularies/identifier").param("name", name)).andReturn();
+        assertEquals(uri.toString(), readValue(mvcResult, String.class));
+        verify(idResolverMock).generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, name);
     }
 }
