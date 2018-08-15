@@ -69,8 +69,10 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
     @Override
     protected void prePersist(User instance) {
         validate(instance);
-        instance.setUri(idResolver
-                .generateIdentifier(ConfigParam.NAMESPACE_USER, instance.getFirstName(), instance.getLastName()));
+        if (instance.getUri() == null) {
+            instance.setUri(idResolver
+                    .generateIdentifier(ConfigParam.NAMESPACE_USER, instance.getFirstName(), instance.getLastName()));
+        }
         instance.setPassword(passwordEncoder.encode(instance.getPassword()));
         instance.addType(Vocabulary.s_c_omezeny_uzivatel_termitu);
         instance.removeType(Vocabulary.s_c_administrator_termitu);
