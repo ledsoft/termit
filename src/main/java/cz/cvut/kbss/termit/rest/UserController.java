@@ -10,6 +10,7 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,8 @@ public class UserController extends BaseController {
 
     @Autowired
     public UserController(UserRepositoryService userService, SecurityUtils securityUtils,
-                          IdentifierResolver idResolver) {
-        super(idResolver);
+                          IdentifierResolver idResolver, Configuration config) {
+        super(idResolver, config);
         this.userService = userService;
         this.securityUtils = securityUtils;
     }

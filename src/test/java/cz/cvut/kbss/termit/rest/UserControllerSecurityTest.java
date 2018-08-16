@@ -34,7 +34,7 @@ import javax.servlet.Filter;
 import java.util.Collections;
 import java.util.List;
 
-import static cz.cvut.kbss.termit.environment.Environment.extractFragment;
+import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -155,7 +155,8 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         final User toUnlock = Generator.generateUserWithId();
 
         mockMvc.perform(
-                delete(BASE_URL + extractFragment(toUnlock.getUri()) + "/lock").content(toUnlock.getPassword()))
+                delete(BASE_URL + "/" + extractIdentifierFragment(toUnlock.getUri()) + "/lock")
+                        .content(toUnlock.getPassword()))
                .andExpect(status().isForbidden());
         verify(userService, never()).unlock(any(), any());
     }
@@ -166,7 +167,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         Environment.setCurrentUser(Generator.generateUserWithId());
         final User toEnable = Generator.generateUserWithId();
 
-        mockMvc.perform(post(BASE_URL + extractFragment(toEnable.getUri()) + "/status"))
+        mockMvc.perform(post(BASE_URL + "/" + extractIdentifierFragment(toEnable.getUri()) + "/status"))
                .andExpect(status().isForbidden());
         verify(userService, never()).enable(any());
     }
@@ -177,7 +178,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         Environment.setCurrentUser(Generator.generateUserWithId());
         final User toDisable = Generator.generateUserWithId();
 
-        mockMvc.perform(delete(BASE_URL + extractFragment(toDisable.getUri()) + "/status"))
+        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(toDisable.getUri()) + "/status"))
                .andExpect(status().isForbidden());
         verify(userService, never()).disable(any());
     }

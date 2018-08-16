@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cz.cvut.kbss.termit.environment.Environment.extractFragment;
+import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,7 +136,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(user.getUri());
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
-        mockMvc.perform(delete(BASE_URL + extractFragment(user.getUri()) + "/lock")
+        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(user.getUri()) + "/lock")
                 .content(newPassword))
                .andExpect(status().isNoContent());
         verify(userService).unlock(user, newPassword);
@@ -149,7 +149,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(uri);
         when(userService.find(uri)).thenReturn(Optional.empty());
-        mockMvc.perform(delete(BASE_URL + extractFragment(uri) + "/lock")
+        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(uri) + "/lock")
                 .content(newPassword))
                .andExpect(status().isNotFound());
         verify(userService, never()).unlock(any(), any());
@@ -159,7 +159,8 @@ class UserControllerTest extends BaseControllerTestRunner {
     void enableEnablesUser() throws Exception {
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(user.getUri());
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
-        mockMvc.perform(post(BASE_URL + extractFragment(user.getUri()) + "/status")).andExpect(status().isNoContent());
+        mockMvc.perform(post(BASE_URL + "/" + extractIdentifierFragment(user.getUri()) + "/status"))
+               .andExpect(status().isNoContent());
         verify(userService).enable(user);
     }
 
@@ -169,7 +170,8 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(uri);
         when(userService.find(uri)).thenReturn(Optional.empty());
-        mockMvc.perform(post(BASE_URL + extractFragment(uri) + "/status")).andExpect(status().isNotFound());
+        mockMvc.perform(post(BASE_URL + "/" + extractIdentifierFragment(uri) + "/status"))
+               .andExpect(status().isNotFound());
         verify(userService, never()).enable(any());
     }
 
@@ -177,7 +179,7 @@ class UserControllerTest extends BaseControllerTestRunner {
     void disableDisablesUser() throws Exception {
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(user.getUri());
         when(userService.find(user.getUri())).thenReturn(Optional.of(user));
-        mockMvc.perform(delete(BASE_URL + extractFragment(user.getUri()) + "/status"))
+        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(user.getUri()) + "/status"))
                .andExpect(status().isNoContent());
         verify(userService).disable(user);
     }
@@ -188,7 +190,8 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_USER), any())).thenReturn(uri);
         when(userService.find(uri)).thenReturn(Optional.empty());
-        mockMvc.perform(delete(BASE_URL + extractFragment(uri) + "/status")).andExpect(status().isNotFound());
+        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(uri) + "/status"))
+               .andExpect(status().isNotFound());
         verify(userService, never()).disable(any());
     }
 

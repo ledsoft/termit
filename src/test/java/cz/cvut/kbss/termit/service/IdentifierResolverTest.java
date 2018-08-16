@@ -129,13 +129,29 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
     @Test
     void extractIdentifierFragmentExtractsLastPartOfUri() {
         final URI uri = Generator.generateUri();
-        final String result = sut.extractIdentifierFragment(uri);
+        final String result = IdentifierResolver.extractIdentifierFragment(uri);
         assertEquals(uri.toString().substring(uri.toString().lastIndexOf('/') + 1), result);
     }
 
     @Test
     void extractIdentifierFragmentExtractsFragmentFromUriWithUrlFragment() {
         final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabulary#test");
-        assertEquals("test", sut.extractIdentifierFragment(uri));
+        assertEquals("test", IdentifierResolver.extractIdentifierFragment(uri));
+    }
+
+    @Test
+    void extractIdentifierNamespaceExtractsNamespaceFromSlashBasedUri() {
+        final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/";
+        final String fragment = "metropolitan-plan";
+        final String result = IdentifierResolver.extractIdentifierNamespace(URI.create(namespace + fragment));
+        assertEquals(namespace, result);
+    }
+
+    @Test
+    void extractIdentifierNamespaceExtractsNamespaceFromHashBasedUri() {
+        final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary#";
+        final String fragment = "metropolitan-plan";
+        final String result = IdentifierResolver.extractIdentifierNamespace(URI.create(namespace + fragment));
+        assertEquals(namespace, result);
     }
 }

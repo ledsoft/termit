@@ -3,10 +3,10 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.rest.util.RestUtils;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,9 @@ public class VocabularyController extends BaseController {
     private final VocabularyRepositoryService vocabularyService;
 
     @Autowired
-    public VocabularyController(VocabularyRepositoryService vocabularyService, IdentifierResolver idResolver) {
-        super(idResolver);
+    public VocabularyController(VocabularyRepositoryService vocabularyService, IdentifierResolver idResolver,
+                                Configuration config) {
+        super(idResolver, config);
         this.vocabularyService = vocabularyService;
     }
 
@@ -43,9 +44,7 @@ public class VocabularyController extends BaseController {
     public ResponseEntity<Void> createVocabulary(@RequestBody Vocabulary vocabulary) {
         vocabularyService.persist(vocabulary);
         LOG.debug("Vocabulary {} created.", vocabulary);
-        final HttpHeaders headers = RestUtils
-                .createLocationHeaderFromCurrentUriWithPath("/{fragment}",
-                        idResolver.extractIdentifierFragment(vocabulary.getUri()));
+        final HttpHeaders headers = generateLocationHeader(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY);
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
