@@ -73,4 +73,18 @@ class RestUtilsTest {
         final String value = Generator.generateUri().toString();
         assertEquals(URLEncoder.encode(value, Constants.UTF_8_ENCODING), RestUtils.urlEncode(value));
     }
+
+    @Test
+    void createLocationHeaderFromCurrentUriWithPathAndQueryCreatesLocationHeader() {
+        final MockHttpServletRequest mockRequest = new MockHttpServletRequest(HttpMethod.GET.toString(),
+                "/vocabularies");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
+        final String name = "metropolitan-plan";
+        final String param = "namespace";
+        final String paramValue = "http://onto.fel.cvut.cz/ontologies/termit/vocabularies/";
+        final HttpHeaders result = RestUtils
+                .createLocationHeaderFromCurrentUriWithPathAndQuery("/{name}", param, paramValue, name);
+        final String location = result.getLocation().toString();
+        assertThat(location, endsWith("/" + name + "?" + param + "=" + paramValue));
+    }
 }

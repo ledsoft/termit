@@ -116,11 +116,27 @@ public class IdentifierResolver {
      * @param uri URI to extract fragment from
      * @return Identification fragment
      */
-    public String extractIdentifierFragment(URI uri) {
+    public static String extractIdentifierFragment(URI uri) {
         Objects.requireNonNull(uri);
         final String strUri = uri.toString();
         final int slashIndex = strUri.lastIndexOf('/');
         final int hashIndex = strUri.lastIndexOf('#');
         return strUri.substring((slashIndex > hashIndex ? slashIndex : hashIndex) + 1);
+    }
+
+    /**
+     * Extracts namespace from the specified URI.
+     * <p>
+     * Namespace in this case means the part of the URI up to the last forward slash or hash tag, whichever comes
+     * later.
+     *
+     * @param uri URI to extract namespace from
+     * @return Identifier namespace
+     */
+    public static String extractIdentifierNamespace(URI uri) {
+        final String strUri = uri.toString();
+        final int slashIndex = strUri.lastIndexOf('/');
+        final int hashIndex = strUri.lastIndexOf('#');
+        return strUri.substring(0, (slashIndex > hashIndex ? slashIndex : hashIndex) + 1);
     }
 }

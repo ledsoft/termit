@@ -63,6 +63,33 @@ public class RestUtils {
     }
 
     /**
+     * Creates {@link HttpHeaders} object with a location header with the specified path and query parameter appended to
+     * the current request URI.
+     * <p>
+     * The {@code paramValue} is specified for the query parameter and {@code pathValues} are used to replace path
+     * variables.
+     *
+     * @param path       Path string, may contain path variables
+     * @param param      Query parameter to add to current request URI
+     * @param paramValue Value of the query parameter
+     * @param pathValues Path variable values
+     * @return {@code HttpHeaders} with location header
+     * @see #createLocationHeaderFromCurrentUriWithPath(String, Object...)
+     * @see #createLocationHeaderFromCurrentUriWithQueryParam(String, Object...)
+     */
+    public static HttpHeaders createLocationHeaderFromCurrentUriWithPathAndQuery(String path, String param,
+                                                                                 Object paramValue,
+                                                                                 Object... pathValues) {
+        Objects.requireNonNull(path);
+        Objects.requireNonNull(param);
+        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, paramValue)
+                                                        .path(path).buildAndExpand(pathValues).toUri();
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
+        return headers;
+    }
+
+    /**
      * Encodes the specifies value with an URL encoder, using {@link Constants#UTF_8_ENCODING}.
      *
      * @param value The value to encode
