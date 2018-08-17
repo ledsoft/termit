@@ -203,16 +203,16 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         sut.persist(user);
 
         final User result = em.find(User.class, user.getUri());
-        assertTrue(result.getTypes().contains(Vocabulary.s_c_restricted_user));
+        assertTrue(result.getTypes().contains(Vocabulary.s_c_omezeny_uzivatel_termitu));
     }
 
     @Test
     void persistEnsuresAdminTypeIsNotPresentInUserAccount() {
         final User user = Generator.generateUser();
-        user.addType(Vocabulary.s_c_admin);
+        user.addType(Vocabulary.s_c_administrator_termitu);
         sut.persist(user);
 
         final User result = em.find(User.class, user.getUri());
-        assertFalse(result.getTypes().contains(Vocabulary.s_c_admin));
+        assertFalse(result.getTypes().contains(Vocabulary.s_c_administrator_termitu));
     }
 }

@@ -21,11 +21,11 @@ public class Term implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_narrower, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<Term> subTerms;
 
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_occurrence, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_vyskyt_termu, fetch = FetchType.EAGER)
     private Set<TermOccurrence> occurrences;
 
     @Types

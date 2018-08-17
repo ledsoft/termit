@@ -25,7 +25,7 @@ class UserTest {
 
     @Test
     void isLockedReturnsTrueForLockedInstance() {
-        sut.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_locked_user);
+        sut.addType(Vocabulary.s_c_uzamceny_uzivatel_termitu);
         assertTrue(sut.isLocked());
     }
 
@@ -53,7 +53,7 @@ class UserTest {
 
     @Test
     void enableRemovesDisabledTypeFromInstance() {
-        sut.addType(Vocabulary.s_c_disabled_user);
+        sut.addType(Vocabulary.s_c_zablokovany_uzivatel_termitu);
         assertFalse(sut.isEnabled());
         sut.enable();
         assertTrue(sut.isEnabled());
@@ -61,6 +61,6 @@ class UserTest {
 
     @Test
     void removeTypeHandlesNullTypesAttribute() {
-        sut.removeType(Vocabulary.s_c_admin);
+        sut.removeType(Vocabulary.s_c_administrator_termitu);
     }
 }

@@ -1,929 +1,452 @@
-@prefix : <http://onto.fel.cvut.cz/ontologies/opppr/termit#> .
+@prefix : <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://onto.fel.cvut.cz/ontologies/termit> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix a-popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+@base <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> .
 
-<http://onto.fel.cvut.cz/ontologies/termit> rdf:type owl:Ontology ;
-                                            
-                                            owl:imports <http://onto.fel.cvut.cz/ontologies/ufo/1.0.2> ,
-                                                        <http://www.w3.org/2004/02/skos/core> ,
-                                                        <http://www.w3.org/ns/oa#> ,
-                                                        <http://xmlns.com/foaf/0.1/> .
-
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> rdf:type owl:Ontology ;
+                                                                       owl:imports <http://onto.fel.cvut.cz/ontologies/dataset-descriptor/1.0.0> ,
+                                                                                   <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> ;
+                                                                       rdfs:label "Agendový slovník sloužící k popoisu dat, datových sad, záznamů a atributů"@cs .
 
 #################################################################
-#
 #    Annotation properties
-#
 #################################################################
 
-
-###  http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor
-
-<http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> rdf:type owl:AnnotationProperty .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/created
-
-<http://onto.fel.cvut.cz/ontologies/termit/created> rdf:type owl:AnnotationProperty ;
-                                                    
-                                                    rdfs:label "Date created"@en ;
-                                                    
-                                                    <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                    
-                                                    rdfs:comment "Date of creation of the resource."@en ;
-                                                    
-                                                    rdfs:domain <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                    
-                                                    rdfs:subPropertyOf <http://purl.org/dc/terms/created> ;
-                                                    
-                                                    rdfs:range xsd:dateTime .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/definuje-funkci
+a-popis-dat-pojem:definuje-funkci rdf:type owl:AnnotationProperty ;
+                                  rdfs:range a-popis-dat-pojem:funkce ;
+                                  rdfs:domain a-popis-dat-pojem:atribut-databazove-tabulky .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-author
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-author> rdf:type owl:AnnotationProperty ;
-                                                       
-                                                       rdfs:label "has author"@en ;
-                                                       
-                                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                       
-                                                       rdfs:comment "An agent primarily responsible for making the resource."@en ;
-                                                       
-                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                       
-                                                       rdfs:subPropertyOf <http://purl.org/dc/terms/creator> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu
+a-popis-dat-pojem:je-v-kontextu rdf:type owl:AnnotationProperty .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-body
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-body> rdf:type owl:AnnotationProperty ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> ;
-                                                     
-                                                     rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasBody> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu-datove-sady
+a-popis-dat-pojem:je-v-kontextu-datove-sady rdf:type owl:AnnotationProperty ;
+                                            rdfs:subPropertyOf a-popis-dat-pojem:je-v-kontextu ;
+                                            rdfs:range a-popis-dat-pojem:datova-sada .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-editor
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-editor> rdf:type owl:AnnotationProperty ;
-                                                       
-                                                       rdfs:label "has editor"@en ;
-                                                       
-                                                       rdfs:comment "An entity responsible for making contributions to the resource."@en ;
-                                                       
-                                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                       
-                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                       
-                                                       rdfs:subPropertyOf <http://purl.org/dc/terms/contributor> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-ciselnikovou-hodnotu
+a-popis-dat-pojem:ma-ciselnikovou-hodnotu rdf:type owl:AnnotationProperty ;
+                                          rdfs:range a-popis-dat-pojem:ciselnikova-hodnota .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-source
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-source> rdf:type owl:AnnotationProperty ;
-                                                       
-                                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                       
-                                                       rdfs:comment "Binds a target to a specific source document"@en ;
-                                                       
-                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/document> ;
-                                                       
-                                                       rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/target> ;
-                                                       
-                                                       rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasSource> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-typ
+a-popis-dat-pojem:ma-datovy-typ rdf:type owl:AnnotationProperty ;
+                                rdfs:domain a-popis-dat-pojem:atribut-databazove-tabulky .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-target
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-target> rdf:type owl:AnnotationProperty ;
-                                                       
-                                                       rdfs:comment "Relates a term occurrence to its target"@en ;
-                                                       
-                                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                       
-                                                       rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/target> ;
-                                                       
-                                                       rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> ;
-                                                       
-                                                       rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasTarget> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/modified
-
-<http://onto.fel.cvut.cz/ontologies/termit/modified> rdf:type owl:AnnotationProperty ;
-                                                     
-                                                     rdfs:label "Date modified"@en ;
-                                                     
-                                                     rdfs:comment "Date on which the resource was modified."@en ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:domain <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                     
-                                                     rdfs:subPropertyOf <http://purl.org/dc/terms/modified> ;
-                                                     
-                                                     rdfs:range xsd:dateTime .
-
-
-
-###  http://purl.org/dc/terms/contributor
-
-<http://purl.org/dc/terms/contributor> rdf:type owl:AnnotationProperty .
-
-
-
-###  http://purl.org/dc/terms/modified
-
-<http://purl.org/dc/terms/modified> rdf:type owl:AnnotationProperty .
-
-
-
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-hodnotu-z-ciselniku
+a-popis-dat-pojem:ma-hodnotu-z-ciselniku rdf:type owl:AnnotationProperty ;
+                                         rdfs:range a-popis-dat-pojem:ciselnik ;
+                                         rdfs:domain a-popis-dat-pojem:atribut-databazove-tabulky .
 
 
 #################################################################
-#
-#    Datatypes
-#
-#################################################################
-
-
-###  http://www.w3.org/2001/XMLSchema#date
-
-xsd:date rdf:type rdfs:Datatype .
-
-
-
-
-
-#################################################################
-#
 #    Object Properties
-#
 #################################################################
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/describes
-
-<http://onto.fel.cvut.cz/ontologies/termit/describes> rdf:type owl:ObjectProperty ;
-                                                      
-                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                      
-                                                      rdfs:comment "A vocabulary describes a logical document" ;
-                                                      
-                                                      rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary> ;
-                                                      
-                                                      rdfs:range <http://xmlns.com/foaf/0.1/Document> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem
+a-popis-dat-pojem:je-atributem rdf:type owl:ObjectProperty ;
+                               owl:inverseOf a-popis-dat-pojem:ma-atribut ;
+                               rdfs:domain a-popis-dat-pojem:atribut ;
+                               rdfs:range <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-broader
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-broader> rdf:type owl:ObjectProperty ;
-                                                        
-                                                        rdfs:label "has broader"@en ;
-                                                        
-                                                        <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                        
-                                                        rdfs:comment "Connects a term with narrower meaning to a term with broader meaning."@en ;
-                                                        
-                                                        owl:inverseOf <http://onto.fel.cvut.cz/ontologies/termit/has-narrower> ;
-                                                        
-                                                        rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                        
-                                                        rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                        
-                                                        rdfs:subPropertyOf <http://www.w3.org/2004/02/skos/core#broader> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-databazove-tabulky
+a-popis-dat-pojem:je-atributem-databazove-tabulky rdf:type owl:ObjectProperty ;
+                                                  rdfs:subPropertyOf a-popis-dat-pojem:je-atributem ;
+                                                  owl:inverseOf a-popis-dat-pojem:ma-atribut-databazove-tabulky ;
+                                                  rdfs:domain a-popis-dat-pojem:atribut-databazove-tabulky ;
+                                                  rdfs:range a-popis-dat-pojem:databazova-tabulka .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-file
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-file> rdf:type owl:ObjectProperty ;
-                                                     
-                                                     rdfs:label "has file"@en ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:comment "Represents the connection from a logical document to its constituent files."@en ;
-                                                     
-                                                     rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/file> ;
-                                                     
-                                                     rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/has-object-part> ;
-                                                     
-                                                     rdfs:domain <http://xmlns.com/foaf/0.1/Document> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-zaznamu
+a-popis-dat-pojem:je-atributem-zaznamu rdf:type owl:ObjectProperty ;
+                                       rdfs:subPropertyOf a-popis-dat-pojem:je-atributem ;
+                                       owl:inverseOf a-popis-dat-pojem:ma-atribut-zaznamu ;
+                                       rdfs:domain a-popis-dat-pojem:atribut-zaznamu ;
+                                       rdfs:range a-popis-dat-pojem:zaznam .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-glossary
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-glossary> rdf:type owl:FunctionalProperty ,
-                                                                  owl:ObjectProperty ;
-                                                         
-                                                         rdfs:label "A vocabulary consists of a glossary and a ontological model"@en ,
-                                                                    "has glossary"@en ;
-                                                         
-                                                         <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                         
-                                                         rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/glossary> ;
-                                                         
-                                                         rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/vocabulary> ;
-                                                         
-                                                         rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/has-object-part> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-datovym-atributem-zaznamu
+a-popis-dat-pojem:je-datovym-atributem-zaznamu rdf:type owl:ObjectProperty ;
+                                               rdfs:subPropertyOf a-popis-dat-pojem:je-atributem-zaznamu ;
+                                               owl:inverseOf a-popis-dat-pojem:ma-datovy-atribut-zaznamu ;
+                                               rdfs:domain a-popis-dat-pojem:datovy-atribut-zaznamu ;
+                                               rdfs:range a-popis-dat-pojem:zaznam .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-model
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-model> rdf:type owl:FunctionalProperty ,
-                                                               owl:ObjectProperty ;
-                                                      
-                                                      rdfs:label "has model"@en ;
-                                                      
-                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                      
-                                                      rdfs:comment "A vocabulary consists of a glossary and an ontological model."@en ;
-                                                      
-                                                      rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/model> ;
-                                                      
-                                                      rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/vocabulary> ;
-                                                      
-                                                      rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/has-object-part> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem
+a-popis-dat-pojem:je-pojmem rdf:type owl:ObjectProperty ;
+                            rdfs:subPropertyOf a-popis-dat-pojem:je-zaznamem ,
+                                               skos:inScheme ;
+                            rdfs:domain a-popis-dat-pojem:term ;
+                            rdfs:range <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-narrower
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-narrower> rdf:type owl:ObjectProperty ;
-                                                         
-                                                         rdfs:label "has narrower"@en ;
-                                                         
-                                                         <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                         
-                                                         rdfs:comment "Connects a term with broader meaning to a term with narrower meaning."@en ;
-                                                         
-                                                         rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                         
-                                                         rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                         
-                                                         rdfs:subPropertyOf <http://www.w3.org/2004/02/skos/core#narrower> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem-ze-slovniku
+a-popis-dat-pojem:je-pojmem-ze-slovniku rdf:type owl:ObjectProperty ;
+                                        rdfs:subPropertyOf a-popis-dat-pojem:je-pojmem ;
+                                        rdfs:domain a-popis-dat-pojem:term ;
+                                        rdfs:range a-popis-dat-pojem:slovnik .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-occurrence
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-occurrence> rdf:type owl:ObjectProperty ;
-                                                           
-                                                           rdfs:label "has occurrence"@en ;
-                                                           
-                                                           rdfs:comment "Denotes a relationship between a term and its occurrence in a document"@en ;
-                                                           
-                                                           <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                           
-                                                           rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                           
-                                                           rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-referencnim-atributem-zaznamu
+a-popis-dat-pojem:je-referencnim-atributem-zaznamu rdf:type owl:ObjectProperty ;
+                                                   rdfs:subPropertyOf a-popis-dat-pojem:je-atributem-zaznamu ;
+                                                   owl:inverseOf a-popis-dat-pojem:ma-referencni-atribut-zaznamu ;
+                                                   rdfs:domain a-popis-dat-pojem:referencni-atribut-zaznamu ;
+                                                   rdfs:range a-popis-dat-pojem:zaznam .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-selector
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-selector> rdf:type owl:ObjectProperty ;
-                                                         
-                                                         <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                         
-                                                         rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/selector> ;
-                                                         
-                                                         rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/target> ;
-                                                         
-                                                         rdfs:subPropertyOf <http://www.w3.org/ns/oa#hasSelector> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-statistickym-atributem-zaznamu
+a-popis-dat-pojem:je-statistickym-atributem-zaznamu rdf:type owl:ObjectProperty ;
+                                                    rdfs:subPropertyOf a-popis-dat-pojem:je-atributem-zaznamu ;
+                                                    owl:inverseOf a-popis-dat-pojem:ma-statisticky-atribut-zaznamu ;
+                                                    rdfs:domain a-popis-dat-pojem:statisticky-atribut-zaznamu ;
+                                                    rdfs:range a-popis-dat-pojem:zaznam .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-state
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-state> rdf:type owl:FunctionalProperty ,
-                                                               owl:ObjectProperty ;
-                                                      
-                                                      rdfs:label "has state"@en ;
-                                                      
-                                                      rdfs:comment "Connects a term to a state in which it exists"@en ;
-                                                      
-                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                      
-                                                      rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/state> ;
-                                                      
-                                                      rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/term> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-verzi
+a-popis-dat-pojem:je-verzi rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/is-snapshot-of> ;
+                           rdfs:domain <http://onto.fel.cvut.cz/ontologies/ufo/endurant> .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-term
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-term> rdf:type owl:ObjectProperty ;
-                                                     
-                                                     rdfs:label "has term"@en ;
-                                                     
-                                                     rdfs:comment "Relates a vocabulary to the terms it contains"@en ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/glossary> ;
-                                                     
-                                                     rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/term> ;
-                                                     
-                                                     rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/has-part> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem
+a-popis-dat-pojem:je-zaznamem rdf:type owl:ObjectProperty ;
+                              rdfs:domain a-popis-dat-pojem:zaznam ;
+                              rdfs:range <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-version-info
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-version-info> rdf:type owl:ObjectProperty ;
-                                                             
-                                                             rdfs:label "has version info"@en ;
-                                                             
-                                                             <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                             
-                                                             rdfs:range <http://onto.fel.cvut.cz/ontologies/termit/version-info> ;
-                                                             
-                                                             rdfs:domain <http://onto.fel.cvut.cz/ontologies/ufo/entity> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem-datove-sady
+a-popis-dat-pojem:je-zaznamem-datove-sady rdf:type owl:ObjectProperty ;
+                                          rdfs:subPropertyOf a-popis-dat-pojem:je-zaznamem ;
+                                          rdfs:domain a-popis-dat-pojem:zaznam ;
+                                          rdfs:range a-popis-dat-pojem:datova-sada .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary> rdf:type owl:ObjectProperty ;
-                                                           
-                                                           rdfs:label "has vocabulary"@en ;
-                                                           
-                                                           rdfs:comment "A vocabulary has a related document. Some types of vocabularies may require a document, others may not."@en ;
-                                                           
-                                                           <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                           
-                                                           owl:inverseOf <http://onto.fel.cvut.cz/ontologies/termit/describes> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalogizuje-datovou-sadu
+a-popis-dat-pojem:katalogizuje-datovou-sadu rdf:type owl:ObjectProperty ;
+                                            rdfs:domain a-popis-dat-pojem:katalog ;
+                                            rdfs:range a-popis-dat-pojem:datova-sada .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary-term
-
-<http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary-term> rdf:type owl:ObjectProperty ;
-                                                                
-                                                                rdfs:label "has vocabulary term"@en ;
-                                                                
-                                                                <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                                
-                                                                owl:propertyChainAxiom ( <http://onto.fel.cvut.cz/ontologies/termit/has-glossary>
-                                                                                         <http://onto.fel.cvut.cz/ontologies/termit/has-term>
-                                                                                       ) .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut
+a-popis-dat-pojem:ma-atribut rdf:type owl:ObjectProperty ;
+                             rdfs:domain <http://onto.fel.cvut.cz/ontologies/ufo/object> ;
+                             rdfs:range a-popis-dat-pojem:atribut .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/is-occurrence-of
-
-<http://onto.fel.cvut.cz/ontologies/termit/is-occurrence-of> rdf:type owl:ObjectProperty ;
-                                                             
-                                                             rdfs:label "is occurrence of"@en ;
-                                                             
-                                                             rdfs:comment "Allows to navigate from a term occurrence to the term itself"@en ;
-                                                             
-                                                             <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                             
-                                                             owl:inverseOf <http://onto.fel.cvut.cz/ontologies/termit/has-occurrence> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-databazove-tabulky
+a-popis-dat-pojem:ma-atribut-databazove-tabulky rdf:type owl:ObjectProperty ;
+                                                rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut ;
+                                                rdfs:domain a-popis-dat-pojem:databazova-tabulka ;
+                                                rdfs:range a-popis-dat-pojem:atribut-databazove-tabulky .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/is-part-of-vocabulary
-
-<http://onto.fel.cvut.cz/ontologies/termit/is-part-of-vocabulary> rdf:type owl:ObjectProperty ;
-                                                                  
-                                                                  rdfs:label "is part of vocabulary"@en ;
-                                                                  
-                                                                  <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                                  
-                                                                  rdfs:comment "A term is a part of a vocabulary"@en ;
-                                                                  
-                                                                  owl:inverseOf <http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary-term> ;
-                                                                  
-                                                                  rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/ufo/is-part-of> .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-zaznamu
+a-popis-dat-pojem:ma-atribut-zaznamu rdf:type owl:ObjectProperty ;
+                                     rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut ;
+                                     rdfs:domain a-popis-dat-pojem:zaznam ;
+                                     rdfs:range a-popis-dat-pojem:atribut-zaznamu .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-ciselnikovou-hodnotu
+a-popis-dat-pojem:ma-ciselnikovou-hodnotu rdf:type owl:ObjectProperty ;
+                                          rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut-databazove-tabulky ;
+                                          rdfs:domain a-popis-dat-pojem:ciselnik .
 
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-atribut-zaznamu
+a-popis-dat-pojem:ma-datovy-atribut-zaznamu rdf:type owl:ObjectProperty ;
+                                            rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut-zaznamu ;
+                                            rdfs:domain a-popis-dat-pojem:zaznam ;
+                                            rdfs:range a-popis-dat-pojem:datovy-atribut-zaznamu .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-referencni-atribut-zaznamu
+a-popis-dat-pojem:ma-referencni-atribut-zaznamu rdf:type owl:ObjectProperty ;
+                                                rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut-zaznamu ;
+                                                rdfs:domain a-popis-dat-pojem:zaznam ;
+                                                rdfs:range a-popis-dat-pojem:referencni-atribut-zaznamu .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-soubor
+a-popis-dat-pojem:ma-soubor rdf:type owl:ObjectProperty ;
+                            rdfs:domain a-popis-dat-pojem:dokument ;
+                            rdfs:range a-popis-dat-pojem:soubor .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-statisticky-atribut-zaznamu
+a-popis-dat-pojem:ma-statisticky-atribut-zaznamu rdf:type owl:ObjectProperty ;
+                                                 rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut-zaznamu ;
+                                                 rdfs:domain a-popis-dat-pojem:zaznam ;
+                                                 rdfs:range a-popis-dat-pojem:statisticky-atribut-zaznamu .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/obsahuje-pojem
+a-popis-dat-pojem:obsahuje-pojem rdf:type owl:ObjectProperty ;
+                                 rdfs:domain a-popis-dat-pojem:glosar ;
+                                 rdfs:range a-popis-dat-pojem:term .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-dokument
+a-popis-dat-pojem:popisuje-dokument rdf:type owl:ObjectProperty ;
+                                    rdfs:domain a-popis-dat-pojem:dokumentovy-slovnik ;
+                                    rdfs:range a-popis-dat-pojem:dokument .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-legislativni-dokument
+a-popis-dat-pojem:popisuje-legislativni-dokument rdf:type owl:ObjectProperty ;
+                                                 rdfs:subPropertyOf a-popis-dat-pojem:popisuje-dokument ;
+                                                 rdfs:domain a-popis-dat-pojem:legislativni-slovnik ;
+                                                 rdfs:range a-popis-dat-pojem:dokument-legislativni-povahy .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-atribut-zaznamu
+a-popis-dat-pojem:poskytuje-atribut-zaznamu rdf:type owl:ObjectProperty ;
+                                            rdfs:domain a-popis-dat-pojem:zdroj-atributu-zaznamu ;
+                                            rdfs:range a-popis-dat-pojem:atribut-zaznamu .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-datovou-sadu
+a-popis-dat-pojem:poskytuje-datovou-sadu rdf:type owl:ObjectProperty ;
+                                         rdfs:subPropertyOf <http://onto.fel.cvut.cz/ontologies/dataset-descriptor/offers-dataset> ;
+                                         rdfs:domain a-popis-dat-pojem:zdroj-datove-sady ;
+                                         rdfs:range a-popis-dat-pojem:datova-sada .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-zaznam
+a-popis-dat-pojem:poskytuje-zaznam rdf:type owl:ObjectProperty ;
+                                   rdfs:domain a-popis-dat-pojem:zdroj-zaznamu ;
+                                   rdfs:range a-popis-dat-pojem:zaznam .
+
+
+###  http://onto.fel.cvut.cz/ontologies/ufo/hasPart
+<http://onto.fel.cvut.cz/ontologies/ufo/hasPart> rdf:type owl:ObjectProperty .
+
+
+###  http://onto.fel.cvut.cz/ontologies/ufo/is-snapshot-of
+<http://onto.fel.cvut.cz/ontologies/ufo/is-snapshot-of> rdf:type owl:ObjectProperty .
 
 
 #################################################################
-#
-#    Data properties
-#
-#################################################################
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/file-location
-
-<http://onto.fel.cvut.cz/ontologies/termit/file-location> rdf:type owl:DatatypeProperty ;
-                                                          
-                                                          rdfs:label "file location"@en ;
-                                                          
-                                                          rdfs:comment "denotes the location of a file. Could be local or remote."@en ;
-                                                          
-                                                          <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/password
-
-<http://onto.fel.cvut.cz/ontologies/termit/password> rdf:type owl:DatatypeProperty ,
-                                                              owl:FunctionalProperty ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                     
-                                                     rdfs:range xsd:string .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-position-end
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-position-end> rdf:type owl:DatatypeProperty ,
-                                                                       owl:FunctionalProperty ;
-                                                              
-                                                              <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                              
-                                                              rdfs:comment "The end property is used to convey the 0-based index of the end position of a range of content."@en ;
-                                                              
-                                                              rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/text-position-selector> ;
-                                                              
-                                                              rdfs:subPropertyOf <http://www.w3.org/ns/oa#end> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-position-start
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-position-start> rdf:type owl:DatatypeProperty ,
-                                                                         owl:FunctionalProperty ;
-                                                                
-                                                                rdfs:comment "The start position in a 0-based index at which a range of content is selected from the data in the source resource."@en ;
-                                                                
-                                                                <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                                
-                                                                rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/text-position-selector> ;
-                                                                
-                                                                rdfs:subPropertyOf <http://www.w3.org/ns/oa#start> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-quote-exact
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-quote-exact> rdf:type owl:DatatypeProperty ,
-                                                                      owl:FunctionalProperty ;
-                                                             
-                                                             rdfs:comment "The object of the predicate is a copy of the text which is being selected, after normalization."@en ;
-                                                             
-                                                             <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                             
-                                                             rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector> ;
-                                                             
-                                                             rdfs:subPropertyOf <http://www.w3.org/ns/oa#exact> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-quote-prefix
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-quote-prefix> rdf:type owl:DatatypeProperty ,
-                                                                       owl:FunctionalProperty ;
-                                                              
-                                                              rdfs:comment "The object of the property is a snippet of content that occurs immediately before the content which is being selected by the Selector."@en ;
-                                                              
-                                                              <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                              
-                                                              rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector> ;
-                                                              
-                                                              rdfs:subPropertyOf <http://www.w3.org/ns/oa#prefix> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-quote-suffix
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-quote-suffix> rdf:type owl:DatatypeProperty ,
-                                                                       owl:FunctionalProperty ;
-                                                              
-                                                              <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                              
-                                                              rdfs:comment "The snippet of text that occurs immediately after the text which is being selected."@en ;
-                                                              
-                                                              rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector> ;
-                                                              
-                                                              rdfs:subPropertyOf <http://www.w3.org/ns/oa#suffix> .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/username
-
-<http://onto.fel.cvut.cz/ontologies/termit/username> rdf:type owl:DatatypeProperty ,
-                                                              owl:FunctionalProperty ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:domain <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                     
-                                                     rdfs:range xsd:string .
-
-
-
-###  http://www.w3.org/1999/02/22-rdf-syntax-ns#value
-
-rdf:value rdf:type owl:DatatypeProperty .
-
-
-
-
-
-#################################################################
-#
 #    Classes
-#
 #################################################################
 
+###  http://onto.fel.cvut.cz/ontologies/dataset-descriptor/dataset-source
+<http://onto.fel.cvut.cz/ontologies/dataset-descriptor/dataset-source> rdfs:subClassOf a-popis-dat-pojem:zdroj-dat .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/admin
 
-<http://onto.fel.cvut.cz/ontologies/termit/admin> rdf:type owl:Class ;
-                                                  
-                                                  rdfs:label "Admin"@en ;
-                                                  
-                                                  rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                  
-                                                  rdfs:comment "User who is in the administrator role"@en ;
-                                                  
-                                                  <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/agendovy-slovnik
+a-popis-dat-pojem:agendovy-slovnik rdf:type owl:Class ;
+                                   rdfs:subClassOf a-popis-dat-pojem:slovnik .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut
+a-popis-dat-pojem:atribut rdf:type owl:Class ;
+                          rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/css-selector
 
-<http://onto.fel.cvut.cz/ontologies/termit/css-selector> rdf:type owl:Class ;
-                                                         
-                                                         rdfs:label "CSS Selector"@en ;
-                                                         
-                                                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
-                                                                         <http://www.w3.org/ns/oa#CssSelector> ;
-                                                         
-                                                         rdfs:comment "A CssSelector describes a Segment of interest in a representation that conforms to the Document Object Model through the use of the CSS selector specification."@en ;
-                                                         
-                                                         <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-databazove-tabulky
+a-popis-dat-pojem:atribut-databazove-tabulky rdf:type owl:Class ;
+                                             rdfs:subClassOf a-popis-dat-pojem:atribut .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-zaznamu
+a-popis-dat-pojem:atribut-zaznamu rdf:type owl:Class ;
+                                  rdfs:subClassOf a-popis-dat-pojem:atribut ,
+                                                  a-popis-dat-pojem:term .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/dataset
 
-<http://onto.fel.cvut.cz/ontologies/termit/dataset> rdf:type owl:Class ;
-                                                    
-                                                    rdfs:label "Dataset"@en ;
-                                                    
-                                                    rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                    
-                                                    rdfs:comment "A generic container of data"@en ;
-                                                    
-                                                    <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnik
+a-popis-dat-pojem:ciselnik rdf:type owl:Class ;
+                           rdfs:subClassOf a-popis-dat-pojem:databazova-tabulka .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnikova-hodnota
+a-popis-dat-pojem:ciselnikova-hodnota rdf:type owl:Class ;
+                                      rdfs:subClassOf a-popis-dat-pojem:atribut-databazove-tabulky .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/disabled-user
 
-<http://onto.fel.cvut.cz/ontologies/termit/disabled-user> rdf:type owl:Class ;
-                                                          
-                                                          rdfs:label "Disabled User"@en ;
-                                                          
-                                                          rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                          
-                                                          <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                          
-                                                          rdfs:comment "A user whose account has been disabled, e.g., by an application admin"@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databaze
+a-popis-dat-pojem:databaze rdf:type owl:Class ;
+                           rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka
+a-popis-dat-pojem:databazova-tabulka rdf:type owl:Class ;
+                                     rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/document
 
-<http://onto.fel.cvut.cz/ontologies/termit/document> rdf:type owl:Class ;
-                                                     
-                                                     rdfs:label "Document"@en ;
-                                                     
-                                                     rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ,
-                                                                     <http://www.w3.org/ns/oa#ResourceSelection> ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:comment "Represents a logical, usually textual, document. A document may consist of multiple physical files."@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka-jako-zdroj-dat
+a-popis-dat-pojem:databazova-tabulka-jako-zdroj-dat rdf:type owl:Class ;
+                                                    rdfs:subClassOf a-popis-dat-pojem:databazova-tabulka ,
+                                                                    a-popis-dat-pojem:dotaz-sql-databaze .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datova-sada
+a-popis-dat-pojem:datova-sada rdf:type owl:Class ;
+                              rdfs:subClassOf a-popis-dat-pojem:kontext ,
+                                              <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary
 
-<http://onto.fel.cvut.cz/ontologies/termit/document-vocabulary> rdf:type owl:Class ;
-                                                                
-                                                                rdfs:label "Document Vocabulary"@en ;
-                                                                
-                                                                rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/vocabulary> ,
-                                                                                [ rdf:type owl:Restriction ;
-                                                                                  owl:onProperty <http://onto.fel.cvut.cz/ontologies/termit/describes> ;
-                                                                                  owl:someValuesFrom <http://xmlns.com/foaf/0.1/Document>
-                                                                                ] ;
-                                                                
-                                                                <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                                
-                                                                rdfs:comment "A vocabulary which is related to a document."@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-atribut-zaznamu
+a-popis-dat-pojem:datovy-atribut-zaznamu rdf:type owl:Class ;
+                                         rdfs:subClassOf a-popis-dat-pojem:atribut-zaznamu .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-slovnik
+a-popis-dat-pojem:datovy-slovnik rdf:type owl:Class ;
+                                 rdfs:subClassOf a-popis-dat-pojem:slovnik .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/file
 
-<http://onto.fel.cvut.cz/ontologies/termit/file> rdf:type owl:Class ;
-                                                 
-                                                 rdfs:label "File"@en ;
-                                                 
-                                                 rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                 
-                                                 <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                 
-                                                 rdfs:comment "Representation of a physical file (remote or local)."@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument
+a-popis-dat-pojem:dokument rdf:type owl:Class ;
+                           rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument-legislativni-povahy
+a-popis-dat-pojem:dokument-legislativni-povahy rdf:type owl:Class ;
+                                               rdfs:subClassOf a-popis-dat-pojem:dokument .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/fragment-selector
 
-<http://onto.fel.cvut.cz/ontologies/termit/fragment-selector> rdf:type owl:Class ;
-                                                              
-                                                              rdfs:label "Fragment Selector"@en ;
-                                                              
-                                                              rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
-                                                                              <http://www.w3.org/ns/oa#FragmentSelector> ;
-                                                              
-                                                              rdfs:comment "The FragmentSelector class is used to record the segment of a representation using the IRI fragment specification defined by the representation's media type."@en ;
-                                                              
-                                                              <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokumentovy-slovnik
+a-popis-dat-pojem:dokumentovy-slovnik rdf:type owl:Class ;
+                                      rdfs:subClassOf a-popis-dat-pojem:slovnik .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dotaz-sql-databaze
+a-popis-dat-pojem:dotaz-sql-databaze rdf:type owl:Class ;
+                                     rdfs:subClassOf a-popis-dat-pojem:zdroj-dat .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/glossary
 
-<http://onto.fel.cvut.cz/ontologies/termit/glossary> rdf:type owl:Class ;
-                                                     
-                                                     rdfs:label "Glossary"@en ;
-                                                     
-                                                     rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:comment "Glossary contains terms used in a vocabulary but without any deeper relationship between them. It is usually made using SKOS."@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/funkce
+a-popis-dat-pojem:funkce rdf:type owl:Class ;
+                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/trope> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/geometricky-atribut
+a-popis-dat-pojem:geometricky-atribut rdf:type owl:Class ;
+                                      rdfs:subClassOf a-popis-dat-pojem:atribut .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/locked-user
 
-<http://onto.fel.cvut.cz/ontologies/termit/locked-user> rdf:type owl:Class ;
-                                                        
-                                                        rdfs:label "Locked User"@en ;
-                                                        
-                                                        rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                        
-                                                        rdfs:comment "A user whose account has been locked for security reasons, e.g., when an attacker tries to gues the user's password in an aplication"@en ;
-                                                        
-                                                        <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/glosar
+a-popis-dat-pojem:glosar rdf:type owl:Class ;
+                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalog
+a-popis-dat-pojem:katalog rdf:type owl:Class ;
+                          rdfs:subClassOf a-popis-dat-pojem:datova-sada .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/model
 
-<http://onto.fel.cvut.cz/ontologies/termit/model> rdf:type owl:Class ;
-                                                  
-                                                  rdfs:label "Model"@en ;
-                                                  
-                                                  rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                  
-                                                  rdfs:comment "Represents ontological model of a vocabulary."@en ;
-                                                  
-                                                  <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/kontext
+a-popis-dat-pojem:kontext rdf:type owl:Class ;
+                          rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/endurant> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/legislativni-slovnik
+a-popis-dat-pojem:legislativni-slovnik rdf:type owl:Class ;
+                                       rdfs:subClassOf a-popis-dat-pojem:dokumentovy-slovnik .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/restricted-user
 
-<http://onto.fel.cvut.cz/ontologies/termit/restricted-user> rdf:type owl:Class ;
-                                                            
-                                                            rdfs:label "Restricted User"@en ;
-                                                            
-                                                            rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/user> ;
-                                                            
-                                                            rdfs:comment "User with restricted access rights. This can be for example newly registered user, whose access rights have to be approved by an application admin."@en ;
-                                                            
-                                                            <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/model
+a-popis-dat-pojem:model rdf:type owl:Class ;
+                        rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/referencni-atribut-zaznamu
+a-popis-dat-pojem:referencni-atribut-zaznamu rdf:type owl:Class ;
+                                             rdfs:subClassOf a-popis-dat-pojem:atribut-zaznamu .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/selector
 
-<http://onto.fel.cvut.cz/ontologies/termit/selector> rdf:type owl:Class ;
-                                                     
-                                                     rdfs:label "Selector"@en ;
-                                                     
-                                                     rdfs:subClassOf <http://www.w3.org/ns/oa#Selector> ;
-                                                     
-                                                     <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                     
-                                                     rdfs:comment "Denotes a term occurrence location in a document"@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovnik
+a-popis-dat-pojem:slovnik rdf:type owl:Class ;
+                          rdfs:subClassOf a-popis-dat-pojem:datova-sada ,
+                                          [ rdf:type owl:Restriction ;
+                                            owl:onProperty <http://onto.fel.cvut.cz/ontologies/ufo/hasPart> ;
+                                            owl:someValuesFrom a-popis-dat-pojem:glosar
+                                          ] ,
+                                          [ rdf:type owl:Restriction ;
+                                            owl:onProperty <http://onto.fel.cvut.cz/ontologies/ufo/hasPart> ;
+                                            owl:someValuesFrom a-popis-dat-pojem:model
+                                          ] .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/soubor
+a-popis-dat-pojem:soubor rdf:type owl:Class ;
+                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/state
 
-<http://onto.fel.cvut.cz/ontologies/termit/state> rdf:type owl:Class ;
-                                                  
-                                                  rdfs:label "State"@en ;
-                                                  
-                                                  <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                  
-                                                  rdfs:comment "Denotes a state of a term"@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/statisticky-atribut-zaznamu
+a-popis-dat-pojem:statisticky-atribut-zaznamu rdf:type owl:Class ;
+                                              rdfs:subClassOf a-popis-dat-pojem:atribut-zaznamu .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term
+a-popis-dat-pojem:term rdf:type owl:Class ;
+                       rdfs:subClassOf a-popis-dat-pojem:zaznam .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/target
 
-<http://onto.fel.cvut.cz/ontologies/termit/target> rdf:type owl:Class ;
-                                                   
-                                                   rdfs:label "Target"@en ;
-                                                   
-                                                   rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ;
-                                                   
-                                                   rdfs:comment "Represents a target of an annotation, binding it to a specific source document"@en ;
-                                                   
-                                                   <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zaznam
+a-popis-dat-pojem:zaznam rdf:type owl:Class ;
+                         rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> ,
+                                         skos:Concept .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-atributu-zaznamu
+a-popis-dat-pojem:zdroj-atributu-zaznamu rdf:type owl:Class ;
+                                         rdfs:subClassOf a-popis-dat-pojem:zdroj-dat .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/term
 
-<http://onto.fel.cvut.cz/ontologies/termit/term> rdf:type owl:Class ;
-                                                 
-                                                 rdfs:label "Term"@en ;
-                                                 
-                                                 rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> ,
-                                                                 <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                 
-                                                 <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                 
-                                                 rdfs:comment "A vocabulary term which may occurr in documents"@en .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-dat
+a-popis-dat-pojem:zdroj-dat rdf:type owl:Class ;
+                            rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/object> .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-datove-sady
+a-popis-dat-pojem:zdroj-datove-sady rdf:type owl:Class ;
+                                    rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/dataset-descriptor/dataset-source> .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/term-occurrence
 
-<http://onto.fel.cvut.cz/ontologies/termit/term-occurrence> rdf:type owl:Class ;
-                                                            
-                                                            rdfs:label "Term Occurrence"@en ;
-                                                            
-                                                            rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> ;
-                                                            
-                                                            rdfs:comment "Occurrence of a term in a document"@en ;
-                                                            
-                                                            <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-zaznamu
+a-popis-dat-pojem:zdroj-zaznamu rdf:type owl:Class ;
+                                rdfs:subClassOf a-popis-dat-pojem:zdroj-dat .
 
 
+###  http://onto.fel.cvut.cz/ontologies/ufo/endurant
+<http://onto.fel.cvut.cz/ontologies/ufo/endurant> rdf:type owl:Class .
 
-###  http://onto.fel.cvut.cz/ontologies/termit/text-position-selector
 
-<http://onto.fel.cvut.cz/ontologies/termit/text-position-selector> rdf:type owl:Class ;
-                                                                   
-                                                                   rdfs:label "Text Position Selector"@en ;
-                                                                   
-                                                                   rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
-                                                                                   <http://www.w3.org/ns/oa#TextPositionSelector> ;
-                                                                   
-                                                                   rdfs:comment "The TextPositionSelector describes a range of text by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first character, position 1 would be immediately before the second character, and so on."@en ;
-                                                                   
-                                                                   <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/ufo/object
+<http://onto.fel.cvut.cz/ontologies/ufo/object> rdf:type owl:Class .
 
 
-
-###  http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector
-
-<http://onto.fel.cvut.cz/ontologies/termit/text-quote-selector> rdf:type owl:Class ;
-                                                                
-                                                                rdfs:label "Text Quote Selector"@en ;
-                                                                
-                                                                rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
-                                                                                <http://www.w3.org/ns/oa#TextQuoteSelector> ;
-                                                                
-                                                                rdfs:comment "The TextQuoteSelector describes a range of text by copying it, and including some of the text immediately before (a prefix) and after (a suffix) it to distinguish between multiple copies of the same sequence of characters."@en ;
-                                                                
-                                                                <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/user
-
-<http://onto.fel.cvut.cz/ontologies/termit/user> rdf:type owl:Class ;
-                                                 
-                                                 rdfs:label "User"@en ;
-                                                 
-                                                 rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/person> ;
-                                                 
-                                                 <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                 
-                                                 rdfs:comment "Represents a user of the vocabulary manager"@en .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/user-role
-
-<http://onto.fel.cvut.cz/ontologies/termit/user-role> rdf:type owl:Class ;
-                                                      
-                                                      rdfs:label "User Role"@en ;
-                                                      
-                                                      <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                      
-                                                      rdfs:comment "Role of a user w.r.t. a vocabulary"@en .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/version-info
-
-<http://onto.fel.cvut.cz/ontologies/termit/version-info> rdf:type owl:Class ;
-                                                         
-                                                         rdfs:label "Version Info"@en ;
-                                                         
-                                                         <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                         
-                                                         rdfs:comment "Contains information about version of an asset."@en .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/vocabulary
-
-<http://onto.fel.cvut.cz/ontologies/termit/vocabulary> rdf:type owl:Class ;
-                                                       
-                                                       rdfs:label "Vocabulary"@en ;
-                                                       
-                                                       rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/dataset> ;
-                                                       
-                                                       <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" ;
-                                                       
-                                                       rdfs:comment "Contains terms used in a dataset"@en .
-
-
-
-###  http://onto.fel.cvut.cz/ontologies/termit/xpath-selector
-
-<http://onto.fel.cvut.cz/ontologies/termit/xpath-selector> rdf:type owl:Class ;
-                                                           
-                                                           rdfs:label "XPath Selector"@en ;
-                                                           
-                                                           rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/termit/selector> ,
-                                                                           <http://www.w3.org/ns/oa#XPathSelector> ;
-                                                           
-                                                           rdfs:comment "An XPathSelector is used to select elements and content within a resource that supports the Document Object Model via a specified XPath value."@en ;
-                                                           
-                                                           <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
-
-
-
-###  http://www.w3.org/ns/oa#Annotation
-
-<http://www.w3.org/ns/oa#Annotation> rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/ufo/entity> .
-
-
-
+###  http://onto.fel.cvut.cz/ontologies/ufo/trope
+<http://onto.fel.cvut.cz/ontologies/ufo/trope> rdf:type owl:Class .
 
 
 #################################################################
-#
-#    Annotations
-#
+#    Individuals
 #################################################################
 
-
-<http://xmlns.com/foaf/0.1/familyName> <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
-
-
-
-<http://xmlns.com/foaf/0.1/givenName> <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> rdf:type a-popis-dat-pojem:glosar .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> rdf:type owl:NamedIndividual ,
+                                                                               a-popis-dat-pojem:model .
 
-<http://purl.org/dc/terms/description> <http://krizik.felk.cvut.cz/ontologies/2009/ic.owl#isIntegrityConstraintFor> "termit" .
 
-
-
-
-###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
-
+###  Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi

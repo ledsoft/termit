@@ -6,7 +6,7 @@ import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-@OWLClass(iri = Vocabulary.s_c_fragment_selector)
+@OWLClass(iri = Vocabulary.s_c_selektor_fragmentem)
 public class FragmentSelector extends TermSelector {
 
     @ParticipationConstraints(nonEmpty = true)

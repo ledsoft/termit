@@ -5,18 +5,18 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_term_occurrence)
+@OWLClass(iri = Vocabulary.s_c_vyskyt_termu)
 public class TermOccurrence extends AbstractEntity {
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_is_occurrence_of, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_vyskytem_termu, fetch = FetchType.EAGER)
     private Term term;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_target, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Target> targets;
 
     public String getDescription() {

@@ -6,7 +6,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import java.io.Serializable;
 import java.net.URI;
 
-@OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_vocabulary)
+@OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 public class Vocabulary implements Serializable {
 
     @Id
@@ -16,14 +16,14 @@ public class Vocabulary implements Serializable {
     private String name;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_glossary, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_part, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Glossary glossary;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_model, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_part, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Model model;
 
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_has_version_info, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_informaci_o_verzi, fetch = FetchType.EAGER)
     private VersionInfo versionInfo;
 
     public URI getUri() {

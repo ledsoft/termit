@@ -32,7 +32,7 @@ class UserDetailsTest {
     @Test
     void constructorResolvesAuthoritiesFromUserTypes() {
         final User user = Generator.generateUser();
-        user.addType(Vocabulary.s_c_admin);
+        user.addType(Vocabulary.s_c_administrator_termitu);
         final UserDetails result = new UserDetails(user);
         assertEquals(2, result.getAuthorities().size());
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));
@@ -43,7 +43,7 @@ class UserDetailsTest {
     void authorityBasedConstructorResolvesAuthoritiesFromUserTypes() {
         final Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_MANAGER"));
         final User user = Generator.generateUser();
-        user.addType(Vocabulary.s_c_admin);
+        user.addType(Vocabulary.s_c_administrator_termitu);
         final UserDetails result = new UserDetails(user, authorities);
         assertEquals(3, result.getAuthorities().size());
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));

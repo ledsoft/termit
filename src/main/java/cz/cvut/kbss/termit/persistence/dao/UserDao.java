@@ -37,7 +37,7 @@ public class UserDao extends BaseDao<User> {
             return Optional
                     .of(em.createNativeQuery("SELECT ?x WHERE { ?x a ?type ; ?hasUsername ?username . }", User.class)
                           .setParameter("type", typeUri)
-                          .setParameter("hasUsername", URI.create(Vocabulary.s_p_username))
+                          .setParameter("hasUsername", URI.create(Vocabulary.s_p_ma_uzivatelske_jmeno))
                           .setParameter("username", username, config.get(ConfigParam.LANGUAGE)).getSingleResult());
         } catch (NoResultException e) {
             return Optional.empty();
@@ -56,7 +56,7 @@ public class UserDao extends BaseDao<User> {
         Objects.requireNonNull(username);
         return em.createNativeQuery("ASK WHERE { ?x a ?type ; ?hasUsername ?username . }", Boolean.class)
                  .setParameter("type", typeUri)
-                 .setParameter("hasUsername", URI.create(Vocabulary.s_p_username))
+                 .setParameter("hasUsername", URI.create(Vocabulary.s_p_ma_uzivatelske_jmeno))
                  .setParameter("username", username, config.get(ConfigParam.LANGUAGE)).getSingleResult();
     }
 }

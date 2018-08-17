@@ -5,15 +5,15 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-@OWLClass(iri = Vocabulary.s_c_text_position_selector)
+@OWLClass(iri = Vocabulary.s_c_selektor_pozici_v_textu)
 public class TextPositionSelector extends TermSelector {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_text_position_start)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_startovni_pozici)
     private Integer start;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_text_position_end)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_koncovou_pozici)
     private Integer end;
 
     public Integer getStart() {

@@ -6,15 +6,15 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_target)
+@OWLClass(iri = Vocabulary.s_c_cil)
 public class Target extends AbstractEntity {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_selector, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_selektor, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<TermSelector> selectors;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_source, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdrojovy_dokument, fetch = FetchType.EAGER)
     private Document source;
 
     public Set<TermSelector> getSelectors() {

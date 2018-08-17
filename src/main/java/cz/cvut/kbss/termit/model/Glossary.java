@@ -7,10 +7,10 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_glossary)
+@OWLClass(iri = Vocabulary.s_c_glosar)
 public class Glossary extends AbstractEntity {
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_term, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_obsahuje_pojem, fetch = FetchType.EAGER)
     private Set<Term> terms;
 
     public Set<Term> getTerms() {

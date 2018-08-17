@@ -6,7 +6,7 @@ import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-@OWLClass(iri = Vocabulary.s_c_css_selector)
+@OWLClass(iri = Vocabulary.s_c_selektor_css)
 public class CssSelector extends TermSelector {
 
     @ParticipationConstraints(nonEmpty = true)
