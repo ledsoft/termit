@@ -1,1 +1,3 @@
-http://onto.fel.cvut.cz/ontologies/termit > ../../../model.ttl
+http://onto.fel.cvut.cz/ontologies/application/termit > ../../../termit.ttl
+http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar > ../../../glosar.ttl
+http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model > ../../../model.ttl

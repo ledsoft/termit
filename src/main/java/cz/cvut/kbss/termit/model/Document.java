@@ -9,7 +9,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_document)
+@OWLClass(iri = Vocabulary.s_c_dokument)
 public class Document implements Serializable {
 
     @Id
@@ -23,18 +23,18 @@ public class Document implements Serializable {
     private String description;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_author, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_autora, fetch = FetchType.EAGER)
     private User author;
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_created)
     private Date dateCreated;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_file, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<File> files;
 
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_vocabulary, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik, fetch = FetchType.EAGER)
     private DocumentVocabulary vocabulary;
 
     public URI getUri() {

@@ -15,15 +15,15 @@ public enum UserRole {
     /**
      * Regular application user.
      * <p>
-     * Does not map to any specific subclass of {@link Vocabulary#s_c_user}.
+     * Does not map to any specific subclass of {@link Vocabulary#s_c_uzivatel_termitu}.
      */
     USER("", ROLE_USER),
     /**
      * Application administrator.
      * <p>
-     * Maps to {@link Vocabulary#s_c_admin}.
+     * Maps to {@link Vocabulary#s_c_administrator_termitu}.
      */
-    ADMIN(Vocabulary.s_c_admin, ROLE_ADMIN);
+    ADMIN(Vocabulary.s_c_administrator_termitu, ROLE_ADMIN);
 
     private final String type;
     private final String name;

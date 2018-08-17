@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_user)
+@OWLClass(iri = Vocabulary.s_c_uzivatel_termitu)
 public class User implements Serializable {
 
     @Id
@@ -18,22 +18,22 @@ public class User implements Serializable {
 
     @NotEmpty
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_givenName)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_krestni_jmeno)
     private String firstName;
 
     @NotEmpty
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_familyName)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_prijmeni)
     private String lastName;
 
     @NotEmpty
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_username)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_uzivatelske_jmeno)
     private String username;
 
     @NotEmpty
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_password)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_heslo)
     private String password;
 
     @Types
@@ -119,14 +119,14 @@ public class User implements Serializable {
      * @return Locked status
      */
     public boolean isLocked() {
-        return types != null && types.contains(Vocabulary.s_c_locked_user);
+        return types != null && types.contains(Vocabulary.s_c_uzamceny_uzivatel_termitu);
     }
 
     /**
      * Locks the account represented by this instance.
      */
     public void lock() {
-        addType(Vocabulary.s_c_locked_user);
+        addType(Vocabulary.s_c_uzamceny_uzivatel_termitu);
     }
 
     /**
@@ -136,7 +136,7 @@ public class User implements Serializable {
         if (types == null) {
             return;
         }
-        types.remove(Vocabulary.s_c_locked_user);
+        types.remove(Vocabulary.s_c_uzamceny_uzivatel_termitu);
     }
 
     /**
@@ -148,14 +148,14 @@ public class User implements Serializable {
         if (types == null) {
             return;
         }
-        types.remove(Vocabulary.s_c_disabled_user);
+        types.remove(Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
 
     /**
      * Checks whether the account represented by this instance is enabled.
      */
     public boolean isEnabled() {
-        return types == null || !types.contains(Vocabulary.s_c_disabled_user);
+        return types == null || !types.contains(Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
 
     /**
@@ -164,7 +164,7 @@ public class User implements Serializable {
      * Disabled account cannot be logged into and cannot be used to view/modify data.
      */
     public void disable() {
-        addType(Vocabulary.s_c_disabled_user);
+        addType(Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
 
     @Override

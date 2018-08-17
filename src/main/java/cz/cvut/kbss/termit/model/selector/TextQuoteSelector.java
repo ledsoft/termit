@@ -5,17 +5,17 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-@OWLClass(iri = Vocabulary.s_c_text_quote_selector)
+@OWLClass(iri = Vocabulary.s_c_selektor_text_quote)
 public class TextQuoteSelector extends TermSelector {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_text_quote_exact)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_presny_text_quote)
     private String exactMatch;
 
-    @OWLDataProperty(iri = Vocabulary.s_p_text_quote_prefix)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_prefix_text_quote)
     private String prefix;
 
-    @OWLDataProperty(iri = Vocabulary.s_p_text_quote_suffix)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_suffix_text_quote)
     private String suffix;
 
     public String getExactMatch() {
