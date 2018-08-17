@@ -79,7 +79,7 @@ public class SystemInitializer {
         admin.setFirstName("System");
         admin.setLastName("Administrator");
         admin.setUsername("admin@inbas.cz");
-        admin.addType(Vocabulary.s_c_admin);
+        admin.addType(Vocabulary.s_c_administrator_termitu);
         return admin;
     }
 
