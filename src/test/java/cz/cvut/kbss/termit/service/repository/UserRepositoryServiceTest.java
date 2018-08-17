@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,7 +66,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         final User user = Generator.generateUserWithId();
         user.setPassword(null);
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
-        assertThat(ex.getMessage(), containsString("password must not be empty"));
+        assertThat(ex.getMessage(), containsString("password must not be blank"));
     }
 
     @Test
@@ -73,7 +74,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         final User user = Generator.generateUserWithId();
         user.setPassword("");
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
-        assertThat(ex.getMessage(), containsString("password must not be empty"));
+        assertThat(ex.getMessage(), containsString("password must not be blank"));
     }
 
     @Test
@@ -137,7 +138,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         user.setUsername(null);
         user.setPassword(null); // Simulate instance being loaded from repo
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.update(user));
-        assertThat(ex.getMessage(), containsString("username must not be empty"));
+        assertThat(ex.getMessage(), containsString("username must not be blank"));
     }
 
     @Test
@@ -214,5 +215,16 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
         final User result = em.find(User.class, user.getUri());
         assertFalse(result.getTypes().contains(Vocabulary.s_c_administrator_termitu));
+    }
+
+    @Test
+    void persistDoesNotGenerateUriIfItIsAlreadyPresent() {
+        final User user = Generator.generateUserWithId();
+        final URI originalUri = user.getUri();
+        sut.persist(user);
+
+        final User result = em.find(User.class, originalUri);
+        assertNotNull(result);
+        assertEquals(originalUri, result.getUri());
     }
 }

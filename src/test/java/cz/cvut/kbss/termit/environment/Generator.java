@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.environment;
 
+import cz.cvut.kbss.termit.model.Glossary;
+import cz.cvut.kbss.termit.model.Model;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -102,5 +104,18 @@ public class Generator {
         final User user = generateUser();
         user.setUri(Generator.generateUri());
         return user;
+    }
+
+    /**
+     * Generates a {@link cz.cvut.kbss.termit.model.Vocabulary} instance with a name, an empty glossary and a model.
+     *
+     * @return New {@code Vocabulary} instance
+     */
+    public static cz.cvut.kbss.termit.model.Vocabulary generateVocabulary() {
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = new cz.cvut.kbss.termit.model.Vocabulary();
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        vocabulary.setName("Vocabulary" + randomInt());
+        return vocabulary;
     }
 }

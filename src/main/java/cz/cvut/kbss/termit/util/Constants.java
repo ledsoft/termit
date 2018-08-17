@@ -40,6 +40,8 @@ public class Constants {
 
     /**
      * Version of this application.
+     * <p>
+     * Injected by Maven during production build.
      */
     public static final String VERSION = "$VERSION$";
 
@@ -47,6 +49,11 @@ public class Constants {
      * Default persistence unit language.
      */
     public static final String DEFAULT_LANGUAGE = "en";
+
+    /**
+     * Name of the file in which admin credentials are stored.
+     */
+    public static final String ADMIN_CREDENTIALS_FILE = ".termit-admin";
 
     /**
      * Default page specification, corresponding to a find all query with no page specification.

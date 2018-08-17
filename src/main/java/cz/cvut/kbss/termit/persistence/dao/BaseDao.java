@@ -3,8 +3,6 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Collection;
@@ -16,8 +14,6 @@ import java.util.Optional;
  * Base implementation of the generic DAO API.
  */
 public abstract class BaseDao<T> implements GenericDao<T> {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(BaseDao.class);
 
     protected final Class<T> type;
     protected final URI typeUri;

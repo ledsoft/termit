@@ -33,7 +33,32 @@ public enum ConfigParam {
     /**
      * Secret key used when hashing a JWT.
      */
-    JWT_SECRET_KEY("jwt.secretKey");
+    JWT_SECRET_KEY("jwt.secretKey"),
+
+    /**
+     * Namespace for vocabulary identifiers.
+     */
+    NAMESPACE_VOCABULARY("namespace.vocabulary"),
+
+    /**
+     * Namespace for user identifiers.
+     */
+    NAMESPACE_USER("namespace.user"),
+
+    /**
+     * Namespace for document identifiers.
+     */
+    NAMESPACE_DOCUMENT("namespace.document"),
+
+    /**
+     * Namespace for term identifiers.
+     */
+    NAMESPACE_TERM("namespace.term"),
+
+    /**
+     * Specifies folder in which admin credentials are stored when his account is generated.
+     */
+    ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation");
 
     private final String parameter;
 

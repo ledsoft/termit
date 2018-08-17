@@ -84,6 +84,7 @@ public class Configuration {
     private static Map<ConfigParam, String> initDefaults() {
         final Map<ConfigParam, String> map = new EnumMap<>(ConfigParam.class);
         map.put(ConfigParam.LANGUAGE, Constants.DEFAULT_LANGUAGE);
+        map.put(ConfigParam.ADMIN_CREDENTIALS_LOCATION, System.getProperty("user.home"));
         return map;
     }
 }

@@ -3,13 +3,12 @@ package cz.cvut.kbss.termit.service.repository;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
-import cz.cvut.kbss.termit.model.util.IdentifierUtils;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.UserDao;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.util.ValidationResult;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,19 +29,20 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
 
     private final UserDao userDao;
 
+    private final IdentifierResolver idResolver;
+
     private final SecurityUtils securityUtils;
 
     private final PasswordEncoder passwordEncoder;
 
-    private final Validator validator;
-
     @Autowired
-    public UserRepositoryService(UserDao userDao, SecurityUtils securityUtils, PasswordEncoder passwordEncoder,
-                                 Validator validator) {
+    public UserRepositoryService(UserDao userDao, IdentifierResolver idResolver, SecurityUtils securityUtils,
+                                 PasswordEncoder passwordEncoder, Validator validator) {
+        super(validator);
         this.userDao = userDao;
+        this.idResolver = idResolver;
         this.securityUtils = securityUtils;
         this.passwordEncoder = passwordEncoder;
-        this.validator = validator;
     }
 
     @Override
@@ -68,19 +68,14 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
 
     @Override
     protected void prePersist(User instance) {
-        validateInstance(instance);
-        instance.setUri(IdentifierUtils
-                .generateIdentifier(Vocabulary.ONTOLOGY_IRI_termit, instance.getFirstName(), instance.getLastName()));
+        validate(instance);
+        if (instance.getUri() == null) {
+            instance.setUri(idResolver
+                    .generateIdentifier(ConfigParam.NAMESPACE_USER, instance.getFirstName(), instance.getLastName()));
+        }
         instance.setPassword(passwordEncoder.encode(instance.getPassword()));
         instance.addType(Vocabulary.s_c_omezeny_uzivatel_termitu);
         instance.removeType(Vocabulary.s_c_administrator_termitu);
-    }
-
-    private void validateInstance(User instance) {
-        final ValidationResult<User> validationResult = ValidationResult.of(validator.validate(instance));
-        if (!validationResult.isValid()) {
-            throw new ValidationException(validationResult);
-        }
     }
 
     @Override
@@ -98,7 +93,7 @@ public class UserRepositoryService extends BaseRepositoryService<User> {
         } else {
             instance.setPassword(orig.get().getPassword());
         }
-        validateInstance(instance);
+        validate(instance);
     }
 
     @Transactional

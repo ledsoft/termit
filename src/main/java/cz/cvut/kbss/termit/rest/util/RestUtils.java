@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -22,17 +23,18 @@ public class RestUtils {
     }
 
     /**
-     * Creates HTTP headers object with a location header with the specified path appended to the current request URI.
+     * Creates {@link HttpHeaders} object with a location header with the specified path appended to the current request
+     * URI.
      * <p>
-     * The {@code uriVariableValues} are used to fill in possible variables specified in the {@code path}.
+     * The {@code uriVariableValues} are used to fill in possible variables specified in {@code path}.
      *
      * @param path              Path to add to the current request URI in order to construct a resource location
      * @param uriVariableValues Values used to replace possible variables in the path
-     * @return HttpHeaders with location headers set
+     * @return {@code HttpHeaders} with location header
+     * @see #createLocationHeaderFromCurrentUriWithQueryParam(String, Object...)
      */
-    public static HttpHeaders createLocationHeaderFromCurrentUri(String path, Object... uriVariableValues) {
-        assert path != null;
-
+    public static HttpHeaders createLocationHeaderFromCurrentUriWithPath(String path, Object... uriVariableValues) {
+        Objects.requireNonNull(path);
         final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path(path).buildAndExpand(
                 uriVariableValues).toUri();
         final HttpHeaders headers = new HttpHeaders();
@@ -41,22 +43,47 @@ public class RestUtils {
     }
 
     /**
-     * Creates HTTP headers object with a location header with the specified path appended to the current context path.
+     * Creates {@link HttpHeaders} object with a location header with the specified query parameter appended to the
+     * current request URI.
      * <p>
-     * The {@code uriVariableValues} are used to fill in possible variables specified in the {@code path}.
-     * <p>
-     * This method is useful when major part of the request URI needs to be replaced and so it is easier to start from
-     * base context path and append the new path to it.
+     * The {@code values} are used as values of {@code param} in the resulting URI.
      *
-     * @param path              Path to add to the current request URI in order to construct a resource location
-     * @param uriVariableValues Values used to replace possible variables in the path
-     * @return HttpHeaders with location headers set
+     * @param param  Query parameter to add to current request URI
+     * @param values Values of the query parameter
+     * @return {@code HttpHeaders} with location header
+     * @see #createLocationHeaderFromCurrentUriWithPath(String, Object...)
      */
-    public static HttpHeaders createLocationHeaderFromContextPath(String path, Object... uriVariableValues) {
-        assert path != null;
+    public static HttpHeaders createLocationHeaderFromCurrentUriWithQueryParam(String param, Object... values) {
+        Objects.requireNonNull(param);
+        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, values).build()
+                                                        .toUri();
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
+        return headers;
+    }
 
-        final URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
-                                                        .buildAndExpand(uriVariableValues).toUri();
+    /**
+     * Creates {@link HttpHeaders} object with a location header with the specified path and query parameter appended to
+     * the current request URI.
+     * <p>
+     * The {@code paramValue} is specified for the query parameter and {@code pathValues} are used to replace path
+     * variables.
+     *
+     * @param path       Path string, may contain path variables
+     * @param param      Query parameter to add to current request URI
+     * @param paramValue Value of the query parameter
+     * @param pathValues Path variable values
+     * @return {@code HttpHeaders} with location header
+     * @see #createLocationHeaderFromCurrentUriWithPath(String, Object...)
+     * @see #createLocationHeaderFromCurrentUriWithQueryParam(String, Object...)
+     */
+    public static HttpHeaders createLocationHeaderFromCurrentUriWithPathAndQuery(String path, String param,
+                                                                                 Object paramValue,
+                                                                                 Object... pathValues) {
+        Objects.requireNonNull(path);
+        Objects.requireNonNull(param);
+        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, paramValue)
+                                                        .path(path).buildAndExpand(pathValues).toUri();
         final HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.LOCATION, location.toASCIIString());
         return headers;
@@ -68,7 +95,7 @@ public class RestUtils {
      * @param value The value to encode
      * @return Encoded string
      */
-    public static String encodeUrl(String value) {
+    public static String urlEncode(String value) {
         try {
             return URLEncoder.encode(value, Constants.UTF_8_ENCODING);
         } catch (UnsupportedEncodingException e) {
