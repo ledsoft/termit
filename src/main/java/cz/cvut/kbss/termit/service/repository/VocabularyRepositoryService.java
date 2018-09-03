@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.model.Glossary;
+import cz.cvut.kbss.termit.model.Model;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
@@ -43,6 +45,12 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
         instance.setAuthor(securityUtils.getCurrentUser());
         if (instance.getUri() == null) {
             instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getName()));
+        }
+        if (instance.getGlossary() == null) {
+            instance.setGlossary(new Glossary());
+        }
+        if (instance.getModel() == null) {
+            instance.setModel(new Model());
         }
     }
 

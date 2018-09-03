@@ -26,8 +26,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.servlet.FilterChain;
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
@@ -57,16 +55,6 @@ class JwtAuthenticationFilterTest {
         this.mockRequest = new MockHttpServletRequest();
         this.mockResponse = new MockHttpServletResponse();
         this.sut = new JwtAuthenticationFilter(mock(AuthenticationManager.class), new JwtUtils(config));
-    }
-
-    @Test
-    void successfulAuthenticationExposesAuthenticationHeaderToClient() throws Exception {
-        final AuthenticationToken token = new AuthenticationToken(Collections.emptySet(), new UserDetails(user));
-        sut.successfulAuthentication(mockRequest, mockResponse, filterChain, token);
-        assertTrue(mockResponse.containsHeader(SecurityConstants.AUTHENTICATION_HEADER));
-        final String value = mockResponse.getHeader(SecurityConstants.EXPOSE_HEADERS_HEADER);
-        assertNotNull(value);
-        assertThat(value, containsString(SecurityConstants.AUTHENTICATION_HEADER));
     }
 
     @Test

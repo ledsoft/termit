@@ -70,4 +70,14 @@ public class RestExceptionHandler {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorInfo> tokenExpiredException(HttpServletRequest request, TokenExpiredException e) {
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(IncompleteJwtException.class)
+    public ResponseEntity<ErrorInfo> incompleteJwtException(HttpServletRequest request, IncompleteJwtException e) {
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.BAD_REQUEST);
+    }
 }
