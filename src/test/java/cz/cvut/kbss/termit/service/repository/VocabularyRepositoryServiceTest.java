@@ -94,4 +94,15 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         assertTrue(result.isPresent());
         assertNull(result.get().getAuthor().getPassword());
     }
+
+    @Test
+    void persistCreatesGlossaryAndModelInstances() {
+        final Vocabulary vocabulary = new Vocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setName("TestVocabulary");
+        sut.persist(vocabulary);
+        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
+        assertNotNull(result.getGlossary());
+        assertNotNull(result.getModel());
+    }
 }
