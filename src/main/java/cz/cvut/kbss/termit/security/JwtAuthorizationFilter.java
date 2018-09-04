@@ -1,9 +1,16 @@
 package cz.cvut.kbss.termit.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.cvut.kbss.termit.exception.JwtException;
+import cz.cvut.kbss.termit.exception.TokenExpiredException;
+import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -24,12 +31,16 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final UserDetailsService userDetailsService;
 
+    private final ObjectMapper objectMapper;
+
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                                  SecurityUtils securityUtils, UserDetailsService userDetailsService) {
+                                  SecurityUtils securityUtils, UserDetailsService userDetailsService,
+                                  ObjectMapper objectMapper) {
         super(authenticationManager);
         this.jwtUtils = jwtUtils;
         this.securityUtils = securityUtils;
         this.userDetailsService = userDetailsService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -41,12 +52,21 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
         final String authToken = authHeader.substring(SecurityConstants.JWT_TOKEN_PREFIX.length());
-        final UserDetails userDetails = jwtUtils.extractUserInfo(authToken);
-        final UserDetails existingDetails = userDetailsService.loadUserByUsername(userDetails.getUsername());
-        SecurityUtils.verifyAccountStatus(existingDetails.getUser());
-        securityUtils.setCurrentUser(existingDetails);
-        refreshToken(authToken, response);
-
+        try {
+            final UserDetails userDetails = jwtUtils.extractUserInfo(authToken);
+            final UserDetails existingDetails = userDetailsService.loadUserByUsername(userDetails.getUsername());
+            SecurityUtils.verifyAccountStatus(existingDetails.getUser());
+            securityUtils.setCurrentUser(existingDetails);
+            refreshToken(authToken, response);
+        } catch (DisabledException | LockedException | TokenExpiredException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
+            return;
+        } catch (JwtException e) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
+            return;
+        }
         chain.doFilter(request, response);
     }
 

@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.security.*;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.service.security.UserDetailsService;
@@ -43,13 +44,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
 
+    private final ObjectMapper objectMapper;
+
     @Autowired
     public SecurityConfig(AuthenticationProvider authenticationProvider,
                           AuthenticationEntryPoint authenticationEntryPoint,
                           AuthenticationSuccess authenticationSuccessHandler,
                           AuthenticationFailureHandler authenticationFailureHandler,
                           JwtUtils jwtUtils, SecurityUtils securityUtils,
-                          UserDetailsService userDetailsService) {
+                          UserDetailsService userDetailsService,
+                          ObjectMapper objectMapper) {
         this.authenticationProvider = authenticationProvider;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
@@ -57,6 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.jwtUtils = jwtUtils;
         this.securityUtils = securityUtils;
         this.userDetailsService = userDetailsService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -71,7 +76,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and().cors().and().csrf().disable()
             .addFilter(authenticationFilter())
             .addFilter(
-                    new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
+                    new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService,
+                            objectMapper))
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
