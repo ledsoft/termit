@@ -51,9 +51,9 @@ public class SecurityConstants {
     public static final String JWT_ROLE_DELIMITER = "-";
 
     /**
-     * Session timeout in milliseconds. 30 minutes.
+     * Session timeout in milliseconds. 10 minutes.
      */
-    public static final int SESSION_TIMEOUT = 30 * 60 * 1000;
+    public static final int SESSION_TIMEOUT = 10 * 60 * 1000;
 
     /**
      * Maximum number of unsuccessful login attempts.
