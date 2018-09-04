@@ -51,7 +51,7 @@ public class SystemInitializer {
         }
         LOG.info("Creating application admin account.");
         final TransactionTemplate tx = new TransactionTemplate(txManager);
-        tx.execute((status) -> {
+        tx.execute(status -> {
             userService.persist(admin);
             return null;
         });
@@ -73,7 +73,7 @@ public class SystemInitializer {
         }
     }
 
-    private User initAdminInstance() {
+    private static User initAdminInstance() {
         final User admin = new User();
         admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user"));
         admin.setFirstName("System");
@@ -83,7 +83,7 @@ public class SystemInitializer {
         return admin;
     }
 
-    private String generatePassword() {
+    private static String generatePassword() {
         final StringBuilder sb = new StringBuilder(PASSWORD_LENGTH);
         final Random random = new Random();
         for (int i = 0; i < PASSWORD_LENGTH; i++) {
