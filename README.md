@@ -46,5 +46,3 @@ Use it to verify input data. See `User` and its validation in `BaseRepositorySer
 `ValidationException` is then handled by `RestExceptionHandler` and an appropriate response is returned to the client.
 
 ## TODO
-
-- __CONSIDER__: OAuth for authentication

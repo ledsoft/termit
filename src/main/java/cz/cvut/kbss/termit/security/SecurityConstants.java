@@ -26,11 +26,6 @@ public class SecurityConstants {
     public static final String SECURITY_CHECK_URI = "/j_spring_security_check";
 
     /**
-     * URL used for logging out of the application
-     */
-    public static final String LOGOUT_URI = "/j_spring_security_logout";
-
-    /**
      * Request/response header used to store authentication info.
      */
     public static final String AUTHENTICATION_HEADER = "Authentication";
