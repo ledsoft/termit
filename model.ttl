@@ -173,6 +173,18 @@ a-popis-dat-pojem:ma-datovy-atribut-zaznamu rdf:type owl:ObjectProperty ;
                                             rdfs:range a-popis-dat-pojem:datovy-atribut-zaznamu .
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-glosar
+a-popis-dat-pojem:ma-glosar rdf:type owl:ObjectProperty ;
+                            rdfs:domain a-popis-dat-pojem:slovnik ;
+                            rdfs:range a-popis-dat-pojem:glosar .
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-model
+a-popis-dat-pojem:ma-model rdf:type owl:ObjectProperty ;
+                           rdfs:domain a-popis-dat-pojem:slovnik ;
+                           rdfs:range a-popis-dat-pojem:model .
+
+
 ###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-referencni-atribut-zaznamu
 a-popis-dat-pojem:ma-referencni-atribut-zaznamu rdf:type owl:ObjectProperty ;
                                                 rdfs:subPropertyOf a-popis-dat-pojem:ma-atribut-zaznamu ;
