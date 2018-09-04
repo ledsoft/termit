@@ -47,8 +47,8 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(UsernameExistsException.class)
-    public ResponseEntity<ErrorInfo> usernameExistsException(HttpServletRequest request, UsernameExistsException e) {
+    @ExceptionHandler(ResourceExistsException.class)
+    public ResponseEntity<ErrorInfo> resourceExistsException(HttpServletRequest request, ResourceExistsException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
