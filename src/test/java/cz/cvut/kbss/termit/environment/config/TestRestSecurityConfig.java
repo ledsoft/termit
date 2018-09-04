@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.environment.config;
 
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.security.HttpAuthenticationEntryPoint;
 import cz.cvut.kbss.termit.security.JwtAuthenticationFilter;
 import cz.cvut.kbss.termit.security.JwtAuthorizationFilter;
@@ -73,7 +74,8 @@ public class TestRestSecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and().cors().and().csrf().disable()
             .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtUtils))
-            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService))
+            .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService,
+                    Environment.getObjectMapper()))
             .formLogin().successHandler(authenticationSuccessHandler)
             .failureHandler(authenticationFailureHandler).and().sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
