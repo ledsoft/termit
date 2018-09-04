@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.repository;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -104,5 +105,18 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result.getGlossary());
         assertNotNull(result.getModel());
+    }
+
+    @Test
+    void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalAlreadyIriExists() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setAuthor(user);
+        vocabulary.setDateCreated(new Date());
+        transactional(() -> em.persist(vocabulary));
+
+        final Vocabulary toPersist = Generator.generateVocabulary();
+        toPersist.setUri(vocabulary.getUri());
+        assertThrows(ResourceExistsException.class, () -> sut.persist(toPersist));
     }
 }
