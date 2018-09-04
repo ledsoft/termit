@@ -6,439 +6,402 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix a-popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
-@base <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> .
 
-<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> rdf:type owl:Ontology ;
-                                                                        owl:imports <http://www.w3.org/2004/02/skos/core> ;
-                                                                        rdfs:comment "Glossary of terms belonging to the data desription vocabulary. This vocabulary defines the relations between data sets, its records, their attributes and versions."@en .
-
-#################################################################
-#    Annotation properties
-#################################################################
-
-###  http://purl.org/dc/terms/description
-<http://purl.org/dc/terms/description> rdf:type owl:AnnotationProperty .
-
-
-#################################################################
-#    Classes
-#################################################################
-
-###  http://www.w3.org/2004/02/skos/core#Concept
-<http://www.w3.org/2004/02/skos/core#Concept> rdf:type owl:Class .
-
-
-#################################################################
-#    Individuals
-#################################################################
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar
-<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> rdf:type owl:NamedIndividual ,
-                                                                                <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/agendovy-slovnik
-a-popis-dat-pojem:agendovy-slovnik rdf:type owl:NamedIndividual ,
-                                            <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                   rdfs:label "agendový slovník"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut
-a-popis-dat-pojem:atribut rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                          rdfs:label "Atribut"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-databazove-tabulky
-a-popis-dat-pojem:atribut-databazove-tabulky rdf:type owl:NamedIndividual ,
-                                                      <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                             <http://purl.org/dc/terms/description> "Sloupec v tabulce relační databáze"@cs ;
-                                             rdfs:label "Atribut databázové tabulky"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-zaznamu
-a-popis-dat-pojem:atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                           <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                  rdfs:label "atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnik
-a-popis-dat-pojem:ciselnik rdf:type owl:NamedIndividual ,
-                                    <http://www.w3.org/2004/02/skos/core#Concept> ;
-                           rdfs:label "číselník"@cs ;
-                           <http://www.w3.org/2004/02/skos/core#definition> "Datová sada obsahující konečný seznam možných hodnot, které může nabývat atribut datové sady."@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnikova-hodnota
-a-popis-dat-pojem:ciselnikova-hodnota rdf:type owl:NamedIndividual ,
-                                               <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                      rdfs:label "číselníková hodnota"@cs ;
-                                      <http://www.w3.org/2004/02/skos/core#definition> "Hodnota z číselníku. Společně tvoří seznam povolených číselníkových hodnot."@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databaze
-a-popis-dat-pojem:databaze rdf:type owl:NamedIndividual ,
-                                    <http://www.w3.org/2004/02/skos/core#Concept> ;
-                           <http://purl.org/dc/terms/description> "Způsob uchovávání dat pomocí databáze."@cs ;
-                           rdfs:label "databáze"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka
-a-popis-dat-pojem:databazova-tabulka rdf:type owl:NamedIndividual ,
-                                              <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                     <http://purl.org/dc/terms/description> "Tabulka v relační databázi (SQL)."@cs ;
-                                     rdfs:label "databázová tabulka"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka-jako-zdroj-dat
-a-popis-dat-pojem:databazova-tabulka-jako-zdroj-dat rdf:type owl:NamedIndividual ,
-                                                             <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                    <http://purl.org/dc/terms/description> "celá a samotná databázová tabulka je zdrojem dat"@cs ;
-                                                    rdfs:label "databázová tabulka jako zdroj dat"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datova-sada
-a-popis-dat-pojem:datova-sada rdf:type owl:NamedIndividual ,
-                                       <http://www.w3.org/2004/02/skos/core#Concept> ;
-                              rdfs:label "Datová sada"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-atribut-zaznamu
-a-popis-dat-pojem:datovy-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                  <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                         <http://purl.org/dc/terms/description> "Atribut, jehož hodnotou je konkrétní datová hodnota, nikoliv resource odkazující na jiný objekt."@cs ;
-                                         rdfs:label "přímý atribut"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-slovnik
-a-popis-dat-pojem:datovy-slovnik rdf:type owl:NamedIndividual ,
-                                          <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                 rdfs:label "datový slovník"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/definuje-funkci
-a-popis-dat-pojem:definuje-funkci rdf:type owl:NamedIndividual ,
-                                           <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                  rdfs:label "definuje funkci"@cs ;
-                                  <http://www.w3.org/2004/02/skos/core#definition> "Hodnota atributu v databázové tabulce, která definuje funkci objektu datové sady."@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument
-a-popis-dat-pojem:dokument rdf:type owl:NamedIndividual ,
-                                    <http://www.w3.org/2004/02/skos/core#Concept> ;
-                           rdfs:label "dokument"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument-legislativni-povahy
-a-popis-dat-pojem:dokument-legislativni-povahy rdf:type owl:NamedIndividual ,
-                                                        <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                               rdfs:label "dokument legislativní povahy"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokumentovy-slovnik
-a-popis-dat-pojem:dokumentovy-slovnik rdf:type owl:NamedIndividual ,
-                                               <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                      rdfs:label "dokumentový slovník"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dotaz-sql-databaze
-a-popis-dat-pojem:dotaz-sql-databaze rdf:type owl:NamedIndividual ,
-                                              <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                     rdfs:label "dotaz do SQL databáze"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/funkce
-a-popis-dat-pojem:funkce rdf:type owl:NamedIndividual ,
-                                  <http://www.w3.org/2004/02/skos/core#Concept> .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/geometricky-atribut
-a-popis-dat-pojem:geometricky-atribut rdf:type owl:NamedIndividual ,
-                                               <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                      rdfs:label "geometrický atribut"@cs ;
-                                      <http://www.w3.org/2004/02/skos/core#definition> "Atribut, který obsahuje geometrii objektu."@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/glosar
-a-popis-dat-pojem:glosar rdf:type owl:NamedIndividual ,
-                                  <http://www.w3.org/2004/02/skos/core#Concept> .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem
-a-popis-dat-pojem:je-atributem rdf:type owl:NamedIndividual ,
-                                        <http://www.w3.org/2004/02/skos/core#Concept> ;
-                               rdfs:label "je atributem"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-databazove-tabulky
-a-popis-dat-pojem:je-atributem-databazove-tabulky rdf:type owl:NamedIndividual ,
-                                                           <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                  rdfs:label "je atributem databázové tabulky"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-zaznamu
-a-popis-dat-pojem:je-atributem-zaznamu rdf:type owl:NamedIndividual ,
-                                                <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                       <http://purl.org/dc/terms/description> "Přiřazuje atribut k záznamu."@cs ;
-                                       rdfs:label "je atributem záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-datovym-atributem-zaznamu
-a-popis-dat-pojem:je-datovym-atributem-zaznamu rdf:type owl:NamedIndividual ,
-                                                        <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                               <http://purl.org/dc/terms/description> "Vztah mezi přímým atributem a záznamem."@cs ;
-                                               rdfs:label "Je přímým atributem záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem
-a-popis-dat-pojem:je-pojmem rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                            <http://purl.org/dc/terms/description> "Vytváří vazbu mezi datovým záznamem a slovníkovým pojmem, kterému odpovídá."@cs ;
-                            rdfs:label "je pojmem"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem-ze-slovniku
-a-popis-dat-pojem:je-pojmem-ze-slovniku rdf:type owl:NamedIndividual ,
-                                                 <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                        rdfs:label "je pojmem ze slovníku"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-referencnim-atributem-zaznamu
-a-popis-dat-pojem:je-referencnim-atributem-zaznamu rdf:type owl:NamedIndividual ,
-                                                            <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                   <http://purl.org/dc/terms/description> "Vztah mezi referenčním atributem a záznamem."@cs ;
-                                                   rdfs:label "Je referenčním atributem záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-statistickym-atributem-zaznamu
-a-popis-dat-pojem:je-statistickym-atributem-zaznamu rdf:type owl:NamedIndividual ,
-                                                             <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                    rdfs:label "je statistickým atributem záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu
-a-popis-dat-pojem:je-v-kontextu rdf:type owl:NamedIndividual ,
-                                         <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                <http://purl.org/dc/terms/description> "Vztah definující vztah objektu k nějakému kontextu."@cs ;
-                                rdfs:label "je v kontextu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu-datove-sady
-a-popis-dat-pojem:je-v-kontextu-datove-sady rdf:type owl:NamedIndividual ,
-                                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                            <http://purl.org/dc/terms/description> "Vztah definující kontext objektu vzhledem ke konkrétní datové sadě."@cs ;
-                                            rdfs:label "je v kontextu datové sady"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-verzi
-a-popis-dat-pojem:je-verzi rdf:type owl:NamedIndividual ,
-                                    <http://www.w3.org/2004/02/skos/core#Concept> ;
-                           <http://purl.org/dc/terms/description> "Určuje objekt, jehož verzí je subjekt"@cs ;
-                           rdfs:label "je verzí"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem
-a-popis-dat-pojem:je-zaznamem rdf:type owl:NamedIndividual ,
-                                       <http://www.w3.org/2004/02/skos/core#Concept> ;
-                              <http://purl.org/dc/terms/description> "Přiřazuje záznam k objektu."@cs ;
-                              rdfs:label "je záznamem"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem-datove-sady
-a-popis-dat-pojem:je-zaznamem-datove-sady rdf:type owl:NamedIndividual ,
-                                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                          <http://purl.org/dc/terms/description> "Přiřazuje záznam k datové sadě."@cs ;
-                                          rdfs:label "je záznamem datové sady"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalog
-a-popis-dat-pojem:katalog rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                          rdfs:label "katalog"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalogizuje-datovou-sadu
-a-popis-dat-pojem:katalogizuje-datovou-sadu rdf:type owl:NamedIndividual ,
-                                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                            rdfs:label "katalogizuje datovou sadu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/kontext
-a-popis-dat-pojem:kontext rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                          <http://purl.org/dc/terms/description> "Informační objekt definující významovou souvislost pojmů."@cs ;
-                          rdfs:label "Kontext"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/legislativni-slovnik
-a-popis-dat-pojem:legislativni-slovnik rdf:type owl:NamedIndividual ,
-                                                <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                       rdfs:label "legislativní slovník"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut
-a-popis-dat-pojem:ma-atribut rdf:type owl:NamedIndividual ,
-                                      <http://www.w3.org/2004/02/skos/core#Concept> ;
-                             rdfs:label "má atribut"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-databazove-tabulky
-a-popis-dat-pojem:ma-atribut-databazove-tabulky rdf:type owl:NamedIndividual ,
-                                                         <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                rdfs:label "má atribut databázové tabulky"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-zaznamu
-a-popis-dat-pojem:ma-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                              <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                     rdfs:label "má atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-ciselnikovou-hodnotu
-a-popis-dat-pojem:ma-ciselnikovou-hodnotu rdf:type owl:NamedIndividual ,
-                                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                          rdfs:label "má číselníkovou hodnotu"@cs ;
-                                          <http://www.w3.org/2004/02/skos/core#definition> "Vztah mezi číselníkem a číselníkovými hodnotami, které do číselníku patří."@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-atribut-zaznamu
-a-popis-dat-pojem:ma-datovy-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                            rdfs:label "má přímý atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-typ
-a-popis-dat-pojem:ma-datovy-typ rdf:type owl:NamedIndividual ,
-                                         <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                rdfs:comment "Definuje datový typ atributu databázové tabulky"@cs ;
-                                rdfs:label "má datový typ"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-hodnotu-z-ciselniku
-a-popis-dat-pojem:ma-hodnotu-z-ciselniku rdf:type owl:NamedIndividual ,
-                                                  <http://www.w3.org/2004/02/skos/core#Concept> .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-referencni-atribut-zaznamu
-a-popis-dat-pojem:ma-referencni-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                         <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                rdfs:label "má referenční atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-soubor
-a-popis-dat-pojem:ma-soubor rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                            rdfs:label "má soubor"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-statisticky-atribut-zaznamu
-a-popis-dat-pojem:ma-statisticky-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                          <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                 rdfs:label "má statistický atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/model
-a-popis-dat-pojem:model rdf:type owl:NamedIndividual ,
-                                 <http://www.w3.org/2004/02/skos/core#Concept> ;
-                        rdfs:label "model"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/obsahuje-pojem
-a-popis-dat-pojem:obsahuje-pojem rdf:type owl:NamedIndividual ,
-                                          <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                 rdfs:label "obsahuje pojem"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-dokument
-a-popis-dat-pojem:popisuje-dokument rdf:type owl:NamedIndividual ,
-                                             <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                    rdfs:label "popisuje dokument"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-legislativni-dokument
-a-popis-dat-pojem:popisuje-legislativni-dokument rdf:type owl:NamedIndividual ,
-                                                          <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                                 rdfs:label "popisuje legislativní dokument"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-atribut-zaznamu
-a-popis-dat-pojem:poskytuje-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                            rdfs:label "poskytuje atribut záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-datovou-sadu
-a-popis-dat-pojem:poskytuje-datovou-sadu rdf:type owl:NamedIndividual ,
-                                                  <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                         rdfs:label "poskytuje datovou sadu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-zaznam
-a-popis-dat-pojem:poskytuje-zaznam rdf:type owl:NamedIndividual ,
-                                            <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                   rdfs:label "poskytuje záznam"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/referencni-atribut-zaznamu
-a-popis-dat-pojem:referencni-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                      <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                             <http://purl.org/dc/terms/description> "Atribut, jehož hodnotou je reference na jiný zdroj."@cs ;
-                                             rdfs:label "Referenční atribut"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovnik
-a-popis-dat-pojem:slovnik rdf:type owl:NamedIndividual ,
-                                   <http://www.w3.org/2004/02/skos/core#Concept> ;
-                          rdfs:label "slovník"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/soubor
-a-popis-dat-pojem:soubor rdf:type owl:NamedIndividual ,
-                                  <http://www.w3.org/2004/02/skos/core#Concept> ;
-                         rdfs:label "soubor"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/statisticky-atribut-zaznamu
-a-popis-dat-pojem:statisticky-atribut-zaznamu rdf:type owl:NamedIndividual ,
-                                                       <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                              rdfs:label "Statistický atribut"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term
-a-popis-dat-pojem:term rdf:type owl:NamedIndividual ,
-                                <http://www.w3.org/2004/02/skos/core#Concept> ;
-                       <http://purl.org/dc/terms/description> "Pojem v datech nebo datové sadě"@cs ;
-                       rdfs:label "Term"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zaznam
-a-popis-dat-pojem:zaznam rdf:type owl:NamedIndividual ,
-                                  <http://www.w3.org/2004/02/skos/core#Concept> ;
-                         rdfs:label "záznam"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-atributu-zaznamu
-a-popis-dat-pojem:zdroj-atributu-zaznamu rdf:type owl:NamedIndividual ,
-                                                  <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                         rdfs:label "zdroj atributu záznamu"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-dat
-a-popis-dat-pojem:zdroj-dat rdf:type owl:NamedIndividual ,
-                                     <http://www.w3.org/2004/02/skos/core#Concept> ;
-                            rdfs:label "zdroj dat"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-datove-sady
-a-popis-dat-pojem:zdroj-datove-sady rdf:type owl:NamedIndividual ,
-                                             <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                    rdfs:label "zdroj datové sady"@cs .
-
-
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-zaznamu
-a-popis-dat-pojem:zdroj-zaznamu rdf:type owl:NamedIndividual ,
-                                         <http://www.w3.org/2004/02/skos/core#Concept> ;
-                                rdfs:label "zdroj záznamu"@cs .
-
-
-###  Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> a owl:Ontology ;
+	owl:imports <http://www.w3.org/2004/02/skos/core> ;
+	rdfs:comment "Glossary of terms belonging to the data desription vocabulary. This vocabulary defines the relations between data sets, its records, their attributes and versions."@en .
+# 
+# 
+# #################################################################
+# #
+# #    Annotation properties
+# #
+# #################################################################
+# 
+# 
+# http://purl.org/dc/terms/description
+
+<http://purl.org/dc/terms/description> a owl:AnnotationProperty .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Classes
+# #
+# #################################################################
+# 
+# 
+# http://www.w3.org/2004/02/skos/core#Concept
+
+<http://www.w3.org/2004/02/skos/core#Concept> a owl:Class .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Individuals
+# #
+# #################################################################
+# 
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar
+
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/agendovy-slovnik
+
+a-popis-dat-pojem:agendovy-slovnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "agendový slovník"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut
+
+a-popis-dat-pojem:atribut a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "Atribut"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-databazove-tabulky
+
+a-popis-dat-pojem:atribut-databazove-tabulky a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Sloupec v tabulce relační databáze"@cs ;
+	rdfs:label "Atribut databázové tabulky"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/atribut-zaznamu
+
+a-popis-dat-pojem:atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnik
+
+a-popis-dat-pojem:ciselnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "číselník"@cs ;
+	<http://www.w3.org/2004/02/skos/core#definition> "Datová sada obsahující konečný seznam možných hodnot, které může nabývat atribut datové sady."@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ciselnikova-hodnota
+
+a-popis-dat-pojem:ciselnikova-hodnota a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "číselníková hodnota"@cs ;
+	<http://www.w3.org/2004/02/skos/core#definition> "Hodnota z číselníku. Společně tvoří seznam povolených číselníkových hodnot."@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databaze
+
+a-popis-dat-pojem:databaze a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Způsob uchovávání dat pomocí databáze."@cs ;
+	rdfs:label "databáze"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka
+
+a-popis-dat-pojem:databazova-tabulka a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Tabulka v relační databázi (SQL)."@cs ;
+	rdfs:label "databázová tabulka"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/databazova-tabulka-jako-zdroj-dat
+
+a-popis-dat-pojem:databazova-tabulka-jako-zdroj-dat a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "celá a samotná databázová tabulka je zdrojem dat"@cs ;
+	rdfs:label "databázová tabulka jako zdroj dat"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datova-sada
+
+a-popis-dat-pojem:datova-sada a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "Datová sada"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-atribut-zaznamu
+
+a-popis-dat-pojem:datovy-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Atribut, jehož hodnotou je konkrétní datová hodnota, nikoliv resource odkazující na jiný objekt."@cs ;
+	rdfs:label "přímý atribut"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/datovy-slovnik
+
+a-popis-dat-pojem:datovy-slovnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "datový slovník"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/definuje-funkci
+
+a-popis-dat-pojem:definuje-funkci a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "definuje funkci"@cs ;
+	<http://www.w3.org/2004/02/skos/core#definition> "Hodnota atributu v databázové tabulce, která definuje funkci objektu datové sady."@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument
+
+a-popis-dat-pojem:dokument a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "dokument"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument-legislativni-povahy
+
+a-popis-dat-pojem:dokument-legislativni-povahy a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "dokument legislativní povahy"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokumentovy-slovnik
+
+a-popis-dat-pojem:dokumentovy-slovnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "dokumentový slovník"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dotaz-sql-databaze
+
+a-popis-dat-pojem:dotaz-sql-databaze a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "dotaz do SQL databáze"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/funkce
+
+a-popis-dat-pojem:funkce a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/geometricky-atribut
+
+a-popis-dat-pojem:geometricky-atribut a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "geometrický atribut"@cs ;
+	<http://www.w3.org/2004/02/skos/core#definition> "Atribut, který obsahuje geometrii objektu."@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/glosar
+
+a-popis-dat-pojem:glosar a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem
+
+a-popis-dat-pojem:je-atributem a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "je atributem"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-databazove-tabulky
+
+a-popis-dat-pojem:je-atributem-databazove-tabulky a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "je atributem databázové tabulky"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-atributem-zaznamu
+
+a-popis-dat-pojem:je-atributem-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Přiřazuje atribut k záznamu."@cs ;
+	rdfs:label "je atributem záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-datovym-atributem-zaznamu
+
+a-popis-dat-pojem:je-datovym-atributem-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Vztah mezi přímým atributem a záznamem."@cs ;
+	rdfs:label "Je přímým atributem záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem
+
+a-popis-dat-pojem:je-pojmem a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Vytváří vazbu mezi datovým záznamem a slovníkovým pojmem, kterému odpovídá."@cs ;
+	rdfs:label "je pojmem"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-pojmem-ze-slovniku
+
+a-popis-dat-pojem:je-pojmem-ze-slovniku a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "je pojmem ze slovníku"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-referencnim-atributem-zaznamu
+
+a-popis-dat-pojem:je-referencnim-atributem-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Vztah mezi referenčním atributem a záznamem."@cs ;
+	rdfs:label "Je referenčním atributem záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-statistickym-atributem-zaznamu
+
+a-popis-dat-pojem:je-statistickym-atributem-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "je statistickým atributem záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu
+
+a-popis-dat-pojem:je-v-kontextu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Vztah definující vztah objektu k nějakému kontextu."@cs ;
+	rdfs:label "je v kontextu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-v-kontextu-datove-sady
+
+a-popis-dat-pojem:je-v-kontextu-datove-sady a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Vztah definující kontext objektu vzhledem ke konkrétní datové sadě."@cs ;
+	rdfs:label "je v kontextu datové sady"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-verzi
+
+a-popis-dat-pojem:je-verzi a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Určuje objekt, jehož verzí je subjekt"@cs ;
+	rdfs:label "je verzí"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem
+
+a-popis-dat-pojem:je-zaznamem a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Přiřazuje záznam k objektu."@cs ;
+	rdfs:label "je záznamem"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-zaznamem-datove-sady
+
+a-popis-dat-pojem:je-zaznamem-datove-sady a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Přiřazuje záznam k datové sadě."@cs ;
+	rdfs:label "je záznamem datové sady"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalog
+
+a-popis-dat-pojem:katalog a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "katalog"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/katalogizuje-datovou-sadu
+
+a-popis-dat-pojem:katalogizuje-datovou-sadu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "katalogizuje datovou sadu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/kontext
+
+a-popis-dat-pojem:kontext a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Informační objekt definující významovou souvislost pojmů."@cs ;
+	rdfs:label "Kontext"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/legislativni-slovnik
+
+a-popis-dat-pojem:legislativni-slovnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "legislativní slovník"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut
+
+a-popis-dat-pojem:ma-atribut a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má atribut"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-databazove-tabulky
+
+a-popis-dat-pojem:ma-atribut-databazove-tabulky a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má atribut databázové tabulky"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-atribut-zaznamu
+
+a-popis-dat-pojem:ma-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-ciselnikovou-hodnotu
+
+a-popis-dat-pojem:ma-ciselnikovou-hodnotu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má číselníkovou hodnotu"@cs ;
+	<http://www.w3.org/2004/02/skos/core#definition> "Vztah mezi číselníkem a číselníkovými hodnotami, které do číselníku patří."@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-atribut-zaznamu
+
+a-popis-dat-pojem:ma-datovy-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má přímý atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-datovy-typ
+
+a-popis-dat-pojem:ma-datovy-typ a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:comment "Definuje datový typ atributu databázové tabulky"@cs ;
+	rdfs:label "má datový typ"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-hodnotu-z-ciselniku
+
+a-popis-dat-pojem:ma-hodnotu-z-ciselniku a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-referencni-atribut-zaznamu
+
+a-popis-dat-pojem:ma-referencni-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má referenční atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-soubor
+
+a-popis-dat-pojem:ma-soubor a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má soubor"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-statisticky-atribut-zaznamu
+
+a-popis-dat-pojem:ma-statisticky-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "má statistický atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/model
+
+a-popis-dat-pojem:model a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "model"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/obsahuje-pojem
+
+a-popis-dat-pojem:obsahuje-pojem a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "obsahuje pojem"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-dokument
+
+a-popis-dat-pojem:popisuje-dokument a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "popisuje dokument"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-legislativni-dokument
+
+a-popis-dat-pojem:popisuje-legislativni-dokument a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "popisuje legislativní dokument"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-atribut-zaznamu
+
+a-popis-dat-pojem:poskytuje-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "poskytuje atribut záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-datovou-sadu
+
+a-popis-dat-pojem:poskytuje-datovou-sadu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "poskytuje datovou sadu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/poskytuje-zaznam
+
+a-popis-dat-pojem:poskytuje-zaznam a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "poskytuje záznam"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/referencni-atribut-zaznamu
+
+a-popis-dat-pojem:referencni-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Atribut, jehož hodnotou je reference na jiný zdroj."@cs ;
+	rdfs:label "Referenční atribut"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovnik
+
+a-popis-dat-pojem:slovnik a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "slovník"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/soubor
+
+a-popis-dat-pojem:soubor a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "soubor"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/statisticky-atribut-zaznamu
+
+a-popis-dat-pojem:statisticky-atribut-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "Statistický atribut"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term
+
+a-popis-dat-pojem:term a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://purl.org/dc/terms/description> "Pojem v datech nebo datové sadě"@cs ;
+	rdfs:label "Term"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zaznam
+
+a-popis-dat-pojem:zaznam a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "záznam"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-atributu-zaznamu
+
+a-popis-dat-pojem:zdroj-atributu-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "zdroj atributu záznamu"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-dat
+
+a-popis-dat-pojem:zdroj-dat a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "zdroj dat"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-datove-sady
+
+a-popis-dat-pojem:zdroj-datove-sady a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "zdroj datové sady"@cs .
+# 
+# http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj-zaznamu
+
+a-popis-dat-pojem:zdroj-zaznamu a owl:NamedIndividual , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	rdfs:label "zdroj záznamu"@cs .
+# 
+# 
+# 
+# #################################################################
+# #
+# #    Annotations
+# #
+# #################################################################
+# 
+# 
+
+a-popis-dat-pojem:ma-glosar rdfs:label "má glosář"@cs .
+# 
+
+a-popis-dat-pojem:ma-model rdfs:label "má model"@cs .
+# 
+# Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi
