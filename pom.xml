@@ -21,6 +21,7 @@
         <repository>
             <id>kbss</id>
             <url>http://kbss.felk.cvut.cz/m2repo</url>
+
         </repository>
     </repositories>
 
@@ -31,7 +32,7 @@
         <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
         <org.hibernate.validator.version>6.0.11.Final</org.hibernate.validator.version>
         <cz.cvut.kbss.jopa.version>0.10.5</cz.cvut.kbss.jopa.version>
-        <cz.cvut.kbss.jsonld.version>0.3.4</cz.cvut.kbss.jsonld.version>
+        <cz.cvut.kbss.jsonld.version>0.3.5</cz.cvut.kbss.jsonld.version>
 
         <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
         <org.mockito.version>2.19.1</org.mockito.version>
