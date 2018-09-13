@@ -104,6 +104,7 @@ public class TermController extends BaseController {
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestBody Term term) {
         Vocabulary vocabulary = vocabularyController.getById(fragment, namespace);
+        //TODO custom comparator for the Set<Term>
         if (!vocabulary.getGlossary().getTerms().add(term)){
             LOG.debug("Term {} in vocabulary {} was not created because it already exist.", term, vocabulary);
             //TODO return error message that term cannot be created because term uri already exist
