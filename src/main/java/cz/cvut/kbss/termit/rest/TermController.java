@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public class TermController extends BaseController {
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestBody Term term) {
         Vocabulary vocabulary = vocabularyController.getById(fragment, namespace);
-        //TODO custom comparator for the Set<Term>
+        //TODO custom comparator for the Set<Term> -> compare only uri not the objects
         if (!vocabulary.getGlossary().getTerms().add(term)){
             LOG.debug("Term {} in vocabulary {} was not created because it already exist.", term, vocabulary);
             //TODO return error message that term cannot be created because term uri already exist
