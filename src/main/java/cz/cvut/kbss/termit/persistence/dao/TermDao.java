@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class TermDao extends BaseDao<Term> {
@@ -25,15 +24,4 @@ public class TermDao extends BaseDao<Term> {
         throw new NotImplementedException();
     }
 
-    /**
-     * Checks whether a term with the specified label exists in specific vocabulary.
-     *
-     * @param label Term label to check
-     * @return {@code true} if a user with the specified username exists
-     */
-    public boolean exists(String label, URI vocabularyUri) {
-        Objects.requireNonNull(label);
-        //TODO query
-        throw new NotImplementedException();
-    }
 }
