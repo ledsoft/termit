@@ -45,4 +45,9 @@ The application uses JSR 380 validation API. This provides a generic, easy-to-us
 Use it to verify input data. See `User` and its validation in `BaseRepositoryService`/`UserRepositoryService`.
 `ValidationException` is then handled by `RestExceptionHandler` and an appropriate response is returned to the client.
 
+### Storage
+
+TermIt is preconfigured to run against a local RDF4J repository at `http://locahost:18188/rdf4j-server/repositories/termit`.
+This can be changed by updating `config.properties`.
+
 ## TODO
