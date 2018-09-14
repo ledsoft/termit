@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.jopa.model.annotations.CascadeType;
 import cz.cvut.kbss.jopa.model.annotations.FetchType;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
@@ -12,7 +13,12 @@ import java.util.Set;
 @OWLClass(iri = Vocabulary.s_c_glosar)
 public class Glossary extends AbstractEntity {
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_obsahuje_pojem, fetch = FetchType.EAGER)
+    /**
+     * This attribute should contain only root terms. The term hierarchy is modelled by terms having sub-terms, so all
+     * terms should be reachable.
+     */
+    @OWLObjectProperty(iri = Vocabulary.s_p_obsahuje_pojem, cascade = {CascadeType.PERSIST,
+            CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Term> terms;
 
     public Set<Term> getTerms() {
