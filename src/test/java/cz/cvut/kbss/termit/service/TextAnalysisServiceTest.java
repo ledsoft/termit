@@ -19,6 +19,7 @@ import java.nio.file.Files;
 
 import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 import static cz.cvut.kbss.termit.util.ConfigParam.TEXT_ANALYSIS_SERVICE_URL;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -57,8 +58,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(CONTENT);
         mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
-                  .andExpect(method(
-                          HttpMethod.POST)).andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andExpect(method(HttpMethod.POST)).andExpect(content().string(containsString(CONTENT)))
                   .andRespond(withSuccess());
         final File file = new File();
         file.setName("Test");
