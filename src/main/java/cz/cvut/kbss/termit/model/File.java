@@ -6,9 +6,12 @@ import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import javax.validation.constraints.NotBlank;
+
 @OWLClass(iri = Vocabulary.s_c_soubor)
 public class File extends AbstractEntity {
 
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = RDFS.LABEL)
     private String name;

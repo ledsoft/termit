@@ -15,7 +15,7 @@ public class Target extends AbstractEntity {
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdrojovy_dokument, fetch = FetchType.EAGER)
-    private Document source;
+    private File source;
 
     public Set<TermSelector> getSelectors() {
         return selectors;
@@ -25,11 +25,11 @@ public class Target extends AbstractEntity {
         this.selectors = selectors;
     }
 
-    public Document getSource() {
+    public File getSource() {
         return source;
     }
 
-    public void setSource(Document source) {
+    public void setSource(File source) {
         this.source = source;
     }
 
