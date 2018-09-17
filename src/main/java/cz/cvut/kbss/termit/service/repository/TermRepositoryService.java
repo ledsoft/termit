@@ -50,4 +50,14 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
         return termDao.findAll(pageable, vocabulary);
     }
+
+    public List<Term> findAll(String searchString, URI vocabularyUri){
+        Vocabulary vocabulary = vocabularyService.find(vocabularyUri)
+                .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri));
+
+        List<Term> rootTerms = termDao.findAll(searchString, vocabulary);
+        // List<Term> allTerms = new ArrayList<>(rootTerms.size()*4);
+        // TODO if term.subTerms will be FetchType.LAZY then fetch all children, filter them and return the result
+        return rootTerms;
+    }
 }
