@@ -10,10 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,5 +102,36 @@ class TermDaoTest extends BaseDaoTestRunner {
             assertEquals(terms.get(i), result.get(i));
             assertEquals(terms.get(i).getSubTerms(), result.get(i).getSubTerms());
         }
+    }
+
+    @Test
+    void findAllBySearchStringReturnsRootTermsWithMatchingLabel() {
+        final List<Term> terms = generateTerms(10);
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        final List<Term> result = sut.findAll("term 3", vocabulary);
+        assertEquals(1, result.size());
+        assertTrue(terms.contains(result.get(0)));
+    }
+
+    @Test
+    void findAlLBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
+        final List<Term> terms = generateTerms(10);
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        final Term root = terms.get(Generator.randomIndex(terms));
+        final Term child = new Term();
+        child.setUri(Generator.generateUri());
+        child.setLabel("test");
+        root.setSubTerms(Collections.singleton(child));
+        final Term matchingDesc = new Term();
+        matchingDesc.setUri(Generator.generateUri());
+        matchingDesc.setLabel("Metropolitan plan");
+        child.setSubTerms(Collections.singleton(matchingDesc));
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        final List<Term> result = sut.findAll("plan", vocabulary);
+        assertEquals(1, result.size());
+        assertEquals(root, result.get(0));
     }
 }
