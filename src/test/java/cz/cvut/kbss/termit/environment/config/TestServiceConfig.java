@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,7 +33,7 @@ public class TestServiceConfig {
         jacksonConverter.setObjectMapper(Environment.getObjectMapper());
         final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
                 Constants.UTF_8_ENCODING));
-        client.setMessageConverters(Arrays.asList(jacksonConverter, stringConverter));
+        client.setMessageConverters(Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
         return client;
     }
 

@@ -3,27 +3,41 @@ package cz.cvut.kbss.termit.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.service.document.AnnotationGenerator;
+import cz.cvut.kbss.termit.service.document.TextAnalysisService;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
 
 import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 import static cz.cvut.kbss.termit.util.ConfigParam.TEXT_ANALYSIS_SERVICE_URL;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class TextAnalysisServiceTest extends BaseServiceTestRunner {
@@ -34,9 +48,11 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     private RestTemplate restTemplate;
 
     @Autowired
-    private Environment environment;
+    private Configuration config;
 
-    @Autowired
+    @Mock
+    private AnnotationGenerator annotationGeneratorMock;
+
     private TextAnalysisService sut;
 
     private MockRestServiceServer mockServer;
@@ -45,24 +61,28 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     private Vocabulary vocabulary;
 
+    private File file;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         this.mockServer = MockRestServiceServer.createServer(restTemplate);
         this.objectMapper = cz.cvut.kbss.termit.environment.Environment.getObjectMapper();
         this.vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
+        this.sut = new TextAnalysisService(restTemplate, config, annotationGeneratorMock);
+        this.file = new File();
+        file.setName("test");
+        file.setLocation(generateFile());
     }
 
     @Test
-    void analyzeDocumentInvokesTextAnalysisServiceWithDocumentContent() throws Exception {
+    void analyzeDocumentInvokesTextAnalysisServiceWithDocumentContent() {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(CONTENT);
-        mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST)).andExpect(content().string(containsString(CONTENT)))
-                  .andRespond(withSuccess());
-        final File file = new File();
-        file.setName("Test");
-        file.setLocation(generateFile());
+                  .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
         sut.analyzeDocument(file, vocabulary);
         mockServer.verify();
     }
@@ -79,14 +99,11 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(CONTENT);
         input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(environment.getRequiredProperty(REPOSITORY_URL.toString())));
-        mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
+        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
-                  .andRespond(withSuccess());
-        final File file = new File();
-        file.setName("Test");
-        file.setLocation(generateFile());
+                  .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
         sut.analyzeDocument(file, vocabulary);
         mockServer.verify();
     }
@@ -96,17 +113,47 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(CONTENT);
         input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(environment.getRequiredProperty(REPOSITORY_URL.toString())));
-        mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
+        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
                   .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE))
-                  .andRespond(withSuccess());
-        final File file = new File();
-        file.setName("Test");
-        file.setLocation(generateFile());
+                  .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
         sut.analyzeDocument(file, vocabulary);
         mockServer.verify();
+    }
+
+    @Test
+    void analyzeDocumentThrowsWebServiceIntegrationExceptionOnError() throws Exception {
+        final TextAnalysisInput input = new TextAnalysisInput();
+        input.setContent(CONTENT);
+        input.setVocabularyContext(vocabulary.getUri());
+        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withServerError());
+        assertThrows(WebServiceIntegrationException.class, () -> sut.analyzeDocument(file, vocabulary));
+        mockServer.verify();
+    }
+
+    @Test
+    void analyzeDocumentInvokesAnnotationGeneratorWithResultFromTextAnalysisService() throws Exception {
+        final TextAnalysisInput input = new TextAnalysisInput();
+        input.setContent(CONTENT);
+        input.setVocabularyContext(vocabulary.getUri());
+        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
+        sut.analyzeDocument(file, vocabulary);
+        mockServer.verify();
+        final ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
+        verify(annotationGeneratorMock).generateAnnotations(captor.capture(), eq(file), eq(vocabulary));
+        final String result = new BufferedReader(new InputStreamReader(captor.getValue())).lines().collect(
+                Collectors.joining("\n"));
+        assertEquals(CONTENT, result);
     }
 }

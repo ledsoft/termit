@@ -22,6 +22,8 @@ public class TextAnalysisInput {
 
     /**
      * URI of the context containing vocabulary whose terms are used in the text analysis. Optional.
+     * <p>
+     * If not specified, the whole {@link #vocabularyRepository} is searched for terms.
      */
     private URI vocabularyContext;
 
