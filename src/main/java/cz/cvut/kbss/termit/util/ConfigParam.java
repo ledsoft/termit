@@ -56,6 +56,11 @@ public enum ConfigParam {
     NAMESPACE_TERM("namespace.term"),
 
     /**
+     * URL of the text analysis service.
+     */
+    TEXT_ANALYSIS_SERVICE_URL("textAnalysis.url"),
+
+    /**
      * Specifies folder in which admin credentials are stored when his account is generated.
      */
     ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation");
