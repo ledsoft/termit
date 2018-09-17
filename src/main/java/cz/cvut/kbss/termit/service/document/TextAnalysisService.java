@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -46,6 +47,7 @@ public class TextAnalysisService {
      * @param file       File whose content shall be analyzed
      * @param vocabulary Vocabulary used for text analysis
      */
+    @Async
     public void analyzeDocument(File file, Vocabulary vocabulary) {
         Objects.requireNonNull(file);
         Objects.requireNonNull(vocabulary);

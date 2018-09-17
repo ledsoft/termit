@@ -22,6 +22,6 @@ public class AnnotationGenerator {
      * @param vocabulary Vocabulary whose terms occur in the document
      */
     public void generateAnnotations(InputStream document, File source, Vocabulary vocabulary) {
-
+        // TODO
     }
 }

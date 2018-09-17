@@ -15,6 +15,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebMvc
+@EnableAsync
 @Import({RestConfig.class, SecurityConfig.class})
 public class WebAppConfig implements WebMvcConfigurer {
 
