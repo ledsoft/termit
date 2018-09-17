@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -37,7 +39,8 @@ public class ServiceConfig {
         jacksonConverter.setObjectMapper(objectMapper);
         final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
                 Constants.UTF_8_ENCODING));
-        client.setMessageConverters(Arrays.asList(jacksonConverter, stringConverter));
+        client.setMessageConverters(
+                Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
         return client;
     }
 

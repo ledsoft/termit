@@ -23,11 +23,11 @@ public class RestExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    private static void logException(RuntimeException ex) {
+    private static void logException(Throwable ex) {
         logException("Exception caught.", ex);
     }
 
-    private static void logException(String message, RuntimeException ex) {
+    private static void logException(String message, Throwable ex) {
         LOG.error(message, ex);
     }
 
@@ -69,5 +69,12 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorInfo> validationException(HttpServletRequest request, ValidationException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(WebServiceIntegrationException.class)
+    public ResponseEntity<ErrorInfo> webServiceIntegrationException(HttpServletRequest request,
+                                                                    WebServiceIntegrationException e) {
+        logException(e.getCause());
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

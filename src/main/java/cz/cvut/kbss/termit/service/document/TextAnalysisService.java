@@ -1,11 +1,13 @@
-package cz.cvut.kbss.termit.service;
+package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
+import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,10 +28,13 @@ public class TextAnalysisService {
 
     private final Configuration config;
 
+    private final AnnotationGenerator annotationGenerator;
+
     @Autowired
-    public TextAnalysisService(RestTemplate restClient, Configuration config) {
+    public TextAnalysisService(RestTemplate restClient, Configuration config, AnnotationGenerator annotationGenerator) {
         this.restClient = restClient;
         this.config = config;
+        this.annotationGenerator = annotationGenerator;
     }
 
     /**
@@ -50,8 +55,16 @@ public class TextAnalysisService {
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         final HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
-        final String result = restClient.exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST,
-                new HttpEntity<>(input, headers), String.class).getBody();
+        try {
+            final Resource result = restClient
+                    .exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST,
+                            new HttpEntity<>(input, headers), Resource.class).getBody();
+            annotationGenerator.generateAnnotations(result.getInputStream(), file, vocabulary);
+        } catch (RuntimeException e) {
+            throw new WebServiceIntegrationException("Text analysis invocation failed.", e);
+        } catch (IOException e) {
+            throw new WebServiceIntegrationException("Unable to read text analysis result from response.", e);
+        }
     }
 
     private String loadFileContent(File file) {
