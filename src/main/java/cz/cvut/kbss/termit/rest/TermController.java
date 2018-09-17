@@ -3,8 +3,6 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.persistence.dao.TermDao;
-import cz.cvut.kbss.termit.rest.util.TermResponseWrapper;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -30,13 +28,11 @@ public class TermController extends BaseController {
     private static final Logger LOG = LoggerFactory.getLogger(TermController.class);
 
     private final TermRepositoryService termService;
-    private final TermDao termDao;
 
     @Autowired
-    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService, TermDao termDao) {
+    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService) {
         super(idResolver, config);
         this.termService = termService;
-        this.termDao = termDao;
     }
 
 
@@ -83,25 +79,16 @@ public class TermController extends BaseController {
         return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termId));
     }
 
-    @RequestMapping(value = "/{fragment}/terms/ids", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TermResponseWrapper> getByIDs(@PathVariable String fragment,
-                                                        @RequestParam(name = "namespace", required = false) String namespace,
-                                                        @RequestBody List<String> terms_ids) {
+    @RequestMapping(value = "/{fragment}/terms/subterms", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public List<Term> getSubtermsByParentID(@PathVariable String fragment,
+                                            @RequestParam(name = "parent_id") String parentID,
+                                            @RequestParam(name = "namespace", required = false) String namespace) {
 
-        List<Term> result = new ArrayList<>(terms_ids.size());
-        List<String> errors = new ArrayList<>();
+        URI termUri = URI.create(parentID);
+        return new ArrayList<>(termService.find(termUri)
+                .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms());
 
-        terms_ids.forEach((String termId) -> {
-            Term term = termService.find(URI.create(termId)).orElse(null);
-            if (term != null){
-                result.add(term);
-            }else{
-                errors.add(termId);
-            }
-        });
-
-        return new ResponseEntity<>(new TermResponseWrapper(result, errors), HttpStatus.OK);
     }
 
     /**
@@ -124,22 +111,22 @@ public class TermController extends BaseController {
 
         final URI vocabularyUri = getVocabularyUri(namespace, fragment);
 
-        URI parentTermUri = idResolver.resolveIdentifier(parentTerm, "");
+        if (parentTerm != null && !parentTerm.equals("")) {
+            Term term = termService.find(URI.create(parentTerm))
+                    .orElseThrow(() -> NotFoundException.create("Term", parentTerm));
+            return new ArrayList<>(term.getSubTerms());
+        }
+        if (label != null && !label.equals("")){
+            return termService.findAll(label, vocabularyUri);
+        }
         if (limit == null) {
             limit = 100;
         }
         if (offset == null) {
             offset = 0;
         }
-        if (label == null) {
-            label = "";
-        }
 
-        if (offset >= limit) {
-            throw new ArrayIndexOutOfBoundsException("Offset cannot be bigger than limit");
-        }
-
-        return termDao.find(label, vocabularyUri, parentTermUri, offset, limit);
+        return termService.findAll(vocabularyUri, limit, offset);
     }
 
     /**
