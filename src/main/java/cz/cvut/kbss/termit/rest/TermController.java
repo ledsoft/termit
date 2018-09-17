@@ -1,8 +1,10 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
+import cz.cvut.kbss.termit.rest.util.TermResponseWrapper;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -18,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,7 +40,7 @@ public class TermController extends BaseController {
     }
 
 
-    private URI getVocabularyUri(String fragment, String namespace){
+    private URI getVocabularyUri(String namespace, String fragment) {
         final URI vocabularyUri;
         if (namespace != null) {
             vocabularyUri = idResolver.resolveIdentifier(namespace, fragment);
@@ -48,8 +51,7 @@ public class TermController extends BaseController {
     }
 
     /**
-     *
-     * @param fragment Vocabulary name
+     * @param fragment  Vocabulary name
      * @param namespace Vocabulary namespace
      * @return List of terms of the specific vocabulary
      */
@@ -58,9 +60,8 @@ public class TermController extends BaseController {
     public List<Term> getAll(@PathVariable String fragment,
                              @RequestParam(name = "namespace", required = false) String namespace,
                              @RequestParam(name = "limit", required = false) Integer limit,
-                             @RequestParam(name = "offset", required = false) Integer offset
-                             ) {
-        URI vocabularyUri = getVocabularyUri(fragment, namespace);
+                             @RequestParam(name = "offset", required = false) Integer offset) {
+        URI vocabularyUri = getVocabularyUri(namespace, fragment);
         if (limit == null) {
             limit = 100;
         }
@@ -70,6 +71,37 @@ public class TermController extends BaseController {
         List<Term> terms = termService.findAll(vocabularyUri, limit, offset);
         LOG.debug("Get all terms for vocabulary {}", vocabularyUri);
         return terms;
+    }
+
+    @RequestMapping(value = "/{fragment}/terms/id", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Term getByID(@PathVariable String fragment,
+                        @RequestParam(name = "term_id") String termId,
+                        @RequestParam(name = "namespace", required = false) String namespace) {
+
+        URI termUri = URI.create(termId);
+        return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termId));
+    }
+
+    @RequestMapping(value = "/{fragment}/terms/ids", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<TermResponseWrapper> getByIDs(@PathVariable String fragment,
+                                                        @RequestParam(name = "namespace", required = false) String namespace,
+                                                        @RequestBody List<String> terms_ids) {
+
+        List<Term> result = new ArrayList<>(terms_ids.size());
+        List<String> errors = new ArrayList<>();
+
+        terms_ids.forEach((String termId) -> {
+            Term term = termService.find(URI.create(termId)).orElse(null);
+            if (term != null){
+                result.add(term);
+            }else{
+                errors.add(termId);
+            }
+        });
+
+        return new ResponseEntity<>(new TermResponseWrapper(result, errors), HttpStatus.OK);
     }
 
     /**
@@ -90,7 +122,7 @@ public class TermController extends BaseController {
                                 @RequestParam(name = "offset", required = false) Integer offset,
                                 @RequestParam(name = "label", required = false) String label) {
 
-        final URI vocabularyUri = getVocabularyUri(fragment, namespace);
+        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
 
         URI parentTermUri = idResolver.resolveIdentifier(parentTerm, "");
         if (limit == null) {
@@ -121,7 +153,7 @@ public class TermController extends BaseController {
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestBody Term term) {
 
-        final URI vocabularyUri = getVocabularyUri(fragment, namespace);
+        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
         this.termService.addTermToVocabulary(term, vocabularyUri);
         LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
         final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
@@ -142,8 +174,7 @@ public class TermController extends BaseController {
     public String generateIdentifier(@PathVariable String fragment,
                                      @RequestParam(name = "namespace", required = false) String namespace,
                                      @RequestParam("name") String name) {
-        URI vocabularyUri = getVocabularyUri(fragment, namespace);
-        //TODO verify vocabulary.getUri().toString() is correct
+        URI vocabularyUri = getVocabularyUri(namespace, fragment);
         return idResolver.generateIdentifier(vocabularyUri.toString() + "/pojem", name).toString();
     }
 }
