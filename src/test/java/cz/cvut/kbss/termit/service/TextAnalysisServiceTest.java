@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,9 +23,7 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 import static cz.cvut.kbss.termit.util.ConfigParam.TEXT_ANALYSIS_SERVICE_URL;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class TextAnalysisServiceTest extends BaseServiceTestRunner {
@@ -81,8 +81,27 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         input.setVocabularyContext(vocabulary.getUri());
         input.setVocabularyRepository(URI.create(environment.getRequiredProperty(REPOSITORY_URL.toString())));
         mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
-                  .andExpect(method(
-                          HttpMethod.POST)).andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withSuccess());
+        final File file = new File();
+        file.setName("Test");
+        file.setLocation(generateFile());
+        sut.analyzeDocument(file, vocabulary);
+        mockServer.verify();
+    }
+
+    @Test
+    void analyzeDocumentPassesContentTypeAndAcceptHeadersToService() throws Exception {
+        final TextAnalysisInput input = new TextAnalysisInput();
+        input.setContent(CONTENT);
+        input.setVocabularyContext(vocabulary.getUri());
+        input.setVocabularyRepository(URI.create(environment.getRequiredProperty(REPOSITORY_URL.toString())));
+        mockServer.expect(requestTo(environment.getRequiredProperty(TEXT_ANALYSIS_SERVICE_URL.toString())))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+                  .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE))
                   .andRespond(withSuccess());
         final File file = new File();
         file.setName("Test");

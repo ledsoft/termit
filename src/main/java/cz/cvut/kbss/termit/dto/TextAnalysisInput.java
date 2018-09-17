@@ -1,9 +1,6 @@
 package cz.cvut.kbss.termit.dto;
 
-import cz.cvut.kbss.termit.model.TermOccurrence;
-
 import java.net.URI;
-import java.util.List;
 
 /**
  * Represents input passed to the text analysis service.
@@ -28,11 +25,6 @@ public class TextAnalysisInput {
      */
     private URI vocabularyContext;
 
-    /**
-     * Existing term occurrences in the text. Optional.
-     */
-    private List<TermOccurrence> occurrences;
-
     public String getContent() {
         return content;
     }
@@ -55,13 +47,5 @@ public class TextAnalysisInput {
 
     public void setVocabularyContext(URI vocabularyContext) {
         this.vocabularyContext = vocabularyContext;
-    }
-
-    public List<TermOccurrence> getOccurrences() {
-        return occurrences;
-    }
-
-    public void setOccurrences(List<TermOccurrence> occurrences) {
-        this.occurrences = occurrences;
     }
 }
