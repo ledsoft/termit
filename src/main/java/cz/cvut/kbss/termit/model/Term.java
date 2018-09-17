@@ -4,8 +4,10 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_term)
@@ -14,6 +16,7 @@ public class Term implements Serializable {
     @Id
     private URI uri;
 
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String label;
@@ -21,8 +24,9 @@ public class Term implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
-    private Set<Term> subTerms;
+    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, cascade = {CascadeType.PERSIST,
+            CascadeType.MERGE}, fetch = FetchType.EAGER)
+    private Set<Term> subTerms; //TODO FetchType.LAZY or change to Set<URI> ???
 
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_vyskyt_termu, fetch = FetchType.EAGER)
@@ -77,6 +81,19 @@ public class Term implements Serializable {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Term)) return false;
+        Term term = (Term) o;
+        return Objects.equals(uri, term.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
     }
 
     @Override
