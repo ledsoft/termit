@@ -7,7 +7,9 @@ import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -46,8 +48,10 @@ public class TextAnalysisService {
         input.setContent(loadFileContent(file));
         input.setVocabularyContext(vocabulary.getUri());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
-        restClient.exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST, new HttpEntity<>(input),
-                Object.class);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
+        final String result = restClient.exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST,
+                new HttpEntity<>(input, headers), String.class).getBody();
     }
 
     private String loadFileContent(File file) {
