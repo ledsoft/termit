@@ -138,10 +138,15 @@ public class TermController extends BaseController {
     @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String fragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
+                                           @RequestParam(name = "parentTermUri") String parentTerm,
                                            @RequestBody Term term) {
 
-        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
-        this.termService.addTermToVocabulary(term, vocabularyUri);
+        URI vocabularyUri = getVocabularyUri(namespace, fragment);
+        URI parentTermUri = null;
+        if (parentTerm != null && !parentTerm.equals("")){
+            parentTermUri = URI.create(parentTerm);
+        }
+        this.termService.addTermToVocabulary(term, vocabularyUri, parentTermUri);
         LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
         final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
         return new ResponseEntity<>(headers, HttpStatus.CREATED);

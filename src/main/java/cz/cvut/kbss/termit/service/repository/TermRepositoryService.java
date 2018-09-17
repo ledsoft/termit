@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.Validator;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TermRepositoryService extends BaseRepositoryService<Term> {
@@ -32,7 +33,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         return this.termDao;
     }
 
-    public void addTermToVocabulary(Term instance, URI vocabularyUri) {
+    public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
         validate(instance);
         Vocabulary vocabulary = vocabularyService.find(vocabularyUri)
                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri));
@@ -40,6 +41,15 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         if (!vocabulary.getGlossary().getTerms().add(instance)){
             throw ResourceExistsException.create("Term", instance.getUri());
         }
+
+        if (parentTermUri != null){
+            Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
+
+            Set<Term> newTerms = parenTerm.getSubTerms();
+            newTerms.add(instance);
+            parenTerm.setSubTerms(newTerms);
+        }
+
         vocabularyService.update(vocabulary);
     }
 
