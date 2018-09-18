@@ -4,8 +4,11 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_document)
@@ -14,6 +17,7 @@ public class Document extends HasProvenanceData implements Serializable {
     @Id
     private URI uri;
 
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String name;
@@ -58,6 +62,14 @@ public class Document extends HasProvenanceData implements Serializable {
 
     public void setFiles(Set<File> files) {
         this.files = files;
+    }
+
+    public void addFile(File file) {
+        Objects.requireNonNull(file);
+        if (files == null) {
+            this.files = new HashSet<>();
+        }
+        files.add(file);
     }
 
     public DocumentVocabulary getVocabulary() {
