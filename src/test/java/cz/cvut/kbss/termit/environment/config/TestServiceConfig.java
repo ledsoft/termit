@@ -1,7 +1,9 @@
 package cz.cvut.kbss.termit.environment.config;
 
+import cz.cvut.kbss.termit.environment.DummySelectorGenerator;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.service.Services;
+import cz.cvut.kbss.termit.service.document.SelectorGenerator;
 import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -40,5 +42,10 @@ public class TestServiceConfig {
     @Bean
     public LocalValidatorFactoryBean validatorFactoryBean() {
         return new LocalValidatorFactoryBean();
+    }
+
+    @Bean
+    public SelectorGenerator selectorGenerator() {
+        return new DummySelectorGenerator();
     }
 }

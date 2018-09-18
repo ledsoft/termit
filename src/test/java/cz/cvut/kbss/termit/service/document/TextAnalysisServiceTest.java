@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service;
+package cz.cvut.kbss.termit.service.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
@@ -6,8 +6,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.service.document.AnnotationGenerator;
-import cz.cvut.kbss.termit.service.document.TextAnalysisService;
+import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
-    private static final String CONTENT = "<html><body><h1>Metropolitan plan</h1><p>Description of the metropolitan plan.</body></html>";
+    private static final String CONTENT =
+            "<html><body><h1>Metropolitan plan</h1><p>Description of the metropolitan plan.</body></html>";
 
     @Autowired
     private RestTemplate restTemplate;
