@@ -30,7 +30,7 @@ public class DocumentController extends BaseController {
     }
 
     private Document getDocument(URI id) {
-        return documentService.find(id).orElseThrow(() -> NotFoundException.create("Document", id));
+        return documentService.find(id).orElseThrow(() -> NotFoundException.create(Document.class.getSimpleName(), id));
     }
 
     /**
