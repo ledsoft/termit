@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service.document;
+package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import org.jsoup.nodes.Element;

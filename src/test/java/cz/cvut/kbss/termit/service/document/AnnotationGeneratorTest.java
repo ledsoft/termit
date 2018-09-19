@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -10,9 +11,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -21,9 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
 
+// Needed for the request-scoped occurrence resolver bean to work
+@WebAppConfiguration
 class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private static final URI TERM_ID = URI.create("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan");
@@ -76,7 +80,6 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         return AnnotationGeneratorTest.class.getClassLoader().getResourceAsStream(file);
     }
 
-    @Disabled
     @Test
     void generateAnnotationsSkipsElementsWithUnsupportedType() throws Exception {
         final InputStream content = changeAnnotationType(loadRDFa("data/rdfa-simple.html"));
@@ -91,5 +94,22 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         element.attr(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
 
         return new ByteArrayInputStream(doc.toString().getBytes());
+    }
+
+    @Test
+    void generateAnnotationsResolvesPrefixes() {
+        final InputStream content = loadRDFa("data/rdfa-simple.html");
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<TermOccurrence> result = termOccurrenceDao.findAll(term);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
+        final InputStream content = loadRDFa("data/rdfa-simple.html");
+        file.setName("test.txt");
+        final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
+                () -> sut.generateAnnotations(content, file, vocabulary));
+        assertThat(ex.getMessage(), containsString("Unsupported type of file"));
     }
 }
