@@ -69,7 +69,7 @@ public class TextAnalysisService {
         }
     }
 
-    private String loadFileContent(File file) {
+    private static String loadFileContent(File file) {
         try {
             final List<String> lines = Files.readAllLines(new java.io.File(file.getLocation()).toPath());
             return String.join("\n", lines);

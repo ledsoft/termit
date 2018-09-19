@@ -14,7 +14,7 @@ import java.util.Optional;
  * between the elements in the actual page. Thus, the exact match is created by concatenating the text content of all
  * the elements.
  */
-class TextQuoteSelectorGenerator extends SelectorGenerator {
+class TextQuoteSelectorGenerator implements SelectorGenerator {
 
     /**
      * Length of the generated prefix and suffix
