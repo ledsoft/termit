@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.environment.config;
 
-import cz.cvut.kbss.termit.environment.DummySelectorGenerator;
+import cz.cvut.kbss.termit.service.document.html.DummySelectorGenerator;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.service.Services;
 import cz.cvut.kbss.termit.service.document.html.SelectorGenerator;
@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -45,6 +46,7 @@ public class TestServiceConfig {
     }
 
     @Bean
+    @Primary
     public SelectorGenerator selectorGenerator() {
         return new DummySelectorGenerator();
     }

@@ -5,6 +5,14 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+/**
+ * Position-based selector of text in a document.
+ * <p>
+ * Note that position selector is susceptible to even minor changes in the document content (added or removed
+ * whitespaces etc.).
+ *
+ * @see <a href="https://www.w3.org/TR/annotation-model/#text-position-selector">https://www.w3.org/TR/annotation-model/#text-position-selector</a>
+ */
 @OWLClass(iri = Vocabulary.s_c_selektor_pozici_v_textu)
 public class TextPositionSelector extends TermSelector {
 
