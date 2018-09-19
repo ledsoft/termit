@@ -3,6 +3,8 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_vyskyt_termu)
@@ -41,6 +43,14 @@ public class TermOccurrence extends AbstractEntity {
 
     public void setTargets(Set<Target> targets) {
         this.targets = targets;
+    }
+
+    public void addTarget(Target target) {
+        Objects.requireNonNull(target);
+        if (targets == null) {
+            this.targets = new HashSet<>(2);
+        }
+        targets.add(target);
     }
 
     @Override

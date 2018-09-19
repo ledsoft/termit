@@ -38,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class VocabularyControllerTest extends BaseControllerTestRunner {
 
+    private static final String PATH = "/vocabularies";
+
     @Mock
     private VocabularyRepositoryService serviceMock;
 
@@ -57,7 +59,8 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
         this.user = Generator.generateUserWithId();
-        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/");
+        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY))
+                .thenReturn(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/");
     }
 
     @Test
@@ -71,7 +74,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         }).collect(Collectors.toList());
         when(serviceMock.findAll()).thenReturn(vocabularies);
 
-        final MvcResult mvcResult = mockMvc.perform(get("/vocabularies")).andExpect(status().isOk()).andReturn();
+        final MvcResult mvcResult = mockMvc.perform(get(PATH)).andExpect(status().isOk()).andReturn();
         final List<Vocabulary> result = readValue(mvcResult, new TypeReference<List<Vocabulary>>() {
         });
         assertEquals(vocabularies.size(), result.size());
@@ -85,7 +88,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
 
-        mockMvc.perform(post("/vocabularies").content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
+        mockMvc.perform(post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                .andExpect(status().isCreated());
         final ArgumentCaptor<Vocabulary> captor = ArgumentCaptor.forClass(Vocabulary.class);
         verify(serviceMock).persist(captor.capture());
@@ -99,9 +102,9 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final String fragment = IdentifierResolver.extractIdentifierFragment(vocabulary.getUri());
 
         final MvcResult mvcResult = mockMvc.perform(
-                post("/vocabularies").content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
+                post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
-        verifyLocationEquals("/vocabularies/" + fragment, mvcResult);
+        verifyLocationEquals(PATH + "/" + fragment, mvcResult);
     }
 
     @Test
@@ -114,7 +117,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
 
         final MvcResult mvcResult = mockMvc
-                .perform(get("/vocabularies/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE))
+                .perform(get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk()).andReturn();
         final Vocabulary result = readValue(mvcResult, Vocabulary.class);
         assertNotNull(result);
@@ -130,7 +133,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                 .thenReturn(unknownUri);
         when(serviceMock.find(any())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/vocabularies/" + fragment)).andExpect(status().isNotFound());
+        mockMvc.perform(get(PATH + "/" + fragment)).andExpect(status().isNotFound());
         verify(serviceMock).find(unknownUri);
     }
 
@@ -145,7 +148,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
 
         final MvcResult mvcResult = mockMvc.perform(
-                get("/vocabularies/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE).param("namespace", namespace))
+                get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE).param("namespace", namespace))
                                            .andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
         verify(idResolverMock).resolveIdentifier(namespace, fragment);
@@ -157,7 +160,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final URI uri = URI.create(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/" +
                 IdentifierResolver.normalize(name));
         when(idResolverMock.generateIdentifier(any(ConfigParam.class), eq(name))).thenReturn(uri);
-        final MvcResult mvcResult = mockMvc.perform(get("/vocabularies/identifier").param("name", name)).andReturn();
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", name)).andReturn();
         assertEquals(uri.toString(), readValue(mvcResult, String.class));
         verify(idResolverMock).generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, name);
     }
@@ -172,7 +175,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final String namespace = "http://kbss.felk.cvut.cz/ontologies/termit/vocabularies/";
         when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(namespace);
         final MvcResult mvcResult = mockMvc.perform(
-                post("/vocabularies").content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
+                post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
         assertThat(location, containsString("namespace=" + uriNs));

@@ -77,4 +77,11 @@ public class RestExceptionHandler {
         logException(e.getCause());
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(AnnotationGenerationException.class)
+    public ResponseEntity<ErrorInfo> annotationGenerationException(HttpServletRequest request,
+                                                                   AnnotationGenerationException e) {
+        logException(e.getCause());
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

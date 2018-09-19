@@ -5,9 +5,12 @@ import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 
+import javax.validation.constraints.NotNull;
+
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_dokumentovy_slovnik)
 public class DocumentVocabulary extends Vocabulary {
 
+    @NotNull
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_popisuje_dokument, fetch = FetchType.EAGER)
     private Document document;

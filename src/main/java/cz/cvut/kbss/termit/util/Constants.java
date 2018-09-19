@@ -65,4 +65,34 @@ public class Constants {
     private Constants() {
         throw new AssertionError();
     }
+
+    /**
+     * Constants from the RDFa vocabulary.
+     */
+    public static final class RDFa {
+
+        /**
+         * RDFa property attribute.
+         */
+        public static final String PROPERTY = "property";
+
+        /**
+         * RDFa context identifier attribute.
+         */
+        public static final String ABOUT = "about";
+
+        /**
+         * RDFa type identifier attribute.
+         */
+        public static final String TYPE = "typeof";
+
+        /**
+         * RDFa resource identifier.
+         */
+        public static final String RESOURCE = "resource";
+
+        private RDFa() {
+            throw new AssertionError();
+        }
+    }
 }

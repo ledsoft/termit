@@ -68,6 +68,20 @@ public class Generator {
     }
 
     /**
+     * Generates a (pseudo)random index of an element in the array.
+     * <p>
+     * I.e. the returned number is in the interval <0, arr.length).
+     *
+     * @param arr The array
+     * @return Random index
+     */
+    public static int randomIndex(Object[] arr) {
+        assert arr != null;
+        assert arr.length > 0;
+        return random.nextInt(arr.length);
+    }
+
+    /**
      * Generators a (pseudo) random boolean.
      *
      * @return Random boolean
