@@ -3,10 +3,12 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +31,14 @@ public class TermController extends BaseController {
 
     private final TermRepositoryService termService;
 
+    private final VocabularyController vocabularyController;
+
     @Autowired
-    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService) {
+    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService,
+                          VocabularyController vocabularyController) {
         super(idResolver, config);
         this.termService = termService;
+        this.vocabularyController = vocabularyController;
     }
 
 
@@ -87,7 +93,7 @@ public class TermController extends BaseController {
 
         URI termUri = URI.create(parentID);
         return new ArrayList<>(termService.find(termUri)
-                .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms());
+                                          .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms());
 
     }
 
@@ -113,10 +119,10 @@ public class TermController extends BaseController {
 
         if (parentTerm != null && !parentTerm.equals("")) {
             Term term = termService.find(URI.create(parentTerm))
-                    .orElseThrow(() -> NotFoundException.create("Term", parentTerm));
+                                   .orElseThrow(() -> NotFoundException.create("Term", parentTerm));
             return new ArrayList<>(term.getSubTerms());
         }
-        if (label != null && !label.equals("")){
+        if (label != null && !label.equals("")) {
             return termService.findAll(label, vocabularyUri);
         }
         if (limit == null) {
@@ -135,20 +141,22 @@ public class TermController extends BaseController {
      * @param term      Vocabulary term that will be created
      * @return HttpHeader
      */
-    @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String fragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestParam(name = "parentTermUri") String parentTerm,
                                            @RequestBody Term term) {
 
-        URI vocabularyUri = getVocabularyUri(namespace, fragment);
-        URI parentTermUri = null;
-        if (parentTerm != null && !parentTerm.equals("")){
-            parentTermUri = URI.create(parentTerm);
+        final Vocabulary vocabulary = vocabularyController.getById(fragment, namespace);
+        if (parentTerm != null && !parentTerm.isEmpty()) {
+            termService.addTermToVocabulary(term, vocabulary, URI.create(parentTerm));
+        } else {
+            termService.addTermToVocabulary(term, vocabulary);
         }
-        this.termService.addTermToVocabulary(term, vocabularyUri, parentTermUri);
-        LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
-        final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
+
+        LOG.debug("Term {} in vocabulary {} created.", term, vocabulary);
+        final HttpHeaders headers = generateLocationHeader(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY);
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
@@ -167,6 +175,7 @@ public class TermController extends BaseController {
                                      @RequestParam(name = "namespace", required = false) String namespace,
                                      @RequestParam("name") String name) {
         URI vocabularyUri = getVocabularyUri(namespace, fragment);
-        return idResolver.generateIdentifier(vocabularyUri.toString() + "/pojem", name).toString();
+        return idResolver.generateIdentifier(vocabularyUri.toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR, name)
+                         .toString();
     }
 }

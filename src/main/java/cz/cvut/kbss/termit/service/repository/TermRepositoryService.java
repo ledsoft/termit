@@ -9,10 +9,12 @@ import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -33,23 +35,34 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         return this.termDao;
     }
 
-    public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
+    @Transactional
+    public void addTermToVocabulary(Term instance, Vocabulary vocabulary) {
+        Objects.requireNonNull(instance);
+        Objects.requireNonNull(vocabulary);
+        addTopLevelTerm(instance, vocabulary);
+        vocabularyService.update(vocabulary);
+    }
+
+    private void addTopLevelTerm(Term instance, Vocabulary vocabulary) {
         validate(instance);
-        Vocabulary vocabulary = vocabularyService.find(vocabularyUri)
-                                                 .orElseThrow(() -> NotFoundException
-                                                         .create(Vocabulary.class.getSimpleName(), vocabularyUri));
         //TODO custom comparator for the Set<Term> -> compare only uri not the objects
         if (!vocabulary.getGlossary().getTerms().add(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
+    }
 
-        if (parentTermUri != null) {
-            Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
+    @Transactional
+    public void addTermToVocabulary(Term instance, Vocabulary vocabulary, URI parentTermUri) {
+        Objects.requireNonNull(instance);
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(parentTermUri);
+        addTopLevelTerm(instance, vocabulary);
 
-            Set<Term> newTerms = parenTerm.getSubTerms();
-            newTerms.add(instance);
-            parenTerm.setSubTerms(newTerms);
-        }
+        Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
+
+        Set<Term> newTerms = parenTerm.getSubTerms();
+        newTerms.add(instance);
+        parenTerm.setSubTerms(newTerms);
 
         vocabularyService.update(vocabulary);
     }
