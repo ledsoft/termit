@@ -8,7 +8,7 @@ import org.jsoup.nodes.TextNode;
 /**
  * Generator of HTML/XML selectors.
  */
-public abstract class SelectorGenerator {
+abstract class SelectorGenerator {
 
     /**
      * Generates selector for the specified elements' content.

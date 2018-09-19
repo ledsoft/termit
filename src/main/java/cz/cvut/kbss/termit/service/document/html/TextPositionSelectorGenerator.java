@@ -18,7 +18,7 @@ import java.util.List;
  * In order to be compatible with {@link cz.cvut.kbss.termit.model.selector.TextQuoteSelector} (as is required by the
  * specification), the generator uses only text content of the document, so any HTML/XML or other markup is ignored.
  */
-public class TextPositionSelectorGenerator extends SelectorGenerator {
+class TextPositionSelectorGenerator extends SelectorGenerator {
 
     @Override
     public TextPositionSelector generateSelector(Element... elements) {
