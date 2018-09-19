@@ -49,7 +49,8 @@ public class AnnotationGenerator {
         // This will allow us to potentially support different types of files
         if (htmlOccurrenceResolver.supports(source)) {
             LOG.debug("Resolving annotations of HTML file {}.", source);
-            final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences(content, source);
+            htmlOccurrenceResolver.parseContent(content, source);
+            final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences();
             occurrences.forEach(o -> {
                 o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
                 termOccurrenceDao.persist(o);

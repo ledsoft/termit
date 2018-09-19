@@ -1,10 +1,7 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.model.Target;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -39,6 +36,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private final HtmlSelectorGenerators selectorGenerators;
 
+    private Document document;
+    private File source;
+
     private Map<String, String> prefixes;
 
     @Autowired
@@ -48,26 +48,12 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     }
 
     @Override
-    public List<TermOccurrence> findTermOccurrences(InputStream content, File source) {
-        final Document document = parseDocument(content, source);
-        this.prefixes = resolvePrefixes(document);
-        final Map<String, List<Element>> annotations = mapRDFaTermOccurrenceAnnotations(document);
-        final List<TermOccurrence> result = new ArrayList<>(annotations.size());
-        for (List<Element> elements : annotations.values()) {
-            LOG.trace("Processing RDFa annotated elements {}.", elements);
-            final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
-            occurrence.ifPresent(to -> {
-                LOG.trace("Found term occurrence {}.", to, source);
-                result.add(to);
-            });
-        }
-        return result;
-    }
-
-    private static Document parseDocument(InputStream content, File source) {
+    public void parseContent(InputStream input, File source) {
         try {
-            return Jsoup.parse(content, StandardCharsets.UTF_8.name(),
+            this.source = source;
+            this.document = Jsoup.parse(input, StandardCharsets.UTF_8.name(),
                     source.getOrigin() != null ? source.getOrigin().toString() : "");
+            this.prefixes = resolvePrefixes(document);
         } catch (IOException e) {
             throw new AnnotationGenerationException("Unable to read RDFa document.", e);
         }
@@ -86,6 +72,27 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             }
         });
         return map;
+    }
+
+    @Override
+    public List<Term> findNewTerms(Vocabulary vocabulary) {
+        return null;
+    }
+
+    @Override
+    public List<TermOccurrence> findTermOccurrences() {
+        assert document != null;
+        final Map<String, List<Element>> annotations = mapRDFaTermOccurrenceAnnotations(document);
+        final List<TermOccurrence> result = new ArrayList<>(annotations.size());
+        for (List<Element> elements : annotations.values()) {
+            LOG.trace("Processing RDFa annotated elements {}.", elements);
+            final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
+            occurrence.ifPresent(to -> {
+                LOG.trace("Found term occurrence {}.", to, source);
+                result.add(to);
+            });
+        }
+        return result;
     }
 
     private Map<String, List<Element>> mapRDFaTermOccurrenceAnnotations(Document document) {
