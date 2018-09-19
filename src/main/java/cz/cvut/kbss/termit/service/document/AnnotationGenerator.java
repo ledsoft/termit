@@ -17,6 +17,9 @@ import java.util.List;
 
 /**
  * Creates annotations (term occurrences) for vocabulary terms.
+ * <p>
+ * The generated {@link TermOccurrence}s are assigned a special type so that it is clear they have been suggested by an
+ * automated procedure and should be reviewed.
  */
 @Service
 public class AnnotationGenerator {
@@ -36,11 +39,9 @@ public class AnnotationGenerator {
 
     /**
      * Generates annotations (term occurrences) for terms identified in the specified document.
-     * <p>
-     * The document is annotated using RDFa to indicate term occurrences in the text.
      *
      * @param content    Content of file with identified term occurrences
-     * @param source     Source file of the document
+     * @param source     Source file of the annotated document
      * @param vocabulary Vocabulary whose terms occur in the document
      */
     @Transactional
@@ -49,7 +50,10 @@ public class AnnotationGenerator {
         if (htmlOccurrenceResolver.supports(source)) {
             LOG.debug("Resolving annotations of HTML file {}.", source);
             final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences(content, source);
-            termOccurrenceDao.persist(occurrences);
+            occurrences.forEach(o -> {
+                o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
+                termOccurrenceDao.persist(o);
+            });
         } else {
             throw new AnnotationGenerationException("Unsupported type of file " + source);
         }
