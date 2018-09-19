@@ -51,11 +51,6 @@ public enum ConfigParam {
     NAMESPACE_DOCUMENT("namespace.document"),
 
     /**
-     * Namespace for term identifiers.
-     */
-    NAMESPACE_TERM("namespace.term"),
-
-    /**
      * URL of the text analysis service.
      */
     TEXT_ANALYSIS_SERVICE_URL("textAnalysis.url"),
