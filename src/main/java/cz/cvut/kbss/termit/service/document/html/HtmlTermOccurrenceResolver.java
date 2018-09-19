@@ -49,7 +49,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public List<TermOccurrence> findTermOccurrences(InputStream content, File source) {
-        final Document document = parseDocument(content);
+        final Document document = parseDocument(content, source);
         this.prefixes = resolvePrefixes(document);
         final Map<String, List<Element>> annotations = mapRDFaTermOccurrenceAnnotations(document);
         final List<TermOccurrence> result = new ArrayList<>(annotations.size());
@@ -64,9 +64,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return result;
     }
 
-    private static Document parseDocument(InputStream content) {
+    private static Document parseDocument(InputStream content, File source) {
         try {
-            return Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
+            return Jsoup.parse(content, StandardCharsets.UTF_8.name(),
+                    source.getOrigin() != null ? source.getOrigin().toString() : "");
         } catch (IOException e) {
             throw new AnnotationGenerationException("Unable to read RDFa document.", e);
         }
