@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.document;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 
 import java.io.InputStream;
@@ -20,13 +21,39 @@ public abstract class TermOccurrenceResolver {
     }
 
     /**
-     * Finds term occurrences in the input stream.
+     * Parses the specified input into some abstract representation from which new terms and term occurrences can be
+     * extracted.
+     * <p>
+     * Note that this method has to be called before calling {@link #findTermOccurrences()} and {@link
+     * #findNewTerms(Vocabulary)}.
      *
-     * @param input  Data containing term occurrence identification
-     * @param source Original source of the data. Used for term occurrence generation
-     * @return List of term occurrences identified in the input
+     * @param input  The input to parse
+     * @param source Original source of the input. Used for term occurrence generation
      */
-    public abstract List<TermOccurrence> findTermOccurrences(InputStream input, File source);
+    public abstract void parseContent(InputStream input, File source);
+
+    /**
+     * Finds term occurrences in the input stream.
+     * <p>
+     * {@link #parseContent(InputStream, File)} has to be called prior to this method.
+     *
+     * @return List of term occurrences identified in the input
+     * @see #parseContent(InputStream, File)
+     */
+    public abstract List<TermOccurrence> findTermOccurrences();
+
+    /**
+     * Discovers new terms in the loaded file.
+     * <p>
+     * The specified vocabulary will be used mainly for term identifier resolution.
+     * <p>
+     * {@link #parseContent(InputStream, File)} has to be called prior to this method.
+     *
+     * @param vocabulary Vocabulary to which the new terms will be added
+     * @return Newly discovered terms
+     * @see #parseContent(InputStream, File)
+     */
+    public abstract List<Term> findNewTerms(Vocabulary vocabulary);
 
     /**
      * Checks whether this resolver supports the specified source file type.
