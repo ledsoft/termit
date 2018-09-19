@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service.repository;
+package cz.cvut.kbss.termit.service;
 
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.util.Configuration;
