@@ -1,10 +1,10 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.model.selector.TermSelector;
-import org.w3c.dom.Element;
+import org.jsoup.nodes.Element;
 
 /**
- * Generator of XML selectors.
+ * Generator of HTML/XML selectors.
  */
 public interface SelectorGenerator {
 
