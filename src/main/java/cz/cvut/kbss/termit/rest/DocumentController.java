@@ -68,7 +68,7 @@ public class DocumentController extends BaseController {
         }
     }
 
-    private Optional<File> resolveFileToAnalyze(Document document, String fileName) {
+    private static Optional<File> resolveFileToAnalyze(Document document, String fileName) {
         return document.getFiles().stream().filter(f -> f.getName().equals(fileName)).findAny();
     }
 }

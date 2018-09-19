@@ -56,7 +56,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         for (List<Element> elements : annotations.values()) {
             LOG.trace("Processing RDFa annotated elements {}.", elements);
             final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
-            occurrence.ifPresent((to) -> {
+            occurrence.ifPresent(to -> {
                 LOG.trace("Found term occurrence {}.", to, source);
                 result.add(to);
             });
@@ -64,7 +64,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return result;
     }
 
-    private Document parseDocument(InputStream content) {
+    private static Document parseDocument(InputStream content) {
         try {
             return Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
         } catch (IOException e) {
@@ -72,8 +72,8 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         }
     }
 
-    private Map<String, String> resolvePrefixes(Document document) {
-        final Map<String, String> prefixes = new HashMap<>(4);
+    private static Map<String, String> resolvePrefixes(Document document) {
+        final Map<String, String> map = new HashMap<>(4);
         final Elements prefixElements = document.getElementsByAttribute(Constants.RDFa.PREFIX);
         prefixElements.forEach(element -> {
             final String prefixStr = element.attr(Constants.RDFa.PREFIX);
@@ -81,10 +81,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             for (String def : prefixDefinitions) {
                 final String[] split = def.split(": ");
                 assert split.length == 2;
-                prefixes.put(split[0].trim(), split[1].trim());
+                map.put(split[0].trim(), split[1].trim());
             }
         });
-        return prefixes;
+        return map;
     }
 
     private Map<String, List<Element>> mapRDFaTermOccurrenceAnnotations(Document document) {
@@ -94,13 +94,13 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             if (!isTermOccurrence(element)) {
                 continue;
             }
-            map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), (key) -> new ArrayList<>()).add(element);
+            map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
         }
         return map;
     }
 
     private Optional<TermOccurrence> resolveAnnotation(List<Element> rdfaElem, File source) {
-        assert rdfaElem.size() > 0;
+        assert !rdfaElem.isEmpty();
         final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
         if (termId.isEmpty()) {
             LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);

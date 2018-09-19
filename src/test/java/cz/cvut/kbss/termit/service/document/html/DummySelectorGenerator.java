@@ -9,7 +9,7 @@ import org.jsoup.nodes.Element;
  * <p>
  * For testing purposes only.
  */
-public class DummySelectorGenerator extends SelectorGenerator {
+public class DummySelectorGenerator implements SelectorGenerator {
 
     @Override
     public TermSelector generateSelector(Element... elements) {

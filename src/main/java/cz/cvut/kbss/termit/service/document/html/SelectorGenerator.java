@@ -8,7 +8,7 @@ import org.jsoup.nodes.TextNode;
 /**
  * Generator of HTML/XML selectors.
  */
-abstract class SelectorGenerator {
+interface SelectorGenerator {
 
     /**
      * Generates selector for the specified elements' content.
@@ -20,7 +20,7 @@ abstract class SelectorGenerator {
      * @param elements Elements to generate selector for. At least one must be provided
      * @return Selector for the text content of the specified elements
      */
-    abstract TermSelector generateSelector(Element... elements);
+    TermSelector generateSelector(Element... elements);
 
     /**
      * Extracts text content of the specified elements, joining them into one string.
@@ -28,7 +28,7 @@ abstract class SelectorGenerator {
      * @param elements Elements to extract text from
      * @return Text content
      */
-    String extractExactText(Element[] elements) {
+    default String extractExactText(Element[] elements) {
         final StringBuilder sb = new StringBuilder();
         for (Element element : elements) {
             sb.append(element.wholeText());
@@ -36,7 +36,7 @@ abstract class SelectorGenerator {
         return sb.toString();
     }
 
-    StringBuilder extractNodeText(Iterable<Node> nodes) {
+    default StringBuilder extractNodeText(Iterable<Node> nodes) {
         final StringBuilder sb = new StringBuilder();
         for (Node node : nodes) {
             sb.append(node instanceof TextNode ? ((TextNode) node).getWholeText() : ((Element) node).wholeText());
