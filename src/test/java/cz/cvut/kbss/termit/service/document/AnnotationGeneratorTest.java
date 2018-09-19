@@ -31,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private static final URI TERM_ID = URI.create("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan");
+    private static final URI TERM_TWO_ID = URI
+            .create("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan-praha");
 
     @Autowired
     private EntityManager em;
@@ -46,15 +48,20 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private File file;
 
     private Term term;
+    private Term termTwo;
 
     @BeforeEach
     void setUp() {
         this.term = new Term();
         term.setUri(TERM_ID);
         term.setLabel("Územní plán");
+        this.termTwo = new Term();
+        termTwo.setUri(TERM_TWO_ID);
+        termTwo.setLabel("Územní plán hlavního města Prahy");
         this.vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
         this.vocabulary.getGlossary().addTerm(term);
+        this.vocabulary.getGlossary().addTerm(termTwo);
         final User author = Generator.generateUserWithId();
         vocabulary.setAuthor(author);
         vocabulary.setDateCreated(new Date());
@@ -111,5 +118,31 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file, vocabulary));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
+    }
+
+    @Test
+    void generateAnnotationsResolvesOverlappingAnnotations() {
+        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
+        sut.generateAnnotations(content, file, vocabulary);
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
+        assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
+    }
+
+    @Test
+    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnknownTermIdentifier() throws Exception {
+        final InputStream content = setUnknownTermIdentifier(loadRDFa("data/rdfa-simple.html"));
+        final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
+                () -> sut.generateAnnotations(content, file, vocabulary));
+        assertThat(ex.getMessage(), containsString("Term with id "));
+        assertThat(ex.getMessage(), containsString("not found"));
+    }
+
+    private InputStream setUnknownTermIdentifier(InputStream content) throws Exception {
+        final Document doc = Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
+        final Elements element = doc.getElementsByAttribute("about");
+        assert element.size() == 1;
+        element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
+
+        return new ByteArrayInputStream(doc.toString().getBytes());
     }
 }

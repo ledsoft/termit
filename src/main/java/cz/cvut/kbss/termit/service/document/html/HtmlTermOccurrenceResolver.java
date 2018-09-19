@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
@@ -30,7 +29,7 @@ import java.util.*;
 /**
  * Resolves term occurrences from RDFa-annotated HTML document.
  * <p>
- * This class is not thread-safe.
+ * This class is not thread-safe and not re-entrant.
  */
 @Service("html")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -52,11 +51,11 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     public List<TermOccurrence> findTermOccurrences(InputStream content, File source) {
         final Document document = parseDocument(content);
         this.prefixes = resolvePrefixes(document);
-        final Elements rdfaElements = retrieveRDFaElements(document);
-        final List<TermOccurrence> result = new ArrayList<>();
-        for (Element element : rdfaElements) {
-            LOG.trace("Processing RDFa annotated element {}.", element);
-            final Optional<TermOccurrence> occurrence = resolveAnnotation(element, source);
+        final Map<String, List<Element>> annotations = mapRDFaTermOccurrenceAnnotations(document);
+        final List<TermOccurrence> result = new ArrayList<>(annotations.size());
+        for (List<Element> elements : annotations.values()) {
+            LOG.trace("Processing RDFa annotated elements {}.", elements);
+            final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
             occurrence.ifPresent((to) -> {
                 LOG.trace("Found term occurrence {}.", to, source);
                 result.add(to);
@@ -88,21 +87,28 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return prefixes;
     }
 
-    private Elements retrieveRDFaElements(Document document) {
-        return document.getElementsByAttribute(Constants.RDFa.ABOUT);
+    private Map<String, List<Element>> mapRDFaTermOccurrenceAnnotations(Document document) {
+        final Map<String, List<Element>> map = new LinkedHashMap<>();
+        final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
+        for (Element element : elements) {
+            if (!isTermOccurrence(element)) {
+                continue;
+            }
+            map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), (key) -> new ArrayList<>()).add(element);
+        }
+        return map;
     }
 
-    private Optional<TermOccurrence> resolveAnnotation(Element rdfaElem, File source) {
-        if (!isTermOccurrence(rdfaElem)) {
-            return Optional.empty();
-        }
-        final String termId = fullIri(rdfaElem.attr(Constants.RDFa.RESOURCE));
-        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new NotFoundException(
+    private Optional<TermOccurrence> resolveAnnotation(List<Element> rdfaElem, File source) {
+        assert rdfaElem.size() > 0;
+        final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
+        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
                 "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
         final TermOccurrence occurrence = createOccurrence(term);
         final Target target = new Target();
         target.setSource(source);
-        target.setSelectors(Collections.singleton(selectorGenerator.generateSelector(rdfaElem)));
+        target.setSelectors(
+                Collections.singleton(selectorGenerator.generateSelector(rdfaElem.toArray(new Element[0]))));
         occurrence.addTarget(target);
         return Optional.of(occurrence);
     }
