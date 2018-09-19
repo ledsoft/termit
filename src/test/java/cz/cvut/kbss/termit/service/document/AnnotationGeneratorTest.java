@@ -123,6 +123,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() {
         final InputStream content = loadRDFa("data/rdfa-overlapping.html");
+        file.setName("rdfa-overlapping.html");
         sut.generateAnnotations(content, file, vocabulary);
         assertEquals(1, termOccurrenceDao.findAll(term).size());
         assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
@@ -144,5 +145,29 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
 
         return new ByteArrayInputStream(doc.toString().getBytes());
+    }
+
+    @Test
+    void generateAnnotationsHandlesLargerDocumentAnalysis() {
+        final Term mp = new Term();
+        mp.setLabel("Metropolitní plán");
+        mp.setUri(URI.create("http://test.org/pojem/metropolitni-plan"));
+        final Term ma = new Term();
+        ma.setLabel("Správní území Prahy");
+        ma.setUri(URI.create("http://test.org/pojem/spravni-uzemi-prahy"));
+        final Term area = new Term();
+        area.setLabel("Území");
+        area.setUri(URI.create("http://test.org/pojem/uzemi"));
+        vocabulary.getGlossary().addTerm(mp);
+        vocabulary.getGlossary().addTerm(ma);
+        vocabulary.getGlossary().addTerm(area);
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        final InputStream content = loadRDFa("data/rdfa-large.html");
+        file.setName("rdfa-large.html");
+        sut.generateAnnotations(content, file, vocabulary);
+        assertFalse(termOccurrenceDao.findAll(mp).isEmpty());
+        assertFalse(termOccurrenceDao.findAll(ma).isEmpty());
+        assertFalse(termOccurrenceDao.findAll(area).isEmpty());
     }
 }

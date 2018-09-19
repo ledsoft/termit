@@ -102,6 +102,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private Optional<TermOccurrence> resolveAnnotation(List<Element> rdfaElem, File source) {
         assert rdfaElem.size() > 0;
         final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
+        if (termId.isEmpty()) {
+            LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);
+            return Optional.empty();
+        }
         final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
                 "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
         final TermOccurrence occurrence = createOccurrence(term);
