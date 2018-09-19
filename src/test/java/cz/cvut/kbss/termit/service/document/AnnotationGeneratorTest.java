@@ -1,9 +1,11 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.Constants;
@@ -41,9 +43,13 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private TermOccurrenceDao termOccurrenceDao;
 
     @Autowired
+    private TermDao termDao;
+
+    @Autowired
     private AnnotationGenerator sut;
 
     private Vocabulary vocabulary;
+    private EntityDescriptor vocabDescriptor;
 
     private File file;
 
@@ -51,7 +57,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private Term termTwo;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         this.term = new Term();
         term.setUri(TERM_ID);
         term.setLabel("Územní plán");
@@ -62,6 +68,8 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setUri(Generator.generateUri());
         this.vocabulary.getGlossary().addTerm(term);
         this.vocabulary.getGlossary().addTerm(termTwo);
+        this.vocabDescriptor = new EntityDescriptor(vocabulary.getUri());
+        vocabDescriptor.addAttributeContext(HasProvenanceData.class.getDeclaredField("author"), null);
         final User author = Generator.generateUserWithId();
         vocabulary.setAuthor(author);
         vocabulary.setDateCreated(new Date());
@@ -70,7 +78,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         file.setName("rdfa-simple.html");
         transactional(() -> {
             em.persist(author);
-            em.persist(vocabulary);
+            em.persist(vocabulary, vocabDescriptor);
             em.persist(file);
         });
     }
@@ -161,7 +169,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(mp);
         vocabulary.getGlossary().addTerm(ma);
         vocabulary.getGlossary().addTerm(area);
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
 
         final InputStream content = loadRDFa("data/rdfa-large.html");
         file.setName("rdfa-large.html");
@@ -181,5 +189,19 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
                 to.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu)));
         assertEquals(1, termOccurrenceDao.findAll(term).size());
         assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
+    }
+
+    @Test
+    void generateAnnotationsPersistsNewTerms() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        file.setName("rdfa-new-terms.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        assertEquals(origTerms.size() + 1, resultTerms.size());
+        resultTerms.removeAll(origTerms);
+        final Term newTerm = resultTerms.get(0);
+        // TODO Maybe the annotations should specify a lemmatized form of the keyword, which would be used as term label
+        assertEquals("města", newTerm.getLabel());
     }
 }

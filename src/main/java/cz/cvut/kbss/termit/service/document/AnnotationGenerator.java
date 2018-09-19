@@ -2,9 +2,11 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
+import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +28,17 @@ public class AnnotationGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnnotationGenerator.class);
 
+    private final TermRepositoryService termService;
+
     private final TermOccurrenceDao termOccurrenceDao;
 
     private final TermOccurrenceResolver htmlOccurrenceResolver;
 
     @Autowired
-    public AnnotationGenerator(TermOccurrenceDao termOccurrenceDao,
+    public AnnotationGenerator(TermRepositoryService termService,
+                               TermOccurrenceDao termOccurrenceDao,
                                @Qualifier("html") TermOccurrenceResolver htmlOccurrenceResolver) {
+        this.termService = termService;
         this.termOccurrenceDao = termOccurrenceDao;
         this.htmlOccurrenceResolver = htmlOccurrenceResolver;
     }
@@ -50,6 +56,8 @@ public class AnnotationGenerator {
         if (htmlOccurrenceResolver.supports(source)) {
             LOG.debug("Resolving annotations of HTML file {}.", source);
             htmlOccurrenceResolver.parseContent(content, source);
+            final List<Term> newTerms = htmlOccurrenceResolver.findNewTerms(vocabulary);
+            newTerms.forEach(t -> termService.addTermToVocabulary(t, vocabulary));
             final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences();
             occurrences.forEach(o -> {
                 o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -36,15 +37,19 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private final HtmlSelectorGenerators selectorGenerators;
 
+    private final IdentifierResolver identifierResolver;
+
     private Document document;
     private File source;
 
     private Map<String, String> prefixes;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
+                               IdentifierResolver identifierResolver) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
+        this.identifierResolver = identifierResolver;
     }
 
     @Override
@@ -76,7 +81,25 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public List<Term> findNewTerms(Vocabulary vocabulary) {
-        return null;
+        final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
+        final List<Term> newTerms = new ArrayList<>();
+        for (Element element : elements) {
+            if (isNotTermOccurrence(element) || existingTerm(element)) {
+                continue;
+            }
+            final String label = element.wholeText();
+            final Term newTerm = new Term();
+            newTerm.setLabel(label);
+            newTerm.setUri(identifierResolver
+                    .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
+                            label));
+            newTerms.add(newTerm);
+        }
+        return newTerms;
+    }
+
+    private boolean existingTerm(Element rdfaElem) {
+        return !rdfaElem.attr(Constants.RDFa.RESOURCE).isEmpty();
     }
 
     @Override
@@ -99,7 +122,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         final Map<String, List<Element>> map = new LinkedHashMap<>();
         final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
         for (Element element : elements) {
-            if (!isTermOccurrence(element)) {
+            if (isNotTermOccurrence(element)) {
                 continue;
             }
             map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
@@ -124,17 +147,17 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return Optional.of(occurrence);
     }
 
-    private boolean isTermOccurrence(Element rdfaElem) {
+    private boolean isNotTermOccurrence(Element rdfaElem) {
         final String typesString = rdfaElem.attr(Constants.RDFa.TYPE);
         final String[] types = typesString.split(" ");
         // Perhaps we should check also for correct property?
         for (String type : types) {
             final String fullType = fullIri(type);
             if (fullType.equals(cz.cvut.kbss.termit.util.Vocabulary.s_c_vyskyt_termu)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private String fullIri(String possiblyPrefixed) {
