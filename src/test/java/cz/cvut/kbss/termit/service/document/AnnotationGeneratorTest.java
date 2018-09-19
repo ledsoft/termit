@@ -6,38 +6,27 @@ import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.Constants;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private static final URI TERM_ID = URI.create("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan");
-
-    private static final DocumentBuilderFactory BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
-    private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
-    private static final TransformerFactory TRANSFORMER_FACTORY = TransformerFactory.newInstance();
 
     @Autowired
     private EntityManager em;
@@ -96,15 +85,11 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     private InputStream changeAnnotationType(InputStream content) throws Exception {
-        final Document doc = BUILDER_FACTORY.newDocumentBuilder().parse(content);
-        final Element element = (Element) XPATH_FACTORY.newXPath().evaluate("//span[@about]", doc, XPathConstants.NODE);
-        element.setAttribute(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
-        Transformer transformer = TRANSFORMER_FACTORY.newTransformer();
+        final Document doc = Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
+        final Elements element = doc.getElementsByAttribute("about");
+        assert element.size() == 1;
+        element.attr(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
 
-        DOMSource source = new DOMSource(doc);
-        final StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-        transformer.transform(source, result);
-        return new ByteArrayInputStream(sw.getBuffer().toString().getBytes());
+        return new ByteArrayInputStream(doc.toString().getBytes());
     }
 }

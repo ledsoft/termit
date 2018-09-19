@@ -36,8 +36,15 @@ _* Technology not used in INBAS RT_
 
 ## Implementation Notes
 
+### Bean Discovery
+
 We are using `basePackageClasses` instead of `basePackages` in `ComponentScan`. This is more resilient to refactoring errors 
 because it uses classes instead of String-based package info. Thus, any errors are discovered during compilation.
+
+### jsoup
+
+Had to switch from standard Java DOM implementation to **jsoup** because DOM had sometimes trouble parsing HTML documents (`meta` tags in header).
+Jsoup, on the other hand, handles HTML natively and should be able to work with XML (if need be) as well.
 
 ### Validation
 
