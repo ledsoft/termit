@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -81,6 +82,14 @@ public class Term implements Serializable {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    public void addType(String type) {
+        Objects.requireNonNull(type);
+        if (types == null) {
+            this.types = new HashSet<>(2);
+        }
+        types.add(type);
     }
 
     @Override
