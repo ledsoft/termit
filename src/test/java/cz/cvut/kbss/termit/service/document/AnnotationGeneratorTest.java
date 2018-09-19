@@ -170,4 +170,16 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertFalse(termOccurrenceDao.findAll(ma).isEmpty());
         assertFalse(termOccurrenceDao.findAll(area).isEmpty());
     }
+
+    @Test
+    void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() {
+        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
+        file.setName("rdfa-overlapping.html");
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<TermOccurrence> result = termOccurrenceDao.findAll();
+        result.forEach(to -> assertTrue(
+                to.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu)));
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
+        assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
+    }
 }

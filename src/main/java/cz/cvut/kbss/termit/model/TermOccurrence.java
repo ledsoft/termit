@@ -21,6 +21,9 @@ public class TermOccurrence extends AbstractEntity {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Target> targets;
 
+    @Types
+    private Set<String> types;
+
     public String getDescription() {
         return description;
     }
@@ -51,6 +54,22 @@ public class TermOccurrence extends AbstractEntity {
             this.targets = new HashSet<>(2);
         }
         targets.add(target);
+    }
+
+    public Set<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(Set<String> types) {
+        this.types = types;
+    }
+
+    public void addType(String type) {
+        Objects.requireNonNull(type);
+        if (types == null) {
+            this.types = new HashSet<>(2);
+        }
+        types.add(type);
     }
 
     @Override
