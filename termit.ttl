@@ -96,6 +96,15 @@
     
 
 
+    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-puvod -->
+
+    <owl:ObjectProperty rdf:about="&pojem;ma-puvod">
+        <rdfs:label xml:lang="cs">má původ</rdfs:label>
+        <rdfs:comment xml:lang="cs">Označuje původní zdroj dokumentu. Lze použít např. pro určení baseURI HTML dokumentu tak, aby v něm fungovaly relativního odkazy.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-selektor -->
 
     <owl:ObjectProperty rdf:about="&pojem;ma-selektor">
