@@ -2,7 +2,7 @@ package cz.cvut.kbss.termit.environment;
 
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
-import cz.cvut.kbss.termit.service.document.SelectorGenerator;
+import cz.cvut.kbss.termit.service.document.html.SelectorGenerator;
 import org.jsoup.nodes.Element;
 
 /**

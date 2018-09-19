@@ -91,6 +91,11 @@ public class Constants {
          */
         public static final String RESOURCE = "resource";
 
+        /**
+         * RDFa prefix attribute.
+         */
+        public static final String PREFIX = "prefix";
+
         private RDFa() {
             throw new AssertionError();
         }
