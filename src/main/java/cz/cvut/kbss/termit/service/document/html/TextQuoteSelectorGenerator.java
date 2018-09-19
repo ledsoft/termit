@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.service.document.html;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +14,7 @@ import java.util.Optional;
  * between the elements in the actual page. Thus, the exact match is created by concatenating the text content of all
  * the elements.
  */
-@Service("textQuote")
-public class TextQuoteSelectorGenerator extends SelectorGenerator {
+class TextQuoteSelectorGenerator extends SelectorGenerator {
 
     /**
      * Length of the generated prefix and suffix

@@ -37,14 +37,14 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlTermOccurrenceResolver.class);
 
-    private final SelectorGenerator selectorGenerator;
+    private final HtmlSelectorGenerators selectorGenerators;
 
     private Map<String, String> prefixes;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, SelectorGenerator selectorGenerator) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
         super(termService);
-        this.selectorGenerator = selectorGenerator;
+        this.selectorGenerators = selectorGenerators;
     }
 
     @Override
@@ -107,8 +107,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         final TermOccurrence occurrence = createOccurrence(term);
         final Target target = new Target();
         target.setSource(source);
-        target.setSelectors(
-                Collections.singleton(selectorGenerator.generateSelector(rdfaElem.toArray(new Element[0]))));
+        target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
         occurrence.addTarget(target);
         return Optional.of(occurrence);
     }

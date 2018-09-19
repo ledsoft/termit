@@ -1,10 +1,12 @@
 package cz.cvut.kbss.termit.environment.config;
 
-import cz.cvut.kbss.termit.service.document.html.DummySelectorGenerator;
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.service.Services;
-import cz.cvut.kbss.termit.service.document.html.SelectorGenerator;
+import cz.cvut.kbss.termit.service.document.html.DummySelectorGenerator;
+import cz.cvut.kbss.termit.service.document.html.HtmlSelectorGenerators;
 import cz.cvut.kbss.termit.util.Constants;
+import org.jsoup.nodes.Element;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 @Configuration
 @ComponentScan(basePackageClasses = {Services.class})
@@ -36,7 +40,8 @@ public class TestServiceConfig {
         jacksonConverter.setObjectMapper(Environment.getObjectMapper());
         final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
                 Constants.UTF_8_ENCODING));
-        client.setMessageConverters(Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
+        client.setMessageConverters(
+                Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
         return client;
     }
 
@@ -47,7 +52,12 @@ public class TestServiceConfig {
 
     @Bean
     @Primary
-    public SelectorGenerator selectorGenerator() {
-        return new DummySelectorGenerator();
+    public HtmlSelectorGenerators htmlSelectorGenerators() {
+        return new HtmlSelectorGenerators() {
+            @Override
+            public Set<TermSelector> generateSelectors(Element... elements) {
+                return Collections.singleton(new DummySelectorGenerator().generateSelector(elements));
+            }
+        };
     }
 }
