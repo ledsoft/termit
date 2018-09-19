@@ -2,25 +2,12 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.util.Configuration;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.xml.ws.Response;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,7 +29,7 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
      *
      * @param queryString the string representation of a SPARQL query
      */
-    @Async public String query(String queryString) {
+    public String query(String queryString) {
         final String repositoryUrl = config.get(REPOSITORY_URL);
 
         Objects.requireNonNull(queryString);
@@ -54,7 +41,7 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
                     HttpMethod.GET,
                     new HttpEntity<>(null, headers),
                     JSONArray.class, queryString).getBody();
-            return result.toString();
+            return result.toJSONString();
         } catch (RuntimeException e) {
             throw new WebServiceIntegrationException("Query invocation failed.", e);
         }

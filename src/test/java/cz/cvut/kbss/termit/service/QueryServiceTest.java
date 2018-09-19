@@ -25,15 +25,14 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers
     .requestToUriTemplate;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class QueryServiceTest extends BaseServiceTestRunner {
 
-    private static final String query = "CONSTRUCT { <http://xyz/x> <http://xyz/y> ?c} { SELECT (COUNT(*) AS ?c) {?s ?p ?o} }";
-    private static final String result = "[{ \"@id\": \"http://xyz/x\", \"http://xyz/y\": [ { \"@type\": \"http://www.w3.org/2001/XMLSchema#integer\", \"@value\": \"2627\" } ] } ]";
+    private static final String query = "CONSTRUCT { <http://onto.fel.cvut.cz/ontologies/termit> <http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary-count> ?c} { SELECT (COUNT(*) AS ?c) {?s ?p ?o} }";
+    private static final String result = "[{ \"@id\": \"http://onto.fel.cvut.cz/ontologies/termit\", \"http://onto.fel.cvut.cz/ontologies/termit/has-vocabulary-count\": [ { \"@type\": \"http://www.w3.org/2001/XMLSchema#integer\", \"@value\": \"7\" } ] } ]";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -60,7 +59,7 @@ class QueryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void analyzeDocumentInvokesTextAnalysisServiceWithDocumentContent()
+    void runSimpleQuery()
         throws ParseException {
         mockServer.expect(requestToUriTemplate(config.get(REPOSITORY_URL) + "?query={query}", query))
                   .andExpect(method(HttpMethod.GET))

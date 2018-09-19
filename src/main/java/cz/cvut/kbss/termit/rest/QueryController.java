@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.rest.dto.RawJson;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.QueryService;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -28,8 +29,9 @@ public class QueryController extends BaseController {
 
     @RequestMapping(method = RequestMethod.GET,
                     produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public String query(@RequestParam("queryString")
+    public RawJson query(@RequestParam("queryString")
                             final String queryString) {
-        return queryService.query(queryString);
+        final String json = queryService.query(queryString);
+        return new RawJson(json);
     }
 }
