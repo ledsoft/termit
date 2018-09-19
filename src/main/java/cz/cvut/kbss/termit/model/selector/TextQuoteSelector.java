@@ -5,9 +5,12 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import javax.validation.constraints.NotBlank;
+
 @OWLClass(iri = Vocabulary.s_c_selektor_text_quote)
 public class TextQuoteSelector extends TermSelector {
 
+    @NotBlank
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_ma_presny_text_quote)
     private String exactMatch;

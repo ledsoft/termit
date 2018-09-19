@@ -9,10 +9,14 @@ import org.jsoup.nodes.Element;
 public interface SelectorGenerator {
 
     /**
-     * Generates selector for the specified element's content.
+     * Generates selector for the specified elements' content.
+     * <p>
+     * The reason multiple elements are supported is because in case there are overlapping annotations, they are
+     * represented by multiple elements using the <a href="https://en.wikipedia.org/wiki/Overlapping_markup#Joins">JOINS</a>
+     * strategy.
      *
-     * @param element Element to generate selector for
-     * @return Selector
+     * @param elements Elements to generate selector for. At least one must be provided
+     * @return Selector for the text content of the specified elements
      */
-    TermSelector createSelector(Element element);
+    TermSelector generateSelector(Element... elements);
 }

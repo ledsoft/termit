@@ -12,9 +12,10 @@ import org.jsoup.nodes.Element;
  */
 public class DummySelectorGenerator implements SelectorGenerator {
     @Override
-    public TermSelector createSelector(Element element) {
+    public TermSelector generateSelector(Element... elements) {
+        assert elements.length > 0;
         final TextQuoteSelector selector = new TextQuoteSelector();
-        selector.setExactMatch(element.wholeText());
+        selector.setExactMatch(elements[0].wholeText());
         return selector;
     }
 }
