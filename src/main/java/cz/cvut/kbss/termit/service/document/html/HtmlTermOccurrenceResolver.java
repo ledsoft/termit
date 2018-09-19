@@ -102,7 +102,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         final TermOccurrence occurrence = createOccurrence(term);
         final Target target = new Target();
         target.setSource(source);
-        target.setSelectors(Collections.singleton(selectorGenerator.createSelector(rdfaElem)));
+        target.setSelectors(Collections.singleton(selectorGenerator.generateSelector(rdfaElem)));
         occurrence.addTarget(target);
         return Optional.of(occurrence);
     }
