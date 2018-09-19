@@ -3,14 +3,20 @@ package cz.cvut.kbss.termit.service.document.html;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Generates a {@link TextQuoteSelector} for the specified elements' content.
+ * <p>
+ * Note that if there are multiple elements specified for generation, it is expected that no text node is present
+ * between the elements in the actual page. Thus, the exact match is created by concatenating the text content of all
+ * the elements.
+ */
 @Service("textQuote")
-public class TextQuoteSelectorGenerator implements SelectorGenerator {
+public class TextQuoteSelectorGenerator extends SelectorGenerator {
 
     /**
      * Length of the generated prefix and suffix
@@ -25,14 +31,6 @@ public class TextQuoteSelectorGenerator implements SelectorGenerator {
         extractPrefix(elements[0]).ifPresent(selector::setPrefix);
         extractSuffix(elements[elements.length - 1]).ifPresent(selector::setSuffix);
         return selector;
-    }
-
-    private String extractExactText(Element[] elements) {
-        final StringBuilder sb = new StringBuilder();
-        for (Element element : elements) {
-            sb.append(element.wholeText());
-        }
-        return sb.toString();
     }
 
     private Optional<String> extractPrefix(Element start) {
@@ -50,14 +48,6 @@ public class TextQuoteSelectorGenerator implements SelectorGenerator {
         }
         return sb.length() > 0 ? Optional.of(sb.substring(Math.max(0, sb.length() - CONTEXT_LENGTH))) :
                Optional.empty();
-    }
-
-    private StringBuilder extractNodeText(Iterable<Node> nodes) {
-        final StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            sb.append(node instanceof TextNode ? ((TextNode) node).getWholeText() : ((Element) node).wholeText());
-        }
-        return sb;
     }
 
     private Optional<String> extractSuffix(Element end) {

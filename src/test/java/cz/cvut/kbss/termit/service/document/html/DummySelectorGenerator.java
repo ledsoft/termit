@@ -1,8 +1,7 @@
-package cz.cvut.kbss.termit.environment;
+package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
-import cz.cvut.kbss.termit.service.document.html.SelectorGenerator;
 import org.jsoup.nodes.Element;
 
 /**
@@ -10,7 +9,8 @@ import org.jsoup.nodes.Element;
  * <p>
  * For testing purposes only.
  */
-public class DummySelectorGenerator implements SelectorGenerator {
+public class DummySelectorGenerator extends SelectorGenerator {
+
     @Override
     public TermSelector generateSelector(Element... elements) {
         assert elements.length > 0;

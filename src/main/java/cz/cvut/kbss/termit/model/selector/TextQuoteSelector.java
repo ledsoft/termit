@@ -7,6 +7,11 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * Selector using text quote with prefix and suffix to identify the context.
+ *
+ * @see <a href="https://www.w3.org/TR/annotation-model/#text-quote-selector">https://www.w3.org/TR/annotation-model/#text-quote-selector</a>
+ */
 @OWLClass(iri = Vocabulary.s_c_selektor_text_quote)
 public class TextQuoteSelector extends TermSelector {
 
