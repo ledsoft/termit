@@ -200,8 +200,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertEquals(origTerms.size() + 1, resultTerms.size());
         resultTerms.removeAll(origTerms);
         final Term newTerm = resultTerms.get(0);
-        // TODO Maybe the annotations should specify a lemmatized form of the keyword, which would be used as term label
-        assertEquals("města", newTerm.getLabel());
+        assertEquals("město", newTerm.getLabel());
     }
 
     @Test

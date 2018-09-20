@@ -87,7 +87,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             if (isNotTermOccurrence(element) || existingTerm(element)) {
                 continue;
             }
-            final String label = element.wholeText();
+            final String label = element.attr(Constants.RDFa.CONTENT);
             final Term newTerm = new Term();
             newTerm.setLabel(label);
             newTerm.setUri(identifierResolver
@@ -95,7 +95,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
                             label));
             LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
             element.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString());
-            element.attr(Constants.RDFa.PROPERTY, cz.cvut.kbss.termit.util.Vocabulary.s_p_je_vyskytem_termu);
             newTerms.add(newTerm);
         }
         return newTerms;
