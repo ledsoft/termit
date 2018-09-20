@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
@@ -33,12 +34,16 @@ public class TextAnalysisService {
 
     private final Configuration config;
 
+    private final DocumentRepositoryService documentService;
+
     private final AnnotationGenerator annotationGenerator;
 
     @Autowired
-    public TextAnalysisService(RestTemplate restClient, Configuration config, AnnotationGenerator annotationGenerator) {
+    public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentRepositoryService documentService,
+                               AnnotationGenerator annotationGenerator) {
         this.restClient = restClient;
         this.config = config;
+        this.documentService = documentService;
         this.annotationGenerator = annotationGenerator;
     }
 
@@ -94,24 +99,20 @@ public class TextAnalysisService {
 
     private String loadFileContent(File file, Document document) {
         try {
-            final String path = resolveFilePath(file, document);
-            LOG.debug("Loading file for text analysis from {}.", path);
-            final List<String> lines = Files.readAllLines(new java.io.File(path).toPath());
+            final java.io.File content = documentService.resolveFile(document, file);
+            LOG.debug("Loading file for text analysis from {}.", content);
+            final List<String> lines = Files.readAllLines(content.toPath());
             return String.join("\n", lines);
         } catch (IOException e) {
             throw new TermItException("Unable to read file for text analysis.", e);
         }
     }
 
-    private String resolveFilePath(File file, Document document) {
-        return config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator +
-                document.getFileDirectoryName() + java.io.File.separator + file.getFileName();
-    }
-
     private void writeOutAnalysisResult(InputStream input, File file, Document document) {
         try {
-            final String path = resolveFilePath(file, document);
-            Files.copy(input, new java.io.File(path).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            final java.io.File content = documentService.resolveFile(document, file);
+            LOG.debug("Saving text analysis results to {}.", content);
+            Files.copy(input, content.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new TermItException("Unable to write out text analysis results.", e);
         }

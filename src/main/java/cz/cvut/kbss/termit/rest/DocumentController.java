@@ -1,13 +1,18 @@
 package cz.cvut.kbss.termit.rest;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -29,8 +34,24 @@ public class DocumentController extends BaseController {
         this.textAnalysisService = textAnalysisService;
     }
 
-    private Document getDocument(URI id) {
+    @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
+    public Document getById(@PathVariable("fragment") String fragment,
+                            @RequestParam(name = "namespace", required = false) String namespace) {
+        final URI id;
+        if (namespace != null) {
+            id = idResolver.resolveIdentifier(namespace, fragment);
+        } else {
+            id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_DOCUMENT, fragment);
+        }
         return documentService.find(id).orElseThrow(() -> NotFoundException.create(Document.class.getSimpleName(), id));
+    }
+
+    @RequestMapping(value = "/{fragment}/content", method = RequestMethod.GET)
+    public ResponseEntity<Resource> getFileContent(@PathVariable("fragment") String fragment,
+                                                   @RequestParam(name = "namespace", required = false) String namespace,
+                                                   @RequestParam(name = "file") String fileName) {
+        return null;
     }
 
     /**
@@ -50,10 +71,9 @@ public class DocumentController extends BaseController {
     @RequestMapping(value = "/{document}/text-analysis", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void runTextAnalysis(@PathVariable("document") String documentName,
-                                @RequestParam(name = "namespace") String namespace,
+                                @RequestParam(name = "namespace", required = false) String namespace,
                                 @RequestParam(value = "file", required = false) String fileName) {
-        final URI docUri = idResolver.resolveIdentifier(namespace, documentName);
-        final Document document = getDocument(docUri);
+        final Document document = getById(documentName, namespace);
         if (fileName != null) {
             final Optional<File> toAnalyze = resolveFileToAnalyze(document, fileName);
             if (toAnalyze.isPresent()) {

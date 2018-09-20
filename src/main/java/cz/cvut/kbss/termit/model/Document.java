@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -29,6 +30,7 @@ public class Document extends HasProvenanceData implements Serializable {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<File> files;
 
+    @JsonIgnore
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik, fetch = FetchType.EAGER)
     private DocumentVocabulary vocabulary;
