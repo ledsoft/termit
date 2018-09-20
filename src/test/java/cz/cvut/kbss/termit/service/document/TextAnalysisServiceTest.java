@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 import static cz.cvut.kbss.termit.util.ConfigParam.TEXT_ANALYSIS_SERVICE_URL;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -183,5 +185,16 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         final String result = new BufferedReader(new InputStreamReader(captor.getValue())).lines().collect(
                 Collectors.joining("\n"));
         assertEquals(CONTENT, result);
+    }
+
+    @Test
+    void analyzeDocumentThrowsTermItExceptionWhenFileCannotBeRead() {
+        final TextAnalysisInput input = new TextAnalysisInput();
+        input.setContent(CONTENT);
+        input.setVocabularyContext(vocabulary.getUri());
+        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        file.setFileName("unknown.html");
+        final TermItException result = assertThrows(TermItException.class, () -> sut.analyzeDocument(file, document));
+        assertThat(result.getMessage(), containsString("Unable to read file"));
     }
 }

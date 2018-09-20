@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
@@ -81,7 +82,7 @@ public class TextAnalysisService {
             final List<String> lines = Files.readAllLines(new java.io.File(path).toPath());
             return String.join("\n", lines);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TermItException("Unable to read file for text analysis.", e);
         }
     }
 }
