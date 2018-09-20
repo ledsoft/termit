@@ -12,13 +12,15 @@ import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.nio.file.Files;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -170,13 +172,38 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         verify(idResolverMock).resolveIdentifier(namespace, NORMALIZED_DOC_NAME);
     }
 
-    @Disabled
     @Test
     void getFileContentReturnsContentOfRequestedFile() throws Exception {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
         when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        final java.io.File content = Files.createTempFile("document", ".html").toFile();
+        content.deleteOnExit();
+        final String data = "<html><head><title>Test</title></head><body>test</body></html>";
+        Files.write(content.toPath(), data.getBytes());
+        when(documentServiceMock.resolveFile(doc, getFile(doc, FILE_NAMES[0]))).thenReturn(content);
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + NORMALIZED_DOC_NAME + "/content").param("file", FILE_NAMES[0]))
+                .andExpect(status().isOk()).andReturn();
+        final String resultContent = mvcResult.getResponse().getContentAsString();
+        assertEquals(data, resultContent);
+        assertEquals(MediaType.TEXT_HTML_VALUE, mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_TYPE));
+    }
 
+    @Test
+    void getFileContentThrowsNotFoundExceptionForUnknownFileName() throws Exception {
+        final Document doc = generateTestData();
+        when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
+                .thenReturn(doc.getUri());
+        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        final String name = "unknown.txt";
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + NORMALIZED_DOC_NAME + "/content").param("file", name))
+                .andExpect(status().isNotFound()).andReturn();
+        final ErrorInfo result = readValue(mvcResult, ErrorInfo.class);
+        assertNotNull(result);
+        assertThat(result.getMessage(), containsString("not found in document"));
+        verify(documentServiceMock, never()).resolveFile(any(), any());
     }
 }
