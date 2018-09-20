@@ -20,8 +20,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/vocabularies")
@@ -92,8 +93,12 @@ public class TermController extends BaseController {
                                             @RequestParam(name = "namespace", required = false) String namespace) {
 
         URI termUri = URI.create(parentID);
-        return new ArrayList<>(termService.find(termUri)
-                                          .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms());
+        Set<URI> subTerms = termService.find(termUri)
+                .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms();
+        return subTerms
+                .parallelStream()
+                .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
+                .collect(Collectors.toList());
 
     }
 
@@ -118,9 +123,7 @@ public class TermController extends BaseController {
         final URI vocabularyUri = getVocabularyUri(namespace, fragment);
 
         if (parentTerm != null && !parentTerm.equals("")) {
-            Term term = termService.find(URI.create(parentTerm))
-                                   .orElseThrow(() -> NotFoundException.create("Term", parentTerm));
-            return new ArrayList<>(term.getSubTerms());
+            return getSubtermsByParentID(fragment, parentTerm, namespace);
         }
         if (label != null && !label.equals("")) {
             return termService.findAll(label, vocabularyUri);
@@ -176,6 +179,6 @@ public class TermController extends BaseController {
                                      @RequestParam("name") String name) {
         URI vocabularyUri = getVocabularyUri(namespace, fragment);
         return idResolver.generateIdentifier(vocabularyUri.toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR, name)
-                         .toString();
+                .toString();
     }
 }
