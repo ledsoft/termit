@@ -92,8 +92,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             if (parts.isEmpty()) {
                 continue;
             }
-            final String label = parts.stream().map(elem -> elem.attr(Constants.RDFa.CONTENT))
-                                           .collect(Collectors.joining(" "));
+            final String label = parts.stream().map(elem -> {
+                final String content = elem.attr(Constants.RDFa.CONTENT).trim();
+                return content.isEmpty() ? elem.wholeText() : content;
+            }).collect(Collectors.joining(" "));
             final Term newTerm = new Term();
             newTerm.setLabel(label);
             newTerm.setUri(identifierResolver
@@ -113,7 +115,8 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             if (isNotTermOccurrence(element)) {
                 continue;
             }
-            annotatedElements.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
+            annotatedElements.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>())
+                             .add(element);
         }
     }
 
@@ -147,8 +150,8 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return prefixes.get(prefix) + localName;
     }
 
-    private boolean existingTerm(Element rdfaElem) {
-        return !rdfaElem.attr(Constants.RDFa.RESOURCE).isEmpty();
+    private static boolean existingTerm(Element rdfaElem) {
+        return rdfaElem.hasAttr(Constants.RDFa.RESOURCE);
     }
 
     @Override
