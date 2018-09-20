@@ -26,12 +26,7 @@ public class SecurityConstants {
     public static final String SECURITY_CHECK_URI = "/j_spring_security_check";
 
     /**
-     * Request/response header used to store authentication info.
-     */
-    public static final String AUTHENTICATION_HEADER = "Authentication";
-
-    /**
-     * String prefix added to JWT tokens in the {@link #AUTHENTICATION_HEADER}.
+     * String prefix added to JWT tokens in the Authorization header.
      */
     public static final String JWT_TOKEN_PREFIX = "Bearer ";
 

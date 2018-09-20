@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -46,7 +47,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        final String authHeader = request.getHeader(SecurityConstants.AUTHENTICATION_HEADER);
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith(SecurityConstants.JWT_TOKEN_PREFIX)) {
             chain.doFilter(request, response);
             return;
@@ -72,6 +73,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private void refreshToken(String authToken, HttpServletResponse response) {
         final String newToken = jwtUtils.refreshToken(authToken);
-        response.setHeader(SecurityConstants.AUTHENTICATION_HEADER, SecurityConstants.JWT_TOKEN_PREFIX + newToken);
+        response.setHeader(HttpHeaders.AUTHORIZATION, SecurityConstants.JWT_TOKEN_PREFIX + newToken);
     }
 }
