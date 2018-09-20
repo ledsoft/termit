@@ -34,10 +34,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
-import static cz.cvut.kbss.termit.util.ConfigParam.TEXT_ANALYSIS_SERVICE_URL;
+import static cz.cvut.kbss.termit.util.ConfigParam.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,10 +126,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentPassesRepositoryAndVocabularyContextToService() throws Exception {
-        final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(CONTENT);
-        input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        final TextAnalysisInput input = textAnalysisInput();
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
@@ -138,12 +135,17 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         mockServer.verify();
     }
 
-    @Test
-    void analyzeDocumentPassesContentTypeAndAcceptHeadersToService() throws Exception {
+    private TextAnalysisInput textAnalysisInput() {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(CONTENT);
         input.setVocabularyContext(vocabulary.getUri());
         input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        return input;
+    }
+
+    @Test
+    void analyzeDocumentPassesContentTypeAndAcceptHeadersToService() throws Exception {
+        final TextAnalysisInput input = textAnalysisInput();
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
@@ -156,10 +158,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsWebServiceIntegrationExceptionOnError() throws Exception {
-        final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(CONTENT);
-        input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        final TextAnalysisInput input = textAnalysisInput();
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
@@ -170,10 +169,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentInvokesAnnotationGeneratorWithResultFromTextAnalysisService() throws Exception {
-        final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(CONTENT);
-        input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        final TextAnalysisInput input = textAnalysisInput();
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
@@ -189,12 +185,39 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsTermItExceptionWhenFileCannotBeRead() {
-        final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(CONTENT);
-        input.setVocabularyContext(vocabulary.getUri());
-        input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
         file.setFileName("unknown.html");
         final TermItException result = assertThrows(TermItException.class, () -> sut.analyzeDocument(file, document));
         assertThat(result.getMessage(), containsString("Unable to read file"));
+    }
+
+    @Test
+    void analyzeDocumentThrowsWebServiceIntegrationExceptionWhenRemoteServiceReturnsEmptyBody() throws Exception {
+        final TextAnalysisInput input = textAnalysisInput();
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withSuccess());
+        final WebServiceIntegrationException result = assertThrows(WebServiceIntegrationException.class,
+                () -> sut.analyzeDocument(file, document));
+        assertThat(result.getMessage(), containsString("empty response"));
+        mockServer.verify();
+    }
+
+    @Test
+    void analyzeDocumentStoresRemoteServiceResponseInOriginalFile() throws Exception {
+        final String responseContent = "<html><head><title>Text analysis</title></head><body><h1>Success</h1></body></html>";
+        final TextAnalysisInput input = textAnalysisInput();
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withSuccess(responseContent, MediaType.APPLICATION_XML));
+        sut.analyzeDocument(file, document);
+
+        final java.io.File docFile = new java.io.File(
+                config.get(FILE_STORAGE) + java.io.File.separator + document.getFileDirectoryName() +
+                        java.io.File.separator + file.getFileName());
+        final List<String> lines = Files.readAllLines(docFile.toPath());
+        final String result = String.join("\n", lines);
+        assertEquals(responseContent, result);
     }
 }
