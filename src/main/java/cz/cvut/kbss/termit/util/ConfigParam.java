@@ -58,7 +58,12 @@ public enum ConfigParam {
     /**
      * Specifies folder in which admin credentials are stored when his account is generated.
      */
-    ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation");
+    ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation"),
+
+    /**
+     * Specifies root directory in which document files are stored.
+     */
+    FILE_STORAGE("file.storage");
 
     private final String parameter;
 

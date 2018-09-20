@@ -13,13 +13,13 @@ import java.net.URI;
 @OWLClass(iri = Vocabulary.s_c_soubor)
 public class File extends AbstractEntity {
 
+    @OWLDataProperty(iri = RDFS.COMMENT)
+    private String comment;
+
     @NotBlank
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = RDFS.LABEL)
-    private String name;
-
-    @OWLDataProperty(iri = Vocabulary.s_p_ma_umisteni)
-    private String location;
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_nazev_souboru)
+    private String fileName;
 
     /**
      * File origin.
@@ -29,20 +29,20 @@ public class File extends AbstractEntity {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_puvod)
     private URI origin;
 
-    public String getName() {
-        return name;
+    public String getComment() {
+        return comment;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
-    public String getLocation() {
-        return location;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public URI getOrigin() {
@@ -56,8 +56,8 @@ public class File extends AbstractEntity {
     @Override
     public String toString() {
         return "File{" +
-                "name='" + name + '\'' +
-                ", location='" + location + '\'' +
+                "fileName='" + fileName + '\'' +
+                ", origin=" + origin +
                 "} " + super.toString();
     }
 }
