@@ -131,7 +131,11 @@ class TermDaoTest extends BaseDaoTestRunner {
         matchingDesc.setUri(Generator.generateUri());
         matchingDesc.setLabel("Metropolitan plan");
         child.setSubTerms(Collections.singleton(matchingDesc.getUri()));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        transactional(() -> {
+            em.persist(child);
+            em.persist(matchingDesc);
+            em.merge(vocabulary.getGlossary());
+        });
 
         final List<Term> result = sut.findAll("plan", vocabulary);
         assertEquals(1, result.size());
