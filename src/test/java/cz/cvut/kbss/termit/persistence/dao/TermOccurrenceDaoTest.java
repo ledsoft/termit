@@ -40,7 +40,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
 
     private List<TermOccurrence> generateOccurrences(Term term) {
         final File file = new File();
-        file.setName("test");
+        file.setFileName("test.html");
         final List<TermOccurrence> occurrences = new ArrayList<>();
         final List<TermOccurrence> matching = new ArrayList<>();
         final Term other = new Term();
