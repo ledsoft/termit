@@ -119,7 +119,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAlLBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
+    void findAllBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         final Term root = terms.get(Generator.randomIndex(terms));
