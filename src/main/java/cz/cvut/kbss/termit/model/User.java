@@ -1,17 +1,17 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_uzivatel_termitu)
-public class User implements Serializable {
+public class User implements Serializable, HasTypes {
 
     @Id
     private URI uri;
@@ -79,28 +79,14 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    @Override
     public Set<String> getTypes() {
         return types;
     }
 
+    @Override
     public void setTypes(Set<String> types) {
         this.types = types;
-    }
-
-    public void addType(String type) {
-        Objects.requireNonNull(type);
-        if (types == null) {
-            this.types = new HashSet<>(4);
-        }
-        types.add(type);
-    }
-
-    public void removeType(String type) {
-        Objects.requireNonNull(type);
-        if (types == null) {
-            return;
-        }
-        types.remove(type);
     }
 
     /**

@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.HashSet;
@@ -8,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_vyskyt_termu)
-public class TermOccurrence extends AbstractEntity {
+public class TermOccurrence extends AbstractEntity implements HasTypes {
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
@@ -56,20 +57,14 @@ public class TermOccurrence extends AbstractEntity {
         targets.add(target);
     }
 
+    @Override
     public Set<String> getTypes() {
         return types;
     }
 
+    @Override
     public void setTypes(Set<String> types) {
         this.types = types;
-    }
-
-    public void addType(String type) {
-        Objects.requireNonNull(type);
-        if (types == null) {
-            this.types = new HashSet<>(2);
-        }
-        types.add(type);
     }
 
     @Override
