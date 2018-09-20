@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
-import cz.cvut.kbss.termit.exception.TermItException;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -64,6 +65,9 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     private Configuration config;
 
     @Autowired
+    private DocumentRepositoryService documentService;
+
+    @Autowired
     private Environment environment;
 
     @Mock
@@ -96,7 +100,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.file = new File();
         file.setFileName(FILE_NAME);
         generateFile();
-        this.sut = new TextAnalysisService(restTemplate, config, annotationGeneratorMock);
+        this.sut = new TextAnalysisService(restTemplate, config, documentService, annotationGeneratorMock);
     }
 
     @Test
@@ -184,10 +188,11 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void analyzeDocumentThrowsTermItExceptionWhenFileCannotBeRead() {
+    void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
         file.setFileName("unknown.html");
-        final TermItException result = assertThrows(TermItException.class, () -> sut.analyzeDocument(file, document));
-        assertThat(result.getMessage(), containsString("Unable to read file"));
+        final NotFoundException result = assertThrows(NotFoundException.class,
+                () -> sut.analyzeDocument(file, document));
+        assertThat(result.getMessage(), containsString("not found on file system"));
     }
 
     @Test
