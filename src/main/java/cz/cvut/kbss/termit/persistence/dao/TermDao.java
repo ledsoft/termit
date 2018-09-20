@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -68,11 +67,4 @@ public class TermDao extends BaseDao<Term> {
                  .setParameter("searchString", searchString, null)
                  .getResultList();
     }
-
-    public List<Term> find(String termLabel, URI vocabularyUri, URI parentTermUri, Integer offset, Integer limit) {
-        //TODO query
-        // https://blog.novatec-gmbh.de/art-pagination-offset-vs-value-based-paging/
-        throw new NotImplementedException();
-    }
-
 }
