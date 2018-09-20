@@ -92,6 +92,11 @@ public class Constants {
         public static final String ABOUT = "about";
 
         /**
+         * RDFa content attribute.
+         */
+        public static final String CONTENT = "content";
+
+        /**
          * RDFa type identifier attribute.
          */
         public static final String TYPE = "typeof";
