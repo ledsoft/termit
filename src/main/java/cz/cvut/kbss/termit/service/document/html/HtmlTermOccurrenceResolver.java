@@ -93,6 +93,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             newTerm.setUri(identifierResolver
                     .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
                             label));
+            LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
+            element.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString());
+            element.attr(Constants.RDFa.PROPERTY, cz.cvut.kbss.termit.util.Vocabulary.s_p_je_vyskytem_termu);
             newTerms.add(newTerm);
         }
         return newTerms;

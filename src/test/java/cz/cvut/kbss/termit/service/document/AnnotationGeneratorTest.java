@@ -74,8 +74,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setAuthor(author);
         vocabulary.setDateCreated(new Date());
         this.file = new File();
-        file.setLocation("data/");
-        file.setName("rdfa-simple.html");
+        file.setFileName("rdfa-simple.html");
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary, vocabDescriptor);
@@ -122,7 +121,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
         final InputStream content = loadRDFa("data/rdfa-simple.html");
-        file.setName("test.txt");
+        file.setFileName("test.txt");
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file, vocabulary));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
@@ -131,7 +130,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() {
         final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setFileName("rdfa-overlapping.html");
         sut.generateAnnotations(content, file, vocabulary);
         assertEquals(1, termOccurrenceDao.findAll(term).size());
         assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
@@ -172,7 +171,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
 
         final InputStream content = loadRDFa("data/rdfa-large.html");
-        file.setName("rdfa-large.html");
+        file.setFileName("rdfa-large.html");
         sut.generateAnnotations(content, file, vocabulary);
         assertFalse(termOccurrenceDao.findAll(mp).isEmpty());
         assertFalse(termOccurrenceDao.findAll(ma).isEmpty());
@@ -182,7 +181,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() {
         final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setFileName("rdfa-overlapping.html");
         sut.generateAnnotations(content, file, vocabulary);
         final List<TermOccurrence> result = termOccurrenceDao.findAll();
         result.forEach(to -> assertTrue(
@@ -194,7 +193,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsPersistsNewTerms() {
         final InputStream content = loadRDFa("data/rdfa-new-terms.html");
-        file.setName("rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
         final List<Term> origTerms = termDao.findAll();
         sut.generateAnnotations(content, file, vocabulary);
         final List<Term> resultTerms = termDao.findAll();
@@ -203,5 +202,30 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final Term newTerm = resultTerms.get(0);
         // TODO Maybe the annotations should specify a lemmatized form of the keyword, which would be used as term label
         assertEquals("města", newTerm.getLabel());
+    }
+
+    @Test
+    void generateAnnotationsPersistsNewTermsWithTypeSuggestedToIndicateTheyShouldBeVerifiedByUser() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        final Term newTerm = resultTerms.get(0);
+        assertTrue(newTerm.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term));
+    }
+
+    @Test
+    void generateAnnotationsCreatesTermOccurrencesForNewTerms() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        final Term newTerm = resultTerms.get(0);
+        final List<TermOccurrence> result = termOccurrenceDao.findAll(newTerm);
+        assertFalse(result.isEmpty());
     }
 }

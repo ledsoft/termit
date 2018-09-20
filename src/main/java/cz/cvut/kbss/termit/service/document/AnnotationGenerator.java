@@ -57,7 +57,10 @@ public class AnnotationGenerator {
             LOG.debug("Resolving annotations of HTML file {}.", source);
             htmlOccurrenceResolver.parseContent(content, source);
             final List<Term> newTerms = htmlOccurrenceResolver.findNewTerms(vocabulary);
-            newTerms.forEach(t -> termService.addTermToVocabulary(t, vocabulary));
+            newTerms.forEach(t -> {
+                t.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term);
+                termService.addTermToVocabulary(t, vocabulary);
+            });
             final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences();
             occurrences.forEach(o -> {
                 o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
