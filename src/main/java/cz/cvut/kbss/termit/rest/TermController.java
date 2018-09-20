@@ -144,8 +144,8 @@ public class TermController extends BaseController {
      * @param term      Vocabulary term that will be created
      * @return HttpHeader
      */
-    @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String fragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestParam(name = "parentTermUri") String parentTerm,

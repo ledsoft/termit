@@ -45,7 +45,6 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     private void addTopLevelTerm(Term instance, Vocabulary vocabulary) {
         validate(instance);
-        //TODO custom comparator for the Set<Term> -> compare only uri not the objects
         if (!vocabulary.getGlossary().getTerms().add(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
@@ -83,7 +82,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
         List<Term> rootTerms = termDao.findAll(searchString, vocabulary);
         // List<Term> allTerms = new ArrayList<>(rootTerms.size()*4);
-        // TODO if term.subTerms will be FetchType.LAZY then fetch all children, filter them and return the result
+        //TODO filter
         return rootTerms;
     }
 }
