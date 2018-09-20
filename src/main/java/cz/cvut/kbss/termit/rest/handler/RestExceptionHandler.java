@@ -84,4 +84,11 @@ public class RestExceptionHandler {
         logException(e.getCause());
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(TermItException.class)
+    public ResponseEntity<ErrorInfo> termItException(HttpServletRequest request,
+                                                     TermItException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
