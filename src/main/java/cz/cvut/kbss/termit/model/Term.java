@@ -27,7 +27,7 @@ public class Term implements Serializable {
 
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, cascade = {CascadeType.PERSIST,
             CascadeType.MERGE}, fetch = FetchType.EAGER)
-    private Set<Term> subTerms; //TODO FetchType.LAZY or change to Set<URI> ???
+    private Set<URI> subTerms; //TODO FetchType.LAZY or change to Set<URI> ???
 
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_vyskyt_termu, fetch = FetchType.EAGER)
@@ -60,11 +60,11 @@ public class Term implements Serializable {
         this.comment = comment;
     }
 
-    public Set<Term> getSubTerms() {
+    public Set<URI> getSubTerms() {
         return subTerms;
     }
 
-    public void setSubTerms(Set<Term> subTerms) {
+    public void setSubTerms(Set<URI> subTerms) {
         this.subTerms = subTerms;
     }
 

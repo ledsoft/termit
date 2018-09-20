@@ -60,8 +60,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
 
-        Set<Term> newTerms = parenTerm.getSubTerms();
-        newTerms.add(instance);
+        Set<URI> newTerms = parenTerm.getSubTerms();
+        newTerms.add(instance.getUri());
         parenTerm.setSubTerms(newTerms);
 
         vocabularyService.update(vocabulary);
