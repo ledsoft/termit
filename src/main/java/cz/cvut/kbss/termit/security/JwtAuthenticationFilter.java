@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.security.model.UserDetails;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,7 +29,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authResult) throws IOException, ServletException {
         final UserDetails ud = (UserDetails) authResult.getDetails();
         final String token = jwtUtils.generateToken(ud);
-        response.addHeader(SecurityConstants.AUTHENTICATION_HEADER, SecurityConstants.JWT_TOKEN_PREFIX + token);
+        response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstants.JWT_TOKEN_PREFIX + token);
         super.successfulAuthentication(request, response, chain, authResult);
     }
 }
