@@ -8,6 +8,7 @@ import org.jsoup.nodes.TextNode;
 /**
  * Generator of HTML/XML selectors.
  */
+@FunctionalInterface
 interface SelectorGenerator {
 
     /**

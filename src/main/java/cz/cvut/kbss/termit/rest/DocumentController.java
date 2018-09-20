@@ -68,7 +68,7 @@ public class DocumentController extends BaseController {
         }
     }
 
-    private MediaType resolveFileMediaType(java.io.File file) throws IOException {
+    private static MediaType resolveFileMediaType(java.io.File file) throws IOException {
         final String type = Files.probeContentType(file.toPath());
         return type != null ? MediaType.parseMediaType(type) : MediaType.APPLICATION_OCTET_STREAM;
     }

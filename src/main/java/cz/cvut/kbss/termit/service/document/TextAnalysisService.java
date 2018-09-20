@@ -79,10 +79,9 @@ public class TextAnalysisService {
             try (final InputStream is = resource.getInputStream()) {
                 annotationGenerator.generateAnnotations(is, file, document.getVocabulary());
             }
+        } catch (WebServiceIntegrationException e) {
+            throw e;
         } catch (RuntimeException e) {
-            if (e instanceof WebServiceIntegrationException) {
-                throw e;
-            }
             throw new WebServiceIntegrationException("Text analysis invocation failed.", e);
         } catch (IOException e) {
             throw new WebServiceIntegrationException("Unable to read text analysis result from response.", e);
