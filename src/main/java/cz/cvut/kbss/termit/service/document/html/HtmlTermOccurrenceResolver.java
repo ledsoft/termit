@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Resolves term occurrences from RDFa-annotated HTML document.
@@ -81,23 +82,33 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public List<Term> findNewTerms(Vocabulary vocabulary) {
-        final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
-        final List<Term> newTerms = new ArrayList<>();
-        for (Element element : elements) {
-            if (isNotTermOccurrence(element) || existingTerm(element)) {
-                continue;
-            }
-            final String label = element.attr(Constants.RDFa.CONTENT);
+        final Map<String, List<Element>> annotatedElements = mapNewTermAnnotations(document);
+        final List<Term> newTerms = new ArrayList<>(annotatedElements.size());
+        for (List<Element> annotation : annotatedElements.values()) {
+            final String label = annotation.stream().map(elem -> elem.attr(Constants.RDFa.CONTENT))
+                                           .collect(Collectors.joining(" "));
             final Term newTerm = new Term();
             newTerm.setLabel(label);
             newTerm.setUri(identifierResolver
                     .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
                             label));
             LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
-            element.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString());
+            annotation.forEach(elem -> elem.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString()));
             newTerms.add(newTerm);
         }
         return newTerms;
+    }
+
+    private Map<String, List<Element>> mapNewTermAnnotations(Document document) {
+        final Map<String, List<Element>> map = new LinkedHashMap<>();
+        final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
+        for (Element element : elements) {
+            if (isNotTermOccurrence(element) || existingTerm(element)) {
+                continue;
+            }
+            map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
+        }
+        return map;
     }
 
     private boolean existingTerm(Element rdfaElem) {
@@ -150,6 +161,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     }
 
     private boolean isNotTermOccurrence(Element rdfaElem) {
+        if (!rdfaElem.hasAttr(Constants.RDFa.RESOURCE) && !rdfaElem.hasAttr(Constants.RDFa.CONTENT)) {
+            return true;
+        }
         final String typesString = rdfaElem.attr(Constants.RDFa.TYPE);
         final String[] types = typesString.split(" ");
         // Perhaps we should check also for correct property?

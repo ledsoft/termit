@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -226,5 +227,35 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final Term newTerm = resultTerms.get(0);
         final List<TermOccurrence> result = termOccurrenceDao.findAll(newTerm);
         assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsCreatesNewTermsFromOverlappingAnnotations() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms-overlapping.html");
+        file.setFileName("rdfa-new-terms-overlapping.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        assertEquals(1, resultTerms.size());
+        final Term newTerm = resultTerms.get(0);
+        assertEquals("územní plán hlavní město praha", newTerm.getLabel());
+        assertFalse(termOccurrenceDao.findAll(newTerm).isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsSkipsRDFaAnnotationsWithoutResourceAndContent() throws Exception {
+        final InputStream content = removeResourceAndContent(loadRDFa("data/rdfa-simple.html"));
+        sut.generateAnnotations(content, file, vocabulary);
+        assertTrue(termOccurrenceDao.findAll().isEmpty());
+    }
+
+    private InputStream removeResourceAndContent(InputStream input) throws IOException {
+        final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
+        final Elements elements = doc.getElementsByAttribute("about");
+        elements.removeAttr(Constants.RDFa.RESOURCE);
+        elements.removeAttr(Constants.RDFa.CONTENT);
+
+        return new ByteArrayInputStream(doc.toString().getBytes());
     }
 }
