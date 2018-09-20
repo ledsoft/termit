@@ -104,7 +104,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private InputStream changeAnnotationType(InputStream content) throws Exception {
         final Document doc = Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
-        final Elements element = doc.getElementsByAttribute("about");
+        final Elements element = doc.getElementsByAttribute(Constants.RDFa.ABOUT);
         assert element.size() == 1;
         element.attr(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
 
@@ -148,7 +148,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private InputStream setUnknownTermIdentifier(InputStream content) throws Exception {
         final Document doc = Jsoup.parse(content, StandardCharsets.UTF_8.name(), "");
-        final Elements element = doc.getElementsByAttribute("about");
+        final Elements element = doc.getElementsByAttribute(Constants.RDFa.ABOUT);
         assert element.size() == 1;
         element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
 
@@ -252,9 +252,44 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private InputStream removeResourceAndContent(InputStream input) throws IOException {
         final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
-        final Elements elements = doc.getElementsByAttribute("about");
+        final Elements elements = doc.getElementsByAttribute(Constants.RDFa.ABOUT);
         elements.removeAttr(Constants.RDFa.RESOURCE);
         elements.removeAttr(Constants.RDFa.CONTENT);
+
+        return new ByteArrayInputStream(doc.toString().getBytes());
+    }
+
+    @Test
+    void generateAnnotationsSkipsAnnotationsWithEmptyResource() throws Exception {
+        final InputStream content = setEmptyResource(loadRDFa("data/rdfa-simple.html"));
+        sut.generateAnnotations(content, file, vocabulary);
+        assertTrue(termOccurrenceDao.findAll().isEmpty());
+    }
+
+    private InputStream setEmptyResource(InputStream input) throws IOException {
+        final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
+        final Elements elements = doc.getElementsByAttribute(Constants.RDFa.ABOUT);
+        elements.attr(Constants.RDFa.RESOURCE, "");
+
+        return new ByteArrayInputStream(doc.toString().getBytes());
+    }
+
+    @Test
+    void generateAnnotationsUsesElementTextContentWhenContentAttributeIsEmptyForNewTerms() throws Exception {
+        final InputStream content = setEmptyContentOfNewTerm(loadRDFa("data/rdfa-new-terms.html"));
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        assertEquals(1, resultTerms.size());
+        final Term newTerm = resultTerms.get(0);
+        assertEquals("města", newTerm.getLabel());
+    }
+
+    private InputStream setEmptyContentOfNewTerm(InputStream input) throws IOException {
+        final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
+        final Elements elements = doc.getElementsByAttribute(Constants.RDFa.CONTENT);
+        elements.attr(Constants.RDFa.CONTENT, "");
 
         return new ByteArrayInputStream(doc.toString().getBytes());
     }
