@@ -57,18 +57,18 @@ public class DocumentController extends BaseController {
         if (fileName != null) {
             final Optional<File> toAnalyze = resolveFileToAnalyze(document, fileName);
             if (toAnalyze.isPresent()) {
-                textAnalysisService.analyzeDocument(toAnalyze.get(), document.getVocabulary());
+                textAnalysisService.analyzeDocument(toAnalyze.get(), document);
             } else {
                 throw new NotFoundException("File " + fileName + " not found in document " + document + ".");
             }
         } else {
             for (File f : document.getFiles()) {
-                textAnalysisService.analyzeDocument(f, document.getVocabulary());
+                textAnalysisService.analyzeDocument(f, document);
             }
         }
     }
 
     private static Optional<File> resolveFileToAnalyze(Document document, String fileName) {
-        return document.getFiles().stream().filter(f -> f.getName().equals(fileName)).findAny();
+        return document.getFiles().stream().filter(f -> f.getFileName().equals(fileName)).findAny();
     }
 }

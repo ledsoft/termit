@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Resolves term occurrences from RDFa-annotated HTML document.
@@ -43,6 +44,8 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private File source;
 
     private Map<String, String> prefixes;
+
+    private Map<String, List<Element>> annotatedElements;
 
     @Autowired
     HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
@@ -81,73 +84,43 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public List<Term> findNewTerms(Vocabulary vocabulary) {
-        final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
-        final List<Term> newTerms = new ArrayList<>();
-        for (Element element : elements) {
-            if (isNotTermOccurrence(element) || existingTerm(element)) {
+        assert document != null;
+        mapRDFaTermOccurrenceAnnotations();
+        final List<Term> newTerms = new ArrayList<>(annotatedElements.size());
+        for (List<Element> annotation : annotatedElements.values()) {
+            List<Element> parts = annotation.stream().filter(e -> !existingTerm(e)).collect(Collectors.toList());
+            if (parts.isEmpty()) {
                 continue;
             }
-            final String label = element.wholeText();
+            final String label = parts.stream().map(elem -> elem.attr(Constants.RDFa.CONTENT))
+                                           .collect(Collectors.joining(" "));
             final Term newTerm = new Term();
             newTerm.setLabel(label);
             newTerm.setUri(identifierResolver
                     .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
                             label));
+            LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
+            parts.forEach(elem -> elem.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString()));
             newTerms.add(newTerm);
         }
         return newTerms;
     }
 
-    private boolean existingTerm(Element rdfaElem) {
-        return !rdfaElem.attr(Constants.RDFa.RESOURCE).isEmpty();
-    }
-
-    @Override
-    public List<TermOccurrence> findTermOccurrences() {
-        assert document != null;
-        final Map<String, List<Element>> annotations = mapRDFaTermOccurrenceAnnotations(document);
-        final List<TermOccurrence> result = new ArrayList<>(annotations.size());
-        for (List<Element> elements : annotations.values()) {
-            LOG.trace("Processing RDFa annotated elements {}.", elements);
-            final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
-            occurrence.ifPresent(to -> {
-                LOG.trace("Found term occurrence {}.", to, source);
-                result.add(to);
-            });
-        }
-        return result;
-    }
-
-    private Map<String, List<Element>> mapRDFaTermOccurrenceAnnotations(Document document) {
-        final Map<String, List<Element>> map = new LinkedHashMap<>();
+    private void mapRDFaTermOccurrenceAnnotations() {
+        this.annotatedElements = new LinkedHashMap<>();
         final Elements elements = document.getElementsByAttribute(Constants.RDFa.ABOUT);
         for (Element element : elements) {
             if (isNotTermOccurrence(element)) {
                 continue;
             }
-            map.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
+            annotatedElements.computeIfAbsent(element.attr(Constants.RDFa.ABOUT), key -> new ArrayList<>()).add(element);
         }
-        return map;
-    }
-
-    private Optional<TermOccurrence> resolveAnnotation(List<Element> rdfaElem, File source) {
-        assert !rdfaElem.isEmpty();
-        final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
-        if (termId.isEmpty()) {
-            LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);
-            return Optional.empty();
-        }
-        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
-                "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
-        final TermOccurrence occurrence = createOccurrence(term);
-        final Target target = new Target();
-        target.setSource(source);
-        target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
-        occurrence.addTarget(target);
-        return Optional.of(occurrence);
     }
 
     private boolean isNotTermOccurrence(Element rdfaElem) {
+        if (!rdfaElem.hasAttr(Constants.RDFa.RESOURCE) && !rdfaElem.hasAttr(Constants.RDFa.CONTENT)) {
+            return true;
+        }
         final String typesString = rdfaElem.attr(Constants.RDFa.TYPE);
         final String[] types = typesString.split(" ");
         // Perhaps we should check also for correct property?
@@ -174,8 +147,47 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return prefixes.get(prefix) + localName;
     }
 
+    private boolean existingTerm(Element rdfaElem) {
+        return !rdfaElem.attr(Constants.RDFa.RESOURCE).isEmpty();
+    }
+
+    @Override
+    public List<TermOccurrence> findTermOccurrences() {
+        assert document != null;
+        if (annotatedElements == null) {
+            mapRDFaTermOccurrenceAnnotations();
+        }
+        final List<TermOccurrence> result = new ArrayList<>(annotatedElements.size());
+        for (List<Element> elements : annotatedElements.values()) {
+            LOG.trace("Processing RDFa annotated elements {}.", elements);
+            final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
+            occurrence.ifPresent(to -> {
+                LOG.trace("Found term occurrence {}.", to, source);
+                result.add(to);
+            });
+        }
+        return result;
+    }
+
+    private Optional<TermOccurrence> resolveAnnotation(List<Element> rdfaElem, File source) {
+        assert !rdfaElem.isEmpty();
+        final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
+        if (termId.isEmpty()) {
+            LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);
+            return Optional.empty();
+        }
+        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
+                "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
+        final TermOccurrence occurrence = createOccurrence(term);
+        final Target target = new Target();
+        target.setSource(source);
+        target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
+        occurrence.addTarget(target);
+        return Optional.of(occurrence);
+    }
+
     @Override
     public boolean supports(File source) {
-        return source.getName().endsWith("html") || source.getName().endsWith("htm");
+        return source.getFileName().endsWith("html") || source.getFileName().endsWith("htm");
     }
 }

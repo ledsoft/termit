@@ -182,6 +182,16 @@
     
 
 
+    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-nazev-souboru -->
+
+    <owl:DatatypeProperty rdf:about="&pojem;ma-nazev-souboru">
+        <rdfs:label xml:lang="cs">má název souboru</rdfs:label>
+        <rdfs:domain rdf:resource="&pojem;soubor"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prefix-text-quote -->
 
     <owl:DatatypeProperty rdf:about="&pojem;ma-prefix-text-quote">
@@ -227,16 +237,6 @@
     <owl:DatatypeProperty rdf:about="&pojem;ma-suffix-text-quote">
         <rdfs:label xml:lang="cs">má suffix text quote</rdfs:label>
         <rdfs:domain rdf:resource="&pojem;selektor-text-quote"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-umisteni -->
-
-    <owl:DatatypeProperty rdf:about="&pojem;ma-umisteni">
-        <rdfs:label xml:lang="cs">má umístění</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;soubor"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
@@ -326,6 +326,16 @@
     
 
 
+    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-term -->
+
+    <owl:Class rdf:about="&pojem;navrzeny-term">
+        <rdfs:label xml:lang="cs">Navržený term</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&pojem;term"/>
+        <rdfs:comment xml:lang="cs">Term navržený automatizovanou procedurou. Takový term by měl podléhat schválení autorizovaným uživatelem.</rdfs:comment>
+    </owl:Class>
+    
+
+
     <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-vyskyt-termu -->
 
     <owl:Class rdf:about="&pojem;navrzeny-vyskyt-termu">
@@ -333,15 +343,7 @@
         <rdfs:subClassOf rdf:resource="&pojem;vyskyt-termu"/>
         <rdfs:comment xml:lang="cs">Výskyt termu navržený automatizovanou procedurou. Takový výskyt by měl podléhat schválení autorizovaným uživatelem.</rdfs:comment>
     </owl:Class>
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-term -->
-
-        <owl:Class rdf:about="&pojem;navrzeny-term">
-            <rdfs:label xml:lang="cs">Navržený term</rdfs:label>
-            <rdfs:subClassOf rdf:resource="&pojem;term"/>
-            <rdfs:comment xml:lang="cs">Term navržený automatizovanou procedurou. Takový term by měl podléhat schválení autorizovaným uživatelem.</rdfs:comment>
-        </owl:Class>
+    
 
 
     <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-css -->

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
@@ -78,6 +79,23 @@ public class Document extends HasProvenanceData implements Serializable {
 
     public void setVocabulary(DocumentVocabulary vocabulary) {
         this.vocabulary = vocabulary;
+    }
+
+    /**
+     * Gets name of the directory where files comprising this document are stored.
+     * <p>
+     * The name consists of normalized name of this document, appended with hash code of this document's URI.
+     * <p>
+     * Note that the full directory path consists of the configured storage directory ({@link
+     * cz.cvut.kbss.termit.util.ConfigParam#FILE_STORAGE}) to which the document-specific directory name is appended.
+     *
+     * @return Document-specific directory name
+     */
+    public String getFileDirectoryName() {
+        if (name == null || uri == null) {
+            throw new IllegalStateException("Missing document name or URI required for directory name resolution.");
+        }
+        return IdentifierResolver.normalize(name) + "_" + uri.hashCode();
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -74,8 +75,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setAuthor(author);
         vocabulary.setDateCreated(new Date());
         this.file = new File();
-        file.setLocation("data/");
-        file.setName("rdfa-simple.html");
+        file.setFileName("rdfa-simple.html");
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary, vocabDescriptor);
@@ -122,7 +122,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
         final InputStream content = loadRDFa("data/rdfa-simple.html");
-        file.setName("test.txt");
+        file.setFileName("test.txt");
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file, vocabulary));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
@@ -131,7 +131,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() {
         final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setFileName("rdfa-overlapping.html");
         sut.generateAnnotations(content, file, vocabulary);
         assertEquals(1, termOccurrenceDao.findAll(term).size());
         assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
@@ -172,7 +172,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
 
         final InputStream content = loadRDFa("data/rdfa-large.html");
-        file.setName("rdfa-large.html");
+        file.setFileName("rdfa-large.html");
         sut.generateAnnotations(content, file, vocabulary);
         assertFalse(termOccurrenceDao.findAll(mp).isEmpty());
         assertFalse(termOccurrenceDao.findAll(ma).isEmpty());
@@ -182,7 +182,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() {
         final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setFileName("rdfa-overlapping.html");
         sut.generateAnnotations(content, file, vocabulary);
         final List<TermOccurrence> result = termOccurrenceDao.findAll();
         result.forEach(to -> assertTrue(
@@ -194,14 +194,68 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsPersistsNewTerms() {
         final InputStream content = loadRDFa("data/rdfa-new-terms.html");
-        file.setName("rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
         final List<Term> origTerms = termDao.findAll();
         sut.generateAnnotations(content, file, vocabulary);
         final List<Term> resultTerms = termDao.findAll();
         assertEquals(origTerms.size() + 1, resultTerms.size());
         resultTerms.removeAll(origTerms);
         final Term newTerm = resultTerms.get(0);
-        // TODO Maybe the annotations should specify a lemmatized form of the keyword, which would be used as term label
-        assertEquals("města", newTerm.getLabel());
+        assertEquals("město", newTerm.getLabel());
+    }
+
+    @Test
+    void generateAnnotationsPersistsNewTermsWithTypeSuggestedToIndicateTheyShouldBeVerifiedByUser() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        final Term newTerm = resultTerms.get(0);
+        assertTrue(newTerm.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term));
+    }
+
+    @Test
+    void generateAnnotationsCreatesTermOccurrencesForNewTerms() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        file.setFileName("rdfa-new-terms.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        final Term newTerm = resultTerms.get(0);
+        final List<TermOccurrence> result = termOccurrenceDao.findAll(newTerm);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsCreatesNewTermsFromOverlappingAnnotations() {
+        final InputStream content = loadRDFa("data/rdfa-new-terms-overlapping.html");
+        file.setFileName("rdfa-new-terms-overlapping.html");
+        final List<Term> origTerms = termDao.findAll();
+        sut.generateAnnotations(content, file, vocabulary);
+        final List<Term> resultTerms = termDao.findAll();
+        resultTerms.removeAll(origTerms);
+        assertEquals(1, resultTerms.size());
+        final Term newTerm = resultTerms.get(0);
+        assertEquals("územní plán hlavní město praha", newTerm.getLabel());
+        assertFalse(termOccurrenceDao.findAll(newTerm).isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsSkipsRDFaAnnotationsWithoutResourceAndContent() throws Exception {
+        final InputStream content = removeResourceAndContent(loadRDFa("data/rdfa-simple.html"));
+        sut.generateAnnotations(content, file, vocabulary);
+        assertTrue(termOccurrenceDao.findAll().isEmpty());
+    }
+
+    private InputStream removeResourceAndContent(InputStream input) throws IOException {
+        final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
+        final Elements elements = doc.getElementsByAttribute("about");
+        elements.removeAttr(Constants.RDFa.RESOURCE);
+        elements.removeAttr(Constants.RDFa.CONTENT);
+
+        return new ByteArrayInputStream(doc.toString().getBytes());
     }
 }

@@ -67,7 +67,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                 put(PATH + "/" + NORMALIZED_NAME + "/text-analysis").param("namespace", Vocabulary.ONTOLOGY_IRI_termit)
                                                                     .param("file", fileName))
                .andExpect(status().isAccepted());
-        verify(textAnalysisServiceMock).analyzeDocument(getFile(doc, fileName), doc.getVocabulary());
+        verify(textAnalysisServiceMock).analyzeDocument(getFile(doc, fileName), doc);
     }
 
     private static Document generateTestData() {
@@ -81,15 +81,14 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         doc.setVocabulary(vocabulary);
         for (String name : FILE_NAMES) {
             final File file = new File();
-            file.setName(name);
-            file.setLocation("/tmp/doc/1/" + name);
+            file.setFileName(name);
             doc.addFile(file);
         }
         return doc;
     }
 
     private static File getFile(Document doc, String name) {
-        return doc.getFiles().stream().filter(f -> f.getName().equals(name)).findFirst()
+        return doc.getFiles().stream().filter(f -> f.getFileName().equals(name)).findFirst()
                   .orElseThrow(() -> new TermItException("File not found."));
     }
 
@@ -102,7 +101,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                 put(PATH + "/" + NORMALIZED_NAME + "/text-analysis").param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
                .andExpect(status().isAccepted());
         for (File f : doc.getFiles()) {
-            verify(textAnalysisServiceMock).analyzeDocument(f, doc.getVocabulary());
+            verify(textAnalysisServiceMock).analyzeDocument(f, doc);
         }
     }
 
