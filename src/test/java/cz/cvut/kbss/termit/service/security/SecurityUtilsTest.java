@@ -4,7 +4,7 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.User;
-import cz.cvut.kbss.termit.persistence.dao.UserDao;
+import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +25,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     private SecurityUtils securityUtils;
 
     @Autowired
-    private UserDao userDao;
+    private UserAccountDao userAccountDao;
 
     private User user;
 
@@ -70,7 +70,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         update.setLastName("updatedLastName");
         update.setPassword(user.getPassword());
         update.setUsername(user.getUsername());
-        transactional(() -> userDao.update(update));
+        transactional(() -> userAccountDao.update(update));
         securityUtils.updateCurrentUser();
 
         final User currentUser = securityUtils.getCurrentUser();

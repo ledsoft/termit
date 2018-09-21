@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.service.security;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class RuntimeBasedLoginTracker implements LoginTracker, ApplicationEventP
 
     @Override
     public void onLoginFailure(LoginFailureEvent event) {
-        final User user = event.getUser();
+        final UserAccount user = event.getUser();
         if (!counter.containsKey(user.getUri())) {
             counter.putIfAbsent(user.getUri(), new AtomicInteger());
         }
@@ -45,7 +45,7 @@ public class RuntimeBasedLoginTracker implements LoginTracker, ApplicationEventP
         }
     }
 
-    private void emitThresholdExceeded(User user) {
+    private void emitThresholdExceeded(UserAccount user) {
         if (counter.get(user.getUri()).get() > SecurityConstants.MAX_LOGIN_ATTEMPTS + 1) {
             // Do not emit multiple times
             return;
@@ -56,7 +56,7 @@ public class RuntimeBasedLoginTracker implements LoginTracker, ApplicationEventP
 
     @Override
     public void onLoginSuccess(LoginSuccessEvent event) {
-        final User user = event.getUser();
+        final UserAccount user = event.getUser();
         Objects.requireNonNull(user);
         counter.computeIfPresent(user.getUri(), (uri, attempts) -> {
             attempts.set(0);
