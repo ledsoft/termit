@@ -12,13 +12,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("dao")
-class UserDaoTest extends BaseDaoTestRunner {
+class UserAccountDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private EntityManager em;
 
     @Autowired
-    private UserDao sut;
+    private UserAccountDao sut;
 
     @Test
     void findByUsernameReturnsMatchingUser() {

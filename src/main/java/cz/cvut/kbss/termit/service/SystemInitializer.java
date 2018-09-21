@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.service;
 
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -42,7 +42,7 @@ public class SystemInitializer {
 
     @PostConstruct
     void initSystemAdmin() {    // Package-private for testing purposes
-        final User admin = initAdminInstance();
+        final UserAccount admin = initAdminInstance();
         final String passwordPlain = generatePassword();
         admin.setPassword(passwordPlain);
         if (userService.exists(admin.getUri())) {
@@ -73,8 +73,8 @@ public class SystemInitializer {
         }
     }
 
-    private static User initAdminInstance() {
-        final User admin = new User();
+    private static UserAccount initAdminInstance() {
+        final UserAccount admin = new UserAccount();
         admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user"));
         admin.setFirstName("System");
         admin.setLastName("Administrator");

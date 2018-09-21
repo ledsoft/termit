@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.security;
 import cz.cvut.kbss.termit.exception.IncompleteJwtException;
 import cz.cvut.kbss.termit.exception.JwtException;
 import cz.cvut.kbss.termit.exception.TokenExpiredException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -62,7 +62,7 @@ public class JwtUtils {
         try {
             final Claims claims = getClaimsFromToken(token);
             verifyAttributePresence(claims);
-            final User user = new User();
+            final UserAccount user = new UserAccount();
             user.setUri(URI.create(claims.getId()));
             user.setUsername(claims.getSubject());
             final String roles = claims.get(SecurityConstants.JWT_ROLE_CLAIM, String.class);

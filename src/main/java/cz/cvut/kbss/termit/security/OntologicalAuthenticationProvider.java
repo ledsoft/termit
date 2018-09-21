@@ -2,7 +2,7 @@ package cz.cvut.kbss.termit.security;
 
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
@@ -64,12 +64,12 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
         }
     }
 
-    private void onLoginFailure(User user) {
+    private void onLoginFailure(UserAccount user) {
         user.erasePassword();
         eventPublisher.publishEvent(new LoginFailureEvent(user));
     }
 
-    private void onLoginSuccess(User user) {
+    private void onLoginSuccess(UserAccount user) {
         eventPublisher.publishEvent(new LoginSuccessEvent(user));
     }
 

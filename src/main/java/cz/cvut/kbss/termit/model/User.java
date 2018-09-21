@@ -31,11 +31,6 @@ public class User implements Serializable, HasTypes {
     @OWLDataProperty(iri = Vocabulary.s_p_ma_uzivatelske_jmeno)
     private String username;
 
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_ma_heslo)
-    private String password;
-
     @Types
     private Set<String> types;
 
@@ -71,14 +66,6 @@ public class User implements Serializable, HasTypes {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     @Override
     public Set<String> getTypes() {
         return types;
@@ -87,70 +74,6 @@ public class User implements Serializable, HasTypes {
     @Override
     public void setTypes(Set<String> types) {
         this.types = types;
-    }
-
-    /**
-     * Erases the password in this instance.
-     * <p>
-     * This should be used for security reasons when passing the instance throughout the application and especially when
-     * it to be send from the REST API to the client.
-     */
-    public void erasePassword() {
-        this.password = null;
-    }
-
-    /**
-     * Checks whether the account represented by this instance is locked.
-     *
-     * @return Locked status
-     */
-    public boolean isLocked() {
-        return types != null && types.contains(Vocabulary.s_c_uzamceny_uzivatel_termitu);
-    }
-
-    /**
-     * Locks the account represented by this instance.
-     */
-    public void lock() {
-        addType(Vocabulary.s_c_uzamceny_uzivatel_termitu);
-    }
-
-    /**
-     * Unlocks the account represented by this instance.
-     */
-    public void unlock() {
-        if (types == null) {
-            return;
-        }
-        types.remove(Vocabulary.s_c_uzamceny_uzivatel_termitu);
-    }
-
-    /**
-     * Enables the account represented by this instance.
-     * <p>
-     * Does nothing if the account is already enabled.
-     */
-    public void enable() {
-        if (types == null) {
-            return;
-        }
-        types.remove(Vocabulary.s_c_zablokovany_uzivatel_termitu);
-    }
-
-    /**
-     * Checks whether the account represented by this instance is enabled.
-     */
-    public boolean isEnabled() {
-        return types == null || !types.contains(Vocabulary.s_c_zablokovany_uzivatel_termitu);
-    }
-
-    /**
-     * Disables the account represented by this instance.
-     * <p>
-     * Disabled account cannot be logged into and cannot be used to view/modify data.
-     */
-    public void disable() {
-        addType(Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
 
     @Override

@@ -35,13 +35,6 @@ public class DocumentRepositoryService extends BaseRepositoryService<Document> {
         return dao;
     }
 
-    // TODO Temporarily disabled due to possible bug in JOPA
-//    @Override
-//    protected Document postLoad(Document instance) {
-//        instance.getAuthor().erasePassword();
-//        return instance;
-//    }
-
     /**
      * Resolves the actual file stored on the file system which is represented by the specified {@code file} in the
      * specified logical {@code document}.
