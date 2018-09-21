@@ -1,10 +1,12 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +17,16 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.nio.file.Files;
+import java.util.Date;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
 class DocumentRepositoryServiceTest extends BaseServiceTestRunner {
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private Environment environment;
@@ -35,6 +41,7 @@ class DocumentRepositoryServiceTest extends BaseServiceTestRunner {
         this.document = new Document();
         document.setName("Metropolitan plan");
         document.setUri(Generator.generateUri());
+        document.setDateCreated(new Date());
     }
 
     @Test
@@ -69,5 +76,19 @@ class DocumentRepositoryServiceTest extends BaseServiceTestRunner {
         file.setFileName("unknown.html");
         document.addFile(file);
         assertThrows(NotFoundException.class, () -> sut.resolveFile(document, file));
+    }
+
+    @Test
+    void findClearsUserPasswordAfterLoad() {
+        final User author = Generator.generateUserWithId();
+        document.setAuthor(author);
+        transactional(() -> {
+            em.persist(author);
+            em.persist(document);
+        });
+        final Optional<Document> result = sut.find(document.getUri());
+        assertTrue(result.isPresent());
+        assertNotNull(result.get().getAuthor());
+        assertNull(result.get().getAuthor().getPassword());
     }
 }
