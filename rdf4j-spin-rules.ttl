@@ -20,3 +20,13 @@ pdp:term a rdfs:Class ;
 	           CONSTRUCT { ?this pdp:ma-vyskyt-termu ?occurrence . }
 	           WHERE { ?occurrence pdp:je-vyskytem-termu ?this . }"""
 ] .
+
+# InverseOf between je-pojmem-ze-slovniku and property chain ma-glosar -> obsahuje-pojem
+pdp:term a rdfs:Class ;
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . }
+	           WHERE { ?vocabulary pdp:ma-glosar ?glossary .
+	                   ?glossasry pdp:obsahuje-pojem ?this .}"""
+] .
