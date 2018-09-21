@@ -50,6 +50,13 @@
             <artifactId>ontodriver-sesame</artifactId>
             <version>${cz.cvut.kbss.jopa.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena-libs</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+
         <!-- Spring declarative transactions with JOPA -->
         <dependency>
             <groupId>com.github.ledsoft</groupId>
