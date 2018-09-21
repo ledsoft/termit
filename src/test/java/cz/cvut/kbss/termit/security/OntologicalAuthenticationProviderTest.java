@@ -5,7 +5,7 @@ import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
 import cz.cvut.kbss.termit.model.User;
-import cz.cvut.kbss.termit.persistence.dao.UserDao;
+import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +46,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
     private AuthenticationProvider provider;
 
     @Autowired
-    private UserDao userDao;
+    private UserAccountDao userAccountDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -62,7 +62,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
         this.user = Generator.generateUserWithId();
         this.plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(plainPassword));
-        transactional(() -> userDao.persist(user));
+        transactional(() -> userAccountDao.persist(user));
         SecurityContextHolder.setContext(new SecurityContextImpl());
     }
 
@@ -135,7 +135,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
     @Test
     void authenticateThrowsLockedExceptionForLockedUser() {
         user.lock();
-        transactional(() -> userDao.update(user));
+        transactional(() -> userAccountDao.update(user));
         final Authentication auth = authentication(user.getUsername(), plainPassword);
         final LockedException ex = assertThrows(LockedException.class, () -> provider.authenticate(auth));
         assertEquals("Account of user " + user + " is locked.", ex.getMessage());
@@ -144,7 +144,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
     @Test
     void authenticationThrowsDisabledExceptionForDisabledUser() {
         user.disable();
-        transactional(() -> userDao.update(user));
+        transactional(() -> userAccountDao.update(user));
         final Authentication auth = authentication(user.getUsername(), plainPassword);
         final DisabledException ex = assertThrows(DisabledException.class, () -> provider.authenticate(auth));
         assertEquals("Account of user " + user + " is disabled.", ex.getMessage());

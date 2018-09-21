@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.security;
 
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class SecurityUtils {
      *
      * @return Currently logged in user
      */
-    public static User currentUser() {
+    public static UserAccount currentUser() {
         final SecurityContext context = SecurityContextHolder.getContext();
         assert context != null;
         final UserDetails userDetails = (UserDetails) context.getAuthentication().getDetails();
@@ -52,7 +52,7 @@ public class SecurityUtils {
      *
      * @return Current user
      */
-    public User getCurrentUser() {
+    public UserAccount getCurrentUser() {
         return currentUser();
     }
 
@@ -105,7 +105,7 @@ public class SecurityUtils {
      * @throws IllegalArgumentException When the password's do not match
      */
     public void verifyCurrentUserPassword(String password) {
-        final User currentUser = getCurrentUser();
+        final UserAccount currentUser = getCurrentUser();
         if (!passwordEncoder.matches(password, currentUser.getPassword())) {
             throw new ValidationException("The specified password does not match the original one.");
         }
@@ -116,7 +116,7 @@ public class SecurityUtils {
      *
      * @param user User to check
      */
-    public static void verifyAccountStatus(User user) {
+    public static void verifyAccountStatus(UserAccount user) {
         Objects.requireNonNull(user);
         if (user.isLocked()) {
             throw new LockedException("Account of user " + user + " is locked.");

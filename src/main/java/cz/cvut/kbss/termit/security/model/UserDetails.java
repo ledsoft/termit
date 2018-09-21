@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.security.model;
 
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -14,17 +14,17 @@ public class UserDetails implements org.springframework.security.core.userdetail
      */
     public static final GrantedAuthority DEFAULT_AUTHORITY = new SimpleGrantedAuthority(UserRole.USER.getName());
 
-    private User user;
+    private UserAccount user;
 
     private final Set<GrantedAuthority> authorities;
 
-    public UserDetails(User user) {
+    public UserDetails(UserAccount user) {
         Objects.requireNonNull(user);
         this.user = user;
         this.authorities = resolveAuthorities(user);
     }
 
-    public UserDetails(User user, Collection<GrantedAuthority> authorities) {
+    public UserDetails(UserAccount user, Collection<GrantedAuthority> authorities) {
         Objects.requireNonNull(user);
         Objects.requireNonNull(authorities);
         this.user = user;
@@ -32,7 +32,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
         this.authorities.addAll(authorities);
     }
 
-    private static Set<GrantedAuthority> resolveAuthorities(User user) {
+    private static Set<GrantedAuthority> resolveAuthorities(UserAccount user) {
         final Set<GrantedAuthority> authorities = new HashSet<>(4);
         authorities.add(DEFAULT_AUTHORITY);
         if (user.getTypes() != null) {
@@ -78,7 +78,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
         return user.isEnabled();
     }
 
-    public User getUser() {
+    public UserAccount getUser() {
         return user;
     }
 

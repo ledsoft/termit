@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.exceptions.NoResultException;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -15,13 +15,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
-public class UserDao extends BaseDao<User> {
+public class UserAccountDao extends BaseDao<UserAccount> {
 
     private final Configuration config;
 
     @Autowired
-    public UserDao(EntityManager em, Configuration config) {
-        super(User.class, em);
+    public UserAccountDao(EntityManager em, Configuration config) {
+        super(UserAccount.class, em);
         this.config = config;
     }
 
@@ -31,11 +31,11 @@ public class UserDao extends BaseDao<User> {
      * @param username Username to search by
      * @return User with matching username
      */
-    public Optional<User> findByUsername(String username) {
+    public Optional<UserAccount> findByUsername(String username) {
         Objects.requireNonNull(username);
         try {
             return Optional
-                    .of(em.createNativeQuery("SELECT ?x WHERE { ?x a ?type ; ?hasUsername ?username . }", User.class)
+                    .of(em.createNativeQuery("SELECT ?x WHERE { ?x a ?type ; ?hasUsername ?username . }", type)
                           .setParameter("type", typeUri)
                           .setParameter("hasUsername", URI.create(Vocabulary.s_p_ma_uzivatelske_jmeno))
                           .setParameter("username", username, config.get(ConfigParam.LANGUAGE)).getSingleResult());

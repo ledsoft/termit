@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.event;
 
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 
 import java.util.Objects;
 
@@ -9,9 +10,9 @@ import java.util.Objects;
  */
 abstract class UserEvent {
 
-    private final User user;
+    private final UserAccount user;
 
-    UserEvent(User user) {
+    UserEvent(UserAccount user) {
         this.user = Objects.requireNonNull(user);
     }
 
@@ -20,7 +21,7 @@ abstract class UserEvent {
      *
      * @return User
      */
-    public User getUser() {
+    public UserAccount getUser() {
         return user;
     }
 }

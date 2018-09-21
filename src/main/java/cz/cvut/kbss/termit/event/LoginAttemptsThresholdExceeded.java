@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.event;
 
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 
 /**
  * Event emitted when a user exceeds the maximum number ({@link cz.cvut.kbss.termit.security.SecurityConstants#MAX_LOGIN_ATTEMPTS})
@@ -8,7 +8,7 @@ import cz.cvut.kbss.termit.model.User;
  */
 public class LoginAttemptsThresholdExceeded extends UserEvent {
 
-    public LoginAttemptsThresholdExceeded(User user) {
+    public LoginAttemptsThresholdExceeded(UserAccount user) {
         super(user);
     }
 }

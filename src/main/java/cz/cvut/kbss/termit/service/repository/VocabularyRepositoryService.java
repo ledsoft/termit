@@ -61,11 +61,4 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
             throw ResourceExistsException.create("Vocabulary", instance.getUri());
         }
     }
-
-    // TODO Disabled due to possible bug in JOPA
-//    @Override
-//    protected Vocabulary postLoad(Vocabulary instance) {
-//        instance.getAuthor().erasePassword();
-//        return instance;
-//    }
 }
