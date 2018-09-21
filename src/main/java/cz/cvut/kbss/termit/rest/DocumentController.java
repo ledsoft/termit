@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.List;
 
 @RestController
 @RequestMapping("/documents")
@@ -35,6 +36,11 @@ public class DocumentController extends BaseController {
         super(idResolver, config);
         this.documentService = documentService;
         this.textAnalysisService = textAnalysisService;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<Document> getAll() {
+        return documentService.findAll();
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,

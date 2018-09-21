@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_document)
+@OWLClass(iri = Vocabulary.s_c_dokument)
 public class Document extends HasProvenanceData implements Serializable {
 
     @Id
@@ -27,12 +27,12 @@ public class Document extends HasProvenanceData implements Serializable {
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_file, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<File> files;
 
     @JsonIgnore
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_has_vocabulary, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik, fetch = FetchType.EAGER)
     private DocumentVocabulary vocabulary;
 
     public URI getUri() {
@@ -101,14 +101,27 @@ public class Document extends HasProvenanceData implements Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Document)) return false;
+        Document document = (Document) o;
+        return Objects.equals(uri, document.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
+    }
+
+    @Override
     public String toString() {
         return "Document{" +
                 "uri=" + uri +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", files=" + files +
                 ", author=" + getAuthor() +
                 ", dateCreated=" + getDateCreated() +
-                ", files=" + files +
                 '}';
     }
 }
