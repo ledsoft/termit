@@ -33,6 +33,16 @@ public abstract class TermOccurrenceResolver {
     public abstract void parseContent(InputStream input, File source);
 
     /**
+     * Gets the content which was previously parsed and processed by this instance.
+     * <p>
+     * This may return a different data that what was originally passed in {@link #parseContent(InputStream, File)}, as
+     * the processing might have augmented the content, e.g., when new terms were processed.
+     *
+     * @return {@code InputStream} with processed content
+     */
+    public abstract InputStream getContent();
+
+    /**
      * Finds term occurrences in the input stream.
      * <p>
      * {@link #parseContent(InputStream, File)} has to be called prior to this method.

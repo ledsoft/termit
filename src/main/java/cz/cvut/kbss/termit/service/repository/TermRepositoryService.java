@@ -36,9 +36,11 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, Vocabulary vocabulary) {
+    public void addTermToVocabulary(Term instance, URI vocabularyUri) {
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(vocabularyUri);
+        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
+
         addTopLevelTerm(instance, vocabulary);
         vocabularyService.update(vocabulary);
     }
@@ -52,10 +54,11 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, Vocabulary vocabulary, URI parentTermUri) {
+    public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);
+        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
         addTopLevelTerm(instance, vocabulary);
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
@@ -68,18 +71,20 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     public List<Term> findAll(URI vocabularyUri, int limit, int offset) {
-        Vocabulary vocabulary = vocabularyService.find(vocabularyUri)
-                                                 .orElseThrow(() -> NotFoundException
-                                                         .create(Vocabulary.class.getSimpleName(), vocabularyUri));
+        Vocabulary vocabulary = getVocabulary(vocabularyUri);
         Pageable pageable = PageRequest.of(offset, limit);
 
         return termDao.findAll(pageable, vocabulary);
     }
 
+    private Vocabulary getVocabulary(URI vocabularyUri) {
+        return vocabularyService.find(vocabularyUri)
+                                .orElseThrow(() -> NotFoundException
+                                        .create(Vocabulary.class.getSimpleName(), vocabularyUri));
+    }
+
     public List<Term> findAll(String searchString, URI vocabularyUri) {
-        Vocabulary vocabulary = vocabularyService.find(vocabularyUri)
-                                                 .orElseThrow(() -> NotFoundException
-                                                         .create(Vocabulary.class.getSimpleName(), vocabularyUri));
+        Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
         List<Term> rootTerms = termDao.findAll(searchString, vocabulary);
         // List<Term> allTerms = new ArrayList<>(rootTerms.size()*4);

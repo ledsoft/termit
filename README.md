@@ -57,7 +57,7 @@ Use it to verify input data. See `User` and its validation in `BaseRepositorySer
 TermIt is preconfigured to run against a local RDF4J repository at `http://locahost:18188/rdf4j-server/repositories/termit`.
 This can be changed by updating `config.properties`.
 
-## SPIN Rules
+### SPIN Rules
 
 In order to support the inference used by the application, new rules need to be added to RDF4J because its own RDFS rule engine does not
 support OWL stuff like inverse properties (which are used in the model). Thus, when creating a new repository, a store 

@@ -62,9 +62,10 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
         }
     }
 
-    @Override
-    protected Vocabulary postLoad(Vocabulary instance) {
-        instance.getAuthor().erasePassword();
-        return instance;
-    }
+    // TODO Disabled due to possible bug in JOPA
+//    @Override
+//    protected Vocabulary postLoad(Vocabulary instance) {
+//        instance.getAuthor().erasePassword();
+//        return instance;
+//    }
 }
