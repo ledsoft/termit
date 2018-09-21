@@ -27,7 +27,7 @@ public class Document extends HasProvenanceData implements Serializable {
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<File> files;
 
     @JsonIgnore
@@ -98,6 +98,19 @@ public class Document extends HasProvenanceData implements Serializable {
             throw new IllegalStateException("Missing document name or URI required for directory name resolution.");
         }
         return IdentifierResolver.normalize(name) + "_" + uri.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Document)) return false;
+        Document document = (Document) o;
+        return Objects.equals(uri, document.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
     }
 
     @Override

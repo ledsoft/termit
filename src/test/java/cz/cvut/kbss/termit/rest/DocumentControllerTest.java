@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.rest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Document;
@@ -21,7 +22,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -205,5 +209,22 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         assertNotNull(result);
         assertThat(result.getMessage(), containsString("not found in document"));
         verify(documentServiceMock, never()).resolveFile(any(), any());
+    }
+
+    @Test
+    void getAllReturnsDocumentsFromService() throws Exception {
+        final List<Document> documents = IntStream.range(0, 10).mapToObj(i -> {
+            final Document doc = new Document();
+            doc.setName("Document-" + i);
+            doc.setUri(Generator.generateUri());
+            return doc;
+        }).collect(Collectors.toList());
+        when(documentServiceMock.findAll()).thenReturn(documents);
+        final MvcResult mvcResult = mockMvc.perform(get(PATH)).andExpect(status().isOk()).andReturn();
+        final List<Document> result = readValue(mvcResult, new TypeReference<List<Document>>() {
+        });
+        assertNotNull(result);
+        assertEquals(documents, result);
+        verify(documentServiceMock).findAll();
     }
 }
