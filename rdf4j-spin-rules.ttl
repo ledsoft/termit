@@ -1,0 +1,22 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+
+# InverseOf between popisuje-dokument and ma-dokumetovy-slovnik
+pdp:dokument a rdfs:Class ;
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           CONSTRUCT { ?this pdp:ma-dokumentovy-slovnik ?vocabulary . }
+	           WHERE { ?vocabulary pdp:popisuje-dokument ?this . }"""
+] .
+
+# InverseOf between je-vyskytem-termu and ma-vyskyt-termu
+pdp:term a rdfs:Class ;
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           CONSTRUCT { ?this pdp:ma-vyskyt-termu ?occurrence . }
+	           WHERE { ?occurrence pdp:je-vyskytem-termu ?this . }"""
+] .

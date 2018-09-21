@@ -2,17 +2,17 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_term)
-public class Term implements Serializable {
+public class Term implements Serializable, HasTypes {
 
     @Id
     private URI uri;
@@ -25,8 +25,7 @@ public class Term implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, cascade = {CascadeType.PERSIST,
-            CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
     @Inferred
@@ -76,20 +75,14 @@ public class Term implements Serializable {
         this.occurrences = occurrences;
     }
 
+    @Override
     public Set<String> getTypes() {
         return types;
     }
 
+    @Override
     public void setTypes(Set<String> types) {
         this.types = types;
-    }
-
-    public void addType(String type) {
-        Objects.requireNonNull(type);
-        if (types == null) {
-            this.types = new HashSet<>(2);
-        }
-        types.add(type);
     }
 
     @Override
