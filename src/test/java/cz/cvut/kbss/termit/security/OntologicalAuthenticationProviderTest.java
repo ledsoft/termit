@@ -1,9 +1,10 @@
 package cz.cvut.kbss.termit.security;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
-import cz.cvut.kbss.termit.model.UserAccount;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -24,7 +25,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,12 +54,12 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
     @Autowired
     private Listener listener;
 
-    private UserAccount user;
+    private User user;
     private String plainPassword;
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserWithId();
         this.plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(plainPassword));
         transactional(() -> userAccountDao.persist(user));
@@ -152,7 +152,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 
     public static class Listener {
 
-        private UserAccount user;
+        private User user;
 
         @EventListener
         public void onSuccess(LoginSuccessEvent event) {
