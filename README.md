@@ -64,4 +64,10 @@ support OWL stuff like inverse properties (which are used in the model). Thus, w
 with **RDFS+SPIN support** should be selected. Then, rules contained in `rdf4j-spin-rules.ttl` should be added to the repository, 
 as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
 
+
+### User vs UserAccount
+`User` is a domain class used for domain functions, mostly for resource provenance (author). It does not support password.
+ `UserAccount` is used for security-related functions and supports password. Most parts of the application **should** use
+ `User`.
+
 ## TODO
