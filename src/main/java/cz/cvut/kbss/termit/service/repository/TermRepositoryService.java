@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
@@ -41,15 +40,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        addTopLevelTerm(instance, vocabulary);
+        vocabulary.getGlossary().addTerm(instance);
         vocabularyService.update(vocabulary);
-    }
-
-    private void addTopLevelTerm(Term instance, Vocabulary vocabulary) {
-        validate(instance);
-        if (!vocabulary.getGlossary().getTerms().add(instance)) {
-            throw ResourceExistsException.create("Term", instance.getUri());
-        }
     }
 
     @Transactional
@@ -58,7 +50,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
-        addTopLevelTerm(instance, vocabulary);
+        vocabulary.getGlossary().addTerm(instance);
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
 
