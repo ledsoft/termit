@@ -114,7 +114,7 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> findTerms(@PathVariable String fragment,
                                 @RequestParam(name = "namespace", required = false) String namespace,
-                                @RequestParam(name = "parentTerm") String parentTerm,
+                                @RequestParam(name = "parentTerm", required = false) String parentTerm,
                                 @RequestParam(name = "limit", required = false) Integer limit,
                                 @RequestParam(name = "offset", required = false) Integer offset,
                                 @RequestParam(name = "label", required = false) String label) {
@@ -143,7 +143,7 @@ public class TermController extends BaseController {
      * @param term      Vocabulary term that will be created
      * @return HttpHeader
      */
-    @RequestMapping(value = "/{fragment}/terms/create", method = RequestMethod.POST,
+    @RequestMapping(value = "/{fragment}/terms", method = RequestMethod.POST,
             consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String fragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
