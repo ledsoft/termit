@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,12 +71,8 @@ public class TextAnalysisService {
             }
             assert resp.getBody() != null;
             final Resource resource = resp.getBody();
-            // resource.getInputStream returns a fresh stream for each call, which is exactly what we need here
             try (final InputStream is = resource.getInputStream()) {
-                writeOutAnalysisResult(is, file, document);
-            }
-            try (final InputStream is = resource.getInputStream()) {
-                annotationGenerator.generateAnnotations(is, file, document.getVocabulary());
+                annotationGenerator.generateAnnotations(is, file, document);
             }
         } catch (WebServiceIntegrationException e) {
             throw e;
@@ -104,16 +99,6 @@ public class TextAnalysisService {
             return String.join("\n", lines);
         } catch (IOException e) {
             throw new TermItException("Unable to read file for text analysis.", e);
-        }
-    }
-
-    private void writeOutAnalysisResult(InputStream input, File file, Document document) {
-        try {
-            final java.io.File content = documentService.resolveFile(document, file);
-            LOG.debug("Saving text analysis results to {}.", content);
-            Files.copy(input, content.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new TermItException("Unable to write out text analysis results.", e);
         }
     }
 }

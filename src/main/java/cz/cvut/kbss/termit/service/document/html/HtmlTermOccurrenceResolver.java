@@ -18,6 +18,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -65,6 +66,12 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         } catch (IOException e) {
             throw new AnnotationGenerationException("Unable to read RDFa document.", e);
         }
+    }
+
+    @Override
+    public InputStream getContent() {
+        assert document != null;
+        return new ByteArrayInputStream(document.toString().getBytes());
     }
 
     private static Map<String, String> resolvePrefixes(Document document) {
