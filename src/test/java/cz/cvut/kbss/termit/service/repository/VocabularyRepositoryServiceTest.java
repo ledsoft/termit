@@ -5,19 +5,18 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.util.Date;
-import java.util.Optional;
 
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,11 +29,11 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Autowired
     private VocabularyRepositoryService sut;
 
-    private User user;
+    private UserAccount user;
 
     @BeforeEach
     void setUp() {
-        this.user = Generator.generateUserWithId();
+        this.user = generateAccount();
         transactional(() -> em.persist(user));
         Environment.setCurrentUser(user);
     }
@@ -47,7 +46,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertEquals(user, result.getAuthor());
+        assertEquals(user.toUser(), result.getAuthor());
         assertNotNull(result.getDateCreated());
     }
 
@@ -84,21 +83,6 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         assertEquals(originalUri, result.getUri());
     }
 
-    // TODO Temporarily disabled due to possible bug in JOPA
-    @Disabled
-    @Test
-    void postLoadRemovesAuthorPassword() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
-        vocabulary.setAuthor(user);
-        vocabulary.setDateCreated(new Date());
-        transactional(() -> em.persist(vocabulary));
-
-        final Optional<Vocabulary> result = sut.find(vocabulary.getUri());
-        assertTrue(result.isPresent());
-        assertNull(result.get().getAuthor().getPassword());
-    }
-
     @Test
     void persistCreatesGlossaryAndModelInstances() {
         final Vocabulary vocabulary = new Vocabulary();
@@ -114,7 +98,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalAlreadyIriExists() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setAuthor(user);
+        vocabulary.setAuthor(user.toUser());
         vocabulary.setDateCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 

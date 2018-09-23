@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,32 +50,32 @@ class UserControllerTest extends BaseControllerTestRunner {
     @InjectMocks
     private UserController sut;
 
-    private User user;
+    private UserAccount user;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
-        this.user = Generator.generateUserWithId();
+        this.user = generateAccount();
         Environment.setCurrentUser(user);
     }
 
     @Test
     void getAllReturnsAllUsers() throws Exception {
-        final List<User> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserWithId())
-                                          .collect(Collectors.toList());
+        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> generateAccount())
+                                                 .collect(Collectors.toList());
         when(userService.findAll()).thenReturn(users);
 
         final MvcResult mvcResult = mockMvc.perform(get(BASE_URL).accept(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isOk()).andReturn();
-        final List<User> result = readValue(mvcResult, new TypeReference<List<User>>() {
+        final List<UserAccount> result = readValue(mvcResult, new TypeReference<List<UserAccount>>() {
         });
         assertEquals(users, result);
     }
 
     @Test
     void createUserPersistsUser() throws Exception {
-        final User user = Generator.generateUser();
+        final UserAccount user = generateAccount();
         mockMvc.perform(post(BASE_URL).content(toJson(user)).contentType(MediaType.APPLICATION_JSON_VALUE))
                .andExpect(status().isCreated());
         verify(userService).persist(user);

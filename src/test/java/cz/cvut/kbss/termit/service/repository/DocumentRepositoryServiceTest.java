@@ -1,16 +1,13 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -19,15 +16,12 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.nio.file.Files;
 import java.util.Date;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
 class DocumentRepositoryServiceTest extends BaseServiceTestRunner {
-
-    @Autowired
-    private EntityManager em;
 
     @Autowired
     private Environment environment;
@@ -77,21 +71,5 @@ class DocumentRepositoryServiceTest extends BaseServiceTestRunner {
         file.setFileName("unknown.html");
         document.addFile(file);
         assertThrows(NotFoundException.class, () -> sut.resolveFile(document, file));
-    }
-
-    // TODO Temporarily disabled due to possible bug in JOPA
-    @Disabled
-    @Test
-    void findClearsUserPasswordAfterLoad() {
-        final User author = Generator.generateUserWithId();
-        document.setAuthor(author);
-        transactional(() -> {
-            em.persist(author);
-            em.persist(document);
-        });
-        final Optional<Document> result = sut.find(document.getUri());
-        assertTrue(result.isPresent());
-        assertNotNull(result.get().getAuthor());
-        assertNull(result.get().getAuthor().getPassword());
     }
 }

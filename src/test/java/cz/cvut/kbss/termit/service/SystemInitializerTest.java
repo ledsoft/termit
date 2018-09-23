@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.service;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -78,15 +78,15 @@ class SystemInitializerTest extends BaseServiceTestRunner {
     @Test
     void persistsSystemAdminWhenHeDoesNotExist() {
         sut.initSystemAdmin();
-        assertNotNull(em.find(User.class, ADMIN_URI));
+        assertNotNull(em.find(UserAccount.class, ADMIN_URI));
     }
 
     @Test
     void doesNotCreateNewAdminWhenOneAlreadyExists() {
         sut.initSystemAdmin();
-        final User admin = em.find(User.class, ADMIN_URI);
+        final UserAccount admin = em.find(UserAccount.class, ADMIN_URI);
         sut.initSystemAdmin();
-        final User result = em.find(User.class, ADMIN_URI);
+        final UserAccount result = em.find(UserAccount.class, ADMIN_URI);
         // We know that password is generated, so the same password means no new instance was created
         assertEquals(admin.getPassword(), result.getPassword());
     }
@@ -94,7 +94,7 @@ class SystemInitializerTest extends BaseServiceTestRunner {
     @Test
     void savesAdminLoginCredentialsIntoHiddenFileInUserHome() throws Exception {
         sut.initSystemAdmin();
-        final User admin = em.find(User.class, ADMIN_URI);
+        final UserAccount admin = em.find(UserAccount.class, ADMIN_URI);
         final String home = environment.getProperty(ConfigParam.ADMIN_CREDENTIALS_LOCATION.toString());
         final File credentialsFile = new File(home + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
         assertTrue(credentialsFile.exists());

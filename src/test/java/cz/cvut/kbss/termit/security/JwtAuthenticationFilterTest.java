@@ -1,8 +1,7 @@
 package cz.cvut.kbss.termit.security;
 
-import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestConfig;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -27,6 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.servlet.FilterChain;
 import java.util.Collections;
 
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
@@ -42,7 +42,7 @@ class JwtAuthenticationFilterTest {
 
     private MockHttpServletResponse mockResponse;
 
-    private User user;
+    private UserAccount user;
 
     @Mock
     private FilterChain filterChain;
@@ -52,7 +52,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.user = Generator.generateUserWithId();
+        this.user = generateAccount();
         this.mockRequest = new MockHttpServletRequest();
         this.mockResponse = new MockHttpServletResponse();
         this.sut = new JwtAuthenticationFilter(mock(AuthenticationManager.class), new JwtUtils(config));

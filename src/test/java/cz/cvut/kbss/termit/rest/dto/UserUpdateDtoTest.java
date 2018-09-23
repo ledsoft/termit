@@ -1,16 +1,16 @@
 package cz.cvut.kbss.termit.rest.dto;
 
-import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserUpdateDtoTest {
 
     @Test
-    void toUserCopiesAllAttributesIntoNewUserInstance() {
-        final User user = Generator.generateUserWithId();
+    void asUserAccountCopiesAllAttributesIntoNewUserInstance() {
+        final UserAccount user = generateAccount();
         final UserUpdateDto dto = new UserUpdateDto();
         dto.setUri(user.getUri());
         dto.setFirstName(user.getFirstName());
@@ -20,13 +20,12 @@ class UserUpdateDtoTest {
         dto.setTypes(user.getTypes());
         dto.setOriginalPassword("test");
 
-        final User result = dto.toUser();
+        final UserAccount result = dto.asUserAccount();
         assertEquals(user.getUri(), result.getUri());
         assertEquals(user.getFirstName(), result.getFirstName());
-        assertEquals(user.getLastName(),  result.getLastName());
+        assertEquals(user.getLastName(), result.getLastName());
         assertEquals(user.getUsername(), result.getUsername());
         assertEquals(user.getPassword(), result.getPassword());
         assertEquals(user.getTypes(), result.getTypes());
     }
-
 }

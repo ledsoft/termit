@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -62,7 +63,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistExecutesTransactionalPersist() {
-        final User user = Generator.generateUserWithId();
+        final UserAccount user = generateAccount();
 
         sut.persist(user);
         assertTrue(userAccountDao.exists(user.getUri()));
@@ -70,7 +71,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistExecutesPrePersistMethodBeforePersistOnDao() {
-        final User user = Generator.generateUser();
+        final UserAccount user = generateAccount();
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
         sut.persist(user);
@@ -81,14 +82,14 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateExecutesTransactionalUpdate() {
-        final User user = Generator.generateUserWithId();
+        final UserAccount user = generateAccount();
         transactional(() -> userAccountDao.persist(user));
 
         final String updatedLastName = "Married";
         user.setLastName(updatedLastName);
         sut.update(user);
 
-        final Optional<User> result = userAccountDao.find(user.getUri());
+        final Optional<UserAccount> result = userAccountDao.find(user.getUri());
         assertAll(() -> assertTrue(result.isPresent()),
                 () -> assertEquals(updatedLastName, result.get().getLastName())
         );
@@ -96,7 +97,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateExecutesPreUpdateMethodBeforeUpdateOnDao() {
-        final User user = Generator.generateUser();
+        final UserAccount user = generateAccount();
         when(userAccountDaoMock.update(any())).thenReturn(user);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
@@ -108,12 +109,12 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateInvokesPostUpdateAfterUpdateOnDao() {
-        final User user = Generator.generateUser();
-        final User returned = Generator.generateUser();
+        final UserAccount user = generateAccount();
+        final UserAccount returned = generateAccount();
         when(userAccountDaoMock.update(any())).thenReturn(returned);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
-        final User result = sut.update(user);
+        final UserAccount result = sut.update(user);
         final InOrder inOrder = Mockito.inOrder(sut, userAccountDaoMock);
         inOrder.verify(userAccountDaoMock).update(user);
         inOrder.verify(sut).postUpdate(returned);
@@ -122,7 +123,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeExecutesTransactionalRemove() {
-        final User user = Generator.generateUserWithId();
+        final UserAccount user = generateAccount();
         transactional(() -> userAccountDao.persist(user));
 
         sut.remove(user);
@@ -131,7 +132,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeByIdExecutesTransactionalRemove() {
-        final User user = Generator.generateUserWithId();
+        final UserAccount user = generateAccount();
         transactional(() -> userAccountDao.persist(user));
 
         sut.remove(user.getUri());
@@ -140,11 +141,11 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findExecutesPostLoadAfterLoadingEntityFromDao() {
-        final User user = Generator.generateUserWithId();
+        final UserAccount user = generateAccount();
         when(userAccountDaoMock.find(user.getUri())).thenReturn(Optional.of(user));
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
-        final Optional<User> result = sut.find(user.getUri());
+        final Optional<UserAccount> result = sut.find(user.getUri());
         assertTrue(result.isPresent());
         assertEquals(user, result.get());
         final InOrder inOrder = Mockito.inOrder(sut, userAccountDaoMock);
@@ -157,19 +158,19 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
         when(userAccountDaoMock.find(any())).thenReturn(Optional.empty());
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
-        final Optional<User> result = sut.find(Generator.generateUri());
+        final Optional<UserAccount> result = sut.find(Generator.generateUri());
         assertFalse(result.isPresent());
         verify(sut, never()).postLoad(any());
     }
 
     @Test
     void findAllExecutesPostLoadForEachLoadedEntity() {
-        final List<User> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserWithId())
-                                          .collect(Collectors.toList());
+        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> generateAccount())
+                                                 .collect(Collectors.toList());
         when(userAccountDaoMock.findAll()).thenReturn(users);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
-        final List<User> result = sut.findAll();
+        final List<UserAccount> result = sut.findAll();
         assertEquals(users, result);
         final InOrder inOrder = Mockito.inOrder(sut, userAccountDaoMock);
         inOrder.verify(userAccountDaoMock).findAll();
