@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -153,12 +154,29 @@ public class UserAccount implements Serializable, HasTypes {
         addType(Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
 
+    /**
+     * Transforms this security-related {@code UserAccount} instance to a domain-specific {@code User} instance.
+     *
+     * @return new user instance based on this account
+     */
+    public User toUser() {
+        final User user = new User();
+        user.setUri(uri);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        if (types != null) {
+            user.setTypes(new HashSet<>(types));
+        }
+        return user;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof User)) {
+        if (!(o instanceof UserAccount)) {
             return false;
         }
         UserAccount user = (UserAccount) o;

@@ -1,13 +1,11 @@
 package cz.cvut.kbss.termit.exception;
 
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.util.ValidationResult;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -25,11 +23,11 @@ class ValidationExceptionTest {
 
     @Test
     void getMessageReturnsConcatenatedConstraintViolationMessages() {
-        final User u = new User();
+        final UserAccount u = new UserAccount();
         u.setFirstName("test");
         u.setLastName("testowitch");
         final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        final ValidationResult<User> violations = ValidationResult.of(validator.validate(u));
+        final ValidationResult<UserAccount> violations = ValidationResult.of(validator.validate(u));
         final ValidationException ex = new ValidationException(violations);
         final String result = ex.getMessage();
         assertAll(() -> assertThat(result, containsString("username")),

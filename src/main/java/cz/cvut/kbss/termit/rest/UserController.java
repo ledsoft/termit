@@ -2,7 +2,7 @@ package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
@@ -45,33 +45,33 @@ public class UserController extends BaseController {
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<User> getAll() {
+    public List<UserAccount> getAll() {
         return userService.findAll();
     }
 
     @PreAuthorize("permitAll()")
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public ResponseEntity<Void> createUser(@RequestBody User user) {
+    public ResponseEntity<Void> createUser(@RequestBody UserAccount user) {
         userService.persist(user);
         LOG.info("User {} successfully registered.", user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/current", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
-    public User getCurrent(Principal principal) {
+                                                                                JsonLd.MEDIA_TYPE})
+    public UserAccount getCurrent(Principal principal) {
         final AuthenticationToken auth = (AuthenticationToken) principal;
         return auth.getDetails().getUser();
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/current", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                JsonLd.MEDIA_TYPE})
     public void updateCurrent(@RequestBody UserUpdateDto update) {
         if (update.getPassword() != null) {
             securityUtils.verifyCurrentUserPassword(update.getOriginalPassword());
         }
-        final User user = update.toUser();
+        final UserAccount user = update.asUserAccount();
         userService.update(user);
         LOG.debug("User {} successfully updated.", user);
     }
@@ -81,8 +81,8 @@ public class UserController extends BaseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unlock(@PathVariable(name = "fragment") String identifierFragment, @RequestBody String newPassword) {
         final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
-        final Optional<User> toUnlock = userService.find(id);
-        final User user = toUnlock.orElseThrow(() -> NotFoundException.create("User", id));
+        final Optional<UserAccount> toUnlock = userService.find(id);
+        final UserAccount user = toUnlock.orElseThrow(() -> NotFoundException.create("User", id));
         userService.unlock(user, newPassword);
         LOG.debug("User {} successfully unlocked.", user);
     }
@@ -92,8 +92,8 @@ public class UserController extends BaseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void enable(@PathVariable(name = "fragment") String identifierFragment) {
         final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
-        final Optional<User> toEnable = userService.find(id);
-        final User user = toEnable.orElseThrow(() -> NotFoundException.create("User", id));
+        final Optional<UserAccount> toEnable = userService.find(id);
+        final UserAccount user = toEnable.orElseThrow(() -> NotFoundException.create("User", id));
         userService.enable(user);
         LOG.debug("User {} successfully enabled.", user);
     }
@@ -103,8 +103,8 @@ public class UserController extends BaseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disable(@PathVariable(name = "fragment") String identifierFragment) {
         final URI id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_USER, identifierFragment);
-        final Optional<User> toDisable = userService.find(id);
-        final User user = toDisable.orElseThrow(() -> NotFoundException.create("User", id));
+        final Optional<UserAccount> toDisable = userService.find(id);
+        final UserAccount user = toDisable.orElseThrow(() -> NotFoundException.create("User", id));
         userService.disable(user);
         LOG.debug("User {} successfully disabled.", user);
     }

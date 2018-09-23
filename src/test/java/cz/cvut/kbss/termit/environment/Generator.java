@@ -103,7 +103,6 @@ public class Generator {
         user.setFirstName("Firstname" + randomInt());
         user.setLastName("Lastname" + randomInt());
         user.setUsername("user" + randomInt() + "@kbss.felk.cvut.cz");
-        user.setPassword(Integer.toString(randomInt()));
         return user;
     }
 

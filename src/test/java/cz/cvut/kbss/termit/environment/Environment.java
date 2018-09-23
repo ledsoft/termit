@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.util.Constants;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 public class Environment {
 
-    private static User currentUser;
+    private static UserAccount currentUser;
 
     private static ObjectMapper objectMapper;
 
@@ -37,7 +37,7 @@ public class Environment {
      *
      * @param user User to set as currently authenticated
      */
-    public static void setCurrentUser(User user) {
+    public static void setCurrentUser(UserAccount user) {
         currentUser = user;
         final UserDetails userDetails = new UserDetails(user, new HashSet<>());
         SecurityContext context = new SecurityContextImpl();
@@ -52,10 +52,10 @@ public class Environment {
      */
     public static Optional<Principal> getCurrentUserPrincipal() {
         return SecurityContextHolder.getContext() != null ?
-               Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
+                Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
     }
 
-    public static User getCurrentUser() {
+    public static UserAccount getCurrentUser() {
         return currentUser;
     }
 

@@ -47,7 +47,7 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
         }
         verifyIdentifierUnique(instance);
         instance.setDateCreated(new Date());
-        instance.setAuthor(securityUtils.getCurrentUser());
+        instance.setAuthor(securityUtils.getCurrentUser().toUser());
         if (instance.getGlossary() == null) {
             instance.setGlossary(new Glossary());
         }

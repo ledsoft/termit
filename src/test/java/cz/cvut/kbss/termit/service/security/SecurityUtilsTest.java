@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.service.security;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,12 +28,11 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Autowired
     private UserAccountDao userAccountDao;
 
-    private User user;
+    private UserAccount user;
 
     @BeforeEach
     void setUp() {
-        this.user = Generator.generateUser();
-        user.setUri(Generator.generateUri());
+        this.user = generateAccount();
     }
 
     @AfterEach
@@ -43,7 +43,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Test
     void getCurrentUserReturnsCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final User result = securityUtils.getCurrentUser();
+        final UserAccount result = securityUtils.getCurrentUser();
         assertEquals(user, result);
     }
 
@@ -64,7 +64,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Test
     void updateCurrentUserReplacesUserInCurrentSecurityContext() {
         Environment.setCurrentUser(user);
-        final User update = new User();
+        final UserAccount update = new UserAccount();
         update.setUri(Generator.generateUri());
         update.setFirstName("updatedFirstName");
         update.setLastName("updatedLastName");
@@ -73,7 +73,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         transactional(() -> userAccountDao.update(update));
         securityUtils.updateCurrentUser();
 
-        final User currentUser = securityUtils.getCurrentUser();
+        final UserAccount currentUser = securityUtils.getCurrentUser();
         assertEquals(update, currentUser);
     }
 

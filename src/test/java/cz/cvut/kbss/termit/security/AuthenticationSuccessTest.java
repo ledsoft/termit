@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
+import cz.cvut.kbss.termit.model.UserAccountTest;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.LoginStatus;
 import cz.cvut.kbss.termit.security.model.UserDetails;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = {TestSecurityConfig.class})
 class AuthenticationSuccessTest extends BaseServiceTestRunner {
 
-    private User person = Generator.generateUser();
+    private UserAccount person = UserAccountTest.generateAccount();
 
     @Autowired
     private AuthenticationSuccess success;

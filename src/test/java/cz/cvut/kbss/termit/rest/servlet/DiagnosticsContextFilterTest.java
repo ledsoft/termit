@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.rest.servlet;
 
-import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.UserDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
 class DiagnosticsContextFilterTest {
 
@@ -41,7 +40,7 @@ class DiagnosticsContextFilterTest {
 
     @Test
     void setsDiagnosticsContextWhenProcessingChain() throws Exception {
-        final User user = Generator.generateUser();
+        final UserAccount user = generateAccount();
         final Principal token = new AuthenticationToken(Collections.emptyList(), new UserDetails(user));
         when(requestMock.getUserPrincipal()).thenReturn(token);
         doAnswer((answer) -> {

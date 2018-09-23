@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.rest.dto;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.Objects;
@@ -11,7 +12,7 @@ import java.util.Objects;
  * DTO used for user updating so that original password can be validated.
  */
 @OWLClass(iri = Vocabulary.s_c_uzivatel_termitu)
-public class UserUpdateDto extends User {
+public class UserUpdateDto extends UserAccount {
 
     @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_termit + "/original-password")
     private String originalPassword;
@@ -31,8 +32,8 @@ public class UserUpdateDto extends User {
      *
      * @return {@link User} instance
      */
-    public User toUser() {
-        final User user = new User();
+    public UserAccount asUserAccount() {
+        final UserAccount user = new UserAccount();
         user.setUri(getUri());
         user.setFirstName(getFirstName());
         user.setLastName(getLastName());
