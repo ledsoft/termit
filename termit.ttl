@@ -1,414 +1,261 @@
-<?xml version="1.0"?>
-
-
-<!DOCTYPE rdf:RDF [
-    <!ENTITY terms "http://purl.org/dc/terms/" >
-    <!ENTITY vann "http://purl.org/vocab/vann/" >
-    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
-    <!ENTITY bibo "http://purl.org/ontology/bibo/" >
-    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
-    <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
-    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY skos "http://www.w3.org/2004/02/skos/core#" >
-    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY ufo "http://onto.fel.cvut.cz/ontologies/ufo/" >
-    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-    <!ENTITY annot "http://onto.fel.cvut.cz/ontologies/ufo/annot/" >
-    <!ENTITY pojem "http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/" >
-]>
+@prefix : <http://onto.fel.cvut.cz/ontologies/application/termit/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ufo: <http://onto.fel.cvut.cz/ontologies/ufo/> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix annot: <http://onto.fel.cvut.cz/ontologies/ufo/annot/> .
+@prefix pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+@prefix terms: <http://purl.org/dc/terms/> .
+@base <http://onto.fel.cvut.cz/ontologies/application/termit> .
 
+<http://onto.fel.cvut.cz/ontologies/application/termit> rdf:type owl:Ontology ;
+                                                         owl:imports <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> .
 
-<rdf:RDF xmlns="http://onto.fel.cvut.cz/ontologies/application/termit#"
-     xml:base="http://onto.fel.cvut.cz/ontologies/application/termit"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:annot="&ufo;annot/"
-     xmlns:pojem="http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:terms="http://purl.org/dc/terms/"
-     xmlns:bibo="http://purl.org/ontology/bibo/"
-     xmlns:vann="http://purl.org/vocab/vann/"
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:ufo="http://onto.fel.cvut.cz/ontologies/ufo/">
-    <owl:Ontology rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit">
-        <owl:imports rdf:resource="http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model"/>
-    </owl:Ontology>
-    
+#################################################################
+#    Object Properties
+#################################################################
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-vyskytem-termu
+pojem:je-vyskytem-termu rdf:type owl:ObjectProperty ;
+                        rdfs:domain pojem:vyskyt-termu ;
+                        rdfs:range pojem:term ;
+                        rdfs:label "je výskytem termu"@cs .
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Object Properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
 
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-autora
+pojem:ma-autora rdf:type owl:ObjectProperty ;
+                rdfs:domain ufo:object ;
+                rdfs:label "má autora"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-vyskytem-termu -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-cil
+pojem:ma-cil rdf:type owl:ObjectProperty ;
+             rdfs:domain pojem:vyskyt-termu ;
+             rdfs:range pojem:cil ;
+             rdfs:label "má cíl"@cs .
 
-    <owl:ObjectProperty rdf:about="&pojem;je-vyskytem-termu">
-        <rdfs:label xml:lang="cs">je výskytem termu</rdfs:label>
-        <rdfs:range rdf:resource="&pojem;term"/>
-        <rdfs:domain rdf:resource="&pojem;vyskyt-termu"/>
-    </owl:ObjectProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-dokumentovy-slovnik
+pojem:ma-dokumentovy-slovnik rdf:type owl:ObjectProperty ;
+                             owl:inverseOf pojem:popisuje-dokument ;
+                             rdfs:label "má dokumentový slovník"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-autora -->
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-autora">
-        <rdfs:label xml:lang="cs">má autora</rdfs:label>
-        <rdfs:domain rdf:resource="&ufo;object"/>
-    </owl:ObjectProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-informaci-o-verzi
+pojem:ma-informaci-o-verzi rdf:type owl:ObjectProperty ;
+                           rdfs:label "má informaci o verzi"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-cil -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-puvod
+pojem:ma-puvod rdf:type owl:ObjectProperty ;
+               rdfs:comment "Označuje původní zdroj dokumentu. Lze použít např. pro určení baseURI HTML dokumentu tak, aby v něm fungovaly relativního odkazy."@cs ;
+               rdfs:label "má původ"@cs .
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-cil">
-        <rdfs:label xml:lang="cs">má cíl</rdfs:label>
-        <rdfs:range rdf:resource="&pojem;cil"/>
-        <rdfs:domain rdf:resource="&pojem;vyskyt-termu"/>
-    </owl:ObjectProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-selektor
+pojem:ma-selektor rdf:type owl:ObjectProperty ;
+                  rdfs:domain pojem:cil ;
+                  rdfs:range pojem:selektor-termu ;
+                  rdfs:label "má selektor"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-dokumentovy-slovnik -->
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-dokumentovy-slovnik">
-        <rdfs:label xml:lang="cs">má dokumentový slovník</rdfs:label>
-        <owl:inverseOf rdf:resource="&pojem;popisuje-dokument"/>
-    </owl:ObjectProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-vyskyt-termu
+pojem:ma-vyskyt-termu rdf:type owl:ObjectProperty ;
+                      rdfs:domain pojem:term ;
+                      rdfs:range pojem:vyskyt-termu ;
+                      rdfs:label "má výskyt termu"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-informaci-o-verzi -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-zdrojovy-dokument
+pojem:ma-zdrojovy-dokument rdf:type owl:ObjectProperty ;
+                           rdfs:domain pojem:cil ;
+                           rdfs:range pojem:dokument ;
+                           rdfs:label "má zdrojový dokument"@cs .
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-informaci-o-verzi">
-        <rdfs:label xml:lang="cs">má informaci o verzi</rdfs:label>
-    </owl:ObjectProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-dokument
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-puvod -->
+#################################################################
+#    Data properties
+#################################################################
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-puvod">
-        <rdfs:label xml:lang="cs">má původ</rdfs:label>
-        <rdfs:comment xml:lang="cs">Označuje původní zdroj dokumentu. Lze použít např. pro určení baseURI HTML dokumentu tak, aby v něm fungovaly relativního odkazy.</rdfs:comment>
-    </owl:ObjectProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-heslo
+pojem:ma-heslo rdf:type owl:DatatypeProperty ;
+               rdfs:domain :uzivatel-termitu ;
+               rdfs:range xsd:string ;
+               rdfs:label "má heslo"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-selektor -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-koncovou-pozici
+pojem:ma-koncovou-pozici rdf:type owl:DatatypeProperty ;
+                         rdfs:domain pojem:selektor-pozici-v-textu ;
+                         rdfs:range xsd:int ;
+                         rdfs:label "má koncovou pozici"@cs .
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-selektor">
-        <rdfs:label xml:lang="cs">má selektor</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;cil"/>
-        <rdfs:range rdf:resource="&pojem;selektor-termu"/>
-    </owl:ObjectProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-krestni-jmeno
+pojem:ma-krestni-jmeno rdf:type owl:DatatypeProperty ;
+                       rdfs:domain :uzivatel-termitu ;
+                       rdfs:range xsd:string ;
+                       rdfs:label "má křestní jméno"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-vyskyt-termu -->
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-vyskyt-termu">
-        <rdfs:label xml:lang="cs">má výskyt termu</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;term"/>
-        <rdfs:range rdf:resource="&pojem;vyskyt-termu"/>
-    </owl:ObjectProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-nazev-souboru
+pojem:ma-nazev-souboru rdf:type owl:DatatypeProperty ;
+                       rdfs:domain pojem:soubor ;
+                       rdfs:range xsd:string ;
+                       rdfs:label "má název souboru"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-zdrojovy-dokument -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prefix-text-quote
+pojem:ma-prefix-text-quote rdf:type owl:DatatypeProperty ;
+                           rdfs:domain pojem:selektor-text-quote ;
+                           rdfs:range xsd:string ;
+                           rdfs:label "má prefix text quote"@cs .
 
-    <owl:ObjectProperty rdf:about="&pojem;ma-zdrojovy-dokument">
-        <rdfs:label xml:lang="cs">má zdrojový dokument</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;cil"/>
-        <rdfs:range rdf:resource="&pojem;dokument"/>
-    </owl:ObjectProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-presny-text-quote
+pojem:ma-presny-text-quote rdf:type owl:DatatypeProperty ;
+                           rdfs:domain pojem:selektor-text-quote ;
+                           rdfs:range xsd:string ;
+                           rdfs:label "má přesný text quote"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/popisuje-dokument -->
 
-    <rdf:Description rdf:about="&pojem;popisuje-dokument"/>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prijmeni
+pojem:ma-prijmeni rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :uzivatel-termitu ;
+                  rdfs:range xsd:string ;
+                  rdfs:label "má příjmení"@cs .
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Data properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-startovni-pozici
+pojem:ma-startovni-pozici rdf:type owl:DatatypeProperty ;
+                          rdfs:domain pojem:selektor-pozici-v-textu ;
+                          rdfs:range xsd:int ;
+                          rdfs:label "má startovní pozici"@cs .
 
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-suffix-text-quote
+pojem:ma-suffix-text-quote rdf:type owl:DatatypeProperty ;
+                           rdfs:domain pojem:selektor-text-quote ;
+                           rdfs:range xsd:string ;
+                           rdfs:label "má suffix text quote"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-heslo -->
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-heslo">
-        <rdfs:label xml:lang="cs">má heslo</rdfs:label>
-        <rdfs:domain rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-uzivatelske-jmeno
+pojem:ma-uzivatelske-jmeno rdf:type owl:DatatypeProperty ;
+                           rdfs:domain :uzivatel-termitu ;
+                           rdfs:range xsd:string ;
+                           rdfs:label "má uživatelské jméno"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-koncovou-pozici -->
+#################################################################
+#    Classes
+#################################################################
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-koncovou-pozici">
-        <rdfs:label xml:lang="cs">má koncovou pozici</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;selektor-pozici-v-textu"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/application/termit/administrator-termitu
+:administrator-termitu rdf:type owl:Class ;
+                       rdfs:subClassOf :uzivatel-termitu ;
+                       rdfs:label "Administrátor TermItu"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-krestni-jmeno -->
+###  http://onto.fel.cvut.cz/ontologies/application/termit/omezeny-uzivatel-termitu
+:omezeny-uzivatel-termitu rdf:type owl:Class ;
+                          rdfs:subClassOf :uzivatel-termitu ;
+                          rdfs:label "Omezený uživatel TermItu"@cs .
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-krestni-jmeno">
-        <rdfs:label xml:lang="cs">má křestní jméno</rdfs:label>
-        <rdfs:domain rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/application/termit/uzamceny-uzivatel-termitu
+:uzamceny-uzivatel-termitu rdf:type owl:Class ;
+                           rdfs:subClassOf :uzivatel-termitu ;
+                           rdfs:label "Uzamčený uživatel TermItu"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-nazev-souboru -->
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-nazev-souboru">
-        <rdfs:label xml:lang="cs">má název souboru</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;soubor"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu
+:uzivatel-termitu rdf:type owl:Class ;
+                  rdfs:subClassOf <http://onto.fel.cvut.cz/ontologies/dataset-descriptor/person> ;
+                  rdfs:label "Uživatel TermItu"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prefix-text-quote -->
+###  http://onto.fel.cvut.cz/ontologies/application/termit/zablokovany-uzivatel-termitu
+:zablokovany-uzivatel-termitu rdf:type owl:Class ;
+                              rdfs:subClassOf :uzivatel-termitu ;
+                              rdfs:label "Zablokovaný uživatel TermItu"@cs .
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-prefix-text-quote">
-        <rdfs:label xml:lang="cs">má prefix text quote</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;selektor-text-quote"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/cil
+pojem:cil rdf:type owl:Class ;
+          rdfs:subClassOf ufo:object ;
+          rdfs:label "Cíl"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-presny-text-quote -->
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-presny-text-quote">
-        <rdfs:label xml:lang="cs">má přesný text quote</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;selektor-text-quote"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/informace-o-verzi
+pojem:informace-o-verzi rdf:type owl:Class ;
+                        rdfs:subClassOf ufo:endurant ;
+                        rdfs:label "Informace o verzi"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prijmeni -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-term
+pojem:navrzeny-term rdf:type owl:Class ;
+                    rdfs:subClassOf pojem:term ;
+                    rdfs:comment "Term navržený automatizovanou procedurou. Takový term by měl podléhat schválení autorizovaným uživatelem."@cs ;
+                    rdfs:label "Navržený term"@cs .
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-prijmeni">
-        <rdfs:label xml:lang="cs">má příjmení</rdfs:label>
-        <rdfs:domain rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-vyskyt-termu
+pojem:navrzeny-vyskyt-termu rdf:type owl:Class ;
+                            rdfs:subClassOf pojem:vyskyt-termu ;
+                            rdfs:comment "Výskyt termu navržený automatizovanou procedurou. Takový výskyt by měl podléhat schválení autorizovaným uživatelem."@cs ;
+                            rdfs:label "Navržený výskyt termu"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-startovni-pozici -->
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-startovni-pozici">
-        <rdfs:label xml:lang="cs">má startovní pozici</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;selektor-pozici-v-textu"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-css
+pojem:selektor-css rdf:type owl:Class ;
+                   rdfs:subClassOf pojem:selektor-termu ;
+                   rdfs:label "Selektor CSS"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-suffix-text-quote -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-fragmentem
+pojem:selektor-fragmentem rdf:type owl:Class ;
+                          rdfs:subClassOf pojem:selektor-termu ;
+                          rdfs:label "Selektor fragmentem"@cs .
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-suffix-text-quote">
-        <rdfs:label xml:lang="cs">má suffix text quote</rdfs:label>
-        <rdfs:domain rdf:resource="&pojem;selektor-text-quote"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-pozici-v-textu
+pojem:selektor-pozici-v-textu rdf:type owl:Class ;
+                              rdfs:subClassOf pojem:selektor-termu ;
+                              rdfs:label "Selektor pozicí v textu"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-uzivatelske-jmeno -->
 
-    <owl:DatatypeProperty rdf:about="&pojem;ma-uzivatelske-jmeno">
-        <rdfs:label xml:lang="cs">má uživatelské jméno</rdfs:label>
-        <rdfs:domain rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:DatatypeProperty>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-termu
+pojem:selektor-termu rdf:type owl:Class ;
+                     rdfs:subClassOf ufo:object ;
+                     rdfs:label "Selektor termu"@cs .
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-text-quote
+pojem:selektor-text-quote rdf:type owl:Class ;
+                          rdfs:subClassOf pojem:selektor-termu ;
+                          rdfs:label "Selektor Text Quote"@cs .
 
-    
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-xpath
+pojem:selektor-xpath rdf:type owl:Class ;
+                     rdfs:subClassOf pojem:selektor-termu ;
+                     rdfs:label "Selektor XPath"@cs .
 
-    <!-- http://onto.fel.cvut.cz/ontologies/application/termit/administrator-termitu -->
 
-    <owl:Class rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit/administrator-termitu">
-        <rdfs:label xml:lang="cs">Administrátor TermItu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-    </owl:Class>
-    
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/vyskyt-termu
+pojem:vyskyt-termu rdf:type owl:Class ;
+                   rdfs:subClassOf ufo:object ;
+                   rdfs:label "Výskyt termu"@cs .
 
 
-    <!-- http://onto.fel.cvut.cz/ontologies/application/termit/omezeny-uzivatel-termitu -->
-
-    <owl:Class rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit/omezeny-uzivatel-termitu">
-        <rdfs:label xml:lang="cs">Omezený uživatel TermItu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/application/termit/uzamceny-uzivatel-termitu -->
-
-    <owl:Class rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit/uzamceny-uzivatel-termitu">
-        <rdfs:label xml:lang="cs">Uzamčený uživatel TermItu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu -->
-
-    <owl:Class rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu">
-        <rdfs:label xml:lang="cs">Uživatel TermItu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://onto.fel.cvut.cz/ontologies/dataset-descriptor/person"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/application/termit/zablokovany-uzivatel-termitu -->
-
-    <owl:Class rdf:about="http://onto.fel.cvut.cz/ontologies/application/termit/zablokovany-uzivatel-termitu">
-        <rdfs:label xml:lang="cs">Zablokovaný uživatel TermItu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://onto.fel.cvut.cz/ontologies/application/termit/uzivatel-termitu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/cil -->
-
-    <owl:Class rdf:about="&pojem;cil">
-        <rdfs:label xml:lang="cs">Cíl</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&ufo;object"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/informace-o-verzi -->
-
-    <owl:Class rdf:about="&pojem;informace-o-verzi">
-        <rdfs:label xml:lang="cs">Informace o verzi</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&ufo;endurant"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-term -->
-
-    <owl:Class rdf:about="&pojem;navrzeny-term">
-        <rdfs:label xml:lang="cs">Navržený term</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;term"/>
-        <rdfs:comment xml:lang="cs">Term navržený automatizovanou procedurou. Takový term by měl podléhat schválení autorizovaným uživatelem.</rdfs:comment>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/navrzeny-vyskyt-termu -->
-
-    <owl:Class rdf:about="&pojem;navrzeny-vyskyt-termu">
-        <rdfs:label xml:lang="cs">Navržený výskyt termu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;vyskyt-termu"/>
-        <rdfs:comment xml:lang="cs">Výskyt termu navržený automatizovanou procedurou. Takový výskyt by měl podléhat schválení autorizovaným uživatelem.</rdfs:comment>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-css -->
-
-    <owl:Class rdf:about="&pojem;selektor-css">
-        <rdfs:label xml:lang="cs">Selektor CSS</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;selektor-termu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-fragmentem -->
-
-    <owl:Class rdf:about="&pojem;selektor-fragmentem">
-        <rdfs:label xml:lang="cs">Selektor fragmentem</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;selektor-termu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-pozici-v-textu -->
-
-    <owl:Class rdf:about="&pojem;selektor-pozici-v-textu">
-        <rdfs:label xml:lang="cs">Selektor pozicí v textu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;selektor-termu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-termu -->
-
-    <owl:Class rdf:about="&pojem;selektor-termu">
-        <rdfs:label xml:lang="cs">Selektor termu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&ufo;object"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-text-quote -->
-
-    <owl:Class rdf:about="&pojem;selektor-text-quote">
-        <rdfs:label xml:lang="cs">Selektor Text Quote</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;selektor-termu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/selektor-xpath -->
-
-    <owl:Class rdf:about="&pojem;selektor-xpath">
-        <rdfs:label xml:lang="cs">Selektor XPath</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&pojem;selektor-termu"/>
-    </owl:Class>
-    
-
-
-    <!-- http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/vyskyt-termu -->
-
-    <owl:Class rdf:about="&pojem;vyskyt-termu">
-        <rdfs:label xml:lang="cs">Výskyt termu</rdfs:label>
-        <rdfs:subClassOf rdf:resource="&ufo;object"/>
-    </owl:Class>
-</rdf:RDF>
-
-
-
-<!-- Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net -->
-
+###  Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi
