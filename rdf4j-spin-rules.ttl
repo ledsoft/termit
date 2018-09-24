@@ -28,5 +28,5 @@ pdp:term a rdfs:Class ;
 	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . }
 	           WHERE { ?vocabulary pdp:ma-glosar ?glossary .
-	                   ?glossasry pdp:obsahuje-pojem ?this .}"""
+	                   ?glossary pdp:obsahuje-pojem ?this .}"""
 ] .
