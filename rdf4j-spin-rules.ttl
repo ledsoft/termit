@@ -12,21 +12,30 @@ pdp:dokument a rdfs:Class ;
 	           WHERE { ?vocabulary pdp:popisuje-dokument ?this . }"""
 ] .
 
-# InverseOf between je-vyskytem-termu and ma-vyskyt-termu
 pdp:term a rdfs:Class ;
+# InverseOf between je-vyskytem-termu and ma-vyskyt-termu
 	spin:rule [
 		a sp:Construct ;
 	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 	           CONSTRUCT { ?this pdp:ma-vyskyt-termu ?occurrence . }
 	           WHERE { ?occurrence pdp:je-vyskytem-termu ?this . }"""
-] .
-
+    ];
 # InverseOf between je-pojmem-ze-slovniku and property chain ma-glosar -> obsahuje-pojem
-pdp:term a rdfs:Class ;
 	spin:rule [
 		a sp:Construct ;
 	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
-	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . }
+	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . ?this skos:inScheme ?glossary.}
 	           WHERE { ?vocabulary pdp:ma-glosar ?glossary .
-	                   ?glossary pdp:obsahuje-pojem ?this .}"""
-] .
+	                   ?glossary pdp:obsahuje-pojem/(skos:narrower*) ?this .}"""
+    ];
+# Term is a skos:Concept
+# REPLACE BY RDFS inference
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+	           CONSTRUCT { ?this a skos:Concept . }
+	           WHERE { ?this a pdp:term . }"""
+    ]
+.
