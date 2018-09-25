@@ -36,6 +36,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     @Transactional
     public void addTermToVocabulary(Term instance, URI vocabularyUri) {
+        validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(vocabularyUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
@@ -48,6 +49,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     @Transactional
     public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
+        validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);

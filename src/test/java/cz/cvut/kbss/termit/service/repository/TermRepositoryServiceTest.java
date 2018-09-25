@@ -72,7 +72,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final ValidationException exception =
                 assertThrows(
                         ValidationException.class, () -> trs.addTermToVocabulary(term, vocabulary.getUri()));
-        assertThat(exception.getMessage(), containsString("name must not be blank"));
+        assertThat(exception.getMessage(), containsString("label must not be blank"));
     }
 
     @Test
@@ -126,7 +126,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result1);
         assertTrue(result1.getSubTerms().contains(uri2));
     }
-    
+
     @Test
     void findTermsWithSpecificLimitAndOffset() {
         Set<Term> terms = new HashSet<>(10);
