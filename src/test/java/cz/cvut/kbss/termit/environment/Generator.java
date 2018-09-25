@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.environment;
 
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Model;
+import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -130,5 +131,12 @@ public class Generator {
         vocabulary.setModel(new Model());
         vocabulary.setName("Vocabulary" + randomInt());
         return vocabulary;
+    }
+
+    public static Term generateTerm() {
+        final Term term = new Term();
+        term.setLabel("Term" + randomInt());
+        term.setComment("Comment"+ randomInt());
+        return term;
     }
 }

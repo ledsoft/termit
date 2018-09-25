@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -40,7 +42,9 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        vocabulary.getGlossary().addTerm(instance);
+        if (!vocabulary.getGlossary().addTerm(instance)){
+            throw ResourceExistsException.create("Term", instance.getUri());
+        }
         vocabularyService.update(vocabulary);
     }
 
@@ -50,12 +54,20 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
-        vocabulary.getGlossary().addTerm(instance);
+
+        if (!vocabulary.getGlossary().addTerm(instance)){
+            throw ResourceExistsException.create("Term", instance.getUri());
+        }
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
 
         Set<URI> newTerms = parenTerm.getSubTerms();
-        newTerms.add(instance.getUri());
+        if (newTerms == null) {
+            newTerms = new HashSet<>();
+        }
+        if (!newTerms.add(instance.getUri())){
+            throw ResourceExistsException.create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
+        }
         parenTerm.setSubTerms(newTerms);
 
         vocabularyService.update(vocabulary);

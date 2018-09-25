@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.CascadeType;
 import cz.cvut.kbss.jopa.model.annotations.FetchType;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.HashSet;
@@ -34,12 +35,16 @@ public class Glossary extends AbstractEntity {
      *
      * @param term Term to add
      */
-    public void addTerm(Term term) {
+    public boolean addTerm(Term term) {
         Objects.requireNonNull(term);
+        Objects.requireNonNull(term.getLabel());
+        if(term.getLabel().isEmpty()){
+            throw new ValidationException("Term name must not be blank");
+        }
         if (terms == null) {
             this.terms = new HashSet<>();
         }
-        terms.add(term);
+        return terms.add(term);
     }
 
     @Override
