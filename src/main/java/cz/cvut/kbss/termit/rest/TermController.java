@@ -147,7 +147,7 @@ public class TermController extends BaseController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String fragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
-                                           @RequestParam(name = "parentTermUri") String parentTerm,
+                                           @RequestParam(name = "parentTermUri", required = false) String parentTerm,
                                            @RequestBody Term term) {
         final URI vocabularyUri = getVocabularyUri(namespace, fragment);
         if (parentTerm != null && !parentTerm.isEmpty()) {
