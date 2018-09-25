@@ -12,4 +12,8 @@ public class ResourceExistsException extends TermItException {
     public static ResourceExistsException create(String resource, Object identifier) {
         return new ResourceExistsException(resource + " with identifier " + identifier + " already exists.");
     }
+
+    public static ResourceExistsException create(String message) {
+        return new ResourceExistsException(message);
+    }
 }
