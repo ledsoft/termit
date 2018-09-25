@@ -25,6 +25,9 @@ public class Term implements Serializable, HasTypes {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
+    @OWLDataProperty(iri = "http://purl.org/dc/elements/1.1/source")
+    private Set<String> sources;
+
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
@@ -73,6 +76,14 @@ public class Term implements Serializable, HasTypes {
 
     public void setOccurrences(Set<TermOccurrence> occurrences) {
         this.occurrences = occurrences;
+    }
+
+    public Set<String> getSource() {
+        return sources;
+    }
+
+    public void setSource(Set<String> source) {
+        this.sources = source;
     }
 
     @Override
