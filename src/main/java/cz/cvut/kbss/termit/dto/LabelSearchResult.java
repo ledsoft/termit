@@ -10,12 +10,12 @@ import java.util.Collections;
 import java.util.Set;
 
 @SparqlResultSetMapping(name = "LabelSearchResult", classes = {@ConstructorResult(targetClass = LabelSearchResult.class,
-variables = {
-        @VariableResult(name ="x", type = URI.class),
-        @VariableResult(name = "label"),
-        @VariableResult(name = "vocabularyUri", type = URI.class),
-        @VariableResult(name = "type", type = String.class)
-})})
+        variables = {
+                @VariableResult(name = "x", type = URI.class),
+                @VariableResult(name = "label"),
+                @VariableResult(name = "vocabularyUri", type = URI.class),
+                @VariableResult(name = "type", type = String.class)
+        })})
 public class LabelSearchResult implements Serializable {
 
     @Id
@@ -30,6 +30,9 @@ public class LabelSearchResult implements Serializable {
 
     @Types
     private Set<String> types;
+
+    public LabelSearchResult() {
+    }
 
     public LabelSearchResult(URI uri, String label, URI vocabularyUri, String type) {
         this.uri = uri;
