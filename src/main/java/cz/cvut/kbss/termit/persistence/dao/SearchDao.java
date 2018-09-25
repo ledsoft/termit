@@ -32,13 +32,15 @@ public class SearchDao {
     public List<LabelSearchResult> searchByLabel(String searchString) {
         Objects.requireNonNull(searchString);
         return (List<LabelSearchResult>) em.createNativeQuery("SELECT * WHERE {" +
-                "?x a ?type ;" +
+                "{ ?x a ?term ;" +
+                "?hasLabel ?label ;" +
+                "?inVocabulary ?vocabularyUri ." +
+                "BIND (?term as ?type) ." +
+                "} UNION {" +
+                "?x a ?vocabulary ;" +
                 "?hasLabel ?label ." +
-                "OPTIONAL {" +
-                "?x ?inVocabulary ?vocabularyUri ." +
-                "}" +
+                "BIND (?vocabulary as ?type) . }" +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "FILTER (?type = ?term || ?type = ?vocabulary) ." +
                 "} ORDER BY ?label", "LabelSearchResult")
                                            .setParameter("hasLabel", URI.create(RDFS.LABEL))
                                            .setParameter("inVocabulary",

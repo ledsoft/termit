@@ -4,6 +4,9 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.LabelSearchResult;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.*;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +38,10 @@ class SearchDaoTest extends BaseDaoTestRunner {
     @Test
     void searchByLabelFindsTermsWithMatchingLabel() {
         final Vocabulary vocabulary = generateTerms();
-        transactional(() -> em.persist(vocabulary));
+        transactional(() -> {
+            em.persist(vocabulary);
+            insertInVocabularyStatements(vocabulary);
+        });
         final Collection<Term> matching = vocabulary.getGlossary().getTerms().stream()
                                                     .filter(t -> t.getLabel().contains("Matching")).collect(
                         Collectors.toList());
@@ -63,6 +69,17 @@ class SearchDaoTest extends BaseDaoTestRunner {
             vocabulary.getGlossary().addTerm(term);
         }
         return vocabulary;
+    }
+
+    private void insertInVocabularyStatements(Vocabulary vocabulary) {
+        // This normally happens by using SPIN rules on repository level
+        final Repository repo = em.unwrap(Repository.class);
+        try (final RepositoryConnection con = repo.getConnection()) {
+            final ValueFactory vf = con.getValueFactory();
+            vocabulary.getGlossary().getTerms().forEach(t -> con.add(vf.createIRI(t.getUri().toString()),
+                    vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku),
+                    vf.createIRI(vocabulary.getUri().toString())));
+        }
     }
 
     @Test
@@ -100,6 +117,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final List<Vocabulary> vocabularies = generateVocabularies();
         transactional(() -> {
             em.persist(terms);
+            insertInVocabularyStatements(terms);
             vocabularies.forEach(em::persist);
         });
         final Collection<Term> matchingTerms = terms.getGlossary().getTerms().stream()
