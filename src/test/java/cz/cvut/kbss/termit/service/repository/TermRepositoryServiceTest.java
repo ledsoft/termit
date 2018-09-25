@@ -10,7 +10,6 @@ import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -127,9 +126,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result1);
         assertTrue(result1.getSubTerms().contains(uri2));
     }
-
-
-    @Disabled // TODO offset does not work
+    
     @Test
     void findTermsWithSpecificLimitAndOffset() {
         Set<Term> terms = new HashSet<>(10);
