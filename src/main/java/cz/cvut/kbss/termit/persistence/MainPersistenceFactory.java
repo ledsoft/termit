@@ -71,7 +71,7 @@ public class MainPersistenceFactory {
      */
     public static Map<String, String> defaultParams() {
         final Map<String, String> map = new HashMap<>();
-        map.put(SCAN_PACKAGE, "cz.cvut.kbss.termit.model");
+        map.put(SCAN_PACKAGE, "cz.cvut.kbss.termit");
         map.put(JPA_PERSISTENCE_PROVIDER, JOPAPersistenceProvider.class.getName());
         return map;
     }
