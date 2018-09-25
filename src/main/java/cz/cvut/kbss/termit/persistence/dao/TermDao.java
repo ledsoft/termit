@@ -41,6 +41,29 @@ public class TermDao extends BaseDao<Term> {
     }
 
     /**
+     * Loads a page of terms contained in the specified vocabulary.
+     *
+     * @param limit   number of terms to be fetched
+     * @param offset   number of terms to be skipped
+     * @param vocabulary Vocabulary whose terms should be returned
+     * @return Matching terms, ordered by their label
+     */
+    public List<Term> findAll(int limit, int offset, Vocabulary vocabulary) {
+        return em.createNativeQuery("SELECT ?term WHERE {" +
+                "?term a ?type ;" +
+                "rdfs:label ?label ." +
+                "?vocabulary ?hasGlossary/?hasTerm ?term ." +
+                "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class)
+                .setParameter("type", typeUri)
+                .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
+                .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
+                .setParameter("vocabulary", vocabulary.getUri())
+                .setUntypedParameter("offset", offset)
+                .setUntypedParameter("limit", limit)
+                .getResultList();
+    }
+
+    /**
      * Finds root terms whose term subtree contains a term with label matching the specified search string.
      * <p>
      * Currently, the match uses SPARQL {@code contains} function on lowercase label and search string. A more

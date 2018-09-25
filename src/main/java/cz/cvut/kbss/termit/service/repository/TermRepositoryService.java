@@ -6,8 +6,6 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,9 +73,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     public List<Term> findAll(URI vocabularyUri, int limit, int offset) {
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
-        Pageable pageable = PageRequest.of(offset, limit);
 
-        return termDao.findAll(pageable, vocabulary);
+        return termDao.findAll(limit, offset, vocabulary);
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
