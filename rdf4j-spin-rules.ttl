@@ -39,3 +39,13 @@ pdp:term a rdfs:Class ;
 	           WHERE { ?this a pdp:term . }"""
     ]
 .
+
+pdp:dokumentovy-slovnik a rdfs:Class ;
+# Infer slovnik for each dokumentovy-slovnik
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           CONSTRUCT { ?this a pdp:slovnik . }
+	           WHERE { ?this a pdp:dokumentovy-slovnik . }"""
+    ]
+.
