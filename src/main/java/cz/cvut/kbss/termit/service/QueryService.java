@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service;
 
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.util.Configuration;
 import java.util.Objects;
@@ -34,7 +35,7 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 
         Objects.requireNonNull(queryString);
         final HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, "application/ld+json");
+        headers.add(HttpHeaders.ACCEPT, JsonLd.MEDIA_TYPE);
         try {
             final JSONArray result = restClient
                 .exchange((repositoryUrl + "?query={query}"),
