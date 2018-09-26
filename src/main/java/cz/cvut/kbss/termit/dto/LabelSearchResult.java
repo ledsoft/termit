@@ -26,7 +26,7 @@ public class LabelSearchResult implements Serializable {
     private String label;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
-    private URI vocabularyUri;
+    private URI vocabulary;
 
     @Types
     private Set<String> types;
@@ -34,10 +34,10 @@ public class LabelSearchResult implements Serializable {
     public LabelSearchResult() {
     }
 
-    public LabelSearchResult(URI uri, String label, URI vocabularyUri, String type) {
+    public LabelSearchResult(URI uri, String label, URI vocabulary, String type) {
         this.uri = uri;
         this.label = label;
-        this.vocabularyUri = vocabularyUri;
+        this.vocabulary = vocabulary;
         this.types = Collections.singleton(type);
     }
 
@@ -57,12 +57,12 @@ public class LabelSearchResult implements Serializable {
         this.label = label;
     }
 
-    public URI getVocabularyUri() {
-        return vocabularyUri;
+    public URI getVocabulary() {
+        return vocabulary;
     }
 
-    public void setVocabularyUri(URI vocabularyUri) {
-        this.vocabularyUri = vocabularyUri;
+    public void setVocabulary(URI vocabulary) {
+        this.vocabulary = vocabulary;
     }
 
     public Set<String> getTypes() {
