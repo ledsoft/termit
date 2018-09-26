@@ -76,7 +76,7 @@ public class TermController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}/terms/id", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Term getByID(@PathVariable String fragment,
                         @RequestParam(name = "term_id") String termId,
                         @RequestParam(name = "namespace", required = false) String namespace) {
@@ -85,15 +85,27 @@ public class TermController extends BaseController {
         return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termId));
     }
 
+    @RequestMapping(value = "/{fragment}/terms/{termName}", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public Term getByName(@PathVariable String fragment,
+                          @PathVariable String termName,
+                          @RequestParam(name = "namespace", required = false) String namespace) {
+
+
+        String uri = this.generateIdentifier(fragment, namespace, termName);
+        URI id = URI.create(uri);
+        return termService.find(id).orElseThrow(() -> NotFoundException.create("Term", id));
+    }
+
     @RequestMapping(value = "/{fragment}/terms/subterms", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubtermsByParentID(@PathVariable String fragment,
                                             @RequestParam(name = "parent_id") String parentID,
                                             @RequestParam(name = "namespace", required = false) String namespace) {
 
         URI termUri = URI.create(parentID);
         Set<URI> subTerms = termService.find(termUri)
-                                       .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms();
+                .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms();
         return subTerms
                 .parallelStream()
                 .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
@@ -177,6 +189,6 @@ public class TermController extends BaseController {
                                      @RequestParam("name") String name) {
         URI vocabularyUri = getVocabularyUri(namespace, fragment);
         return idResolver.generateIdentifier(vocabularyUri.toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR, name)
-                         .toString();
+                .toString();
     }
 }
