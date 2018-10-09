@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +32,8 @@ public class DefaultDocumentManager implements DocumentManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultDocumentManager.class);
 
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("YYYY-MM-dd_HHmmss");
+
     private final Configuration config;
 
     @Autowired
@@ -36,14 +41,14 @@ public class DefaultDocumentManager implements DocumentManager {
         this.config = config;
     }
 
-    private java.io.File resolveFile(Document document, File file, boolean checkExistence) {
+    private java.io.File resolveFile(Document document, File file, boolean verifyExists) {
         Objects.requireNonNull(document);
         Objects.requireNonNull(file);
         final String path =
                 config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + document.getFileDirectoryName() +
                         java.io.File.separator + file.getFileName();
         final java.io.File result = new java.io.File(path);
-        if (checkExistence && !result.exists()) {
+        if (verifyExists && !result.exists()) {
             LOG.error("File {} not found at location {}.", file, path);
             throw new NotFoundException("File " + file + " from document " + document + " not found on file system.");
         }
@@ -81,10 +86,30 @@ public class DefaultDocumentManager implements DocumentManager {
     public void saveFileContent(Document document, File file, InputStream content) {
         try {
             final java.io.File target = resolveFile(document, file, false);
-            LOG.debug("Saving file content to {}.", content);
+            LOG.debug("Saving file content to {}.", target);
             Files.copy(content, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new TermItException("Unable to write out file content.", e);
         }
+    }
+
+    @Override
+    public void createBackup(Document document, File file) {
+        try {
+            final java.io.File toBackup = resolveFile(document, file, true);
+            final java.io.File backupFile = new java.io.File(
+                    toBackup.getParent() + java.io.File.separator + generateBackupFileName(file));
+            LOG.debug("Backing up file {} to {}.", toBackup, backupFile);
+            Files.copy(toBackup.toPath(), backupFile.toPath());
+        } catch (IOException e) {
+            throw new TermItException("Unable to backup file.", e);
+        }
+    }
+
+    private static String generateBackupFileName(File file) {
+        final String origName = file.getFileName();
+        final String name = origName.substring(0, origName.lastIndexOf('.'));
+        final String extension = origName.substring(origName.lastIndexOf('.'));
+        return name + "~" + DATE_FORMAT.format(new Date()) + extension;
     }
 }

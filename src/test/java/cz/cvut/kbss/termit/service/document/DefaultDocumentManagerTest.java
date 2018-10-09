@@ -133,4 +133,21 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         assertTrue(result.isPresent());
         assertEquals(MediaType.TEXT_HTML_VALUE, result.get());
     }
+
+    @Test
+    void createBackupCreatesBackupFileWithIdenticalContent() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setFileName(physicalFile.getName());
+        document.addFile(file);
+        final java.io.File docDir = physicalFile.getParentFile();
+        assertNotNull(docDir.listFiles());
+        assertEquals(1, docDir.listFiles().length);
+        sut.createBackup(document, file);
+        assertEquals(2, docDir.listFiles().length);
+        for (java.io.File f : docDir.listFiles()) {
+            f.deleteOnExit();
+            assertEquals(CONTENT, String.join("\n", Files.readAllLines(f.toPath())));
+        }
+    }
 }
