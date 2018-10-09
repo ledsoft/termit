@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_dokument)
@@ -73,6 +74,17 @@ public class Document extends HasProvenanceData implements Serializable {
             this.files = new HashSet<>();
         }
         files.add(file);
+    }
+
+    /**
+     * Retrieves file with the specified filename from this document.
+     *
+     * @param fileName Name of the file to retrieve
+     * @return {@code Optional} containing the file with a matching filename or an empty {@code Optional}
+     */
+    public Optional<File> getFile(String fileName) {
+        return files != null ? files.stream().filter(f -> f.getFileName().equals(fileName)).findAny() :
+               Optional.empty();
     }
 
     public DocumentVocabulary getVocabulary() {

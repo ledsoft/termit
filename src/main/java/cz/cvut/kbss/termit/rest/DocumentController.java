@@ -107,9 +107,8 @@ public class DocumentController extends BaseController {
         }
     }
 
-    // TODO Move this into Document
     private static File resolveFileFromName(Document document, String fileName) {
-        return document.getFiles().stream().filter(f -> f.getFileName().equals(fileName)).findAny().orElseThrow(
+        return document.getFile(fileName).orElseThrow(
                 () -> new NotFoundException("File " + fileName + " not found in document " + document + "."));
     }
 }
