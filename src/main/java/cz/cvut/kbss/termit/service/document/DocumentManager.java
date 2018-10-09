@@ -64,4 +64,15 @@ public interface DocumentManager {
      * @param content  Content to save
      */
     void saveFileContent(Document document, File file, InputStream content);
+
+    /**
+     * Creates backup of the specified file.
+     * <p>
+     * Multiple backups of a file can be created and they should be distinguishable.
+     *
+     * @param document Document containing file. Used for path resolution
+     * @param file     File to backup
+     * @throws NotFoundException If the file cannot be found
+     */
+    void createBackup(Document document, File file);
 }
