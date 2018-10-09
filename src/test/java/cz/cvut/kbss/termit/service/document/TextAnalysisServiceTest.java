@@ -10,7 +10,6 @@ import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
-import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -65,7 +64,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     private Configuration config;
 
     @Autowired
-    private DocumentRepositoryService documentService;
+    private DocumentManager documentManager;
 
     @Autowired
     private Environment environment;
@@ -100,7 +99,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.file = new File();
         file.setFileName(FILE_NAME);
         generateFile();
-        this.sut = new TextAnalysisService(restTemplate, config, documentService, annotationGeneratorMock);
+        this.sut = new TextAnalysisService(restTemplate, config, documentManager, annotationGeneratorMock);
     }
 
     @Test

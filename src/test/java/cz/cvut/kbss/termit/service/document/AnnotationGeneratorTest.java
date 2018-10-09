@@ -31,7 +31,7 @@ import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 
-import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
+import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -123,20 +123,16 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsCreatesTermOccurrenceForTermFoundInContentDocument() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
+        final InputStream content = loadFile("data/rdfa-simple.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
         final List<TermOccurrence> result = termOccurrenceDao.findAll(term);
         assertEquals(1, result.size());
     }
 
-    private static InputStream loadRDFa(String file) {
-        return AnnotationGeneratorTest.class.getClassLoader().getResourceAsStream(file);
-    }
-
     @Test
     void generateAnnotationsSkipsElementsWithUnsupportedType() throws Exception {
-        final InputStream content = changeAnnotationType(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = changeAnnotationType(loadFile("data/rdfa-simple.html"));
         generateFile();
         sut.generateAnnotations(content, file, document);
         assertTrue(termOccurrenceDao.findAll(term).isEmpty());
@@ -153,7 +149,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
+        final InputStream content = loadFile("data/rdfa-simple.html");
         file.setFileName("test.txt");
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file, document));
@@ -162,7 +158,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
+        final InputStream content = loadFile("data/rdfa-overlapping.html");
         file.setFileName("rdfa-overlapping.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
@@ -172,7 +168,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnknownTermIdentifier() throws Exception {
-        final InputStream content = setUnknownTermIdentifier(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = setUnknownTermIdentifier(loadFile("data/rdfa-simple.html"));
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file, document));
         assertThat(ex.getMessage(), containsString("Term with id "));
@@ -204,7 +200,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(area);
         transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
 
-        final InputStream content = loadRDFa("data/rdfa-large.html");
+        final InputStream content = loadFile("data/rdfa-large.html");
         file.setFileName("rdfa-large.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
@@ -215,7 +211,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
+        final InputStream content = loadFile("data/rdfa-overlapping.html");
         file.setFileName("rdfa-overlapping.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
@@ -228,7 +224,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsPersistsNewTerms() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        final InputStream content = loadFile("data/rdfa-new-terms.html");
         file.setFileName("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
@@ -242,7 +238,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsPersistsNewTermsWithTypeSuggestedToIndicateTheyShouldBeVerifiedByUser() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        final InputStream content = loadFile("data/rdfa-new-terms.html");
         file.setFileName("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
@@ -255,7 +251,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsCreatesTermOccurrencesForNewTerms() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
+        final InputStream content = loadFile("data/rdfa-new-terms.html");
         file.setFileName("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
@@ -269,7 +265,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsCreatesNewTermsFromOverlappingAnnotations() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms-overlapping.html");
+        final InputStream content = loadFile("data/rdfa-new-terms-overlapping.html");
         file.setFileName("rdfa-new-terms-overlapping.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
@@ -284,7 +280,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsSkipsRDFaAnnotationsWithoutResourceAndContent() throws Exception {
-        final InputStream content = removeResourceAndContent(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = removeResourceAndContent(loadFile("data/rdfa-simple.html"));
         generateFile();
         sut.generateAnnotations(content, file, document);
         assertTrue(termOccurrenceDao.findAll().isEmpty());
@@ -301,7 +297,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsSkipsAnnotationsWithEmptyResource() throws Exception {
-        final InputStream content = setEmptyResource(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = setEmptyResource(loadFile("data/rdfa-simple.html"));
         generateFile();
         sut.generateAnnotations(content, file, document);
         assertTrue(termOccurrenceDao.findAll().isEmpty());
@@ -317,7 +313,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsUsesElementTextContentWhenContentAttributeIsEmptyForNewTerms() throws Exception {
-        final InputStream content = setEmptyContentOfNewTerm(loadRDFa("data/rdfa-new-terms.html"));
+        final InputStream content = setEmptyContentOfNewTerm(loadFile("data/rdfa-new-terms.html"));
         file.setFileName("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
@@ -335,18 +331,5 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         elements.attr(Constants.RDFa.CONTENT, "");
 
         return new ByteArrayInputStream(doc.toString().getBytes());
-    }
-
-    @Test
-    void generateAnnotationsStoresAnnotatedContentInPlaceOfOriginalFile() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
-        generateFile();
-        sut.generateAnnotations(content, file, document);
-        final java.io.File contentFile = new java.io.File(
-                environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
-                        vocabulary.getDocument().getFileDirectoryName() + java.io.File.separator + file.getFileName());
-        final List<String> lines = Files.readAllLines(contentFile.toPath());
-        final String result = String.join("\n", lines);
-        assertFalse(result.isEmpty());
     }
 }

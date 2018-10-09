@@ -1,11 +1,9 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
-import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
@@ -20,8 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -33,16 +29,16 @@ public class TextAnalysisService {
 
     private final Configuration config;
 
-    private final DocumentRepositoryService documentService;
+    private final DocumentManager documentManager;
 
     private final AnnotationGenerator annotationGenerator;
 
     @Autowired
-    public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentRepositoryService documentService,
+    public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentManager documentManager,
                                AnnotationGenerator annotationGenerator) {
         this.restClient = restClient;
         this.config = config;
-        this.documentService = documentService;
+        this.documentManager = documentManager;
         this.annotationGenerator = annotationGenerator;
     }
 
@@ -63,6 +59,7 @@ public class TextAnalysisService {
         final HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
         try {
+            LOG.debug("Invoking text analysis on input: {}", input);
             final ResponseEntity<Resource> resp = restClient
                     .exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST,
                             new HttpEntity<>(input, headers), Resource.class);
@@ -85,20 +82,9 @@ public class TextAnalysisService {
 
     private TextAnalysisInput createAnalysisInput(File file, Document document) {
         final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(loadFileContent(file, document));
+        input.setContent(documentManager.loadFileContent(document, file));
         input.setVocabularyContext(document.getVocabulary().getUri());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         return input;
-    }
-
-    private String loadFileContent(File file, Document document) {
-        try {
-            final java.io.File content = documentService.resolveFile(document, file);
-            LOG.debug("Loading file for text analysis from {}.", content);
-            final List<String> lines = Files.readAllLines(content.toPath());
-            return String.join("\n", lines);
-        } catch (IOException e) {
-            throw new TermItException("Unable to read file for text analysis.", e);
-        }
     }
 }

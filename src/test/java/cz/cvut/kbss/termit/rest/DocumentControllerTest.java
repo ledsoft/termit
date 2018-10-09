@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -51,6 +53,9 @@ class DocumentControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private DocumentRepositoryService documentServiceMock;
+
+    @Mock
+    private DocumentManager documentManagerMock;
 
     @Mock
     private TextAnalysisService textAnalysisServiceMock;
@@ -186,7 +191,10 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         content.deleteOnExit();
         final String data = "<html><head><title>Test</title></head><body>test</body></html>";
         Files.write(content.toPath(), data.getBytes());
-        when(documentServiceMock.resolveFile(doc, getFile(doc, FILE_NAMES[0]))).thenReturn(content);
+        when(documentManagerMock.getAsResource(doc, getFile(doc, FILE_NAMES[0])))
+                .thenReturn(new FileSystemResource(content));
+        when(documentManagerMock.getMediaType(doc, getFile(doc, FILE_NAMES[0])))
+                .thenReturn(Optional.of(MediaType.TEXT_HTML_VALUE));
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + NORMALIZED_DOC_NAME + "/content").param("file", FILE_NAMES[0]))
                 .andExpect(status().isOk()).andReturn();
@@ -208,7 +216,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final ErrorInfo result = readValue(mvcResult, ErrorInfo.class);
         assertNotNull(result);
         assertThat(result.getMessage(), containsString("not found in document"));
-        verify(documentServiceMock, never()).resolveFile(any(), any());
+        verify(documentManagerMock, never()).getAsResource(any(), any());
     }
 
     @Test

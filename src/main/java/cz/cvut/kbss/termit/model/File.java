@@ -21,6 +21,8 @@ public class File extends AbstractEntity {
     @OWLDataProperty(iri = Vocabulary.s_p_ma_nazev_souboru)
     private String fileName;
 
+    // TODO Add inverse property pointing to the parent document. It will simplify the DocumentManager API
+
     /**
      * File origin.
      * <p>
