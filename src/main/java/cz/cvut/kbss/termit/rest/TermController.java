@@ -31,14 +31,10 @@ public class TermController extends BaseController {
 
     private final TermRepositoryService termService;
 
-    private final VocabularyController vocabularyController;
-
     @Autowired
-    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService,
-                          VocabularyController vocabularyController) {
+    public TermController(IdentifierResolver idResolver, Configuration config, TermRepositoryService termService) {
         super(idResolver, config);
         this.termService = termService;
-        this.vocabularyController = vocabularyController;
     }
 
 
@@ -133,10 +129,10 @@ public class TermController extends BaseController {
 
         final URI vocabularyUri = getVocabularyUri(namespace, fragment);
 
-        if (parentTerm != null && !parentTerm.equals("")) {
+        if (parentTerm != null && !parentTerm.isEmpty()) {
             return getSubtermsByParentID(fragment, parentTerm, namespace);
         }
-        if (label != null && !label.equals("")) {
+        if (label != null && !label.isEmpty()) {
             return termService.findAll(label, vocabularyUri);
         }
         if (limit == null) {
