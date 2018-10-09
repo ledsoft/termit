@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
@@ -102,5 +104,9 @@ public class Environment {
 
     public static HttpMessageConverter<?> createResourceMessageConverter() {
         return new ResourceHttpMessageConverter();
+    }
+
+    public static InputStream loadFile(String file) {
+        return Environment.class.getClassLoader().getResourceAsStream(file);
     }
 }
