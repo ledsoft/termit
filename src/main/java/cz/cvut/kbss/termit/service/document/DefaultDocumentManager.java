@@ -108,8 +108,9 @@ public class DefaultDocumentManager implements DocumentManager {
 
     private static String generateBackupFileName(File file) {
         final String origName = file.getFileName();
-        final String name = origName.substring(0, origName.lastIndexOf('.'));
-        final String extension = origName.substring(origName.lastIndexOf('.'));
+        final int dotIndex = origName.lastIndexOf('.');
+        final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
+        final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
         return name + "~" + DATE_FORMAT.format(new Date()) + extension;
     }
 }

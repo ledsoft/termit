@@ -67,6 +67,7 @@ public class TextAnalysisService {
                 throw new WebServiceIntegrationException("Text analysis service returned empty response.");
             }
             assert resp.getBody() != null;
+            documentManager.createBackup(document, file);
             final Resource resource = resp.getBody();
             try (final InputStream is = resource.getInputStream()) {
                 annotationGenerator.generateAnnotations(is, file, document);

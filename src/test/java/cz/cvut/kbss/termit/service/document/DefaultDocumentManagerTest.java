@@ -150,4 +150,24 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
             assertEquals(CONTENT, String.join("\n", Files.readAllLines(f.toPath())));
         }
     }
+
+    @Test
+    void createBackupCreatesBackupOfFileWithoutExtension() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        final java.io.File docDir = physicalFile.getParentFile();
+        final java.io.File withoutExtension = new java.io.File(docDir.getAbsolutePath() + java.io.File.separator + "withoutExtension");
+        withoutExtension.deleteOnExit();
+        Files.copy(physicalFile.toPath(), withoutExtension.toPath());
+        file.setFileName(withoutExtension.getName());
+        document.addFile(file);
+        assertNotNull(docDir.listFiles());
+        sut.createBackup(document, file);
+        final java.io.File[] files = docDir.listFiles((d, name) -> name.startsWith("withoutExtension"));
+        assertEquals(2, files.length);
+        for (java.io.File f : files) {
+            f.deleteOnExit();
+            assertEquals(CONTENT, String.join("\n", Files.readAllLines(f.toPath())));
+        }
+    }
 }
