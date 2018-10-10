@@ -71,11 +71,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().permitAll().and()
-            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-            .and().cors().and().csrf().disable()
-            .addFilter(authenticationFilter())
-            .addFilter(
+        http.antMatcher("/rest/query")
+                .authorizeRequests().anyRequest().permitAll()
+                .and().cors().and().csrf().disable()
+            .antMatcher("/**")
+                .authorizeRequests().anyRequest().permitAll()
+                .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+                .and().cors().and().csrf().disable()
+                .addFilter(authenticationFilter())
+                .addFilter(
                     new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService,
                             objectMapper))
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
