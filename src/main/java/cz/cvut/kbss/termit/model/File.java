@@ -1,9 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
-import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -29,6 +27,11 @@ public class File extends AbstractEntity {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_puvod)
     private URI origin;
 
+    @JsonIgnore
+    @Inferred
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu)
+    private Document document;
+
     public String getComment() {
         return comment;
     }
@@ -51,6 +54,14 @@ public class File extends AbstractEntity {
 
     public void setOrigin(URI origin) {
         this.origin = origin;
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 
     @Override

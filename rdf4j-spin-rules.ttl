@@ -27,7 +27,7 @@ pdp:term a rdfs:Class ;
 	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . ?this skos:inScheme ?glossary.}
 	           WHERE { ?vocabulary pdp:ma-glosar ?glossary .
-	                   ?glossary pdp:obsahuje-pojem/(skos:narrower*) ?this .}"""
+	                   ?glossary pdp:obsahuje-pojem/(skos:narrower*) ?this . }"""
     ];
 # Term is a skos:Concept
 # REPLACE BY RDFS inference
@@ -49,3 +49,12 @@ pdp:dokumentovy-slovnik a rdfs:Class ;
 	           WHERE { ?this a pdp:dokumentovy-slovnik . }"""
     ]
 .
+
+# InverseOf between je-casti-dokumentu and ma-soubor
+	spin:rule [
+		a sp:Construct ;
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+	           CONSTRUCT { ?this pdp:je-casti-dokumentu ?doc .}
+	           WHERE { ?doc pdp:ma-soubor ?this . }"""
+    ] .

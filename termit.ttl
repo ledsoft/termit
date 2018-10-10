@@ -47,6 +47,11 @@ pojem:ma-dokumentovy-slovnik rdf:type owl:ObjectProperty ;
                              owl:inverseOf pojem:popisuje-dokument ;
                              rdfs:label "má dokumentový slovník"@cs .
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-casti-dokumentu
+pojem:je-casti-dokumentu rdf:type owl:ObjectProperty ;
+                             owl:inverseOf pojem:ma-soubor ;
+                             rdfs:label "je částí dokumentu"@cs .
+
 
 ###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-informaci-o-verzi
 pojem:ma-informaci-o-verzi rdf:type owl:ObjectProperty ;

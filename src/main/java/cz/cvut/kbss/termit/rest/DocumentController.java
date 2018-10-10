@@ -6,11 +6,11 @@ import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.util.List;
 
 @RestController
@@ -28,13 +27,17 @@ public class DocumentController extends BaseController {
 
     private final DocumentRepositoryService documentService;
 
+    private final DocumentManager documentManager;
+
     private final TextAnalysisService textAnalysisService;
 
     public DocumentController(IdentifierResolver idResolver, Configuration config,
                               DocumentRepositoryService documentService,
+                              DocumentManager documentManager,
                               TextAnalysisService textAnalysisService) {
         super(idResolver, config);
         this.documentService = documentService;
+        this.documentManager = documentManager;
         this.textAnalysisService = textAnalysisService;
     }
 
@@ -63,20 +66,15 @@ public class DocumentController extends BaseController {
         final Document document = getById(fragment, namespace);
         final File file = resolveFileFromName(document, fileName);
         try {
-            final java.io.File content = documentService.resolveFile(document, file);
-            final FileSystemResource resource = new FileSystemResource(content);
+            final Resource resource = documentManager.getAsResource(document, file);
             return ResponseEntity.ok()
                                  .contentLength(resource.contentLength())
-                                 .contentType(resolveFileMediaType(content))
+                                 .contentType(MediaType.parseMediaType(documentManager.getMediaType(document, file)
+                                                                                      .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)))
                                  .body(resource);
         } catch (IOException e) {
             throw new TermItException("Unable to load file " + file, e);
         }
-    }
-
-    private static MediaType resolveFileMediaType(java.io.File file) throws IOException {
-        final String type = Files.probeContentType(file.toPath());
-        return type != null ? MediaType.parseMediaType(type) : MediaType.APPLICATION_OCTET_STREAM;
     }
 
     /**
@@ -110,7 +108,7 @@ public class DocumentController extends BaseController {
     }
 
     private static File resolveFileFromName(Document document, String fileName) {
-        return document.getFiles().stream().filter(f -> f.getFileName().equals(fileName)).findAny().orElseThrow(
+        return document.getFile(fileName).orElseThrow(
                 () -> new NotFoundException("File " + fileName + " not found in document " + document + "."));
     }
 }
