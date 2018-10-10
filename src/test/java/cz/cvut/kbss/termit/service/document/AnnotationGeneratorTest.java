@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -28,6 +29,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -331,5 +333,44 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         elements.attr(Constants.RDFa.CONTENT, "");
 
         return new ByteArrayInputStream(doc.toString().getBytes());
+    }
+
+    @Test
+    void generateAnnotationsSkipsTermOccurrencesWhichAlreadyExistBasedOnSelectors() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file, document);
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
+        final InputStream contentReloaded = loadFile("data/rdfa-simple.html");
+        sut.generateAnnotations(contentReloaded, file, document);
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
+    }
+
+    @Test
+    void generateAnnotationsCreatesTermOccurrenceWhenItHasExistingSelectorButReferencesDifferentTerm()
+            throws Exception {
+        final Term otherTerm = new Term();
+        otherTerm.setUri(Generator.generateUri());
+        otherTerm.setLabel("Other term");
+        final TermOccurrence to = new TermOccurrence();
+        to.setTerm(otherTerm);
+        final TextQuoteSelector selector = new TextQuoteSelector("Územní plán");
+        selector.setPrefix("RDFa simple");
+        selector.setSuffix(" hlavního města Prahy.");
+        final Target t = new Target();
+        t.setSelectors(Collections.singleton(selector));
+        t.setSource(file);
+        to.addTarget(t);
+        transactional(() -> {
+            em.persist(otherTerm);
+            em.persist(to);
+        });
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file, document);
+        final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAllInFile(file);
+        assertEquals(2, allOccurrences.size());
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
     }
 }

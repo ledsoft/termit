@@ -98,8 +98,12 @@ public class Term implements Serializable, HasTypes {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Term)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Term)) {
+            return false;
+        }
         Term term = (Term) o;
         return Objects.equals(uri, term.uri);
     }

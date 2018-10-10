@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.termit.exception.PersistenceException;
+import cz.cvut.kbss.termit.model.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -28,15 +28,30 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
      */
     public List<TermOccurrence> findAll(Term term) {
         Objects.requireNonNull(term);
-        try {
-            return em.createNativeQuery("SELECT ?x WHERE {" +
-                    "?x a ?type ;" +
-                    "?hasTerm ?term . }", TermOccurrence.class)
-                     .setParameter("type", typeUri)
-                     .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_vyskytem_termu))
-                     .setParameter("term", term.getUri()).getResultList();
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
+        return em.createNativeQuery("SELECT ?x WHERE {" +
+                "?x a ?type ;" +
+                "?hasTerm ?term . }", TermOccurrence.class)
+                 .setParameter("type", typeUri)
+                 .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_vyskytem_termu))
+                 .setParameter("term", term.getUri()).getResultList();
+    }
+
+    /**
+     * Finds all term occurrences which have at least one target pointing to the specified file.
+     * <p>
+     * I.e., these term occurrences appear in the specified file.
+     *
+     * @param file File to filter by
+     * @return List of matching term occurrences
+     */
+    public List<TermOccurrence> findAllInFile(File file) {
+        Objects.requireNonNull(file);
+        return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
+                "?x a ?type ;" +
+                "?hasTarget ?target ." +
+                "?target ?hasSource ?file . }", TermOccurrence.class).setParameter("type", typeUri)
+                 .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
+                 .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdrojovy_dokument))
+                 .setParameter("file", file.getUri()).getResultList();
     }
 }
