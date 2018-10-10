@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TermOccurrenceDaoTest extends BaseDaoTestRunner {
 
@@ -50,8 +51,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
             final TermOccurrence to = new TermOccurrence();
             final Target target = new Target();
             target.setSource(file);
-            final TextQuoteSelector selector = new TextQuoteSelector();
-            selector.setExactMatch("test");
+            final TextQuoteSelector selector = new TextQuoteSelector("test");
             selector.setPrefix("this is a ");
             selector.setSuffix(".");
             target.setSelectors(Collections.singleton(selector));

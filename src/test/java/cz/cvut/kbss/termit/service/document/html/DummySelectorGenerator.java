@@ -14,8 +14,6 @@ public class DummySelectorGenerator implements SelectorGenerator {
     @Override
     public TermSelector generateSelector(Element... elements) {
         assert elements.length > 0;
-        final TextQuoteSelector selector = new TextQuoteSelector();
-        selector.setExactMatch(elements[0].wholeText());
-        return selector;
+        return new TextQuoteSelector(elements[0].wholeText());
     }
 }

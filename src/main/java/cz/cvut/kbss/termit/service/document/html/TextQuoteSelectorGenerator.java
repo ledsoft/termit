@@ -24,8 +24,7 @@ class TextQuoteSelectorGenerator implements SelectorGenerator {
     @Override
     public TextQuoteSelector generateSelector(Element... elements) {
         assert elements.length > 0;
-        final TextQuoteSelector selector = new TextQuoteSelector();
-        selector.setExactMatch(extractExactText(elements));
+        final TextQuoteSelector selector = new TextQuoteSelector(extractExactText(elements));
         extractPrefix(elements[0]).ifPresent(selector::setPrefix);
         extractSuffix(elements[elements.length - 1]).ifPresent(selector::setSuffix);
         return selector;
