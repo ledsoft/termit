@@ -1,10 +1,8 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.model.Document;
-import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import org.slf4j.Logger;
@@ -16,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Creates annotations (term occurrences) for vocabulary terms.
@@ -66,7 +66,8 @@ public class AnnotationGenerator {
                 termService.addTermToVocabulary(t, document.getVocabulary().getUri());
             });
             final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences();
-            occurrences.forEach(o -> {
+            final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
+            occurrences.stream().filter(o -> isNew(o, existing, source)).forEach(o -> {
                 o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
                 termOccurrenceDao.persist(o);
             });
@@ -74,6 +75,28 @@ public class AnnotationGenerator {
         } else {
             throw new AnnotationGenerationException("Unsupported type of file " + source);
         }
+    }
+
+    private boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing, File file) {
+        final Optional<Target> target = occurrence.getTargets().stream()
+                                                  .filter(t -> t.getSource().getUri().equals(file.getUri())).findAny();
+        assert target.isPresent();
+        final Set<TermSelector> selectors = target.get().getSelectors();
+        for (TermOccurrence to : existing) {
+            if (!to.getTerm().equals(occurrence.getTerm())) {
+                continue;
+            }
+            final Optional<Target> fileTarget = to.getTargets().stream()
+                                                  .filter(t -> t.getSource().getUri().equals(file.getUri())).findAny();
+            assert fileTarget.isPresent();
+            // Same term, contains at least one identical selector
+            if (fileTarget.get().getSelectors().stream().anyMatch(selectors::contains)) {
+                LOG.trace("Skipping occurrence {} because another one with matching term and selectors exists.",
+                        occurrence);
+                return false;
+            }
+        }
+        return true;
     }
 
     private void saveAnnotatedContent(Document document, File file, InputStream input) {

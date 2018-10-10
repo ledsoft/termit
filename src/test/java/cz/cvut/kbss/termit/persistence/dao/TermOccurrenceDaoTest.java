@@ -10,9 +10,8 @@ import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,10 +26,9 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findAllFindsOccurrencesOfTerm() {
-        final Term term = new Term();
-        term.setLabel("Test term");
-        term.setUri(Generator.generateUri());
-        final List<TermOccurrence> occurrences = generateOccurrences(term);
+        final Map<Term, List<TermOccurrence>> map = generateOccurrences();
+        final Term term = map.keySet().iterator().next();
+        final List<TermOccurrence> occurrences = map.get(term);
 
         final List<TermOccurrence> result = sut.findAll(term);
         assertEquals(occurrences.size(), result.size());
@@ -39,37 +37,68 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         }
     }
 
-    private List<TermOccurrence> generateOccurrences(Term term) {
-        final File file = new File();
-        file.setFileName("test.html");
-        final List<TermOccurrence> occurrences = new ArrayList<>();
-        final List<TermOccurrence> matching = new ArrayList<>();
-        final Term other = new Term();
-        other.setUri(Generator.generateUri());
-        other.setLabel("Other term");
+    private Map<Term, List<TermOccurrence>> generateOccurrences(File... files) {
+        final File[] filesToProcess;
+        if (files.length == 0) {
+            final File file = new File();
+            file.setFileName("test.html");
+            filesToProcess = new File[]{file};
+        } else {
+            filesToProcess = files;
+        }
+        final Term tOne = new Term();
+        tOne.setUri(Generator.generateUri());
+        tOne.setLabel("Term one");
+        final Term tTwo = new Term();
+        tTwo.setUri(Generator.generateUri());
+        tTwo.setLabel("Term two");
+        final Map<Term, List<TermOccurrence>> map = new HashMap<>();
+        map.put(tOne, new ArrayList<>());
+        map.put(tTwo, new ArrayList<>());
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final TermOccurrence to = new TermOccurrence();
             final Target target = new Target();
-            target.setSource(file);
+            target.setSource(filesToProcess[Generator.randomInt(0, filesToProcess.length)]);
             final TextQuoteSelector selector = new TextQuoteSelector("test");
             selector.setPrefix("this is a ");
             selector.setSuffix(".");
             target.setSelectors(Collections.singleton(selector));
             to.setTargets(Collections.singleton(target));
             if (Generator.randomBoolean()) {
-                to.setTerm(term);
-                matching.add(to);
+                to.setTerm(tOne);
+                map.get(tOne).add(to);
             } else {
-                to.setTerm(other);
+                to.setTerm(tTwo);
+                map.get(tTwo).add(to);
             }
-            occurrences.add(to);
         }
         transactional(() -> {
-            em.persist(file);
-            em.persist(term);
-            em.persist(other);
-            occurrences.forEach(em::persist);
+            for (File f : filesToProcess) {
+                em.persist(f);
+            }
+            map.forEach((t, list) -> {
+                em.persist(t);
+                list.forEach(em::persist);
+            });
         });
-        return matching;
+        return map;
+    }
+
+    @Test
+    void findAllInFileReturnsTermOccurrencesWithTargetFile() {
+        final File fOne = new File();
+        fOne.setFileName("fOne.html");
+        final File fTwo = new File();
+        fTwo.setFileName("fTwo.html");
+        final Map<Term, List<TermOccurrence>> allOccurrences = generateOccurrences(fOne, fTwo);
+        final List<TermOccurrence> matching = allOccurrences.values().stream().flatMap(l -> l.stream().filter(to -> to
+                .getTargets().stream().anyMatch(t -> t.getSource().getUri().equals(fOne.getUri()))))
+                                                            .collect(Collectors.toList());
+
+        final List<TermOccurrence> result = sut.findAllInFile(fOne);
+        assertEquals(matching.size(), result.size());
+        for (TermOccurrence to : result) {
+            assertTrue(matching.stream().anyMatch(p -> to.getUri().equals(p.getUri())));
+        }
     }
 }
