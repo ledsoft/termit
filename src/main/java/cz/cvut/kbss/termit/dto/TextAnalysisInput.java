@@ -50,4 +50,13 @@ public class TextAnalysisInput {
     public void setVocabularyContext(URI vocabularyContext) {
         this.vocabularyContext = vocabularyContext;
     }
+
+    @Override
+    public String toString() {
+        return "TextAnalysisInput{" +
+                "content='" + (content.length() > 50 ? content.substring(0, 50) + "..." : content) + '\'' +
+                ", vocabularyRepository=" + vocabularyRepository +
+                ", vocabularyContext=" + vocabularyContext +
+                '}';
+    }
 }
