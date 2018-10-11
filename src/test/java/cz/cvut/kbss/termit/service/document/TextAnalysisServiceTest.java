@@ -101,6 +101,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         generateFile();
         this.documentManagerSpy = spy(documentManager);
         doCallRealMethod().when(documentManagerSpy).loadFileContent(any(), any());
+        doNothing().when(documentManagerSpy).createBackup(any(), any());
         this.sut = new TextAnalysisService(restTemplate, config, documentManagerSpy, annotationGeneratorMock);
     }
 
