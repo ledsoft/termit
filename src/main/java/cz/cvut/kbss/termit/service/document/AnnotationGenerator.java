@@ -8,7 +8,6 @@ import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,17 +33,17 @@ public class AnnotationGenerator {
 
     private final DocumentManager documentManager;
 
-    private final TermOccurrenceResolver htmlOccurrenceResolver;
+    private final TermOccurrenceResolvers resolvers;
 
     @Autowired
     public AnnotationGenerator(TermRepositoryService termService,
                                TermOccurrenceDao termOccurrenceDao,
                                DocumentManager documentManager,
-                               @Qualifier("html") TermOccurrenceResolver htmlOccurrenceResolver) {
+                               TermOccurrenceResolvers resolvers) {
         this.termService = termService;
         this.termOccurrenceDao = termOccurrenceDao;
         this.documentManager = documentManager;
-        this.htmlOccurrenceResolver = htmlOccurrenceResolver;
+        this.resolvers = resolvers;
     }
 
     /**
@@ -56,27 +55,44 @@ public class AnnotationGenerator {
      */
     @Transactional
     public void generateAnnotations(InputStream content, File source, Document document) {
+        final TermOccurrenceResolver occurrenceResolver = findResolverFor(source);
+        LOG.debug("Resolving annotations of file {}.", source);
+        occurrenceResolver.parseContent(content, source);
+        final List<Term> newTerms = occurrenceResolver.findNewTerms(document.getVocabulary());
+        newTerms.forEach(t -> {
+            t.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term);
+            termService.addTermToVocabulary(t, document.getVocabulary().getUri());
+        });
+        final List<TermOccurrence> occurrences = occurrenceResolver.findTermOccurrences();
+        final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
+        occurrences.stream().filter(o -> isNew(o, existing, source)).forEach(o -> {
+            o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
+            termOccurrenceDao.persist(o);
+        });
+        saveAnnotatedContent(document, source, occurrenceResolver.getContent());
+    }
+
+    private TermOccurrenceResolver findResolverFor(File file) {
         // This will allow us to potentially support different types of files
-        if (htmlOccurrenceResolver.supports(source)) {
-            LOG.debug("Resolving annotations of HTML file {}.", source);
-            htmlOccurrenceResolver.parseContent(content, source);
-            final List<Term> newTerms = htmlOccurrenceResolver.findNewTerms(document.getVocabulary());
-            newTerms.forEach(t -> {
-                t.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term);
-                termService.addTermToVocabulary(t, document.getVocabulary().getUri());
-            });
-            final List<TermOccurrence> occurrences = htmlOccurrenceResolver.findTermOccurrences();
-            final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
-            occurrences.stream().filter(o -> isNew(o, existing, source)).forEach(o -> {
-                o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
-                termOccurrenceDao.persist(o);
-            });
-            saveAnnotatedContent(document, source, htmlOccurrenceResolver.getContent());
+        final TermOccurrenceResolver htmlResolver = resolvers.htmlTermOccurrenceResolver();
+        if (htmlResolver.supports(file)) {
+            return htmlResolver;
         } else {
-            throw new AnnotationGenerationException("Unsupported type of file " + source);
+            throw new AnnotationGenerationException("Unsupported type of file " + file);
         }
     }
 
+    /**
+     * Checks whether the specified term occurrence is new or if there already exists an equivalent one.
+     * <p>
+     * Two occurrences are considered equivalent iff they represent the same term, they have at least one target with
+     * the same source file, and the target contains at least one equal selector.
+     *
+     * @param occurrence The supposedly new occurrence to check
+     * @param existing   Existing occurrences relevant to the specified file
+     * @param file       The file being processed
+     * @return Whether the occurrence is truly new
+     */
     private boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing, File file) {
         final Optional<Target> target = occurrence.getTargets().stream()
                                                   .filter(t -> t.getSource().getUri().equals(file.getUri())).findAny();
