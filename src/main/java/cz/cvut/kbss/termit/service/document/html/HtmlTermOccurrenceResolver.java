@@ -13,10 +13,9 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
  * This class is not thread-safe and not re-entrant.
  */
 @Service("html")
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlTermOccurrenceResolver.class);
