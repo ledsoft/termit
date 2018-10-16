@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TermDaoTest extends BaseDaoTestRunner {
@@ -140,5 +141,34 @@ class TermDaoTest extends BaseDaoTestRunner {
         final List<Term> result = sut.findAll("plan", vocabulary);
         assertEquals(1, result.size());
         assertEquals(root, result.get(0));
+    }
+
+    @Test
+    void existsInVocabularyReturnsTrueForLabelExistingInVocabulary() {
+        final List<Term> terms = generateTerms(10);
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        final String label = terms.get(0).getLabel();
+        assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
+    }
+
+    @Test
+    void existsInVocabularyReturnsFalseForUnknownLabel() {
+        final List<Term> terms = generateTerms(10);
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        assertFalse(sut.existsInVocabulary("unknown label", vocabulary.getUri()));
+    }
+
+    @Test
+    void existsInVocabularyReturnsTrueWhenLabelDiffersOnlyInCase() {
+        final List<Term> terms = generateTerms(10);
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        transactional(() -> em.merge(vocabulary.getGlossary()));
+
+        final String label = terms.get(0).getLabel().toLowerCase();
+        assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
     }
 }

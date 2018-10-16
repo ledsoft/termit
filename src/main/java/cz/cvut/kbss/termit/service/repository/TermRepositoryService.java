@@ -41,7 +41,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        if (!vocabulary.getGlossary().addTerm(instance)){
+        if (!vocabulary.getGlossary().addTerm(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
         vocabularyService.update(vocabulary);
@@ -55,7 +55,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(parentTermUri);
         final Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        if (!vocabulary.getGlossary().addTerm(instance)){
+        if (!vocabulary.getGlossary().addTerm(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
 
@@ -65,8 +65,9 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         if (newTerms == null) {
             newTerms = new HashSet<>();
         }
-        if (!newTerms.add(instance.getUri())){
-            throw ResourceExistsException.create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
+        if (!newTerms.add(instance.getUri())) {
+            throw ResourceExistsException
+                    .create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
         }
         parenTerm.setSubTerms(newTerms);
 
@@ -92,5 +93,16 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         // List<Term> allTerms = new ArrayList<>(rootTerms.size()*4);
         //TODO filter
         return rootTerms;
+    }
+
+    /**
+     * Checks whether a term with the specified label exists in a vocabulary with the specified URI.
+     *
+     * @param label         Label to check
+     * @param vocabularyUri Vocabulary in which terms will be searched
+     * @return Whether term with {@code label} already exists in vocabulary
+     */
+    public boolean existsInVocabulary(String label, URI vocabularyUri) {
+        return termDao.existsInVocabulary(label, vocabularyUri);
     }
 }

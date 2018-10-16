@@ -33,7 +33,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     private VocabularyRepositoryService vrs;
 
     @Autowired
-    private TermRepositoryService trs;
+    private TermRepositoryService sut;
 
     private UserAccount user;
     private Vocabulary vocabulary;
@@ -55,7 +55,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
 
-        trs.addTermToVocabulary(term, vocabulary.getUri());
+        sut.addTermToVocabulary(term, vocabulary.getUri());
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
 
@@ -71,7 +71,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         final ValidationException exception =
                 assertThrows(
-                        ValidationException.class, () -> trs.addTermToVocabulary(term, vocabulary.getUri()));
+                        ValidationException.class, () -> sut.addTermToVocabulary(term, vocabulary.getUri()));
         assertThat(exception.getMessage(), containsString("label must not be blank"));
     }
 
@@ -83,8 +83,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term2 = Generator.generateTerm();
         term2.setUri(Generator.generateUri());
 
-        trs.addTermToVocabulary(term1, vocabulary.getUri());
-        trs.addTermToVocabulary(term2, vocabulary.getUri());
+        sut.addTermToVocabulary(term1, vocabulary.getUri());
+        sut.addTermToVocabulary(term2, vocabulary.getUri());
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
 
@@ -101,12 +101,12 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term1 = Generator.generateTerm();
         URI uri = Generator.generateUri();
         term1.setUri(uri);
-        trs.addTermToVocabulary(term1, vocabulary.getUri());
+        sut.addTermToVocabulary(term1, vocabulary.getUri());
 
         final Term term2 = Generator.generateTerm();
         term2.setUri(uri);
         assertThrows(
-                ResourceExistsException.class, () -> trs.addTermToVocabulary(term2, vocabulary.getUri()));
+                ResourceExistsException.class, () -> sut.addTermToVocabulary(term2, vocabulary.getUri()));
     }
 
     @Test
@@ -119,8 +119,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         URI uri2 = Generator.generateUri();
         term2.setUri(uri2);
 
-        trs.addTermToVocabulary(term1, vocabulary.getUri());
-        trs.addTermToVocabulary(term2, vocabulary.getUri(), uri1);
+        sut.addTermToVocabulary(term1, vocabulary.getUri());
+        sut.addTermToVocabulary(term2, vocabulary.getUri(), uri1);
 
         Term result1 = em.find(Term.class, uri1);
         assertNotNull(result1);
@@ -141,8 +141,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         toPersist.getGlossary().setTerms(terms);
         vrs.update(toPersist);
 
-        List<Term> result1 = trs.findAll(vocabulary.getUri(), 5, 0);
-        List<Term> result2 = trs.findAll(vocabulary.getUri(), 5, 5);
+        List<Term> result1 = sut.findAll(vocabulary.getUri(), 5, 0);
+        List<Term> result2 = sut.findAll(vocabulary.getUri(), 5, 5);
 
         assertEquals(5, result1.size());
         assertEquals(5, result2.size());
@@ -167,9 +167,19 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         toPersist.getGlossary().setTerms(terms);
         vrs.update(toPersist);
 
-        List<Term> result1 = trs.findAll("Result", vocabulary.getUri());
+        List<Term> result1 = sut.findAll("Result", vocabulary.getUri());
 
         assertEquals(5, result1.size());
         result1.forEach(o -> assertTrue(o.getLabel().contains("Result")));
+    }
+
+    @Test
+    void existsInVocabularyChecksForTermWithMatchingLabel() {
+        final Term t = Generator.generateTerm();
+        t.setUri(Generator.generateUri());
+        vocabulary.getGlossary().addTerm(t);
+        vrs.update(vocabulary);
+
+        assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary.getUri()));
     }
 }
