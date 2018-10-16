@@ -67,7 +67,6 @@ public class TermController extends BaseController {
             offset = 0;
         }
         List<Term> terms = termService.findAll(vocabularyUri, limit, offset);
-        LOG.debug("Get all terms for vocabulary {}", vocabularyUri);
         return terms;
     }
 
@@ -101,7 +100,7 @@ public class TermController extends BaseController {
 
         URI termUri = URI.create(parentID);
         Set<URI> subTerms = termService.find(termUri)
-                .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms();
+                                       .orElseThrow(() -> NotFoundException.create("Term", parentID)).getSubTerms();
         return subTerms
                 .parallelStream()
                 .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
@@ -180,11 +179,19 @@ public class TermController extends BaseController {
      */
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{fragment}/terms/identifier", method = RequestMethod.GET)
-    public String generateIdentifier(@PathVariable String fragment,
+    public String generateIdentifier(@PathVariable("fragment") String fragment,
                                      @RequestParam(name = "namespace", required = false) String namespace,
                                      @RequestParam("name") String name) {
         URI vocabularyUri = getVocabularyUri(namespace, fragment);
         return idResolver.generateIdentifier(vocabularyUri.toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR, name)
-                .toString();
+                         .toString();
+    }
+
+    @RequestMapping(value = "/{fragment}/terms/label", method = RequestMethod.GET)
+    public Boolean doesLabelExist(@PathVariable("fragment") String normalizedVocabName,
+                                  @RequestParam(name = "namespace", required = false) String namespace,
+                                  @RequestParam(name = "label") String label) {
+        final URI vocabularyUri = getVocabularyUri(namespace, normalizedVocabName);
+        return termService.existsInVocabulary(label, vocabularyUri);
     }
 }
