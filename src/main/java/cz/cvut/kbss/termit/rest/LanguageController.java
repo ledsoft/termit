@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.LanguageService;
+import cz.cvut.kbss.termit.service.language.LanguageService;
 import cz.cvut.kbss.termit.util.Configuration;
 import java.util.List;
 import org.slf4j.Logger;
@@ -38,6 +38,6 @@ public class LanguageController extends BaseController {
     @RequestMapping(value = "/types", method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getAll(@RequestParam String language) {
-        return service.findAll(language);
+        return service.getTypesForLang(language);
     }
 }

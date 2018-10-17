@@ -1,8 +1,8 @@
-package cz.cvut.kbss.termit.service;
+package cz.cvut.kbss.termit.service.language;
 
 import cz.cvut.kbss.termit.model.Term;
-import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,42 +13,54 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-@Service public class LanguageService {
+/**
+ * A service that fetches parts of the UFO-compliant language for the use in TermIt.
+ * <p>
+ * In this class:
+ * - lang = natural language tag, e.g. "cs", or "en"
+ * - language = UFO language, e.g. OntoUML, or Basic Language
+ */
+@Qualifier("jena")
+@Service public class LanguageServiceJena extends LanguageService {
 
-    private final ClassPathResource resource;
-
-    public LanguageService() {
-        resource = new ClassPathResource("language.ttl");
+    @Autowired
+    public LanguageServiceJena(ClassPathResource languageTtlUrl) {
+        super(languageTtlUrl);
     }
 
-    // TODO test
-    public List<Term> findAll(String lang) {
+    /**
+     * Gets all types for the given lang.
+     *
+     * @param lang
+     * @return
+     */
+    public List<Term> getTypesForLang(String lang) {
         try {
-            Model m = ModelFactory.createOntologyModel();
-            m.read(resource.getURL().toString(),"text/turtle");
+            final Model m = ModelFactory.createOntologyModel();
+            m.read(resource.getURL().toString(), "text/turtle");
 
             final List<Term> terms = new ArrayList<>();
-            m.listSubjectsWithProperty(RDF.type,
-                ResourceFactory.createResource(cz.cvut.kbss.termit.util.Vocabulary.s_c_term))
+            m.listSubjectsWithProperty(RDF.type, ResourceFactory.createResource(cz.cvut.kbss.termit.util.Vocabulary.s_c_term))
              .forEachRemaining(c -> {
                  final Term t = new Term();
                  t.setUri(URI.create(c.getURI()));
                  t.setLabel(c.getProperty(RDFS.label, lang).getObject().asLiteral().getString());
 
                  final Statement st = c.getProperty(RDFS.comment, lang);
-                 if ( st != null ) {
+                 if (st != null) {
                      t.setComment(st.getObject().asLiteral().getString());
                  }
                  t.setSubTerms(c.listProperties(SKOS.narrower)
-                                .mapWith(s -> URI.create(s.getObject().asResource().getURI()))
-                                .toSet());
+                                .mapWith(s -> URI.create(s.getObject().asResource().getURI())).toSet());
                  terms.add(t);
              });
             return terms;
-        } catch (IOException e) {
+        } catch(Exception e) {
             e.printStackTrace();
             return Collections.emptyList();
         }
