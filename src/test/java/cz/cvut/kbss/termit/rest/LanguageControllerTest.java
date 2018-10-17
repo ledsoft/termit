@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.LanguageService;
+import cz.cvut.kbss.termit.service.language.LanguageService;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ class LanguageControllerTest extends BaseControllerTestRunner {
         final List<Term> types = new ArrayList<>();
         types.add(new Term());
         types.add(new Term());
-        when(serviceMock.findAll("en")).thenReturn(types);
+        when(serviceMock.getTypesForLang("en")).thenReturn(types);
         final MvcResult mvcResult = mockMvc.perform(
                 get(PATH + "/types").param("language", "en"))
                                            .andExpect(status().isOk()).andReturn();
