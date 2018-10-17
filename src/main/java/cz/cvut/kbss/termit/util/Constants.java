@@ -70,7 +70,7 @@ public class Constants {
      * http://www.example.org/ontologies/vocabularies/metropolitan-plan/SEPARATOR/inhabited-area}, where 'SEPARATOR' is
      * this constant.
      */
-    public static final String NEW_TERM_NAMESPACE_SEPARATOR = "/pojem";
+    public static final String TERM_NAMESPACE_SEPARATOR = "/pojem";
 
     private Constants() {
         throw new AssertionError();

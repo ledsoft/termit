@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.net.URI;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -153,5 +156,42 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
         final String fragment = "metropolitan-plan";
         final String result = IdentifierResolver.extractIdentifierNamespace(URI.create(namespace + fragment));
         assertEquals(namespace, result);
+    }
+
+    @Test
+    void resolveIdentifierWithNamespaceConstruction() {
+        final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan";
+        final String fragment = "locality";
+        final URI result = sut
+                .resolveIdentifier(sut.buildNamespace(namespace, Constants.TERM_NAMESPACE_SEPARATOR), fragment);
+        assertEquals(namespace + Constants.TERM_NAMESPACE_SEPARATOR + "/" + fragment, result.toString());
+    }
+
+    @Test
+    void buildNamespaceAddsComponentsToBaseUri() {
+        final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary";
+        final String cOne = "metropolitan-plan";
+        final String cTwo = Constants.TERM_NAMESPACE_SEPARATOR;
+        assertEquals(base + "/" + cOne + cTwo + "/", sut.buildNamespace(base, cOne, cTwo));
+    }
+
+    @Test
+    void buildNamespaceReturnsNamespaceEndingWithSlash() {
+        final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan";
+        assertThat(sut.buildNamespace(base, "/term"), endsWith("/"));
+    }
+
+    @Test
+    void buildNamespaceReturnsBaseUriWithSlashWhenNoComponentsAreSpecified() {
+        final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan";
+        assertEquals(base + "/", sut.buildNamespace(base));
+    }
+
+    @Test
+    void buildNamespaceLoadsBaseUriFromConfiguration() {
+        final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary";
+        final String component = "/term/";
+        environment.setProperty(ConfigParam.NAMESPACE_VOCABULARY.toString(), base);
+        assertEquals(base + component, sut.buildNamespace(ConfigParam.NAMESPACE_VOCABULARY, component));
     }
 }

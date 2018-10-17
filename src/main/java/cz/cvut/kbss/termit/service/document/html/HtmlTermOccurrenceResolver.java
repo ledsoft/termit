@@ -38,7 +38,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private final HtmlSelectorGenerators selectorGenerators;
 
-    private final IdentifierResolver identifierResolver;
+    private final IdentifierResolver idResolver;
 
     private Document document;
     private File source;
@@ -49,10 +49,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Autowired
     HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
-                               IdentifierResolver identifierResolver) {
+                               IdentifierResolver idResolver) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
-        this.identifierResolver = identifierResolver;
+        this.idResolver = idResolver;
     }
 
     @Override
@@ -104,9 +104,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             }).collect(Collectors.joining(" "));
             final Term newTerm = new Term();
             newTerm.setLabel(label);
-            newTerm.setUri(identifierResolver
-                    .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
-                            label));
+            newTerm.setUri(idResolver.generateIdentifier(
+                    idResolver.buildNamespace(vocabulary.getUri().toString(), Constants.TERM_NAMESPACE_SEPARATOR),
+                    label));
             LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
             parts.forEach(elem -> elem.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString()));
             newTerms.add(newTerm);

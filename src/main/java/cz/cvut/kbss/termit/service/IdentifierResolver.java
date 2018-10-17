@@ -71,8 +71,7 @@ public class IdentifierResolver {
      */
     public URI generateIdentifier(ConfigParam namespaceConfig, String... components) {
         Objects.requireNonNull(namespaceConfig);
-        final String namespace = config.get(namespaceConfig);
-        return generateIdentifier(namespace, components);
+        return generateIdentifier(config.get(namespaceConfig), components);
     }
 
     /**
@@ -106,8 +105,43 @@ public class IdentifierResolver {
      */
     public URI resolveIdentifier(ConfigParam namespaceConfig, String fragment) {
         Objects.requireNonNull(namespaceConfig);
-        final String namespace = config.get(namespaceConfig);
-        return resolveIdentifier(namespace, fragment);
+        return resolveIdentifier(config.get(namespaceConfig), fragment);
+    }
+
+    /**
+     * Creates a namespace URI by appending the specified components to the specified base URI, adding separators where
+     * necessary.
+     *
+     * @param baseUri    Base URI for the namespace
+     * @param components Components to add to namespace URI. Should be normalized
+     * @return Namespace URI, ending with a forward slash
+     */
+    public String buildNamespace(String baseUri, String... components) {
+        Objects.requireNonNull(baseUri);
+        final StringBuilder sb = new StringBuilder(baseUri);
+        for (String comp : components) {
+            if (sb.charAt(sb.length() - 1) != '/' && comp.charAt(0) != '/') {
+                sb.append('/');
+            }
+            sb.append(comp);
+        }
+        if (sb.charAt(sb.length() - 1) != '/') {
+            sb.append('/');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Creates a namespace URI by appending the specified components to base URI loaded from system configuration,
+     * adding separators where necessary.
+     *
+     * @param baseUriParam Configuration parameter specifying namespace base URI
+     * @param components   Components to add to namespace URI. Should be normalized
+     * @return Namespace URI, ending with a forward slash
+     */
+    public String buildNamespace(ConfigParam baseUriParam, String... components) {
+        Objects.requireNonNull(baseUriParam);
+        return buildNamespace(config.get(baseUriParam), components);
     }
 
     /**
