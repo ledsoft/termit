@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -68,6 +69,14 @@ public class Term implements Serializable, HasTypes {
 
     public void setSubTerms(Set<URI> subTerms) {
         this.subTerms = subTerms;
+    }
+
+    public void addSubTerm(URI childUri) {
+        Objects.requireNonNull(childUri);
+        if (subTerms == null) {
+            this.subTerms = new HashSet<>();
+        }
+        subTerms.add(childUri);
     }
 
     public Set<TermOccurrence> getOccurrences() {

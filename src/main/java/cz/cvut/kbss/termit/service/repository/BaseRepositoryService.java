@@ -88,11 +88,13 @@ public abstract class BaseRepositoryService<T> {
 
     /**
      * Override this method to plug custom behavior into the transactional cycle of {@link #persist(Object)}.
+     * <p>
+     * The default behavior is to validate the specified instance.
      *
      * @param instance The instance to be persisted, not {@code null}
      */
     protected void prePersist(@NonNull T instance) {
-        // Do nothing, intended for overriding
+        validate(instance);
     }
 
     /**
@@ -112,11 +114,13 @@ public abstract class BaseRepositoryService<T> {
 
     /**
      * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     * <p>
+     * The default behavior is to validate the specified instance.
      *
      * @param instance The instance to be updated, not {@code null}
      */
     protected void preUpdate(@NonNull T instance) {
-        // Do nothing
+        validate(instance);
     }
 
     /**

@@ -51,7 +51,6 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistSetsVocabularyTerm() {
-
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
 
@@ -132,8 +131,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         Set<Term> terms = new HashSet<>(10);
         Term term;
         for (int i = 0; i < 10; i++) {
-            term = Generator.generateTerm();
-            term.setUri(Generator.generateUri());
+            term = generateTermWithUri();
             terms.add(term);
         }
 
@@ -151,7 +149,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void findTermsBySearchString(){
+    void findTermsBySearchString() {
         Set<Term> terms = new HashSet<>(10);
         Term term;
         for (int i = 0; i < 10; i++) {
@@ -175,11 +173,52 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void existsInVocabularyChecksForTermWithMatchingLabel() {
-        final Term t = Generator.generateTerm();
-        t.setUri(Generator.generateUri());
+        final Term t = generateTermWithUri();
         vocabulary.getGlossary().addTerm(t);
         vrs.update(vocabulary);
 
         assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary.getUri()));
+    }
+
+    private Term generateTermWithUri() {
+        final Term t = Generator.generateTerm();
+        t.setUri(Generator.generateUri());
+        return t;
+    }
+
+    @Test
+    void updateUpdatesTermWithSubTerms() {
+        final Term t = generateTermWithUri();
+        vocabulary.getGlossary().addTerm(t);
+        final Term childOne = generateTermWithUri();
+        t.addSubTerm(childOne.getUri());
+        final Term termTwo = generateTermWithUri();
+        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addTerm(termTwo);
+        transactional(() -> {
+            em.persist(childOne);
+            em.merge(vocabulary);
+        });
+
+        t.addSubTerm(termTwo.getUri());
+        final String newLabel = "new term label";
+        t.setLabel(newLabel);
+        sut.update(t);
+        final Term result = em.find(Term.class, t.getUri());
+        assertEquals(newLabel, result.getLabel());
+        assertEquals(2, result.getSubTerms().size());
+        assertTrue(result.getSubTerms().contains(childOne.getUri()));
+        assertTrue(result.getSubTerms().contains(termTwo.getUri()));
+    }
+
+    @Test
+    void updateThrowsValidationExceptionForEmptyTermLabel() {
+        final Term t = generateTermWithUri();
+        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addTerm(t);
+        transactional(() -> em.merge(vocabulary));
+
+        t.setLabel("");
+        assertThrows(ValidationException.class, () -> sut.update(t));
     }
 }
