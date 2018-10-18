@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -30,10 +31,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class VocabularyControllerTest extends BaseControllerTestRunner {
@@ -179,5 +178,52 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                                            .andExpect(status().isCreated()).andReturn();
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
         assertThat(location, containsString("namespace=" + uriNs));
+    }
+
+    @Test
+    void updateVocabularyUpdatesVocabularyUpdateToService() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setDateCreated(new Date());
+        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
+        vocabulary.setUri(uri);
+        when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_VOCABULARY), any())).thenReturn(uri);
+        when(serviceMock.exists(uri)).thenReturn(true);
+        mockMvc.perform(put(PATH + "/test").contentType(MediaType.APPLICATION_JSON_VALUE).content(toJson(vocabulary)))
+               .andExpect(status().isNoContent());
+        verify(serviceMock).update(vocabulary);
+    }
+
+    @Test
+    void updateVocabularyThrowsNotFoundWhenVocabularyToUpdateDoesNotExist() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setDateCreated(new Date());
+        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
+        final String namespace = "http://kbss.felk.cvut.cz/ontologies/termit/vocabularies/";
+        vocabulary.setUri(uri);
+        when(idResolverMock.resolveIdentifier(namespace, "test")).thenReturn(uri);
+        when(serviceMock.exists(uri)).thenReturn(false);
+        mockMvc.perform(put(PATH + "/test").param("namespace", namespace).contentType(MediaType.APPLICATION_JSON_VALUE)
+                                           .content(toJson(vocabulary))).andExpect(status().isNotFound());
+        verify(serviceMock, never()).update(any());
+    }
+
+    @Test
+    void updateVocabularyThrowsValidationExceptionWhenVocabularyUriDiffersFromRequestBasedUri() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setDateCreated(new Date());
+        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
+        vocabulary.setUri(Generator.generateUri());
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, "test")).thenReturn(uri);
+        when(serviceMock.exists(uri)).thenReturn(false);
+        final MvcResult mvcResult = mockMvc.perform(put(PATH + "/test").contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                                       .content(toJson(vocabulary)))
+                                           .andExpect(status().isConflict()).andReturn();
+        final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
+        assertNotNull(errorInfo);
+        assertThat(errorInfo.getMessage(), containsString("does not match the id of the specified vocabulary"));
+        verify(serviceMock, never()).update(any());
     }
 }
