@@ -6,6 +6,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Objects;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 public class Vocabulary extends HasProvenanceData implements Serializable {
@@ -68,6 +69,24 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
 
     public void setVersionInfo(VersionInfo versionInfo) {
         this.versionInfo = versionInfo;
+    }
+
+    // TODO Upgrade to the next JOPA build once it is available. It fixes cache issues which cause test failures.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Vocabulary)) {
+            return false;
+        }
+        Vocabulary that = (Vocabulary) o;
+        return Objects.equals(uri, that.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
     }
 
     @Override

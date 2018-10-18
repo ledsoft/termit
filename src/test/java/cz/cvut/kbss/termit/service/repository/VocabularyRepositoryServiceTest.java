@@ -1,6 +1,8 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
+import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -105,5 +107,41 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary toPersist = Generator.generateVocabulary();
         toPersist.setUri(vocabulary.getUri());
         assertThrows(ResourceExistsException.class, () -> sut.persist(toPersist));
+    }
+
+    @Test
+    void updateThrowsValidationExceptionForEmptyName() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setAuthor(user.toUser());
+        vocabulary.setDateCreated(new Date());
+        transactional(() -> em.persist(vocabulary));
+
+        vocabulary.setName("");
+        assertThrows(ValidationException.class, () -> sut.update(vocabulary));
+    }
+
+    private Descriptor descriptorFor(Vocabulary entity) {
+        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
+        descriptor.addAttributeDescriptor(
+                em.getMetamodel().entity(Vocabulary.class).getAttribute("author").getJavaField(),
+                new EntityDescriptor(null));
+        return descriptor;
+    }
+
+    @Test
+    void updateSavesUpdatedVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setAuthor(user.toUser());
+        vocabulary.setDateCreated(new Date());
+        transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
+
+        final String newName = "Updated name";
+        vocabulary.setName(newName);
+        sut.update(vocabulary);
+        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
+        assertNotNull(result);
+        assertEquals(newName, result.getName());
     }
 }
