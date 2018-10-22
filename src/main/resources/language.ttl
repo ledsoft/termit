@@ -15,6 +15,7 @@ ufo:individual a a-popis-dat:term ;
     rdfs:label "Individuál"@cs,
         "Individual"@en ;
     skos:narrower ufo:event,
+        ufo:intrinsic-trope,
         ufo:object,
         ufo:relator .
 
@@ -22,6 +23,7 @@ ufo:type a a-popis-dat:term ;
     rdfs:label "Typ"@cs,
         "Type"@en ;
     skos:narrower ufo:event-type,
+        ufo:intrinsic-trope-type,
         ufo:object-type,
         ufo:relator-type .
 
@@ -33,6 +35,14 @@ ufo:event a a-popis-dat:term ;
 ufo:event-type a a-popis-dat:term ;
     rdfs:label "Typ události"@cs,
         "Event Type"@en .
+
+ufo:intrinsic-trope a a-popis-dat:term ;
+    rdfs:label "Vlastnost"@cs,
+        "Intrinsic Trope"@en .
+
+ufo:intrinsic-trope-type a a-popis-dat:term ;
+    rdfs:label "Typ vlastnosti"@cs,
+        "Intrinsic Trope Type"@en .
 
 ufo:object a a-popis-dat:term ;
     rdfs:label "Objekt"@cs,
