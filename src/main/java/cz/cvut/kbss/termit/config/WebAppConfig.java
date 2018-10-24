@@ -7,7 +7,7 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
 import cz.cvut.kbss.termit.util.Constants;
-import cz.cvut.kbss.termit.util.UriTemplateWithoutPathInfoProxyServlet;
+import cz.cvut.kbss.termit.util.AdjustedUriTemplateProxyServlet;
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -73,7 +73,7 @@ public class WebAppConfig implements WebMvcConfigurer {
     @Bean(name = "sparqlEndpointProxyServlet")
     public ServletWrappingController sparqlEndpointController() throws Exception {
         ServletWrappingController controller = new ServletWrappingController();
-        controller.setServletClass(UriTemplateWithoutPathInfoProxyServlet.class);
+        controller.setServletClass(AdjustedUriTemplateProxyServlet.class);
         controller.setBeanName("sparqlEndpointProxyServlet");
         final Properties p = new Properties();
         p.setProperty("targetUri",config.get(REPOSITORY_URL));
