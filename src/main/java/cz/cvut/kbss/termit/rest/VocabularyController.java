@@ -82,7 +82,7 @@ public class VocabularyController extends BaseController {
             throw NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri);
         }
         vocabularyService.update(update);
-        LOG.debug("Vocabulary {} updated.");
+        LOG.debug("Vocabulary {} updated.", update);
     }
 
     /**
