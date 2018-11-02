@@ -91,4 +91,24 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertNotNull(result);
         assertEquals(newName, result.getName());
     }
+
+    @Test
+    void updateEvictsPossiblyPreviouslyLoadedInstanceFromSecondLevelCache() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(author);
+        vocabulary.setDateCreated(new Date());
+        vocabulary.setUri(Generator.generateUri());
+        final Descriptor descriptor = descriptorFor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        // This causes the second level cache to be initialized with the loaded vocabulary (in the default context)
+        final List<Vocabulary> vocabularies = sut.findAll();
+        assertEquals(1, vocabularies.size());
+
+        final String newName = "Updated vocabulary name";
+        vocabulary.setName(newName);
+        transactional(() -> sut.update(vocabulary));
+        final List<Vocabulary> result = sut.findAll();
+        assertEquals(1, result.size());
+        assertEquals(newName, result.get(0).getName());
+    }
 }
