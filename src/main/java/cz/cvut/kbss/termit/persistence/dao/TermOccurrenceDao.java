@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.util.Vocabulary;

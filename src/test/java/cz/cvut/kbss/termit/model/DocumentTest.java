@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import org.junit.jupiter.api.Test;
 

@@ -1,42 +1,37 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.model.annotations.*;
-import cz.cvut.kbss.termit.model.selector.TermSelector;
+import cz.cvut.kbss.jopa.model.annotations.FetchType;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
-
-import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_cil)
 public class Target extends AbstractEntity {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_selektor, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<TermSelector> selectors;
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdroj, fetch = FetchType.EAGER)
+    Resource source;
 
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdrojovy_dokument, fetch = FetchType.EAGER)
-    private File source;
-
-    public Set<TermSelector> getSelectors() {
-        return selectors;
+    public Target() {
     }
 
-    public void setSelectors(Set<TermSelector> selectors) {
-        this.selectors = selectors;
+    public Target(Resource source) {
+        this.source = source;
     }
 
-    public File getSource() {
+    public Resource getSource() {
         return source;
     }
 
-    public void setSource(File source) {
+    public void setSource(Resource source) {
         this.source = source;
     }
 
     @Override
     public String toString() {
         return "Target{" +
-                "selectors=" + selectors +
                 ", source=" + source +
                 "} " + super.toString();
     }

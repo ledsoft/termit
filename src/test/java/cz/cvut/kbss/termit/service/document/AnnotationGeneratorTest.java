@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
@@ -64,7 +65,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     private DocumentVocabulary vocabulary;
     private EntityDescriptor vocabDescriptor;
-    private cz.cvut.kbss.termit.model.Document document;
+    private cz.cvut.kbss.termit.model.resource.Document document;
     private File file;
 
     private Term term;
@@ -84,7 +85,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
         vocabulary.setUri(Generator.generateUri());
-        this.document = new cz.cvut.kbss.termit.model.Document();
+        this.document = new cz.cvut.kbss.termit.model.resource.Document();
         document.setAuthor(author);
         document.setDateCreated(new Date());
         document.setName("metropolitan-plan");

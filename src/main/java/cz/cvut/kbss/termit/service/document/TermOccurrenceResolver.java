@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.service.document;
 
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.Vocabulary;

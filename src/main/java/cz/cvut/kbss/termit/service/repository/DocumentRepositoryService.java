@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.model.Document;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.persistence.dao.DocumentDao;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import org.springframework.beans.factory.annotation.Autowired;
