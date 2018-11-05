@@ -32,10 +32,6 @@ public class Term implements Serializable, HasTypes {
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
-    @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_vyskyt_termu, fetch = FetchType.EAGER)
-    private Set<TermOccurrence> occurrences;
-
     @Types
     private Set<String> types;
 
@@ -77,14 +73,6 @@ public class Term implements Serializable, HasTypes {
             this.subTerms = new HashSet<>();
         }
         subTerms.add(childUri);
-    }
-
-    public Set<TermOccurrence> getOccurrences() {
-        return occurrences;
-    }
-
-    public void setOccurrences(Set<TermOccurrence> occurrences) {
-        this.occurrences = occurrences;
     }
 
     public Set<String> getSource() {
