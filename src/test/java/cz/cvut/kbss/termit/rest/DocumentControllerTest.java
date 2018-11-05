@@ -94,14 +94,15 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         doc.setVocabulary(vocabulary);
         for (String name : FILE_NAMES) {
             final File file = new File();
-            file.setFileName(name);
+            file.setUri(Generator.generateUri());
+            file.setName(name);
             doc.addFile(file);
         }
         return doc;
     }
 
     private static File getFile(Document doc, String name) {
-        return doc.getFiles().stream().filter(f -> f.getFileName().equals(name)).findFirst()
+        return doc.getFiles().stream().filter(f -> f.getName().equals(name)).findFirst()
                   .orElseThrow(() -> new TermItException("File not found."));
     }
 

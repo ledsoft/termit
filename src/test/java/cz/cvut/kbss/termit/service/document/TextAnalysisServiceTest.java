@@ -97,7 +97,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
         this.file = new File();
-        file.setFileName(FILE_NAME);
+        file.setName(FILE_NAME);
         generateFile();
         this.documentManagerSpy = spy(documentManager);
         doCallRealMethod().when(documentManagerSpy).loadFileContent(any(), any());
@@ -191,7 +191,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
-        file.setFileName("unknown.html");
+        file.setName("unknown.html");
         final NotFoundException result = assertThrows(NotFoundException.class,
                 () -> sut.analyzeDocument(file, document));
         assertThat(result.getMessage(), containsString("not found on file system"));

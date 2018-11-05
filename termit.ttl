@@ -49,20 +49,6 @@ pojem:je-prirazenim-termu rdf:type owl:ObjectProperty ;
 
 
 
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/je-vyskytem-termu
-
-pojem:je-vyskytem-termu rdf:type owl:ObjectProperty ;
-                        
-                        rdfs:label "je výskytem termu"@cs ;
-                        
-                        rdfs:subPropertyOf pojem:je-prirazenim-termu ;
-                        
-                        rdfs:range pojem:term ;
-                        
-                        rdfs:domain pojem:vyskyt-termu .
-
-
-
 ###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-autora
 
 pojem:ma-autora rdf:type owl:ObjectProperty ;

@@ -69,7 +69,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
         final File file = new File();
-        file.setFileName("unknown.html");
+        file.setName("unknown.html");
         document.addFile(file);
         assertThrows(NotFoundException.class, () -> sut.loadFileContent(document, file));
     }
@@ -78,7 +78,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void loadFileContentLoadsFileContentFromDisk() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         final String result = sut.loadFileContent(document, file);
         assertEquals(CONTENT, result);
@@ -88,7 +88,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void getAsResourceReturnsResourceRepresentationOfFileOnDisk() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         final Resource result = sut.getAsResource(document, file);
         assertNotNull(result);
@@ -101,7 +101,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
         physicalFile.delete();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         sut.saveFileContent(document, file, content);
         assertTrue(physicalFile.exists());
@@ -112,12 +112,12 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final InputStream content = loadFile("data/rdfa-simple.html");
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         sut.saveFileContent(document, file, content);
         final java.io.File contentFile = new java.io.File(
                 environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
-                        document.getFileDirectoryName() + java.io.File.separator + file.getFileName());
+                        document.getFileDirectoryName() + java.io.File.separator + file.getName());
         final List<String> lines = Files.readAllLines(contentFile.toPath());
         final String result = String.join("\n", lines);
         assertFalse(result.isEmpty());
@@ -127,7 +127,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void getMediaTypeResolvesMediaTypeOfFile() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         final Optional<String> result = sut.getMediaType(document, file);
         assertTrue(result.isPresent());
@@ -138,7 +138,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void createBackupCreatesBackupFileWithIdenticalContent() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setFileName(physicalFile.getName());
+        file.setName(physicalFile.getName());
         document.addFile(file);
         final java.io.File docDir = physicalFile.getParentFile();
         assertNotNull(docDir.listFiles());
@@ -156,10 +156,11 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
         final java.io.File docDir = physicalFile.getParentFile();
-        final java.io.File withoutExtension = new java.io.File(docDir.getAbsolutePath() + java.io.File.separator + "withoutExtension");
+        final java.io.File withoutExtension = new java.io.File(
+                docDir.getAbsolutePath() + java.io.File.separator + "withoutExtension");
         withoutExtension.deleteOnExit();
         Files.copy(physicalFile.toPath(), withoutExtension.toPath());
-        file.setFileName(withoutExtension.getName());
+        file.setName(withoutExtension.getName());
         document.addFile(file);
         assertNotNull(docDir.listFiles());
         sut.createBackup(document, file);
