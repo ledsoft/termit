@@ -14,6 +14,13 @@ public class OccurrenceTarget extends Target {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_selektor, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<TermSelector> selectors;
 
+    public OccurrenceTarget() {
+    }
+
+    public OccurrenceTarget(File source) {
+        super(source);
+    }
+
     public Set<TermSelector> getSelectors() {
         return selectors;
     }

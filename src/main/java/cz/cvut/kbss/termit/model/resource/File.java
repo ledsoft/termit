@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.Inferred;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
+import cz.cvut.kbss.jopa.model.annotations.Types;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_soubor)
 public class File extends Resource {
@@ -24,6 +27,13 @@ public class File extends Resource {
     @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu)
     private Document document;
 
+    @Types
+    private Set<String> types;
+
+    public File() {
+        this.types = Collections.singleton(Vocabulary.s_c_zdroj);
+    }
+
     public URI getOrigin() {
         return origin;
     }
@@ -40,10 +50,18 @@ public class File extends Resource {
         this.document = document;
     }
 
+    public Set<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(Set<String> types) {
+        this.types = types;
+    }
+
     @Override
     public String toString() {
         return "File{" +
                 ", origin=" + origin +
-                "} " + super.toString();
+                super.toString() + '}';
     }
 }

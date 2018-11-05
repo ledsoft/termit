@@ -46,7 +46,7 @@ public class DefaultDocumentManager implements DocumentManager {
         Objects.requireNonNull(file);
         final String path =
                 config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + document.getFileDirectoryName() +
-                        java.io.File.separator + file.getFileName();
+                        java.io.File.separator + file.getName();
         final java.io.File result = new java.io.File(path);
         if (verifyExists && !result.exists()) {
             LOG.error("File {} not found at location {}.", file, path);
@@ -107,7 +107,7 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     private String generateBackupFileName(File file) {
-        final String origName = file.getFileName();
+        final String origName = file.getName();
         final int dotIndex = origName.lastIndexOf('.');
         final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
         final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
