@@ -1,23 +1,15 @@
-package cz.cvut.kbss.termit.model;
+package cz.cvut.kbss.termit.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import cz.cvut.kbss.jopa.model.annotations.*;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.model.annotations.Inferred;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-import javax.validation.constraints.NotBlank;
 import java.net.URI;
 
 @OWLClass(iri = Vocabulary.s_c_soubor)
-public class File extends AbstractEntity {
-
-    @OWLDataProperty(iri = RDFS.COMMENT)
-    private String comment;
-
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_ma_nazev_souboru)
-    private String fileName;
+public class File extends Resource {
 
     /**
      * File origin.
@@ -31,22 +23,6 @@ public class File extends AbstractEntity {
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu)
     private Document document;
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
 
     public URI getOrigin() {
         return origin;
@@ -67,7 +43,6 @@ public class File extends AbstractEntity {
     @Override
     public String toString() {
         return "File{" +
-                "fileName='" + fileName + '\'' +
                 ", origin=" + origin +
                 "} " + super.toString();
     }
