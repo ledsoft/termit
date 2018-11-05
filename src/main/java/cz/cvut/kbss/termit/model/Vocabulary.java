@@ -71,7 +71,6 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
         this.versionInfo = versionInfo;
     }
 
-    // TODO Upgrade to the next JOPA build once it is available. It fixes cache issues which cause test failures.
     @Override
     public boolean equals(Object o) {
         if (this == o) {

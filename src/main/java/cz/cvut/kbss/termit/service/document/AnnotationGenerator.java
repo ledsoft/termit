@@ -88,14 +88,14 @@ public class AnnotationGenerator {
     /**
      * Checks whether the specified term occurrence is new or if there already exists an equivalent one.
      * <p>
-     * Two occurrences are considered equivalent iff they represent the same term, they have a target with
-     * the same source file, and the target contains at least one equal selector.
+     * Two occurrences are considered equivalent iff they represent the same term, they have a target with the same
+     * source file, and the target contains at least one equal selector.
      *
      * @param occurrence The supposedly new occurrence to check
      * @param existing   Existing occurrences relevant to the specified file
      * @return Whether the occurrence is truly new
      */
-    private boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing) {
+    private static boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing) {
         final OccurrenceTarget target = occurrence.getTarget();
         assert target != null;
         final Set<TermSelector> selectors = target.getSelectors();
