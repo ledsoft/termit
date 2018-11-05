@@ -76,8 +76,12 @@ public class Document extends Resource {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Document)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Document)) {
+            return false;
+        }
         Document document = (Document) o;
         return Objects.equals(getUri(), document.getUri());
     }

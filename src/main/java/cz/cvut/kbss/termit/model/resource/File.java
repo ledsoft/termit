@@ -9,6 +9,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_soubor)
@@ -56,6 +57,23 @@ public class File extends Resource {
 
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof File)) {
+            return false;
+        }
+        File document = (File) o;
+        return Objects.equals(getUri(), document.getUri());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUri());
     }
 
     @Override
