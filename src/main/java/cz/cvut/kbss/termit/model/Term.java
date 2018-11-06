@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -31,6 +32,9 @@ public class Term implements Serializable, HasTypes {
 
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
+
+    @Properties
+    private Map<String, Set<String>> properties;
 
     @Types
     private Set<String> types;
@@ -75,11 +79,11 @@ public class Term implements Serializable, HasTypes {
         subTerms.add(childUri);
     }
 
-    public Set<String> getSource() {
+    public Set<String> getSources() {
         return sources;
     }
 
-    public void setSource(Set<String> source) {
+    public void setSources(Set<String> source) {
         this.sources = source;
     }
 
@@ -91,6 +95,14 @@ public class Term implements Serializable, HasTypes {
     @Override
     public void setTypes(Set<String> types) {
         this.types = types;
+    }
+
+    public Map<String, Set<String>> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Set<String>> properties) {
+        this.properties = properties;
     }
 
     @Override
