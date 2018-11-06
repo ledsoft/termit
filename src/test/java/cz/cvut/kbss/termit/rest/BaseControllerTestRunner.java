@@ -21,7 +21,7 @@ public class BaseControllerTestRunner {
 
     MockMvc mockMvc;
 
-    public void setUp(BaseController controller) {
+    public void setUp(Object controller) {
         setupObjectMapper();
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new RestExceptionHandler())
                                       .setMessageConverters(createJsonLdMessageConverter(),
