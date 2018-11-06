@@ -67,8 +67,8 @@ public class File extends Resource {
         if (!(o instanceof File)) {
             return false;
         }
-        File document = (File) o;
-        return Objects.equals(getUri(), document.getUri());
+        File file = (File) o;
+        return Objects.equals(getUri(), file.getUri());
     }
 
     @Override

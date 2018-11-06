@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.dto;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.model.util.HasTypes;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -19,7 +20,7 @@ import java.util.Set;
                 @VariableResult(name = "comment", type = String.class),
                 @VariableResult(name = "type", type = String.class)
         })})
-public class RdfsResource implements Serializable {
+public class RdfsResource implements Serializable, HasTypes {
 
     @Id
     private URI uri;
@@ -67,10 +68,12 @@ public class RdfsResource implements Serializable {
         this.comment = comment;
     }
 
+    @Override
     public Set<String> getTypes() {
         return types;
     }
 
+    @Override
     public void setTypes(Set<String> types) {
         this.types = types;
     }
