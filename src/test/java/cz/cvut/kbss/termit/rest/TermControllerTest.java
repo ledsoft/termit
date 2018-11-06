@@ -1,6 +1,8 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.jsonldjava.utils.JsonUtils;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
@@ -18,16 +20,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -200,5 +202,21 @@ class TermControllerTest extends BaseControllerTestRunner {
                 .andExpect(status().isOk()).andReturn();
         final String result = readValue(mvcResult, String.class);
         assertEquals(termUri.toString(), result);
+    }
+
+    @Test
+    void getTermReturnsTermWithUnmappedProperties() throws Exception {
+        final URI termUri = initTermUriResolution();
+        final Term term = Generator.generateTerm();
+        final String customProperty = Vocabulary.s_p_has_dataset;
+        final String value = "Test";
+        term.setProperties(Collections.singletonMap(customProperty, Collections.singleton(value)));
+        term.setUri(termUri);
+        when(termServiceMock.find(termUri)).thenReturn(Optional.of(term));
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).accept(
+                JsonLd.MEDIA_TYPE)).andReturn();
+        final Map jsonObj = (Map) JsonUtils.fromString(mvcResult.getResponse().getContentAsString());
+        assertTrue(jsonObj.containsKey(customProperty));
+        assertEquals(value, jsonObj.get(customProperty));
     }
 }
