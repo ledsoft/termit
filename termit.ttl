@@ -204,18 +204,6 @@ pojem:ma-krestni-jmeno rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-nazev-souboru
-
-pojem:ma-nazev-souboru rdf:type owl:DatatypeProperty ;
-                       
-                       rdfs:label "má název souboru"@cs ;
-                       
-                       rdfs:domain pojem:soubor ;
-                       
-                       rdfs:range xsd:string .
-
-
-
 ###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/ma-prefix-text-quote
 
 pojem:ma-prefix-text-quote rdf:type owl:DatatypeProperty ;
