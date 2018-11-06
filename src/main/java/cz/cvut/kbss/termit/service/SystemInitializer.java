@@ -78,7 +78,7 @@ public class SystemInitializer {
         admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user"));
         admin.setFirstName("System");
         admin.setLastName("Administrator");
-        admin.setUsername("admin@inbas.cz");
+        admin.setUsername("termit-admin@kbss.felk.cvut.cz");
         admin.addType(Vocabulary.s_c_administrator_termitu);
         return admin;
     }
