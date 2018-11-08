@@ -80,7 +80,7 @@ public class SecurityUtils {
      */
     public boolean isAuthenticated() {
         final SecurityContext context = SecurityContextHolder.getContext();
-        return context.getAuthentication() != null && context.getAuthentication().isAuthenticated();
+        return context.getAuthentication() != null && context.getAuthentication().getDetails() instanceof UserDetails;
     }
 
     /**
