@@ -18,10 +18,17 @@ Axioms
 Rules
 {
   Id: rdfs7
-     x  a  y
-     a  <rdfs:subPropertyOf>  b               [Constraint a != b]
+    x a y
+    a <rdfs:subPropertyOf> b        [Constraint a != b]
     -------------------------------
-     x  b  y
+    x b y
+
+  Id: psys_transitiveOver
+    p <psys:transitiveOver> q
+    x p y
+    y q z
+    ---------------
+    x p z
 
   Id: pdp_dokument_1
 
