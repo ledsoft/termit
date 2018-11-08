@@ -39,6 +39,7 @@ public class TestPersistenceFactory {
         final Map<String, String> properties = MainPersistenceFactory.defaultParams();
         properties.put(ONTOLOGY_PHYSICAL_URI_KEY, config.get(REPOSITORY_URL));
         properties.put(SesameOntoDriverProperties.SESAME_USE_VOLATILE_STORAGE, Boolean.TRUE.toString());
+        properties.put(SesameOntoDriverProperties.SESAME_USE_INFERENCE, Boolean.TRUE.toString());
         properties.put(DATA_SOURCE_CLASS, config.get(DRIVER));
         properties.put(LANG, config.get(LANGUAGE));
         this.emf = Persistence.createEntityManagerFactory("termitTestPU", properties);

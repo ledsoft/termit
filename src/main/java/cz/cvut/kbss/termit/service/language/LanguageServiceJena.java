@@ -1,11 +1,6 @@
 package cz.cvut.kbss.termit.service.language;
 
 import cz.cvut.kbss.termit.model.Term;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -18,15 +13,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A service that fetches parts of the UFO-compliant language for the use in TermIt.
  * <p>
- * In this class:
- * - lang = natural language tag, e.g. "cs", or "en"
- * - language = UFO language, e.g. OntoUML, or Basic Language
+ * In this class: - lang = natural language tag, e.g. "cs", or "en" - language = UFO language, e.g. OntoUML, or Basic
+ * Language
  */
 @Qualifier("jena")
-@Service public class LanguageServiceJena extends LanguageService {
+@Service
+public class LanguageServiceJena extends LanguageService {
 
     @Autowired
     public LanguageServiceJena(ClassPathResource languageTtlUrl) {
@@ -45,7 +45,8 @@ import org.springframework.stereotype.Service;
             m.read(resource.getURL().toString(), "text/turtle");
 
             final List<Term> terms = new ArrayList<>();
-            m.listSubjectsWithProperty(RDF.type, ResourceFactory.createResource(cz.cvut.kbss.termit.util.Vocabulary.s_c_term))
+            m.listSubjectsWithProperty(RDF.type,
+                    ResourceFactory.createResource(cz.cvut.kbss.termit.util.Vocabulary.s_c_term))
              .forEachRemaining(c -> {
                  final Term t = new Term();
                  t.setUri(URI.create(c.getURI()));
@@ -60,7 +61,7 @@ import org.springframework.stereotype.Service;
                  terms.add(t);
              });
             return terms;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyList();
         }

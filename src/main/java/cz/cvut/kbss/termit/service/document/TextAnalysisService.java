@@ -2,8 +2,8 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.Document;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;

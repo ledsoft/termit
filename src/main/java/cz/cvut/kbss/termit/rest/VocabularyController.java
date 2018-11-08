@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
@@ -51,14 +52,37 @@ public class VocabularyController extends BaseController {
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
     public Vocabulary getById(@PathVariable("fragment") String fragment,
                               @RequestParam(name = "namespace", required = false) String namespace) {
+        final URI id = resolveVocabularyUri(fragment, namespace);
+        return vocabularyService.find(id)
+                                .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
+    }
+
+    private URI resolveVocabularyUri(String fragment, String namespace) {
         final URI id;
         if (namespace != null) {
             id = idResolver.resolveIdentifier(namespace, fragment);
         } else {
             id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
         }
-        return vocabularyService.find(id)
-                                .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
+        return id;
+    }
+
+    @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateVocabulary(@PathVariable("fragment") String fragment,
+                                 @RequestParam(name = "namespace", required = false) String namespace,
+                                 @RequestBody Vocabulary update) {
+        final URI vocabularyUri = resolveVocabularyUri(fragment, namespace);
+        if (!vocabularyUri.equals(update.getUri())) {
+            throw new ValidationException(
+                    "Resolved vocabulary id " + vocabularyUri + " does not match the id of the specified vocabulary.");
+        }
+        if (!vocabularyService.exists(vocabularyUri)) {
+            throw NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri);
+        }
+        vocabularyService.update(update);
+        LOG.debug("Vocabulary {} updated.", update);
     }
 
     /**
@@ -69,7 +93,7 @@ public class VocabularyController extends BaseController {
      * @return Generated vocabulary identifier
      */
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "identifier", method = RequestMethod.GET)
+    @RequestMapping(value = "/identifier", method = RequestMethod.GET)
     public String generateIdentifier(@RequestParam("name") String name) {
         return idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, name).toString();
     }

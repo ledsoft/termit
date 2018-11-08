@@ -50,6 +50,7 @@ pdp:dokumentovy-slovnik a rdfs:Class ;
     ]
 .
 
+pdp:dokument a rdfs:Class;
 # InverseOf between je-casti-dokumentu and ma-soubor
 	spin:rule [
 		a sp:Construct ;
@@ -58,3 +59,30 @@ pdp:dokumentovy-slovnik a rdfs:Class ;
 	           CONSTRUCT { ?this pdp:je-casti-dokumentu ?doc .}
 	           WHERE { ?doc pdp:ma-soubor ?this . }"""
     ] .
+
+owl:DatatypeProperty a rdfs:Class ;
+#  owl:DatatypeProperty subclass of rdf:Property
+spin:rule [
+    a sp:Construct ;
+    sp:text """CONSTRUCT { ?this a rdf:Property . }
+               WHERE { ?this a owl:DatatypeProperty . }"""
+
+] .
+
+owl:ObjectProperty a rdfs:Class ;
+#  owl:ObjectProperty subclass of rdf:Property
+spin:rule [
+    a sp:Construct ;
+    sp:text """CONSTRUCT { ?this a rdf:Property . }
+               WHERE { ?this a owl:ObjectProperty . }"""
+
+] .
+
+owl:AnnotationProperty a rdfs:Class ;
+#  owl:AnnotationProperty subclass of rdf:Property
+spin:rule [
+    a sp:Construct ;
+    sp:text """CONSTRUCT { ?this a rdf:Property . }
+               WHERE { ?this a owl:AnnotationProperty . }"""
+
+] .

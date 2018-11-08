@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>termit</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <name>TermIt</name>
     <description>Terminology manager based on Semantic Web technologies.</description>
     <packaging>war</packaging>
@@ -31,21 +31,22 @@
         <org.springframework.data.version>2.0.8.RELEASE</org.springframework.data.version>
         <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
         <org.hibernate.validator.version>6.0.11.Final</org.hibernate.validator.version>
-        <cz.cvut.kbss.jopa.version>0.10.6</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.10.7</cz.cvut.kbss.jopa.version>
         <cz.cvut.kbss.jsonld.version>0.3.6</cz.cvut.kbss.jsonld.version>
+        <org.aspectj.version>1.9.2</org.aspectj.version>
 
         <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
         <org.mockito.version>2.19.1</org.mockito.version>
     </properties>
 
     <dependencies>
-        <!-- JOPA -->
         <dependency>
             <groupId>org.mitre.dsmiley.httpproxy</groupId>
             <artifactId>smiley-http-proxy-servlet</artifactId>
             <version>1.10</version>
         </dependency>
 
+        <!-- JOPA -->
         <dependency>
             <groupId>cz.cvut.kbss.jopa</groupId>
             <artifactId>jopa-impl</artifactId>
@@ -350,12 +351,12 @@
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjtools</artifactId>
-                        <version>1.9.1</version>
+                        <version>${org.aspectj.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjrt</artifactId>
-                        <version>1.9.1</version>
+                        <version>${org.aspectj.version}</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -405,19 +406,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.2.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${org.junit.jupiter.version}</version>
-                    </dependency>
-                </dependencies>
+                <version>2.22.1</version>
             </plugin>
             <!-- Code coverage plugin -->
             <plugin>

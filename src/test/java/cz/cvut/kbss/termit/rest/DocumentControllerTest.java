@@ -3,9 +3,9 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.Document;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -94,14 +94,15 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         doc.setVocabulary(vocabulary);
         for (String name : FILE_NAMES) {
             final File file = new File();
-            file.setFileName(name);
+            file.setUri(Generator.generateUri());
+            file.setName(name);
             doc.addFile(file);
         }
         return doc;
     }
 
     private static File getFile(Document doc, String name) {
-        return doc.getFiles().stream().filter(f -> f.getFileName().equals(name)).findFirst()
+        return doc.getFiles().stream().filter(f -> f.getName().equals(name)).findFirst()
                   .orElseThrow(() -> new TermItException("File not found."));
     }
 

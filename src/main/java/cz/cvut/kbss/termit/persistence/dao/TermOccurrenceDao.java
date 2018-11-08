@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -32,7 +32,7 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
                 "?x a ?type ;" +
                 "?hasTerm ?term . }", TermOccurrence.class)
                  .setParameter("type", typeUri)
-                 .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_vyskytem_termu))
+                 .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                  .setParameter("term", term.getUri()).getResultList();
     }
 
@@ -51,7 +51,7 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
                 "?hasTarget ?target ." +
                 "?target ?hasSource ?file . }", TermOccurrence.class).setParameter("type", typeUri)
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
-                 .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdrojovy_dokument))
+                 .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("file", file.getUri()).getResultList();
     }
 }

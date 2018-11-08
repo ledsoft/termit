@@ -33,7 +33,7 @@ public class TermDao extends BaseDao<Term> {
      * @return Matching terms, ordered by their label
      */
     public List<Term> findAll(Pageable pageSpec, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?term WHERE {" +
+        return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
@@ -56,7 +56,7 @@ public class TermDao extends BaseDao<Term> {
      * @return Matching terms, ordered by their label
      */
     public List<Term> findAll(int limit, int offset, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?term WHERE {" +
+        return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
@@ -81,7 +81,7 @@ public class TermDao extends BaseDao<Term> {
      * @return List of root terms contain a matching term in subtree
      */
     public List<Term> findAll(String searchString, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?root WHERE {" +
+        return em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
                 "?root a ?type ." +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +

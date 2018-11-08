@@ -49,6 +49,8 @@ public class VocabularyDao extends BaseDao<Vocabulary> {
     public Vocabulary update(Vocabulary entity) {
         Objects.requireNonNull(entity);
         try {
+            // Evict possibly cached instance loaded from default context
+            em.getEntityManagerFactory().getCache().evict(Vocabulary.class, entity.getUri(), null);
             return em.merge(entity, descriptorFor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);

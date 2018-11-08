@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import org.junit.jupiter.api.Test;
 
@@ -41,12 +43,12 @@ class DocumentTest {
         final Document document = new Document();
         document.setName("Metropolitan plan");
         final File fOne = new File();
-        fOne.setFileName("test1.html");
+        fOne.setName("test1.html");
         document.addFile(fOne);
         final File fTwo = new File();
-        fTwo.setFileName("test2.html");
+        fTwo.setName("test2.html");
         document.addFile(fTwo);
-        final Optional<File> result = document.getFile(fOne.getFileName());
+        final Optional<File> result = document.getFile(fOne.getName());
         assertTrue(result.isPresent());
         assertSame(fOne, result.get());
     }
@@ -56,7 +58,7 @@ class DocumentTest {
         final Document document = new Document();
         document.setName("Metropolitan plan");
         final File fOne = new File();
-        fOne.setFileName("test1.html");
+        fOne.setName("test1.html");
         document.addFile(fOne);
         assertFalse(document.getFile("unknown.html").isPresent());
     }

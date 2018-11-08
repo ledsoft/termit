@@ -1,9 +1,7 @@
 package cz.cvut.kbss.termit.environment;
 
-import cz.cvut.kbss.termit.model.Glossary;
-import cz.cvut.kbss.termit.model.Model;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
@@ -121,6 +119,21 @@ public class Generator {
     }
 
     /**
+     * Generates a random {@link UserAccount} instance, initialized with first name, last name, username and
+     * identifier.
+     *
+     * @return A new {@code UserAccount} instance
+     */
+    public static UserAccount generateUserAccount() {
+        final UserAccount account = new UserAccount();
+        account.setFirstName("FirstName" + randomInt());
+        account.setLastName("LastName" + randomInt());
+        account.setUsername("user" + randomInt() + "@kbss.felk.cvut.cz");
+        account.setUri(Generator.generateUri());
+        return account;
+    }
+
+    /**
      * Generates a {@link cz.cvut.kbss.termit.model.Vocabulary} instance with a name, an empty glossary and a model.
      *
      * @return New {@code Vocabulary} instance
@@ -136,7 +149,26 @@ public class Generator {
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
-        term.setComment("Comment"+ randomInt());
+        term.setComment("Comment" + randomInt());
         return term;
+    }
+
+    public static Term generateTermWithId() {
+        final Term term = generateTerm();
+        term.setUri(Generator.generateUri());
+        return term;
+    }
+
+    public static Resource generateResource() {
+        final Resource resource = new Resource();
+        resource.setName("Resource " + randomInt());
+        resource.setDescription("Resource description ");
+        return resource;
+    }
+
+    public static Resource generateResourceWithId() {
+        final Resource resource = generateResource();
+        resource.setUri(Generator.generateUri());
+        return resource;
     }
 }

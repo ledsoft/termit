@@ -6,9 +6,9 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.Document;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -97,7 +97,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
         this.file = new File();
-        file.setFileName(FILE_NAME);
+        file.setName(FILE_NAME);
         generateFile();
         this.documentManagerSpy = spy(documentManager);
         doCallRealMethod().when(documentManagerSpy).loadFileContent(any(), any());
@@ -191,7 +191,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
-        file.setFileName("unknown.html");
+        file.setName("unknown.html");
         final NotFoundException result = assertThrows(NotFoundException.class,
                 () -> sut.analyzeDocument(file, document));
         assertThat(result.getMessage(), containsString("not found on file system"));

@@ -1,7 +1,11 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.OccurrenceTarget;
+import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -188,15 +192,14 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
                 "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
         final TermOccurrence occurrence = createOccurrence(term);
-        final Target target = new Target();
-        target.setSource(source);
+        final OccurrenceTarget target = new OccurrenceTarget(source);
         target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
-        occurrence.addTarget(target);
+        occurrence.setTarget(target);
         return Optional.of(occurrence);
     }
 
     @Override
     public boolean supports(File source) {
-        return source.getFileName().endsWith("html") || source.getFileName().endsWith("htm");
+        return source.getName().endsWith("html") || source.getName().endsWith("htm");
     }
 }

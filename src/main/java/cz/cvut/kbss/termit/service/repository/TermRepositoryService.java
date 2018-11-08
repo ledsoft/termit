@@ -89,10 +89,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     public List<Term> findAll(String searchString, URI vocabularyUri) {
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        List<Term> rootTerms = termDao.findAll(searchString, vocabulary);
-        // List<Term> allTerms = new ArrayList<>(rootTerms.size()*4);
         //TODO filter
-        return rootTerms;
+        return termDao.findAll(searchString, vocabulary);
     }
 
     /**

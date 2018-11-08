@@ -1,8 +1,8 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.model.Document;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStream;

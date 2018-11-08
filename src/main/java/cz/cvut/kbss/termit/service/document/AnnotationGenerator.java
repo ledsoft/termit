@@ -1,7 +1,11 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.OccurrenceTarget;
+import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -13,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -65,7 +68,7 @@ public class AnnotationGenerator {
         });
         final List<TermOccurrence> occurrences = occurrenceResolver.findTermOccurrences();
         final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
-        occurrences.stream().filter(o -> isNew(o, existing, source)).forEach(o -> {
+        occurrences.stream().filter(o -> isNew(o, existing)).forEach(o -> {
             o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
             termOccurrenceDao.persist(o);
         });
@@ -85,28 +88,26 @@ public class AnnotationGenerator {
     /**
      * Checks whether the specified term occurrence is new or if there already exists an equivalent one.
      * <p>
-     * Two occurrences are considered equivalent iff they represent the same term, they have at least one target with
-     * the same source file, and the target contains at least one equal selector.
+     * Two occurrences are considered equivalent iff they represent the same term, they have a target with the same
+     * source file, and the target contains at least one equal selector.
      *
      * @param occurrence The supposedly new occurrence to check
      * @param existing   Existing occurrences relevant to the specified file
-     * @param file       The file being processed
      * @return Whether the occurrence is truly new
      */
-    private boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing, File file) {
-        final Optional<Target> target = occurrence.getTargets().stream()
-                                                  .filter(t -> t.getSource().getUri().equals(file.getUri())).findAny();
-        assert target.isPresent();
-        final Set<TermSelector> selectors = target.get().getSelectors();
+    private static boolean isNew(TermOccurrence occurrence, List<TermOccurrence> existing) {
+        final OccurrenceTarget target = occurrence.getTarget();
+        assert target != null;
+        final Set<TermSelector> selectors = target.getSelectors();
         for (TermOccurrence to : existing) {
             if (!to.getTerm().equals(occurrence.getTerm())) {
                 continue;
             }
-            final Optional<Target> fileTarget = to.getTargets().stream()
-                                                  .filter(t -> t.getSource().getUri().equals(file.getUri())).findAny();
-            assert fileTarget.isPresent();
+            final OccurrenceTarget fileTarget = to.getTarget();
+            assert fileTarget != null;
+            assert fileTarget.getSource().equals(target.getSource());
             // Same term, contains at least one identical selector
-            if (fileTarget.get().getSelectors().stream().anyMatch(selectors::contains)) {
+            if (fileTarget.getSelectors().stream().anyMatch(selectors::contains)) {
                 LOG.trace("Skipping occurrence {} because another one with matching term and selectors exists.",
                         occurrence);
                 return false;
