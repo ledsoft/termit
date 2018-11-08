@@ -1,9 +1,6 @@
 package cz.cvut.kbss.termit.environment;
 
-import cz.cvut.kbss.termit.model.Glossary;
-import cz.cvut.kbss.termit.model.Model;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -119,6 +116,21 @@ public class Generator {
         final User user = generateUser();
         user.setUri(Generator.generateUri());
         return user;
+    }
+
+    /**
+     * Generates a random {@link UserAccount} instance, initialized with first name, last name, username and
+     * identifier.
+     *
+     * @return A new {@code UserAccount} instance
+     */
+    public static UserAccount generateUserAccount() {
+        final UserAccount account = new UserAccount();
+        account.setFirstName("FirstName" + randomInt());
+        account.setLastName("LastName" + randomInt());
+        account.setUsername("user" + randomInt() + "@kbss.felk.cvut.cz");
+        account.setUri(Generator.generateUri());
+        return account;
     }
 
     /**

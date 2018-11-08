@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class SecurityUtilsTest extends BaseServiceTestRunner {
 
     @Autowired
-    private SecurityUtils securityUtils;
+    private UserAccountDao userAccountDao;
 
     @Autowired
-    private UserAccountDao userAccountDao;
+    private SecurityUtils sut;
 
     private UserAccount user;
 
@@ -43,14 +43,14 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Test
     void getCurrentUserReturnsCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final UserAccount result = securityUtils.getCurrentUser();
+        final UserAccount result = sut.getCurrentUser();
         assertEquals(user, result);
     }
 
     @Test
     void getCurrentUserDetailsReturnsUserDetailsOfCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final Optional<UserDetails> result = securityUtils.getCurrentUserDetails();
+        final Optional<UserDetails> result = sut.getCurrentUserDetails();
         assertTrue(result.isPresent());
         assertTrue(result.get().isEnabled());
         assertEquals(user, result.get().getUser());
@@ -58,7 +58,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
 
     @Test
     void getCurrentUserDetailsReturnsEmptyOptionalWhenNoUserIsLoggedIn() {
-        assertFalse(securityUtils.getCurrentUserDetails().isPresent());
+        assertFalse(sut.getCurrentUserDetails().isPresent());
     }
 
     @Test
@@ -71,9 +71,9 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         update.setPassword(user.getPassword());
         update.setUsername(user.getUsername());
         transactional(() -> userAccountDao.update(update));
-        securityUtils.updateCurrentUser();
+        sut.updateCurrentUser();
 
-        final UserAccount currentUser = securityUtils.getCurrentUser();
+        final UserAccount currentUser = sut.getCurrentUser();
         assertEquals(update, currentUser);
     }
 
@@ -82,8 +82,18 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         Environment.setCurrentUser(user);
         final String password = "differentPassword";
         final ValidationException ex = assertThrows(ValidationException.class,
-                () -> securityUtils.verifyCurrentUserPassword(password));
+                () -> sut.verifyCurrentUserPassword(password));
         assertThat(ex.getMessage(), containsString("does not match"));
+    }
 
+    @Test
+    void isAuthenticatedReturnsFalseForUnauthenticatedUser() {
+        assertFalse(sut.isAuthenticated());
+    }
+
+    @Test
+    void isAuthenticatedReturnsTrueForAuthenticatedUser() {
+        Environment.setCurrentUser(user);
+        assertTrue(sut.isAuthenticated());
     }
 }
