@@ -1,0 +1,66 @@
+Prefices
+{
+    rdf  :  http://www.w3.org/1999/02/22-rdf-syntax-ns#
+    rdfs :  http://www.w3.org/2000/01/rdf-schema#
+    owl  :  http://www.w3.org/2002/07/owl#
+    xsd  :  http://www.w3.org/2001/XMLSchema#
+    skos :  http://www.w3.org/2004/02/skos/core#
+    pdp  :  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/
+    psys :  http://proton.semanticweb.org/protonsys#
+}
+
+Axioms
+{
+    <skos:narrower> <rdfs:subPropertyOf> <skos:narrowerTransitive>
+    <skos:narrowerTransitive> <psys:transitiveOver> <skos:narrower> 
+}
+
+Rules
+{
+  Id: rdfs7
+     x  a  y
+     a  <rdfs:subPropertyOf>  b               [Constraint a != b]
+    -------------------------------
+     x  b  y
+
+  Id: pdp_dokument_1
+
+    vocabulary <pdp:popisuje-dokument> this   
+    -------------------------------
+    this <pdp:ma-dokumentovy-slovnik> vocabulary
+
+  Id: pdp_term_1
+
+    occurrence <pdp:je-vyskytem-termu> this 
+    -------------------------------
+    this <pdp:ma-vyskyt-termu> occurrence 
+
+  Id: pdp_term_2
+
+    vocabulary <pdp:ma-glosar> glossary
+    glossary <pdp:obsahuje-pojem> term
+    term <skos:narrowerTransitive> this 
+    -------------------------------
+    this <pdp:je-pojmem-ze-slovniku> vocabulary  
+    this <skos:inScheme> glossary
+
+  Id: pdp_term_3
+
+    this <rdf:type> <pdp:term>
+    -------------------------------
+    this <rdf:type> <skos:Concept>
+
+  Id: pdp_term_4
+
+    this <rdf:type> <pdp:dokumentovy-slovnik>
+    -------------------------------
+    this <rdf:type> <pdp:slovnik>
+
+  Id: pdp_term_5
+
+    doc <pdp:ma-soubor> this
+    -------------------------------
+    this <pdp:je-casti-dokumentu> doc
+
+}
+
