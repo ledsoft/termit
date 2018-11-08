@@ -20,7 +20,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.Principal;
@@ -54,11 +53,19 @@ public class Environment {
      */
     public static Optional<Principal> getCurrentUserPrincipal() {
         return SecurityContextHolder.getContext() != null ?
-                Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
+               Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
     }
 
     public static UserAccount getCurrentUser() {
         return currentUser;
+    }
+
+    /**
+     * Resets security context, removing any previously set data.
+     */
+    public static void resetCurrentUser() {
+        currentUser = null;
+        SecurityContextHolder.clearContext();
     }
 
     /**

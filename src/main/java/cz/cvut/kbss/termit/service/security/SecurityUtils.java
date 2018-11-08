@@ -73,6 +73,17 @@ public class SecurityUtils {
     }
 
     /**
+     * Checks if a user is currently authenticated, or if the current thread is processing a request from an anonymous
+     * user.
+     *
+     * @return Whether a user is authenticated
+     */
+    public boolean isAuthenticated() {
+        final SecurityContext context = SecurityContextHolder.getContext();
+        return context.getAuthentication() != null && context.getAuthentication().isAuthenticated();
+    }
+
+    /**
      * Creates an authentication token based on the specified user details and sets it to the current thread's security
      * context.
      *
