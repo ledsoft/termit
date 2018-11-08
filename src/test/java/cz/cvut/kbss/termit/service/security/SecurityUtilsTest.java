@@ -11,8 +11,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
@@ -95,5 +99,13 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     void isAuthenticatedReturnsTrueForAuthenticatedUser() {
         Environment.setCurrentUser(user);
         assertTrue(sut.isAuthenticated());
+    }
+
+    @Test
+    void isAuthenticatedReturnsFalseForAnonymousRequest() {
+        final AnonymousAuthenticationToken token = new AnonymousAuthenticationToken("anonymousUser", "anonymousUser",
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+        SecurityContextHolder.setContext(new SecurityContextImpl(token));
+        assertFalse(sut.isAuthenticated());
     }
 }
