@@ -2,13 +2,11 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
-import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
-import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +28,6 @@ public class AnnotationGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnnotationGenerator.class);
 
-    private final TermRepositoryService termService;
-
     private final TermOccurrenceDao termOccurrenceDao;
 
     private final DocumentManager documentManager;
@@ -39,11 +35,9 @@ public class AnnotationGenerator {
     private final TermOccurrenceResolvers resolvers;
 
     @Autowired
-    public AnnotationGenerator(TermRepositoryService termService,
-                               TermOccurrenceDao termOccurrenceDao,
+    public AnnotationGenerator(TermOccurrenceDao termOccurrenceDao,
                                DocumentManager documentManager,
                                TermOccurrenceResolvers resolvers) {
-        this.termService = termService;
         this.termOccurrenceDao = termOccurrenceDao;
         this.documentManager = documentManager;
         this.resolvers = resolvers;
@@ -61,11 +55,6 @@ public class AnnotationGenerator {
         final TermOccurrenceResolver occurrenceResolver = findResolverFor(source);
         LOG.debug("Resolving annotations of file {}.", source);
         occurrenceResolver.parseContent(content, source);
-        final List<Term> newTerms = occurrenceResolver.findNewTerms(document.getVocabulary());
-        newTerms.forEach(t -> {
-            t.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term);
-            termService.addTermToVocabulary(t, document.getVocabulary().getUri());
-        });
         final List<TermOccurrence> occurrences = occurrenceResolver.findTermOccurrences();
         final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
         occurrences.stream().filter(o -> isNew(o, existing)).forEach(o -> {
