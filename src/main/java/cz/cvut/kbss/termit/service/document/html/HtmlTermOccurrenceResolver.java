@@ -4,9 +4,7 @@ import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
-import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.File;
-import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -27,7 +25,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Resolves term occurrences from RDFa-annotated HTML document.
@@ -42,8 +39,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private final HtmlSelectorGenerators selectorGenerators;
 
-    private final IdentifierResolver idResolver;
-
     private Document document;
     private File source;
 
@@ -52,11 +47,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private Map<String, List<Element>> annotatedElements;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
-                               IdentifierResolver idResolver) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
-        this.idResolver = idResolver;
     }
 
     @Override
@@ -90,32 +83,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             }
         });
         return map;
-    }
-
-    @Override
-    public List<Term> findNewTerms(Vocabulary vocabulary) {
-        assert document != null;
-        mapRDFaTermOccurrenceAnnotations();
-        final List<Term> newTerms = new ArrayList<>(annotatedElements.size());
-        for (List<Element> annotation : annotatedElements.values()) {
-            List<Element> parts = annotation.stream().filter(e -> !existingTerm(e)).collect(Collectors.toList());
-            if (parts.isEmpty()) {
-                continue;
-            }
-            final String label = parts.stream().map(elem -> {
-                final String content = elem.attr(Constants.RDFa.CONTENT).trim();
-                return content.isEmpty() ? elem.wholeText() : content;
-            }).collect(Collectors.joining(" "));
-            final Term newTerm = new Term();
-            newTerm.setLabel(label);
-            newTerm.setUri(idResolver.generateIdentifier(
-                    idResolver.buildNamespace(vocabulary.getUri().toString(), Constants.TERM_NAMESPACE_SEPARATOR),
-                    label));
-            LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
-            parts.forEach(elem -> elem.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString()));
-            newTerms.add(newTerm);
-        }
-        return newTerms;
     }
 
     private void mapRDFaTermOccurrenceAnnotations() {
@@ -160,10 +127,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return prefixes.get(prefix) + localName;
     }
 
-    private static boolean existingTerm(Element rdfaElem) {
-        return rdfaElem.hasAttr(Constants.RDFa.RESOURCE);
-    }
-
     @Override
     public List<TermOccurrence> findTermOccurrences() {
         assert document != null;
@@ -186,7 +149,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         assert !rdfaElem.isEmpty();
         final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
         if (termId.isEmpty()) {
-            LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);
+            LOG.trace("No term identifier found in RDFa element {}. Skipping it.", rdfaElem);
             return Optional.empty();
         }
         final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
