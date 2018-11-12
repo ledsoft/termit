@@ -50,24 +50,64 @@ public class TermController extends BaseController {
     }
 
     /**
-     * @param fragment  Vocabulary name
-     * @param namespace Vocabulary namespace
+     * Get all terms from vocabulary with the specified identification.
+     * <p>
+     * Optionally, the terms can be filtered by the specified search string, so that only terms with label matching the
+     * specified string are returned.
+     *
+     * @param vocabularyIdFragment Vocabulary name
+     * @param namespace            Vocabulary namespace. Optional
+     * @param limit                Limit the number of elements to return. Optional
+     * @param offset               Offset the first returned result. Optional
+     * @param searchString         String to filter term labels by. Optional
      * @return List of terms of the specific vocabulary
      */
-    @RequestMapping(value = "/{fragment}/terms", method = RequestMethod.GET,
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Term> getAll(@PathVariable String fragment,
+    public List<Term> getAll(@PathVariable String vocabularyIdFragment,
                              @RequestParam(name = "namespace", required = false) String namespace,
                              @RequestParam(name = "limit", required = false) Integer limit,
-                             @RequestParam(name = "offset", required = false) Integer offset) {
-        URI vocabularyUri = getVocabularyUri(namespace, fragment);
+                             @RequestParam(name = "offset", required = false) Integer offset,
+                             @RequestParam(name = "searchString", required = false) String searchString) {
+        URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
+        // TODO: Change the limit/offset strategy to regular paging API (pageNo, page size)
         if (limit == null) {
-            limit = 100;
+            limit = Integer.MAX_VALUE;
         }
         if (offset == null) {
             offset = 0;
         }
+        if (searchString != null && !searchString.isEmpty()) {
+            return termService.findAll(searchString, vocabularyUri);
+        }
         return termService.findAll(vocabularyUri, limit, offset);
+    }
+
+    /**
+     * Creates new term in the specified vocabulary, possibly under the specified parent term.
+     *
+     * @param vocabularyIdFragment   Vocabulary name
+     * @param namespace  Vocabulary namespace. Optional
+     * @param parentTerm Parent term of the new term. Optional
+     * @param term       Vocabulary term that will be created
+     * @return Response with {@code Location} header.
+     */
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.POST,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public ResponseEntity<Void> createTerm(@PathVariable String vocabularyIdFragment,
+                                           @RequestParam(name = "namespace", required = false) String namespace,
+                                           @RequestParam(name = "parentTermUri", required = false) String parentTerm,
+                                           @RequestBody Term term) {
+        final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
+        if (parentTerm != null && !parentTerm.isEmpty()) {
+            termService.addTermToVocabulary(term, vocabularyUri, URI.create(parentTerm));
+        } else {
+            termService.addTermToVocabulary(term, vocabularyUri);
+        }
+
+        LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
+        final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     /**
@@ -126,8 +166,16 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubTerms(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                   @PathVariable("termIdFragment") String termIdFragment,
-                                  @RequestParam(name = "namespace", required = false) String namespace) {
+                                  @RequestParam(name = "namespace", required = false) String namespace,
+                                  @RequestParam(name = "searchString", required = false) String searchString) {
         final Term parent = getById(vocabularyIdFragment, termIdFragment, namespace);
+        if (searchString != null && !searchString.isEmpty()) {
+            // NOTE: Consider adding a dedicated search method in case this late filter causes performance problems
+            final List<Term> searchResult = termService
+                    .findAll(searchString, getVocabularyUri(namespace, vocabularyIdFragment));
+            return searchResult.stream().filter(t -> parent.getSubTerms().contains(t.getUri()))
+                               .collect(Collectors.toList());
+        }
         return parent.getSubTerms() == null ? Collections.emptyList() :
                parent.getSubTerms().stream()
                      .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
@@ -136,90 +184,30 @@ public class TermController extends BaseController {
     }
 
     /**
-     * @param fragment   Vocabulary name
-     * @param namespace  Vocabulary namespace
-     * @param parentTerm URI of the parent term
-     * @param limit      number of terms that should be returned
-     * @param offset     number of terms that should be skipped
-     * @param label      term label (partial string)
-     * @return List of terms that match all conditions (limit, offset, label and parentTerm)
-     */
-    @RequestMapping(value = "/{fragment}/terms/find", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Term> findTerms(@PathVariable String fragment,
-                                @RequestParam(name = "namespace", required = false) String namespace,
-                                @RequestParam(name = "parentTerm", required = false) String parentTerm,
-                                @RequestParam(name = "limit", required = false) Integer limit,
-                                @RequestParam(name = "offset", required = false) Integer offset,
-                                @RequestParam(name = "label", required = false) String label) {
-
-        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
-
-        if (parentTerm != null && !parentTerm.isEmpty()) {
-            return getSubTerms(fragment, parentTerm, namespace);
-        }
-        if (label != null && !label.isEmpty()) {
-            return termService.findAll(label, vocabularyUri);
-        }
-        if (limit == null) {
-            limit = 100;
-        }
-        if (offset == null) {
-            offset = 0;
-        }
-
-        return termService.findAll(vocabularyUri, limit, offset);
-    }
-
-    /**
-     * @param fragment  Vocabulary name
-     * @param namespace Vocabulary namespace
-     * @param term      Vocabulary term that will be created
-     * @return HttpHeader
-     */
-    @RequestMapping(value = "/{fragment}/terms", method = RequestMethod.POST,
-            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public ResponseEntity<Void> createTerm(@PathVariable String fragment,
-                                           @RequestParam(name = "namespace", required = false) String namespace,
-                                           @RequestParam(name = "parentTermUri", required = false) String parentTerm,
-                                           @RequestBody Term term) {
-        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
-        if (parentTerm != null && !parentTerm.isEmpty()) {
-            termService.addTermToVocabulary(term, vocabularyUri, URI.create(parentTerm));
-        } else {
-            termService.addTermToVocabulary(term, vocabularyUri);
-        }
-
-        LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
-        final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
-    }
-
-    /**
      * Returns identifier which would be generated by the application for the specified vocabulary name (using the
      * configured namespace).
      *
      * @param name      Term name
-     * @param fragment  Vocabulary name
+     * @param vocabularyIdFragment  Vocabulary name
      * @param namespace Vocabulary namespace
      * @return Generated term identifier for specific vocabulary
      */
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/{fragment}/terms/identifier", method = RequestMethod.GET)
-    public String generateIdentifier(@PathVariable("fragment") String fragment,
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms/identifier", method = RequestMethod.GET)
+    public String generateIdentifier(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                      @RequestParam(name = "namespace", required = false) String namespace,
                                      @RequestParam("name") String name) {
-        final URI vocabularyUri = getVocabularyUri(namespace, fragment);
+        final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         return idResolver.generateIdentifier(
                 idResolver.buildNamespace(vocabularyUri.toString(), Constants.TERM_NAMESPACE_SEPARATOR), name)
                          .toString();
     }
 
-    @RequestMapping(value = "/{fragment}/terms/name", method = RequestMethod.GET)
-    public Boolean doesNameExist(@PathVariable("fragment") String normalizedVocabName,
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms/name", method = RequestMethod.GET)
+    public Boolean doesNameExist(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                  @RequestParam(name = "namespace", required = false) String namespace,
                                  @RequestParam(name = "value") String name) {
-        final URI vocabularyUri = getVocabularyUri(namespace, normalizedVocabName);
+        final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         return termService.existsInVocabulary(name, vocabularyUri);
     }
 }
