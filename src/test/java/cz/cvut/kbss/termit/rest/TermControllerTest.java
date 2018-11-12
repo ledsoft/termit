@@ -20,10 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -218,5 +215,122 @@ class TermControllerTest extends BaseControllerTestRunner {
         final Map jsonObj = (Map) JsonUtils.fromString(mvcResult.getResponse().getContentAsString());
         assertTrue(jsonObj.containsKey(customProperty));
         assertEquals(value, jsonObj.get(customProperty));
+    }
+
+    @Test
+    void getAllReturnsAllTermsFromVocabulary() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        final String namespace = vocabularyUri + Constants.TERM_NAMESPACE_SEPARATOR + "/";
+        when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        when(idResolverMock.buildNamespace(eq(vocabularyUri), any())).thenReturn(namespace);
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
+                                          .collect(Collectors.toList());
+        when(termServiceMock.findAll(eq(URI.create(vocabularyUri)), anyInt(), anyInt())).thenReturn(terms);
+
+        final MvcResult mvcResult = mockMvc.perform(
+                get(PATH + "/" + VOCABULARY_NAME + "/terms/").param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
+                                           .andExpect(status().isOk()).andReturn();
+        final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
+        });
+        assertEquals(terms, result);
+        verify(termServiceMock).findAll(URI.create(vocabularyUri), Integer.MAX_VALUE, 0);
+    }
+
+    @Test
+    void getAllUsesSearchStringToFindMatchingTerms() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        final String namespace = vocabularyUri + Constants.TERM_NAMESPACE_SEPARATOR + "/";
+        when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        when(idResolverMock.buildNamespace(eq(vocabularyUri), any())).thenReturn(namespace);
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
+                                          .collect(Collectors.toList());
+        when(termServiceMock.findAll(any(), eq(URI.create(vocabularyUri)))).thenReturn(terms);
+        final String searchString = "test";
+
+        final MvcResult mvcResult = mockMvc.perform(
+                get(PATH + "/" + VOCABULARY_NAME + "/terms/")
+                        .param("namespace", Vocabulary.ONTOLOGY_IRI_termit)
+                        .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
+        final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
+        });
+        assertEquals(terms, result);
+        verify(termServiceMock).findAll(searchString, URI.create(vocabularyUri));
+    }
+
+    @Test
+    void getSubTermsFindsSubTermsOfTermWithSpecifiedId() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        final Term parent = Generator.generateTermWithId();
+        when(idResolverMock.buildNamespace(vocabularyUri, Constants.TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(vocabularyUri);
+        when(idResolverMock.resolveIdentifier(vocabularyUri, parent.getLabel())).thenReturn(parent.getUri());
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> {
+            final Term child = Generator.generateTermWithId();
+            parent.addSubTerm(child.getUri());
+            when(termServiceMock.find(child.getUri())).thenReturn(Optional.of(child));
+            return child;
+        }).collect(Collectors.toList());
+        when(termServiceMock.find(parent.getUri())).thenReturn(Optional.of(parent));
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms"))
+                .andExpect(status().isOk()).andReturn();
+        final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
+        });
+        assertEquals(terms.size(), result.size());
+        assertTrue(terms.containsAll(result));
+        verify(termServiceMock).find(parent.getUri());
+        terms.forEach(t -> verify(termServiceMock).find(t.getUri()));
+    }
+
+    @Test
+    void getSubTermsFindsSubTermsBySearchString() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        final Term parent = Generator.generateTermWithId();
+        when(idResolverMock.buildNamespace(vocabularyUri, Constants.TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(vocabularyUri);
+        when(idResolverMock.resolveIdentifier(vocabularyUri, parent.getLabel())).thenReturn(parent.getUri());
+        when(termServiceMock.find(parent.getUri())).thenReturn(Optional.of(parent));
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> {
+            final Term child = Generator.generateTermWithId();
+            parent.addSubTerm(child.getUri());
+            return child;
+        }).collect(Collectors.toList());
+        final String searchString = "test";
+        final List<Term> searchResults = new ArrayList<>(terms);
+        searchResults.add(Generator.generateTermWithId());
+        when(termServiceMock.findAll(searchString, URI.create(vocabularyUri))).thenReturn(searchResults);
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms")
+                        .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
+        final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
+        });
+        assertEquals(terms.size(), result.size());
+        assertTrue(terms.containsAll(result));
+        verify(termServiceMock).find(parent.getUri());
+        verify(termServiceMock).findAll(searchString, URI.create(vocabularyUri));
+    }
+
+    @Test
+    void getSubTermsThrowsNotFoundExceptionForUnknownTermIdentifier() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        final Term parent = Generator.generateTermWithId();
+        when(idResolverMock.buildNamespace(vocabularyUri, Constants.TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(vocabularyUri);
+        when(idResolverMock.resolveIdentifier(vocabularyUri, parent.getLabel())).thenReturn(parent.getUri());
+        when(termServiceMock.find(any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms"))
+               .andExpect(status().isNotFound());
+        verify(termServiceMock, never()).findAll(any(), any());
     }
 }
