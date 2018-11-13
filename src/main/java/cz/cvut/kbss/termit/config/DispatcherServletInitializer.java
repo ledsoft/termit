@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextListener;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -41,6 +42,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 
         initSecurityFilter(servletContext);
         initMdcFilter(servletContext);
+        initUTF8Filter(servletContext);
         servletContext.addListener(new RequestContextListener());
     }
 
@@ -67,6 +69,18 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
     private static void initMdcFilter(ServletContext servletContext) {
         FilterRegistration.Dynamic mdcFilter = servletContext
                 .addFilter("diagnosticsContextFilter", new DiagnosticsContextFilter());
+        final EnumSet<DispatcherType> es = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
+        mdcFilter.addMappingForUrlPatterns(es, true, "/*");
+    }
+
+    /**
+     * Initializes UTF-8 encoding filter
+     */
+    private static void initUTF8Filter(ServletContext servletContext) {
+        FilterRegistration.Dynamic mdcFilter = servletContext
+            .addFilter("urlEncodingFilter", new CharacterEncodingFilter());
+        mdcFilter.setInitParameter("encoding","UTF-8");
+        mdcFilter.setInitParameter("forceEncoding","true");
         final EnumSet<DispatcherType> es = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
         mdcFilter.addMappingForUrlPatterns(es, true, "/*");
     }
