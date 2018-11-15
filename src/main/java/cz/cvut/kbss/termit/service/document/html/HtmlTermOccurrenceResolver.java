@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -67,7 +69,11 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     @Override
     public InputStream getContent() {
         assert document != null;
-        return new ByteArrayInputStream(document.toString().getBytes());
+        try {
+            return new ByteArrayInputStream(document.toString().getBytes(StandardCharsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException e) {
+            throw new TermItException("Fatal error, unable to find encoding UTF-8.", e);
+        }
     }
 
     private static Map<String, String> resolvePrefixes(Document document) {
