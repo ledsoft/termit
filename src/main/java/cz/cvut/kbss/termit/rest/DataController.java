@@ -47,4 +47,10 @@ public class DataController {
     public RdfsResource getById(@RequestParam("iri") URI id) {
         return dataDao.find(id).orElseThrow(() -> NotFoundException.create("Resource", id));
     }
+
+    @RequestMapping(value = "/label", method = RequestMethod.GET)
+    public String getLabel(@RequestParam("iri") URI id) {
+        return dataDao.getLabel(id).orElseThrow(
+                () -> new NotFoundException("Resource with id " + id + " not found or it has no matching label."));
+    }
 }
