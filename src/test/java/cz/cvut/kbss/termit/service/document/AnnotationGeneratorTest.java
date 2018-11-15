@@ -151,7 +151,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assert element.size() == 1;
         element.attr(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
 
-        return new ByteArrayInputStream(doc.toString().getBytes());
+        return new ByteArrayInputStream(doc.toString().getBytes(StandardCharsets.UTF_8.name()));
     }
 
     @Test
@@ -246,14 +246,18 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         file.setName("rdfa-new-terms.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
-        final String originalContent = new BufferedReader(new InputStreamReader(loadFile("data/rdfa-new-terms.html")))
-                .lines().collect(Collectors.joining("\n"));
-        final Document originalDoc = Jsoup.parse(originalContent);
-        final String currentContent = new BufferedReader(new InputStreamReader(new FileInputStream(fileLocation)))
-                .lines().collect(
-                        Collectors.joining("\n"));
-        final Document currentDoc = Jsoup.parse(currentContent);
-        assertTrue(originalDoc.hasSameValue(currentDoc));
+        final Document originalDoc;
+        try (final BufferedReader oldIn = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fileLocation)))) {
+            final String originalContent = oldIn.lines().collect(Collectors.joining("\n"));
+            originalDoc = Jsoup.parse(originalContent);
+        }
+        try (final BufferedReader newIn = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fileLocation)))) {
+            final String currentContent = newIn.lines().collect(Collectors.joining("\n"));
+            final Document currentDoc = Jsoup.parse(currentContent);
+            assertTrue(originalDoc.hasSameValue(currentDoc));
+        }
     }
 
     @Test

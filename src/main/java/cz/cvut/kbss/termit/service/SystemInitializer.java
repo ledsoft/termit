@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Random;
@@ -62,15 +63,24 @@ public class SystemInitializer {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        final File credentialsFile = new File(
-                config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
         try {
+            final File credentialsFile = createHiddenFile();
+            LOG.debug("Writing admin credentials into file: {}", credentialsFile);
             Files.write(credentialsFile.toPath(),
                     Collections.singletonList(admin.getUsername() + "/" + passwordPlain),
                     StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             LOG.error("Unable to create admin credentials file.", e);
         }
+    }
+
+    private File createHiddenFile() throws IOException {
+        final File credentialsFile = new File(
+                config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
+        credentialsFile.createNewFile();
+        // Hidden attribute on Windows
+        Files.setAttribute(credentialsFile.toPath(), "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+        return credentialsFile;
     }
 
     private static UserAccount initAdminInstance() {

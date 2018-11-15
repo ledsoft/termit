@@ -23,7 +23,6 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -99,7 +98,7 @@ class SystemInitializerTest extends BaseServiceTestRunner {
         final File credentialsFile = new File(home + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
         assertTrue(credentialsFile.exists());
         assertTrue(credentialsFile.isHidden());
-        final List<String> lines = Files.lines(credentialsFile.toPath()).collect(Collectors.toList());
+        final List<String> lines = Files.readAllLines(credentialsFile.toPath());
         assertThat(lines.get(0), containsString(admin.getUsername() + "/"));
         final String password = lines.get(0).substring(lines.get(0).indexOf('/') + 1);
         assertTrue(passwordEncoder.matches(password, admin.getPassword()));
