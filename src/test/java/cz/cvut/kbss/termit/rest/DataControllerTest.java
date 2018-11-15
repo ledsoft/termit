@@ -66,4 +66,21 @@ class DataControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(get("/data/resource").param("iri", Generator.generateUri().toString()))
                .andExpect(status().isNotFound());
     }
+
+    @Test
+    void getLabelReturnsLabelOfResourceWithSpecifiedIdAsString() throws Exception {
+        final URI uri = Generator.generateUri();
+        final String label = "Test term";
+        when(dataDaoMock.getLabel(uri)).thenReturn(Optional.of(label));
+        final MvcResult mvcResult = mockMvc.perform(get("/data/label").param("iri", uri.toString()))
+                                           .andExpect(status().isOk()).andReturn();
+        assertEquals(label, readValue(mvcResult, String.class));
+    }
+
+    @Test
+    void getLabelThrowsNotFoundExceptionWhenLabelIsNotFound() throws Exception {
+        final URI uri = Generator.generateUri();
+        when(dataDaoMock.getLabel(any())).thenReturn(Optional.empty());
+        mockMvc.perform(get("/data/label").param("iri", uri.toString())).andExpect(status().isNotFound());
+    }
 }

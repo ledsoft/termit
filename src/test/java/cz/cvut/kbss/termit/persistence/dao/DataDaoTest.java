@@ -3,6 +3,8 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.termit.dto.RdfsResource;
+import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -73,5 +75,38 @@ class DataDaoTest extends BaseDaoTestRunner {
         generateProperties();
         final Optional<RdfsResource> result = sut.find(URI.create(Vocabulary.s_c_omezeny_uzivatel_termitu));
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    void getLabelReturnsLabelWithMatchingLanguageOfSpecifiedIdentifier() {
+        final Term term = Generator.generateTermWithId();
+        transactional(() -> em.persist(term));
+
+        final Optional<String> result = sut.getLabel(term.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(term.getLabel(), result.get());
+    }
+
+    @Test
+    void getLabelReturnsLabelWithoutLanguageTagWhenMatchingLanguageTagDoesNotExist() {
+        final Term term = Generator.generateTermWithId();
+        transactional(() -> {
+            final Repository repo = em.unwrap(Repository.class);
+            final ValueFactory vf = repo.getValueFactory();
+            try (final RepositoryConnection connection = repo.getConnection()) {
+                connection.add(vf.createIRI(term.getUri().toString()), RDF.TYPE, vf.createIRI(Vocabulary.s_c_term));
+                connection.add(vf.createIRI(term.getUri().toString()), RDFS.LABEL, vf.createLiteral(term.getLabel()));
+                connection.commit();
+            }
+        });
+
+        final Optional<String> result = sut.getLabel(term.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(term.getLabel(), result.get());
+    }
+
+    @Test
+    void getLabelReturnsEmptyOptionalForIdentifierWithoutLabel() {
+        assertFalse(sut.getLabel(Generator.generateUri()).isPresent());
     }
 }

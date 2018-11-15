@@ -1,8 +1,11 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
+import cz.cvut.kbss.jopa.exceptions.NoResultException;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.dto.RdfsResource;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -15,11 +18,16 @@ import java.util.stream.Collectors;
 @Repository
 public class DataDao {
 
+    private static final URI RDFS_LABEL = URI.create(RDFS.LABEL);
+
     private final EntityManager em;
 
+    private final Configuration config;
+
     @Autowired
-    public DataDao(EntityManager em) {
+    public DataDao(EntityManager em, Configuration config) {
         this.em = em;
+        this.config = config;
     }
 
     /**
@@ -36,7 +44,7 @@ public class DataDao {
                 "}", "RdfsResource")
                  // TODO Replace with RDF.PROPERTY once the new JOPA release which fixes the incorrect IRI is out
                  .setParameter("property", URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"))
-                 .setParameter("has-label", URI.create(RDFS.LABEL))
+                 .setParameter("has-label", RDFS_LABEL)
                  .setParameter("has-comment", URI.create(RDFS.COMMENT)).getResultList();
     }
 
@@ -54,7 +62,7 @@ public class DataDao {
                 "OPTIONAL { ?x ?has-label ?label .}" +
                 "OPTIONAL { ?x ?has-comment ?comment . }" +
                 "}", "RdfsResource").setParameter("id", id)
-                                               .setParameter("has-label", URI.create(RDFS.LABEL))
+                                               .setParameter("has-label", RDFS_LABEL)
                                                .setParameter("has-comment", URI.create(RDFS.COMMENT)).getResultList();
         if (resources.isEmpty()) {
             return Optional.empty();
@@ -62,5 +70,26 @@ public class DataDao {
         final RdfsResource result = resources.get(0);
         result.setTypes(resources.stream().flatMap(r -> r.getTypes().stream()).collect(Collectors.toSet()));
         return Optional.of(result);
+    }
+
+    /**
+     * Gets the {@link RDFS#LABEL} of a resource with the specified identifier.
+     * <p>
+     * Note that the label has to have matching language tag or no language tag at all (matching tag is preferred).
+     *
+     * @param id Resource ({@link RDFS#RESOURCE}) identifier
+     * @return Matching resource identifier (if found)
+     */
+    public Optional<String> getLabel(URI id) {
+        Objects.requireNonNull(id);
+        try {
+            return Optional.of(em.createNativeQuery("SELECT ?label WHERE {" +
+                    "?x ?has-label ?label ." +
+                    "FILTER (LANGMATCHES(LANG(?label), ?tag) || lang(?label) = \"\") }", String.class)
+                                 .setParameter("x", id).setParameter("has-label", RDFS_LABEL)
+                                 .setParameter("tag", config.get(ConfigParam.LANGUAGE), null).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 }
