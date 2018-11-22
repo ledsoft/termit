@@ -33,6 +33,10 @@ public class Term implements Serializable, HasTypes {
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
+    @Inferred
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
+    private URI vocabulary;
+
     @Properties
     private Map<String, Set<String>> properties;
 
@@ -85,6 +89,14 @@ public class Term implements Serializable, HasTypes {
 
     public void setSources(Set<String> source) {
         this.sources = source;
+    }
+
+    public URI getVocabulary() {
+        return vocabulary;
+    }
+
+    public void setVocabulary(URI vocabulary) {
+        this.vocabulary = vocabulary;
     }
 
     @Override
