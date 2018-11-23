@@ -23,6 +23,18 @@ public class RestUtils {
     }
 
     /**
+     * Creates {@link HttpHeaders} object with location header corresponding to the current request's URI.
+     *
+     * @return {@code HttpHeaders} with location header
+     */
+    public static HttpHeaders createLocationHeaderFromCurrentUri() {
+        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUri();
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
+        return headers;
+    }
+
+    /**
      * Creates {@link HttpHeaders} object with a location header with the specified path appended to the current request
      * URI.
      * <p>

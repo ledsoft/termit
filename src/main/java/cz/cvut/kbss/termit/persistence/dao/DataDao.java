@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.exceptions.NoResultException;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.dto.RdfsResource;
+import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,23 @@ public class DataDao {
                  .setParameter("property", URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"))
                  .setParameter("has-label", RDFS_LABEL)
                  .setParameter("has-comment", URI.create(RDFS.COMMENT)).getResultList();
+    }
+
+    /**
+     * Persists the specified resource.
+     * <p>
+     * This method should be used very rarely because it saves a basic RDFS resource with nothing but identifier and
+     * possibly label and comment.
+     *
+     * @param instance The resource to persist
+     */
+    public void persist(RdfsResource instance) {
+        Objects.requireNonNull(instance);
+        try {
+            em.persist(instance);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 
     /**

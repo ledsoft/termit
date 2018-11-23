@@ -1,16 +1,19 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.dto.RdfsResource;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.persistence.dao.DataDao;
+import cz.cvut.kbss.termit.service.repository.DataRepositoryService;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
@@ -18,16 +21,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class DataControllerTest extends BaseControllerTestRunner {
 
     @Mock
-    private DataDao dataDaoMock;
+    private DataRepositoryService dataServiceMock;
 
     @InjectMocks
     private DataController sut;
@@ -40,10 +47,9 @@ class DataControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getPropertiesLoadsPropertiesFromDao() throws Exception {
-        // TODO Replace with RDF.PROPERTY once JOPA 0.10.8 is out
         final RdfsResource property = new RdfsResource(URI.create(Vocabulary.s_p_ma_krestni_jmeno), "Name", null,
-                "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>");
-        when(dataDaoMock.findAllProperties()).thenReturn(Collections.singletonList(property));
+                RDF.PROPERTY);
+        when(dataServiceMock.findAllProperties()).thenReturn(Collections.singletonList(property));
         final MvcResult mvcResult = mockMvc.perform(get("/data/properties")).andExpect(status().isOk()).andReturn();
         final List<RdfsResource> result = readValue(mvcResult, new TypeReference<List<RdfsResource>>() {
         });
@@ -54,7 +60,7 @@ class DataControllerTest extends BaseControllerTestRunner {
     void getByIdReturnsResourceWithSpecifiedIdentifier() throws Exception {
         final RdfsResource property = new RdfsResource(URI.create(Vocabulary.s_p_ma_krestni_jmeno), "Name", null,
                 RDFS.RESOURCE);
-        when(dataDaoMock.find(any())).thenReturn(Optional.of(property));
+        when(dataServiceMock.find(any())).thenReturn(Optional.of(property));
         final MvcResult mvcResult = mockMvc.perform(get("/data/resource").param("iri", property.getUri().toString()))
                                            .andExpect(status().isOk()).andReturn();
         assertEquals(property, readValue(mvcResult, RdfsResource.class));
@@ -62,7 +68,7 @@ class DataControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getByIdThrowsNotFoundExceptionForUnknownResourceIdentifier() throws Exception {
-        when(dataDaoMock.find(any())).thenReturn(Optional.empty());
+        when(dataServiceMock.find(any())).thenReturn(Optional.empty());
         mockMvc.perform(get("/data/resource").param("iri", Generator.generateUri().toString()))
                .andExpect(status().isNotFound());
     }
@@ -71,7 +77,7 @@ class DataControllerTest extends BaseControllerTestRunner {
     void getLabelReturnsLabelOfResourceWithSpecifiedIdAsString() throws Exception {
         final URI uri = Generator.generateUri();
         final String label = "Test term";
-        when(dataDaoMock.getLabel(uri)).thenReturn(Optional.of(label));
+        when(dataServiceMock.getLabel(uri)).thenReturn(Optional.of(label));
         final MvcResult mvcResult = mockMvc.perform(get("/data/label").param("iri", uri.toString()))
                                            .andExpect(status().isOk()).andReturn();
         assertEquals(label, readValue(mvcResult, String.class));
@@ -80,7 +86,25 @@ class DataControllerTest extends BaseControllerTestRunner {
     @Test
     void getLabelThrowsNotFoundExceptionWhenLabelIsNotFound() throws Exception {
         final URI uri = Generator.generateUri();
-        when(dataDaoMock.getLabel(any())).thenReturn(Optional.empty());
+        when(dataServiceMock.getLabel(any())).thenReturn(Optional.empty());
         mockMvc.perform(get("/data/label").param("iri", uri.toString())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createPropertySavesResource() throws Exception {
+        final RdfsResource property = new RdfsResource(URI.create(RDFS.RANGE), "Range", "Property range", RDF.PROPERTY);
+        mockMvc.perform(
+                post("/data/properties").content(toJson(property)).contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(status().isCreated());
+        verify(dataServiceMock).persistProperty(property);
+    }
+
+    @Test
+    void createPropertyReturnsLocationHeaderLeadingToProperties() throws Exception {
+        final RdfsResource property = new RdfsResource(URI.create(RDFS.RANGE), "Range", "Property range", RDF.PROPERTY);
+        final MvcResult mvcResult = mockMvc.perform(
+                post("/data/properties").content(toJson(property)).contentType(MediaType.APPLICATION_JSON_VALUE))
+                                           .andExpect(status().isCreated()).andReturn();
+        assertThat(mvcResult.getResponse().getHeader(HttpHeaders.LOCATION), containsString("/data/properties"));
     }
 }

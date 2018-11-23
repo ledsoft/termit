@@ -3,13 +3,18 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.dto.RdfsResource;
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.persistence.dao.DataDao;
+import cz.cvut.kbss.termit.rest.util.RestUtils;
+import cz.cvut.kbss.termit.security.SecurityConstants;
+import cz.cvut.kbss.termit.service.repository.DataRepositoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
@@ -23,17 +28,29 @@ import java.util.List;
 @RequestMapping("/data")
 public class DataController {
 
-    private final DataDao dataDao;
+    private static final Logger LOG = LoggerFactory.getLogger(DataController.class);
+
+    private final DataRepositoryService dataService;
 
     @Autowired
-    public DataController(DataDao dataDao) {
-        this.dataDao = dataDao;
+    public DataController(DataRepositoryService dataService) {
+        this.dataService = dataService;
     }
 
     @RequestMapping(value = "/properties", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                   JsonLd.MEDIA_TYPE})
     public List<RdfsResource> getProperties() {
-        return dataDao.findAllProperties();
+        return dataService.findAllProperties();
+    }
+
+    @PreAuthorize("hasRole('" + SecurityConstants.ROLE_USER + "')")
+    @RequestMapping(value = "/properties", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
+                                                                                    JsonLd.MEDIA_TYPE})
+    public ResponseEntity<Void> createProperty(@RequestBody RdfsResource property) {
+        dataService.persistProperty(property);
+        LOG.debug("Created property {}.", property);
+        final HttpHeaders headers = RestUtils.createLocationHeaderFromCurrentUri();
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
     /**
@@ -43,14 +60,14 @@ public class DataController {
      * @return Metadata
      */
     @RequestMapping(value = "/resource", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                 JsonLd.MEDIA_TYPE})
     public RdfsResource getById(@RequestParam("iri") URI id) {
-        return dataDao.find(id).orElseThrow(() -> NotFoundException.create("Resource", id));
+        return dataService.find(id).orElseThrow(() -> NotFoundException.create("Resource", id));
     }
 
     @RequestMapping(value = "/label", method = RequestMethod.GET)
     public String getLabel(@RequestParam("iri") URI id) {
-        return dataDao.getLabel(id).orElseThrow(
+        return dataService.getLabel(id).orElseThrow(
                 () -> new NotFoundException("Resource with id " + id + " not found or it has no matching label."));
     }
 }
