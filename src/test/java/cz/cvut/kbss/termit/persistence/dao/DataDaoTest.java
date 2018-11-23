@@ -109,4 +109,17 @@ class DataDaoTest extends BaseDaoTestRunner {
     void getLabelReturnsEmptyOptionalForIdentifierWithoutLabel() {
         assertFalse(sut.getLabel(Generator.generateUri()).isPresent());
     }
+
+    @Test
+    void persistSavesSpecifiedResource() {
+        final RdfsResource resource =
+                new RdfsResource(URI.create(RDFS.LABEL.toString()), "Label", "Label specification",
+                        RDF.PROPERTY.toString());
+        transactional(() -> sut.persist(resource));
+
+        final RdfsResource result = em.find(RdfsResource.class, resource.getUri());
+        assertNotNull(result);
+        assertEquals(resource.getLabel(), result.getLabel());
+        assertEquals(resource.getTypes(), result.getTypes());
+    }
 }

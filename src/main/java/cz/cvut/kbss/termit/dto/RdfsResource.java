@@ -14,12 +14,17 @@ import java.util.Set;
  * Representation of any RDFS resource.
  */
 @SparqlResultSetMapping(name = "RdfsResource", classes = {@ConstructorResult(targetClass = RdfsResource.class,
-        variables = {
-                @VariableResult(name = "x", type = URI.class),
-                @VariableResult(name = "label", type = String.class),
-                @VariableResult(name = "comment", type = String.class),
-                @VariableResult(name = "type", type = String.class)
-        })})
+                                                                             variables = {
+                                                                                     @VariableResult(name = "x",
+                                                                                                     type = URI.class),
+                                                                                     @VariableResult(name = "label",
+                                                                                                     type = String.class),
+                                                                                     @VariableResult(name = "comment",
+                                                                                                     type = String.class),
+                                                                                     @VariableResult(name = "type",
+                                                                                                     type = String.class)
+                                                                             })})
+@OWLClass(iri = RDFS.RESOURCE)
 public class RdfsResource implements Serializable, HasTypes {
 
     @Id
@@ -102,6 +107,7 @@ public class RdfsResource implements Serializable, HasTypes {
         return "RdfsResource{" +
                 "uri=" + uri +
                 ", label='" + label + '\'' +
+                ", types=" + types +
                 '}';
     }
 }
