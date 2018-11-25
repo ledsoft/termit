@@ -6,7 +6,9 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 public class Vocabulary extends HasProvenanceData implements Serializable {
@@ -20,16 +22,20 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
     private String name;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar, cascade = {CascadeType.PERSIST,
-            CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar,
+                       cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private Glossary glossary;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_model, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_model, cascade = CascadeType.PERSIST,
+                       fetch = FetchType.EAGER)
     private Model model;
 
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_informaci_o_verzi, fetch = FetchType.EAGER)
     private VersionInfo versionInfo;
+
+    @Properties
+    private Map<String, Set<String>> properties;
 
     public URI getUri() {
         return uri;
@@ -69,6 +75,14 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
 
     public void setVersionInfo(VersionInfo versionInfo) {
         this.versionInfo = versionInfo;
+    }
+
+    public Map<String, Set<String>> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Set<String>> properties) {
+        this.properties = properties;
     }
 
     @Override
