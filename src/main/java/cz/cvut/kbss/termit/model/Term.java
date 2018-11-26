@@ -37,7 +37,7 @@ public class Term implements Serializable, HasTypes {
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
 
-    @Properties
+    @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
 
     @Types
