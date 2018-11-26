@@ -34,7 +34,7 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_informaci_o_verzi, fetch = FetchType.EAGER)
     private VersionInfo versionInfo;
 
-    @Properties
+    @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
 
     public URI getUri() {
