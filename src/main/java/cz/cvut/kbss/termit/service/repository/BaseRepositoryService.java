@@ -61,7 +61,7 @@ public abstract class BaseRepositoryService<T> {
      */
     public Optional<T> find(URI id) {
         final Optional<T> result = getPrimaryDao().find(id);
-        return result.isPresent() ? Optional.ofNullable(postLoad(result.get())) : result;
+        return result.map(this::postLoad);
     }
 
     /**
