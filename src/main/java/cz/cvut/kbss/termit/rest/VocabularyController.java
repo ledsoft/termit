@@ -58,17 +58,11 @@ public class VocabularyController extends BaseController {
     }
 
     private URI resolveVocabularyUri(String fragment, String namespace) {
-        final URI id;
-        if (namespace != null) {
-            id = idResolver.resolveIdentifier(namespace, fragment);
-        } else {
-            id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
-        }
-        return id;
+        return resolveIdentifier(namespace, fragment, ConfigParam.NAMESPACE_VOCABULARY);
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                   JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateVocabulary(@PathVariable("fragment") String fragment,
                                  @RequestParam(name = "namespace", required = false) String namespace,

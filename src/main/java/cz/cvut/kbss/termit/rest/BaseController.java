@@ -12,7 +12,7 @@ import java.net.URI;
 
 /**
  * Base for application REST controllers.
- *
+ * <p>
  * Will be used to define general security for the public API.
  */
 @PreAuthorize("hasRole('" + SecurityConstants.ROLE_USER + "')")
@@ -25,6 +25,22 @@ public class BaseController {
     protected BaseController(IdentifierResolver idResolver, Configuration config) {
         this.idResolver = idResolver;
         this.config = config;
+    }
+
+    /**
+     * Resolves identifier based on the specified resource (if provided) or the namespace loaded from application configuration.
+     *
+     * @param namespace       Explicitly provided namespace. Optional
+     * @param fragment        Locally unique identifier fragment
+     * @param namespaceConfig Namespace configuration parameter. Used in {@code namespace} is not specified
+     * @return Resolved identifier
+     */
+    protected URI resolveIdentifier(String namespace, String fragment, ConfigParam namespaceConfig) {
+        if (namespace != null) {
+            return idResolver.resolveIdentifier(namespace, fragment);
+        } else {
+            return idResolver.resolveIdentifier(namespaceConfig, fragment);
+        }
     }
 
     HttpHeaders generateLocationHeader(URI identifier, ConfigParam namespaceConfig) {

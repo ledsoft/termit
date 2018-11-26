@@ -38,15 +38,8 @@ public class TermController extends BaseController {
         this.termService = termService;
     }
 
-
     private URI getVocabularyUri(String namespace, String fragment) {
-        final URI vocabularyUri;
-        if (namespace != null) {
-            vocabularyUri = idResolver.resolveIdentifier(namespace, fragment);
-        } else {
-            vocabularyUri = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment);
-        }
-        return vocabularyUri;
+        return resolveIdentifier(namespace, fragment, ConfigParam.NAMESPACE_VOCABULARY);
     }
 
     /**
@@ -63,7 +56,7 @@ public class TermController extends BaseController {
      * @return List of terms of the specific vocabulary
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getAll(@PathVariable String vocabularyIdFragment,
                              @RequestParam(name = "namespace", required = false) String namespace,
                              @RequestParam(name = "limit", required = false) Integer limit,
@@ -86,14 +79,14 @@ public class TermController extends BaseController {
     /**
      * Creates new term in the specified vocabulary, possibly under the specified parent term.
      *
-     * @param vocabularyIdFragment   Vocabulary name
-     * @param namespace  Vocabulary namespace. Optional
-     * @param parentTerm Parent term of the new term. Optional
-     * @param term       Vocabulary term that will be created
+     * @param vocabularyIdFragment Vocabulary name
+     * @param namespace            Vocabulary namespace. Optional
+     * @param parentTerm           Parent term of the new term. Optional
+     * @param term                 Vocabulary term that will be created
      * @return Response with {@code Location} header.
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.POST,
-            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String vocabularyIdFragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestParam(name = "parentTermUri", required = false) String parentTerm,
@@ -120,7 +113,7 @@ public class TermController extends BaseController {
      * @throws NotFoundException If term does not exist
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Term getById(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                         @PathVariable("termIdFragment") String termIdFragment,
                         @RequestParam(name = "namespace", required = false) String namespace) {
@@ -144,7 +137,7 @@ public class TermController extends BaseController {
      * @throws NotFoundException If term does not exist
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.PUT,
-            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                        @PathVariable("termIdFragment") String termIdFragment,
@@ -163,7 +156,7 @@ public class TermController extends BaseController {
     }
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/subterms", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubTerms(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                   @PathVariable("termIdFragment") String termIdFragment,
                                   @RequestParam(name = "namespace", required = false) String namespace,
@@ -177,9 +170,9 @@ public class TermController extends BaseController {
                                .collect(Collectors.toList());
         }
         return parent.getSubTerms() == null ? Collections.emptyList() :
-               parent.getSubTerms().stream()
-                     .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
-                     .collect(Collectors.toList());
+                parent.getSubTerms().stream()
+                      .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
+                      .collect(Collectors.toList());
 
     }
 
@@ -187,9 +180,9 @@ public class TermController extends BaseController {
      * Returns identifier which would be generated by the application for the specified vocabulary name (using the
      * configured namespace).
      *
-     * @param name      Term name
-     * @param vocabularyIdFragment  Vocabulary name
-     * @param namespace Vocabulary namespace
+     * @param name                 Term name
+     * @param vocabularyIdFragment Vocabulary name
+     * @param namespace            Vocabulary namespace
      * @return Generated term identifier for specific vocabulary
      */
     @PreAuthorize("permitAll()")
