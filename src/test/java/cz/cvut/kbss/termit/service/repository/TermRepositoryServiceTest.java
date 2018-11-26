@@ -5,19 +5,15 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.UserAccount;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -220,5 +216,28 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         t.setLabel("");
         assertThrows(ValidationException.class, () -> sut.update(t));
+    }
+
+    @Test
+    void getAssignmentsReturnsTermAssignments() {
+        final Term t = generateTermWithUri();
+        vocabulary.getGlossary().addTerm(t);
+
+        final Resource resource = Generator.generateResourceWithId();
+        resource.setAuthor(user.toUser());
+        resource.setDateCreated(new Date());
+        final TermAssignment ta = new TermAssignment();
+        ta.setTerm(t);
+        ta.setTarget(new Target(resource));
+        transactional(() -> {
+            em.merge(vocabulary);
+            em.persist(resource);
+            em.persist(ta);
+        });
+
+        final List<TermAssignment> result = sut.getAssignments(t);
+        assertEquals(1, result.size());
+        assertEquals(ta.getTerm(), result.get(0).getTerm());
+        assertEquals(ta.getUri(), result.get(0).getUri());
     }
 }

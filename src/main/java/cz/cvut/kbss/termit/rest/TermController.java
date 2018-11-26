@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -173,7 +174,15 @@ public class TermController extends BaseController {
                 parent.getSubTerms().stream()
                       .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
                       .collect(Collectors.toList());
+    }
 
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/assignments", method = RequestMethod.GET,
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<TermAssignment> getAssignments(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
+                                               @PathVariable("termIdFragment") String termIdFragment,
+                                               @RequestParam(name = "namespace", required = false) String namespace) {
+        final Term term = getById(vocabularyIdFragment, termIdFragment, namespace);
+        return termService.getAssignments(term);
     }
 
     /**

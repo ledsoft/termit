@@ -25,7 +25,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
      * @param term Term whose assignments should be returned
      * @return List of matching assignments
      */
-    List<TermAssignment> findAll(Term term) {
+    public List<TermAssignment> findAll(Term term) {
         Objects.requireNonNull(term);
         return em.createNativeQuery("SELECT ?x WHERE {" +
                 "?x a ?type ;" +
