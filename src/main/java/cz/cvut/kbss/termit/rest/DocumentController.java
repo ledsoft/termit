@@ -47,15 +47,10 @@ public class DocumentController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                   JsonLd.MEDIA_TYPE})
     public Document getById(@PathVariable("fragment") String fragment,
                             @RequestParam(name = "namespace", required = false) String namespace) {
-        final URI id;
-        if (namespace != null) {
-            id = idResolver.resolveIdentifier(namespace, fragment);
-        } else {
-            id = idResolver.resolveIdentifier(ConfigParam.NAMESPACE_DOCUMENT, fragment);
-        }
+        final URI id = resolveIdentifier(namespace, fragment, ConfigParam.NAMESPACE_DOCUMENT);
         return documentService.find(id).orElseThrow(() -> NotFoundException.create(Document.class.getSimpleName(), id));
     }
 
