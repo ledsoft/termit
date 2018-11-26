@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -332,5 +334,44 @@ class TermControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms"))
                .andExpect(status().isNotFound());
         verify(termServiceMock, never()).findAll(any(), any());
+    }
+
+    @Test
+    void getAssignmentsReturnsGetsTermAssignmentsFromService() throws Exception {
+        final Term term = Generator.generateTermWithId();
+        term.setLabel(TERM_NAME);
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        when(idResolverMock.buildNamespace(vocabularyUri, Constants.TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(vocabularyUri);
+        when(termServiceMock.find(any())).thenReturn(Optional.of(term));
+        final TermAssignment ta = new TermAssignment();
+        ta.setTerm(term);
+        ta.setTarget(new Target(Generator.generateResourceWithId()));
+        when(termServiceMock.getAssignments(term)).thenReturn(Collections.singletonList(ta));
+
+        final MvcResult mvcResult =
+                mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME + "/assignments")).andExpect(
+                        status().isOk()).andReturn();
+        final List<TermAssignment> result = readValue(mvcResult, new TypeReference<List<TermAssignment>>() {
+        });
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ta.getTarget().getSource(), result.get(0).getTarget().getSource());
+    }
+
+    @Test
+    void getAssignmentsThrowsNotFoundForUnknownTerm() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        when(idResolverMock.buildNamespace(vocabularyUri, Constants.TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(vocabularyUri);
+        when(termServiceMock.find(any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME + "/assignments")).andExpect(
+                status().isNotFound());
+        verify(termServiceMock, never()).getAssignments(any());
     }
 }

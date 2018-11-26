@@ -3,8 +3,10 @@ package cz.cvut.kbss.termit.service.repository;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
+import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +23,16 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     private final TermDao termDao;
 
+    private final TermAssignmentDao termAssignmentDao;
+
     private final VocabularyRepositoryService vocabularyService;
 
-    public TermRepositoryService(Validator validator, TermDao termDao, VocabularyRepositoryService vocabularyService) {
+    public TermRepositoryService(Validator validator, TermDao termDao,
+                                 TermAssignmentDao termAssignmentDao,
+                                 VocabularyRepositoryService vocabularyService) {
         super(validator);
         this.termDao = termDao;
+        this.termAssignmentDao = termAssignmentDao;
         this.vocabularyService = vocabularyService;
     }
 
@@ -102,5 +109,16 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
      */
     public boolean existsInVocabulary(String label, URI vocabularyUri) {
         return termDao.existsInVocabulary(label, vocabularyUri);
+    }
+
+    /**
+     * Retrieves all assignments of the specified term.
+     *
+     * @param instance Term whose assignments should be retrieved
+     * @return List of term assignments (including term occurrences)
+     */
+    public List<TermAssignment> getAssignments(Term instance) {
+        Objects.requireNonNull(instance);
+        return termAssignmentDao.findAll(instance);
     }
 }
