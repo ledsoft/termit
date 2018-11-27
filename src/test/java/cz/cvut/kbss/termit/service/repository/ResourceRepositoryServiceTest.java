@@ -2,10 +2,18 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
@@ -49,6 +59,21 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         return resource;
     }
 
+    private Target generateWholeResourceTarget(final Resource resource) {
+        final Target target = Generator.generateTargetWithId();
+        target.setSource(resource);
+        transactional(() -> em.persist(target));
+        return target;
+    }
+
+    private TermAssignment generateTermAssignment(final Target target, final Term term) {
+        final TermAssignment termAssignment = Generator.generateTermAssignmentWithId();
+        termAssignment.setTarget(target);
+        termAssignment.setTerm(term);
+        transactional(() -> em.persist(termAssignment));
+        return termAssignment;
+    }
+
     @Test
     void findRelatedReturnsEmptyListWhenNoRelatedResourcesAreFoundForResource() {
         final Resource resource = generateResource();
@@ -56,5 +81,76 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final List<Resource> result = sut.findRelated(resource);
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    private Term generateTermWithUriAndPersist() {
+        final Term t = Generator.generateTerm();
+        t.setUri(Generator.generateUri());
+        transactional(() -> em.persist(t));
+        return t;
+    }
+
+    @Test
+    void setTagsForInvalidResource() {
+        assertThrows(NotFoundException.class, () -> {
+            final Term term1 = generateTermWithUriAndPersist();
+            final Term term2 = generateTermWithUriAndPersist();
+
+            final Set<Term> terms = new HashSet<>();
+            terms.add(term1);
+            terms.add(term2);
+            transactional(() -> sut.setTags(URI.create("http://unknown.uri/resource"),
+                terms.stream().map(t -> t.getUri()).collect(Collectors.toSet())));
+        });
+    }
+
+    @Test
+    void setInvalidTagsForValidResource() {
+        assertThrows(NotFoundException.class, () -> {
+            final Resource resource = generateResource();
+            final Set<URI> terms = new HashSet<>();
+            terms.add(URI.create("http://unknown.uri/term1"));
+            terms.add(URI.create("http://unknown.uri/term2"));
+            transactional(() -> sut.setTags(resource.getUri(), terms));
+        });
+    }
+
+    @Test
+    void addTagsToUntaggedResource() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.setTags(resource.getUri(), tags));
+
+        assertEquals(2, sut.findTerms(resource).size());
+        assertEquals(tags, sut.findTerms(resource).stream().map( t -> t.getUri()).collect(Collectors.toSet()));
+    }
+
+    @Test
+    void replaceTagsOfTaggedResource() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.setTags(resource.getUri(), tags));
+
+        final Set<URI> tags2 = new HashSet<>();
+        final URI term2 = generateTermWithUriAndPersist().getUri();
+        final URI term3 = generateTermWithUriAndPersist().getUri();
+        tags2.add(term2);
+        tags2.add(term3);
+        transactional(() -> sut.setTags(resource.getUri(), tags2));
+
+        assertEquals(2, sut.findTerms(resource).size());
+        assertEquals(tags2, sut.findTerms(resource).stream().map( t -> t.getUri()).collect(Collectors.toSet()));
     }
 }

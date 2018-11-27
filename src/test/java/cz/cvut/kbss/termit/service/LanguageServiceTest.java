@@ -16,6 +16,6 @@ class LanguageServiceTest extends BaseServiceTestRunner {
     @Test
     void getTypesForBasicLanguage(){
         List<Term> result = sut.getTypesForLang("en");
-        assertEquals(10,result.size());
+        assertEquals(8,result.size());
     }
 }

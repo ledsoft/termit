@@ -7,6 +7,9 @@ import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+/**
+ * Targets are used to denote which resources are assigned a term.
+ */
 @OWLClass(iri = Vocabulary.s_c_cil)
 public class Target extends AbstractEntity {
 

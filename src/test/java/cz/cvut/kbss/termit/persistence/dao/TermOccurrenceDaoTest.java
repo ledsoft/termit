@@ -91,7 +91,10 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
             }
             map.forEach((t, list) -> {
                 em.persist(t);
-                list.forEach(em::persist);
+                list.forEach(ta -> {
+                    em.persist(ta.getTarget());
+                    em.persist(ta);
+                });
             });
         });
         return map;

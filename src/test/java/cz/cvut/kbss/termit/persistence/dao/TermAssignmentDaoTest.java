@@ -60,11 +60,13 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final TermAssignment ta = new TermAssignment();
             ta.setTerm(term);
-            final Target target = new Target(resource);
-            ta.setTarget(target);
+            ta.setTarget(new Target(resource));
             assignments.add(ta);
         }
-        transactional(() -> assignments.forEach(em::persist));
+        transactional(() -> assignments.forEach(ta -> {
+            em.persist(ta.getTarget());
+            em.persist(ta);
+        }));
         return assignments;
     }
 
@@ -76,5 +78,46 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.persist(term));
 
         assertTrue(sut.findAll(term).isEmpty());
+    }
+
+    private List<TermAssignment> generateAssignmentsForTarget(Term term, Target target) {
+        final List<TermAssignment> assignments = new ArrayList<>();
+        for (int i = 0; i < Generator.randomInt(5, 10); i++) {
+            final TermAssignment ta = new TermAssignment();
+            ta.setTerm(term);
+            ta.setTarget(target);
+            assignments.add(ta);
+        }
+        transactional(() -> assignments.forEach(em::persist));
+        return assignments;
+    }
+
+    @Test
+    void findByTargetReturnsCorrectAssignments() {
+        final Term term = new Term();
+        term.setLabel("TestTerm");
+        term.setUri(Generator.generateUri());
+        transactional(() -> em.persist(term));
+
+        final Target target = new Target();
+        target.setSource(resource);
+        transactional(() -> em.persist(target));
+
+        final List<TermAssignment> expected = generateAssignmentsForTarget(term,target);
+        final List<TermAssignment> result = sut.findByTarget(target);
+        assertEquals(expected.size(), result.size());
+        for (TermAssignment ta : result) {
+            assertTrue(expected.stream().anyMatch(assignment -> assignment.getUri().equals(ta.getUri())));
+        }
+    }
+
+    @Test
+    void findAllByTargetReturnsNoAssignmentsForTargetWithoutAssignment() {
+        final Target target = new Target();
+        target.setSource(resource);
+        target.setUri(Generator.generateUri());
+        transactional(() -> em.persist(target));
+
+        assertTrue(sut.findByTarget(target).isEmpty());
     }
 }

@@ -6,12 +6,15 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -53,5 +56,13 @@ public class ResourceController {
             result.forEach(r -> r.setAuthor(null));
         }
         return result;
+    }
+
+    @RequestMapping(value = "/resource/annotate", method = RequestMethod.POST,
+                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setTags(@RequestParam(name = "iri") URI resourceId,
+                        @RequestParam(name = "tags") Set<URI> termIds) {
+        resourceService.setTags(resourceId,termIds);
     }
 }
