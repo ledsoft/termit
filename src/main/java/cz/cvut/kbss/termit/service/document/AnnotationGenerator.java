@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
+import cz.cvut.kbss.termit.persistence.dao.TargetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +31,19 @@ public class AnnotationGenerator {
 
     private final TermOccurrenceDao termOccurrenceDao;
 
+    private final TargetDao targetDao;
+
     private final DocumentManager documentManager;
 
     private final TermOccurrenceResolvers resolvers;
 
     @Autowired
     public AnnotationGenerator(TermOccurrenceDao termOccurrenceDao,
+                               TargetDao targetDao,
                                DocumentManager documentManager,
                                TermOccurrenceResolvers resolvers) {
         this.termOccurrenceDao = termOccurrenceDao;
+        this.targetDao = targetDao;
         this.documentManager = documentManager;
         this.resolvers = resolvers;
     }
@@ -59,6 +64,7 @@ public class AnnotationGenerator {
         final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
         occurrences.stream().filter(o -> isNew(o, existing)).forEach(o -> {
             o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
+            targetDao.persist(o.getTarget());
             termOccurrenceDao.persist(o);
         });
         saveAnnotatedContent(document, source, occurrenceResolver.getContent());

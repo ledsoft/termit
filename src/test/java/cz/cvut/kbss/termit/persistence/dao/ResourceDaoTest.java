@@ -71,7 +71,10 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         }
         transactional(() -> {
             terms.forEach(em::persist);
-            assignments.forEach(em::persist);
+            assignments.forEach(ta -> {
+                em.persist(ta.getTarget());
+                em.persist(ta);
+            });
         });
         return matching;
     }
@@ -101,6 +104,9 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             ta.setTarget(new Target(res));
             assignments.add(ta);
         }
-        transactional(() -> assignments.forEach(em::persist));
+        transactional(() -> assignments.forEach(ta -> {
+            em.persist(ta.getTarget());
+            em.persist(ta);
+        }));
     }
 }

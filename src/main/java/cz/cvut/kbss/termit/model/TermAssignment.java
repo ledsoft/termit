@@ -14,7 +14,7 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     private Term term;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     Target target;
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)

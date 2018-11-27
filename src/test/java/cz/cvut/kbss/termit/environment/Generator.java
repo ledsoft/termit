@@ -171,4 +171,16 @@ public class Generator {
         resource.setUri(Generator.generateUri());
         return resource;
     }
+
+    public static Target generateTargetWithId() {
+        final Target target = new Target();
+        target.setUri(Generator.generateUri());
+        return target;
+    }
+
+    public static TermAssignment generateTermAssignmentWithId() {
+        final TermAssignment termAssignment = new TermAssignment();
+        termAssignment.setUri(Generator.generateUri());
+        return termAssignment;
+    }
 }

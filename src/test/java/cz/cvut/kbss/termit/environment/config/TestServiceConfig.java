@@ -64,6 +64,6 @@ public class TestServiceConfig {
 
     @Bean
     public ClassPathResource languageSpecification() {
-        return new ClassPathResource("language.ttl");
+        return new ClassPathResource("languages/language.ttl");
     }
 }

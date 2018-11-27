@@ -232,6 +232,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> {
             em.merge(vocabulary);
             em.persist(resource);
+            em.persist(ta.getTarget());
             em.persist(ta);
         });
 

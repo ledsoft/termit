@@ -332,6 +332,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         t.setSelectors(Collections.singleton(selector));
         to.setTarget(t);
         transactional(() -> {
+            em.persist(t);
             em.persist(otherTerm);
             em.persist(to);
         });
