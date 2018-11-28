@@ -73,4 +73,11 @@ tests, yet.
  `UserAccount` is used for security-related functions and supports password. Most parts of the application **should** use
  `User`.
 
-## TODO
+### JMX
+
+A JMX bean called `AppAdminBean` was added to the application. Currently, it supports invalidation of application caches.
+The bean's name is set during Maven build. In case multiple deployments of TermIt are running on the same application server,
+it is necessary to provide different names for it. A Maven property with default value _DEV_ was introduced for it. To specify
+a different value, pass a command line parameter to Maven, so the build call might look as follows:
+
+`mvn clean package -B -P production "-Ddeployment=DEV"`
