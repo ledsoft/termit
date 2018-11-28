@@ -21,6 +21,9 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String name;
 
+    @OWLAnnotationProperty(iri = RDFS.COMMENT)
+    private String comment;
+
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar,
                        cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -51,6 +54,14 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public Glossary getGlossary() {
