@@ -8,6 +8,8 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +29,8 @@ import java.util.List;
 @Qualifier("jena")
 @Service
 public class LanguageServiceJena extends LanguageService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageServiceJena.class);
 
     @Autowired
     public LanguageServiceJena(ClassPathResource languageTtlUrl) {
@@ -62,7 +66,7 @@ public class LanguageServiceJena extends LanguageService {
              });
             return terms;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Unable to retrieve types for language {}.", lang, e);
             return Collections.emptyList();
         }
     }
