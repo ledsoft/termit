@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
  * class.
  */
 @Component
-abstract class TermOccurrenceResolvers {
+interface TermOccurrenceResolvers {
 
     @Lookup
-    abstract HtmlTermOccurrenceResolver htmlTermOccurrenceResolver();
+    HtmlTermOccurrenceResolver htmlTermOccurrenceResolver();
 }
