@@ -1,13 +1,10 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
-import cz.cvut.kbss.termit.dto.LabelSearchResult;
-import cz.cvut.kbss.termit.util.Vocabulary;
+import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,24 +26,30 @@ public class SearchDao {
      * @param searchString The string to search by
      * @return List of matching results
      */
-    public List<LabelSearchResult> searchByLabel(String searchString) {
+    public List<FullTextSearchResult> fullTextSearch(String searchString) {
         Objects.requireNonNull(searchString);
-        return (List<LabelSearchResult>) em.createNativeQuery("SELECT * WHERE {" +
-                "{ ?x a ?term ;" +
-                "?hasLabel ?label ;" +
-                "?inVocabulary ?vocabularyUri ." +
-                "BIND (?term as ?type) ." +
-                "} UNION {" +
-                "?x a ?vocabulary ;" +
-                "?hasLabel ?label ." +
-                "BIND (?vocabulary as ?type) . }" +
-                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "} ORDER BY ?label", "LabelSearchResult")
-                                           .setParameter("hasLabel", URI.create(RDFS.LABEL))
-                                           .setParameter("inVocabulary",
-                                                   URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
-                                           .setParameter("term", URI.create(Vocabulary.s_c_term))
-                                           .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
+        return (List<FullTextSearchResult>) em.createNativeQuery("PREFIX : <http://www.ontotext.com/connectors/lucene#>\n" +
+                "PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX pdp:<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>\n" +
+                "\n" +
+                "SELECT DISTINCT ?entity ?label ?snippetText ?snippetField ?score ?type ?vocabularyURI {\n" +
+                "  ?search1 a inst:czech_index ;\n" +
+                "      :query ?searchString ;\n" +
+                "      :entities ?entity .\n" +
+                "  ?entity a ?type .\n" +
+                "  ?entity rdfs:label ?label . \n" +
+                "  ?entity :score ?score .\n" +
+                "  ?entity :snippets _:s .\n" +
+                "        _:s :snippetText ?snippetText .\n" +
+                "    _:s :snippetField ?snippetField .\n" +
+                "    OPTIONAL {\n" +
+                "        ?entity pdp:je-pojmem-ze-slovniku ?vocabularyURI .\n" +
+                "    }\n" +
+                "    FILTER (?type = pdp:term || ?type = pdp:slovnik)\n" +
+                "          \n" +
+                "}\n" +
+                "ORDER BY desc(?score)", "FullTextSearchResult")
                                            .setParameter("searchString", searchString, null).getResultList();
     }
 }

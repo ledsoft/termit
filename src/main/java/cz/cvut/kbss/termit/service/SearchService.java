@@ -1,6 +1,6 @@
 package cz.cvut.kbss.termit.service;
 
-import cz.cvut.kbss.termit.dto.LabelSearchResult;
+import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.persistence.dao.SearchDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class SearchService {
      * @param searchString String to search by
      * @return General representation of matching resources
      */
-    public List<LabelSearchResult> searchByLabel(String searchString) {
-        return searchDao.searchByLabel(searchString);
+    public List<FullTextSearchResult> searchByLabel(String searchString) {
+        return searchDao.fullTextSearch(searchString);
     }
 }
