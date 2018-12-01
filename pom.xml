@@ -317,6 +317,20 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- Profiles for storages. Important for correct full text search functionality -->
+        <profile>
+            <id>rdf4j</id>
+            <properties>
+                <profile.name>rdf4j</profile.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>graphdb</id>
+            <properties>
+                <profile.name>graphdb</profile.name>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
@@ -446,6 +460,32 @@
                             <sources>
                                 <source>src/main/generated-sources</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>profile/${profile.name}</directory>
+                                    <includes>
+                                        <include>query/*.rq</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

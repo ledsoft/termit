@@ -1,0 +1,24 @@
+##
+# Full text search query for RDF4J with a Lucene SAIL.
+##
+
+PREFIX :<http://www.openrdf.org/contrib/lucenesail#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetField ?score WHERE {
+     ?search :query ?searchString;
+            :score ?score;
+            :snippet ?snippetField .
+  
+    ?entity :matches ?search ;
+            a ?type ;
+  	        rdfs:label ?label .
+  
+  OPTIONAL {
+        ?entity ?inVocabulary ?vocabularyUri .
+    }
+    FILTER (?type = ?term || ?type = ?vocabulary)
+  
+}
+ORDER BY desc(?score)

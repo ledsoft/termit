@@ -72,6 +72,13 @@ public class Constants {
      */
     public static final String TERM_NAMESPACE_SEPARATOR = "/pojem";
 
+    /**
+     * Path to directory containing queries used by the system.
+     * <p>
+     * The path should be relative to the classpath, so that queries from it can be loaded using {@link ClassLoader#getResourceAsStream(String)}.
+     */
+    public static final String QUERY_DIRECTORY = "query";
+
     private Constants() {
         throw new AssertionError();
     }

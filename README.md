@@ -81,3 +81,15 @@ it is necessary to provide different names for it. A Maven property with default
 a different value, pass a command line parameter to Maven, so the build call might look as follows:
 
 `mvn clean package -B -P production "-Ddeployment=DEV"`
+
+### Fulltext Search
+
+Fulltext search currently supports multiple types of implementation:
+
+* Simple substring matching on term and vocabulary label _(default)_
+* RDF4J with Lucene SAIL
+* GraphDB with Lucene connector using czech analyzer
+
+Each implementation has its own search query which is loaded and used by `SearchDao`. In order for the more advanced implementations
+for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
+artifact during build. If none of the profiles is selected, the default search is used.

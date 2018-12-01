@@ -7,9 +7,7 @@ import cz.cvut.kbss.termit.model.*;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,8 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * This class tests the default full text search functionality.
+ * <p>
+ * Repository-tailored queries stored in corresponding profiles should be used in production.
+ */
 class SearchDaoTest extends BaseDaoTestRunner {
 
     @Autowired
@@ -38,8 +42,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled
-    void searchByLabelFindsTermsWithMatchingLabel() {
+    void defaultFullTextSearchFindsTermsWithMatchingLabel() {
         final Vocabulary vocabulary = generateTerms();
         transactional(() -> {
             em.persist(vocabulary);
@@ -86,8 +89,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled
-    void searchByLabelFindsVocabulariesWithMatchingLabel() {
+    void defaultFullTextSearchFindsVocabulariesWithMatchingLabel() {
         final List<Vocabulary> vocabularies = generateVocabularies();
         transactional(() -> vocabularies.forEach(em::persist));
         final Collection<Vocabulary> matching = vocabularies.stream().filter(v -> v.getName().contains("Matching"))
@@ -116,8 +118,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled
-    void searchByLabelFindsVocabulariesAndTermsWithMatchingLabel() {
+    void defaultFullTextSearchFindsVocabulariesAndTermsWithMatchingLabel() {
         final Vocabulary terms = generateTerms();
         final List<Vocabulary> vocabularies = generateVocabularies();
         transactional(() -> {
