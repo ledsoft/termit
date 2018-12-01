@@ -6,8 +6,11 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +39,9 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private ResourceRepositoryService resourceServiceMock;
+
+    @Mock
+    private IdentifierResolver identifierResolverMock;
 
     @Mock
     private SecurityUtils securityUtilsMock;
@@ -148,5 +155,53 @@ class ResourceControllerTest extends BaseControllerTestRunner {
             assertNull(r.getAuthor());
             assertNotNull(r.getDateCreated());
         });
+    }
+
+    @Test
+    void getResourceRetrievesResourceByDefaultNamespaceAndSpecifiedNormalizedName() throws Exception {
+        final Resource resource = Generator.generateResource();
+        final String namespace = Vocabulary.ONTOLOGY_IRI_termit;
+        final String name = "test-resource";
+        resource.setName(name);
+        final URI resourceId = URI.create(namespace + "/" + name);
+        resource.setUri(resourceId);
+        when(identifierResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, name)).thenReturn(resourceId);
+        when(resourceServiceMock.find(resourceId)).thenReturn(Optional.of(resource));
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + name)).andExpect(status().isOk()).andReturn();
+        final Resource result = readValue(mvcResult, Resource.class);
+        assertEquals(resource, result);
+        verify(resourceServiceMock).find(resourceId);
+        verify(identifierResolverMock).resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, name);
+    }
+
+    @Test
+    void getResourceUsesSpecifiedNamespaceForResourceRetrieval() throws Exception {
+        final Resource resource = Generator.generateResource();
+        final String namespace = Vocabulary.ONTOLOGY_IRI_termit;
+        final String name = "test-resource";
+        resource.setName(name);
+        final URI resourceId = URI.create(namespace + "/" + name);
+        resource.setUri(resourceId);
+        when(identifierResolverMock.resolveIdentifier(namespace, name)).thenReturn(resourceId);
+        when(resourceServiceMock.find(resourceId)).thenReturn(Optional.of(resource));
+        final MvcResult mvcResult =
+                mockMvc.perform(get(PATH + "/" + name).param("namespace", namespace)).andExpect(status().isOk())
+                       .andReturn();
+        final Resource result = readValue(mvcResult, Resource.class);
+        assertEquals(resource, result);
+        verify(resourceServiceMock).find(resourceId);
+        verify(identifierResolverMock).resolveIdentifier(namespace, name);
+    }
+
+    @Test
+    void getResourceThrowsNotFoundExceptionForUnknownResourceIdentifier() throws Exception {
+        final Resource resource = Generator.generateResource();
+        final String namespace = Vocabulary.ONTOLOGY_IRI_termit;
+        final String name = "test-resource";
+        resource.setName(name);
+        final URI resourceId = URI.create(namespace + "/" + name);
+        resource.setUri(resourceId);
+        when(identifierResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, name)).thenReturn(resourceId);
+        mockMvc.perform(get(PATH + "/" + name)).andExpect(status().isNotFound());
     }
 }
