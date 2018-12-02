@@ -1,20 +1,25 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.util.HasTypes;
+import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @OWLClass(iri = Vocabulary.s_c_term)
 public class Term implements Serializable, HasTypes {
+
+    /**
+     * Names of columns used in term export.
+     */
+    public static final String[] EXPORT_COLUMNS = {"IRI", "Label", "Comment", "Types", "Sources", "SubTerms"};
 
     @Id
     private URI uri;
@@ -115,6 +120,44 @@ public class Term implements Serializable, HasTypes {
 
     public void setProperties(Map<String, Set<String>> properties) {
         this.properties = properties;
+    }
+
+    /**
+     * Generates a CSV line representing this term.
+     * <p>
+     * The line contains:
+     * <ul>
+     * <li>IRI</li>
+     * <li>Label</li>
+     * <li>Comment</li>
+     * <li>Types</li>
+     * <li>Sources</li>
+     * <li>Subterm IRIs</li>
+     * </ul>
+     *
+     * @return CSV representation of this term
+     */
+    public String toCsv() {
+        final StringBuilder sb = new StringBuilder(uri.toString());
+        sb.append(',').append(CsvUtils.sanitizeString(label));
+        sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
+        sb.append(',');
+        if (types != null && !types.isEmpty()) {
+            sb.append(exportCollection(types));
+        }
+        sb.append(',');
+        if (sources != null && !sources.isEmpty()) {
+            sb.append(exportCollection(sources));
+        }
+        sb.append(',');
+        if (subTerms != null && !subTerms.isEmpty()) {
+            sb.append(exportCollection(subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+        }
+        return sb.toString();
+    }
+
+    private String exportCollection(Collection<String> col) {
+        return CsvUtils.sanitizeString("[" + String.join(";", col) + "]");
     }
 
     @Override
