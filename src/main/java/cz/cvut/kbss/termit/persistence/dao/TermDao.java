@@ -54,7 +54,9 @@ public class TermDao extends BaseDao<Term> {
      * @param offset     number of terms to be skipped
      * @param vocabulary Vocabulary whose terms should be returned
      * @return Matching terms, ordered by their label
+     * @deprecated Should be replaced with {@link #findAll(Pageable, Vocabulary)}
      */
+    @Deprecated
     public List<Term> findAll(int limit, int offset, Vocabulary vocabulary) {
         return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
