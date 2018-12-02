@@ -3,8 +3,8 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -13,31 +13,34 @@ import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Vocabulary;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
-
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -188,10 +191,8 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
         when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
-        final java.io.File content = Files.createTempFile("document", ".html").toFile();
-        content.deleteOnExit();
         final String data = "<html><head><title>Test</title></head><body>test</body></html>";
-        Files.write(content.toPath(), data.getBytes());
+        final java.io.File content = createTemporaryHtmlFile(data);
         when(documentManagerMock.getAsResource(doc, getFile(doc, FILE_NAMES[0])))
                 .thenReturn(new FileSystemResource(content));
         when(documentManagerMock.getMediaType(doc, getFile(doc, FILE_NAMES[0])))
@@ -221,6 +222,29 @@ class DocumentControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
+    void updateFileContentReturnsNoContentStatus() throws Exception {
+        final Document doc = generateTestData();
+        final File file = doc.getFile(FILE_NAMES[0]).orElse(null);
+        when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
+            .thenReturn(doc.getUri());
+        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+
+        final java.io.File attachment = generateHtmlFile();
+        final MockMultipartFile upload = new MockMultipartFile(
+            "file",
+            FILE_NAMES[0],
+            MediaType.TEXT_HTML_VALUE,
+            Files.readAllBytes(attachment.toPath())
+        );
+        mockMvc.perform(
+            multipart(PATH + "/" + NORMALIZED_DOC_NAME + "/content")
+                .file(upload).param("file", FILE_NAMES[0])
+        ).andExpect(status().isNoContent());
+        verify(documentManagerMock).createBackup(eq(doc), eq(file));
+        verify(documentManagerMock).saveFileContent(eq(doc), eq(file), notNull());
+    }
+
+    @Test
     void getAllReturnsDocumentsFromService() throws Exception {
         final List<Document> documents = IntStream.range(0, 10).mapToObj(i -> {
             final Document doc = new Document();
@@ -235,5 +259,17 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         assertNotNull(result);
         assertEquals(documents, result);
         verify(documentServiceMock).findAll();
+    }
+
+    private java.io.File createTemporaryHtmlFile(String data) throws Exception {
+        final java.io.File file = Files.createTempFile("document", ".html").toFile();
+        file.deleteOnExit();
+        Files.write(file.toPath(), data.getBytes());
+        return file;
+    }
+
+    private java.io.File generateHtmlFile() throws Exception {
+        final String data = "<html><head><title>Test</title></head><body>test</body></html>";
+        return createTemporaryHtmlFile(data);
     }
 }
