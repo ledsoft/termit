@@ -11,15 +11,20 @@ import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/documents")
@@ -69,6 +74,22 @@ public class DocumentController extends BaseController {
                                  .body(resource);
         } catch (IOException e) {
             throw new TermItException("Unable to load file " + file, e);
+        }
+    }
+
+    @RequestMapping(value = "/{fragment}/content", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateFileContent(@PathVariable("fragment") String fragment,
+                                  @RequestParam(name = "namespace", required = false) String namespace,
+                                  @RequestParam(name = "file") MultipartFile attachment) {
+        final Document document = getById(fragment, namespace);
+        String fileName = attachment.getOriginalFilename();
+        final File file = resolveFileFromName(document, fileName);
+        try {
+            documentManager.createBackup(document, file);
+            documentManager.saveFileContent(document, file, attachment.getInputStream());
+        } catch (IOException e) {
+            throw new TermItException("Unable to read file (fileName=\"" + fileName + "\") content from request", e);
         }
     }
 
