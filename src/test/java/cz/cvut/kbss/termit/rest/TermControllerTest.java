@@ -9,15 +9,20 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.service.export.VocabularyExporter;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
+import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -47,6 +52,12 @@ class TermControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private TermRepositoryService termServiceMock;
+
+    @Mock
+    private VocabularyRepositoryService vocabularyServiceMock;
+
+    @Mock
+    private VocabularyExporter exporterMock;
 
     @InjectMocks
     private TermController sut;
@@ -373,5 +384,24 @@ class TermControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME + "/assignments")).andExpect(
                 status().isNotFound());
         verify(termServiceMock, never()).getAssignments(any());
+    }
+
+    @Test
+    void getAllExportsTermsToCsvWhenAcceptMediaTypeIsSetToCsv() throws Exception {
+        final String vocabularyUri = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+        final String namespace = vocabularyUri + Constants.TERM_NAMESPACE_SEPARATOR + "/";
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(vocabularyUri));
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(URI.create(vocabularyUri));
+        when(idResolverMock.buildNamespace(eq(vocabularyUri), any())).thenReturn(namespace);
+        when(vocabularyServiceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
+        final String content = String.join(",", Term.EXPORT_COLUMNS);
+        final Resource export = new ByteArrayResource(content.getBytes());
+        when(exporterMock.exportVocabularyGlossary(vocabulary)).thenReturn(export);
+
+        final MvcResult mvcResult =
+                mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(CsvUtils.MEDIA_TYPE)).andReturn();
+        assertEquals(content, mvcResult.getResponse().getContentAsString());
     }
 }

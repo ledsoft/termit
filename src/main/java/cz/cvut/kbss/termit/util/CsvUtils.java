@@ -5,6 +5,11 @@ package cz.cvut.kbss.termit.util;
  */
 public class CsvUtils {
 
+    /**
+     * CSV media type.
+     */
+    public static final String MEDIA_TYPE = "text/csv";
+
     private CsvUtils() {
         throw new AssertionError();
     }
