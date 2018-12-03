@@ -3,11 +3,12 @@ package cz.cvut.kbss.termit.security.model;
 import cz.cvut.kbss.termit.model.UserAccount;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class UserDetails implements org.springframework.security.core.userdetails.UserDetails {
+public class TermItUserDetails implements UserDetails {
 
     /**
      * Default authority held by all registered users of the system.
@@ -18,13 +19,13 @@ public class UserDetails implements org.springframework.security.core.userdetail
 
     private final Set<GrantedAuthority> authorities;
 
-    public UserDetails(UserAccount user) {
+    public TermItUserDetails(UserAccount user) {
         Objects.requireNonNull(user);
         this.user = user;
         this.authorities = resolveAuthorities(user);
     }
 
-    public UserDetails(UserAccount user, Collection<GrantedAuthority> authorities) {
+    public TermItUserDetails(UserAccount user, Collection<GrantedAuthority> authorities) {
         Objects.requireNonNull(user);
         Objects.requireNonNull(authorities);
         this.user = user;
@@ -87,10 +88,10 @@ public class UserDetails implements org.springframework.security.core.userdetail
         if (this == o) {
             return true;
         }
-        if (!(o instanceof UserDetails)) {
+        if (!(o instanceof TermItUserDetails)) {
             return false;
         }
-        UserDetails that = (UserDetails) o;
+        TermItUserDetails that = (TermItUserDetails) o;
         return Objects.equals(user, that.user) && Objects.equals(authorities, that.authorities);
     }
 

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.exception.JwtException;
 import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,12 +30,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final SecurityUtils securityUtils;
 
-    private final UserDetailsService userDetailsService;
+    private final TermItUserDetailsService userDetailsService;
 
     private final ObjectMapper objectMapper;
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                                  SecurityUtils securityUtils, UserDetailsService userDetailsService,
+                                  SecurityUtils securityUtils, TermItUserDetailsService userDetailsService,
                                   ObjectMapper objectMapper) {
         super(authenticationManager);
         this.jwtUtils = jwtUtils;
@@ -54,8 +54,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
         final String authToken = authHeader.substring(SecurityConstants.JWT_TOKEN_PREFIX.length());
         try {
-            final UserDetails userDetails = jwtUtils.extractUserInfo(authToken);
-            final UserDetails existingDetails = userDetailsService.loadUserByUsername(userDetails.getUsername());
+            final TermItUserDetails userDetails = jwtUtils.extractUserInfo(authToken);
+            final TermItUserDetails existingDetails = userDetailsService.loadUserByUsername(userDetails.getUsername());
             SecurityUtils.verifyAccountStatus(existingDetails.getUser());
             securityUtils.setCurrentUser(existingDetails);
             refreshToken(authToken, response);

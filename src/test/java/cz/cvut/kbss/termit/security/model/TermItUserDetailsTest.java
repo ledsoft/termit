@@ -13,12 +13,12 @@ import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class UserDetailsTest {
+class TermItUserDetailsTest {
 
     @Test
     void constructorInitializesDefaultUserAuthority() {
         final UserAccount user = generateAccount();
-        final UserDetails result = new UserDetails(user);
+        final TermItUserDetails result = new TermItUserDetails(user);
         assertEquals(1, result.getAuthorities().size());
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));
     }
@@ -26,7 +26,7 @@ class UserDetailsTest {
     @Test
     void authorityBasedConstructorAddsDefaultAuthority() {
         final Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_MANAGER"));
-        final UserDetails result = new UserDetails(generateAccount(), authorities);
+        final TermItUserDetails result = new TermItUserDetails(generateAccount(), authorities);
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));
     }
 
@@ -34,7 +34,7 @@ class UserDetailsTest {
     void constructorResolvesAuthoritiesFromUserTypes() {
         final UserAccount user = generateAccount();
         user.addType(Vocabulary.s_c_administrator_termitu);
-        final UserDetails result = new UserDetails(user);
+        final TermItUserDetails result = new TermItUserDetails(user);
         assertEquals(2, result.getAuthorities().size());
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.ADMIN.getName())));
@@ -45,7 +45,7 @@ class UserDetailsTest {
         final Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_MANAGER"));
         final UserAccount user = generateAccount();
         user.addType(Vocabulary.s_c_administrator_termitu);
-        final UserDetails result = new UserDetails(user, authorities);
+        final TermItUserDetails result = new TermItUserDetails(user, authorities);
         assertEquals(3, result.getAuthorities().size());
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.USER.getName())));
         assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(UserRole.ADMIN.getName())));

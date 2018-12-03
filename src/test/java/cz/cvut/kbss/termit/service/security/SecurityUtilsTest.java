@@ -5,7 +5,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +54,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Test
     void getCurrentUserDetailsReturnsUserDetailsOfCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final Optional<UserDetails> result = sut.getCurrentUserDetails();
+        final Optional<TermItUserDetails> result = sut.getCurrentUserDetails();
         assertTrue(result.isPresent());
         assertTrue(result.get().isEnabled());
         assertEquals(user, result.get().getUser());

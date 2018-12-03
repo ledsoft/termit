@@ -149,7 +149,7 @@ public class Term implements Serializable, HasTypes {
         return sb.toString();
     }
 
-    private String exportCollection(Collection<String> col) {
+    private static String exportCollection(Collection<String> col) {
         return CsvUtils.sanitizeString("[" + String.join(";", col) + "]");
     }
 

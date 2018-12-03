@@ -2,7 +2,7 @@ package cz.cvut.kbss.termit.service.security;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.model.UserAccount;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +11,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserDetailsServiceTest extends BaseServiceTestRunner {
+class TermItUserDetailsServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private EntityManager em;
 
     @Autowired
-    private UserDetailsService sut;
+    private TermItUserDetailsService sut;
 
     @Test
     void loadUserByUsernameReturnsUserDetailsForLoadedUser() {
         final UserAccount user = generateAccount();
         transactional(() -> em.persist(user));
 
-        final UserDetails result = sut.loadUserByUsername(user.getUsername());
+        final TermItUserDetails result = sut.loadUserByUsername(user.getUsername());
         assertNotNull(result);
         assertEquals(user, result.getUser());
     }

@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +78,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
         assertNull(context.getAuthentication());
         final Authentication result = provider.authenticate(auth);
         assertNotNull(SecurityContextHolder.getContext());
-        final UserDetails details = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        final TermItUserDetails details = (TermItUserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         assertEquals(user.getUsername(), details.getUsername());
         assertTrue(result.isAuthenticated());
     }
