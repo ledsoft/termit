@@ -2,9 +2,13 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -85,5 +89,55 @@ class TermTest {
         final String subTerms = items[5];
         assertTrue(subTerms.matches("\\[.+;.+]"));
         term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
+    }
+
+    @Test
+    void toExcelExportsTermToExcelRw() {
+        final Term term = Generator.generateTermWithId();
+        term.setTypes(Collections.singleton(Vocabulary.s_c_object));
+        term.setSources(new LinkedHashSet<>(
+                Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
+        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+        final HSSFWorkbook wb = new HSSFWorkbook();
+        final HSSFSheet sheet = wb.createSheet("test");
+        final HSSFRow row = sheet.createRow(0);
+        term.toExcel(row);
+        assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
+        assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
+        assertEquals(term.getComment(), row.getCell(2).getStringCellValue());
+        assertEquals(term.getTypes().iterator().next(), row.getCell(3).getStringCellValue());
+        assertTrue(row.getCell(4).getStringCellValue().matches(".+;.+"));
+        term.getSources().forEach(s -> assertTrue(row.getCell(4).getStringCellValue().contains(s)));
+        assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
+        term.getSubTerms().forEach(st -> assertTrue(row.getCell(5).getStringCellValue().contains(st.toString())));
+    }
+
+    @Test
+    void toExcelHandlesEmptyOptionalAttributeValues() {
+        final Term term = Generator.generateTermWithId();
+        term.setComment(null);
+        final HSSFWorkbook wb = new HSSFWorkbook();
+        final HSSFSheet sheet = wb.createSheet("test");
+        final HSSFRow row = sheet.createRow(0);
+        term.toExcel(row);
+        assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
+        assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
+        assertEquals(2, row.getLastCellNum());
+    }
+
+    @Test
+    void toExcelHandlesSkippingEmptyColumns() {
+        final Term term = Generator.generateTermWithId();
+        term.setComment(null);
+        term.setSources(new LinkedHashSet<>(
+                Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
+        final HSSFWorkbook wb = new HSSFWorkbook();
+        final HSSFSheet sheet = wb.createSheet("test");
+        final HSSFRow row = sheet.createRow(0);
+        term.toExcel(row);
+        assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
+        assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
+        assertTrue(row.getCell(4).getStringCellValue().matches(".+;.+"));
+        term.getSources().forEach(s -> assertTrue(row.getCell(4).getStringCellValue().contains(s)));
     }
 }
