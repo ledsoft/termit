@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 /**
  * Allows to export a vocabulary and assets related to it.
  */
+@FunctionalInterface
 public interface VocabularyExporter {
 
     /**
