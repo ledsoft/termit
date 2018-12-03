@@ -38,11 +38,10 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
     @Override
     public Resource exportVocabularyGlossary(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final XSSFWorkbook wb = new XSSFWorkbook();
-        final Sheet sheet = wb.createSheet(SHEET_NAME);
-        generateHeaderRow(sheet);
-        generateTermRows(termService.findAll(vocabulary.getUri(), Integer.MAX_VALUE, 0), sheet);
-        try {
+        try (final XSSFWorkbook wb = new XSSFWorkbook()) {
+            final Sheet sheet = wb.createSheet(SHEET_NAME);
+            generateHeaderRow(sheet);
+            generateTermRows(termService.findAll(vocabulary.getUri(), Integer.MAX_VALUE, 0), sheet);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             wb.write(bos);
             return new ByteArrayResource(bos.toByteArray());
@@ -51,7 +50,7 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
         }
     }
 
-    private void generateHeaderRow(Sheet sheet) {
+    private static void generateHeaderRow(Sheet sheet) {
         final Row row = sheet.createRow(0);
         for (int i = 0; i < Term.EXPORT_COLUMNS.length; i++) {
             row.createCell(i).setCellValue(Term.EXPORT_COLUMNS[i]);

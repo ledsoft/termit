@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.dto;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.util.Vocabulary;
-import org.eclipse.rdf4j.query.algebra.Str;
 
 import java.io.Serializable;
 import java.net.URI;

@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.security.JwtAuthenticationFilter;
 import cz.cvut.kbss.termit.security.JwtAuthorizationFilter;
 import cz.cvut.kbss.termit.security.JwtUtils;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class TestRestSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationProvider authenticationProvider;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private TermItUserDetailsService userDetailsService;
 
     @Autowired
     private JwtUtils jwtUtils;

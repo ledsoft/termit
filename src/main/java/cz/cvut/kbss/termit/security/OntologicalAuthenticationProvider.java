@@ -4,9 +4,9 @@ import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +27,14 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
 
     private final SecurityUtils securityUtils;
 
-    private final UserDetailsService userDetailsService;
+    private final TermItUserDetailsService userDetailsService;
 
     private final PasswordEncoder passwordEncoder;
 
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public OntologicalAuthenticationProvider(SecurityUtils securityUtils, UserDetailsService userDetailsService,
+    public OntologicalAuthenticationProvider(SecurityUtils securityUtils, TermItUserDetailsService userDetailsService,
                                              PasswordEncoder passwordEncoder) {
         this.securityUtils = securityUtils;
         this.userDetailsService = userDetailsService;
@@ -47,7 +47,7 @@ public class OntologicalAuthenticationProvider implements AuthenticationProvider
         verifyUsernameNotEmpty(username);
         LOG.debug("Authenticating user {}", username);
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        final TermItUserDetails userDetails = userDetailsService.loadUserByUsername(username);
         SecurityUtils.verifyAccountStatus(userDetails.getUser());
         final String password = (String) authentication.getCredentials();
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {

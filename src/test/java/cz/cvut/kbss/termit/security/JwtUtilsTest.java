@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.exception.JwtException;
 import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.UserAccountTest;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import io.jsonwebtoken.Claims;
@@ -57,12 +57,12 @@ class JwtUtilsTest {
 
     @Test
     void generateTokenCreatesJwtForUserWithoutAuthorities() {
-        final UserDetails userDetails = new UserDetails(user);
+        final TermItUserDetails userDetails = new TermItUserDetails(user);
         final String jwtToken = sut.generateToken(userDetails);
         verifyJWToken(jwtToken, userDetails);
     }
 
-    private void verifyJWToken(String token, UserDetails userDetails) {
+    private void verifyJWToken(String token, TermItUserDetails userDetails) {
         final Claims claims = Jwts.parser().setSigningKey(config.get(ConfigParam.JWT_SECRET_KEY)).parseClaimsJws(token)
                                   .getBody();
         assertEquals(user.getUsername(), claims.getSubject());
@@ -82,7 +82,7 @@ class JwtUtilsTest {
     void generateTokenCreatesJwtForUserWithAuthorities() {
         final Set<GrantedAuthority> authorities = ROLES.stream().map(SimpleGrantedAuthority::new)
                                                        .collect(Collectors.toSet());
-        final UserDetails userDetails = new UserDetails(user, authorities);
+        final TermItUserDetails userDetails = new TermItUserDetails(user, authorities);
         final String jwtToken = sut.generateToken(userDetails);
         verifyJWToken(jwtToken, userDetails);
     }
@@ -96,10 +96,10 @@ class JwtUtilsTest {
                                          new Date(System.currentTimeMillis() + SecurityConstants.SESSION_TIMEOUT))
                                  .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
 
-        final UserDetails result = sut.extractUserInfo(token);
+        final TermItUserDetails result = sut.extractUserInfo(token);
         assertEquals(user, result.getUser());
         assertEquals(1, result.getAuthorities().size());
-        assertTrue(result.getAuthorities().contains(UserDetails.DEFAULT_AUTHORITY));
+        assertTrue(result.getAuthorities().contains(TermItUserDetails.DEFAULT_AUTHORITY));
     }
 
     @Test
@@ -113,7 +113,7 @@ class JwtUtilsTest {
                                          String.join(SecurityConstants.JWT_ROLE_DELIMITER, ROLES))
                                  .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
 
-        final UserDetails result = sut.extractUserInfo(token);
+        final TermItUserDetails result = sut.extractUserInfo(token);
         ROLES.forEach(r -> assertTrue(result.getAuthorities().contains(new SimpleGrantedAuthority(r))));
     }
 

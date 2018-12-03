@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.security.*;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final SecurityUtils securityUtils;
 
-    private final UserDetailsService userDetailsService;
+    private final TermItUserDetailsService userDetailsService;
 
     private final ObjectMapper objectMapper;
 
@@ -52,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                           AuthenticationSuccess authenticationSuccessHandler,
                           AuthenticationFailureHandler authenticationFailureHandler,
                           JwtUtils jwtUtils, SecurityUtils securityUtils,
-                          UserDetailsService userDetailsService,
+                          TermItUserDetailsService userDetailsService,
                           ObjectMapper objectMapper) {
         this.authenticationProvider = authenticationProvider;
         this.authenticationEntryPoint = authenticationEntryPoint;

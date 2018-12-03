@@ -4,7 +4,7 @@ import cz.cvut.kbss.termit.exception.IncompleteJwtException;
 import cz.cvut.kbss.termit.exception.JwtException;
 import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.model.UserAccount;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import io.jsonwebtoken.*;
@@ -33,7 +33,7 @@ public class JwtUtils {
      * @param userDetails User info
      * @return Generated JWT has
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(TermItUserDetails userDetails) {
         final Date issued = new Date();
         return Jwts.builder().setSubject(userDetails.getUsername())
                    .setId(userDetails.getUser().getUri().toString())
@@ -57,7 +57,7 @@ public class JwtUtils {
      * @param token JWT to read
      * @return User info retrieved from the specified token
      */
-    public UserDetails extractUserInfo(String token) {
+    public TermItUserDetails extractUserInfo(String token) {
         Objects.requireNonNull(token);
         try {
             final Claims claims = getClaimsFromToken(token);
@@ -66,7 +66,7 @@ public class JwtUtils {
             user.setUri(URI.create(claims.getId()));
             user.setUsername(claims.getSubject());
             final String roles = claims.get(SecurityConstants.JWT_ROLE_CLAIM, String.class);
-            return new UserDetails(user, mapClaimToAuthorities(roles));
+            return new TermItUserDetails(user, mapClaimToAuthorities(roles));
         } catch (IllegalArgumentException e) {
             throw new JwtException("Unable to parse user identifier from the specified JWT.", e);
         }

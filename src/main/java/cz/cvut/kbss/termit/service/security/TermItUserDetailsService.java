@@ -1,24 +1,25 @@
 package cz.cvut.kbss.termit.service.security;
 
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class TermItUserDetailsService implements UserDetailsService {
 
     private final UserAccountDao userAccountDao;
 
     @Autowired
-    public UserDetailsService(UserAccountDao userAccountDao) {
+    public TermItUserDetailsService(UserAccountDao userAccountDao) {
         this.userAccountDao = userAccountDao;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        return new UserDetails(userAccountDao.findByUsername(username).orElseThrow(
+    public TermItUserDetails loadUserByUsername(String username) {
+        return new TermItUserDetails(userAccountDao.findByUsername(username).orElseThrow(
                 () -> new UsernameNotFoundException("User with username " + username + " not found.")));
     }
 }
