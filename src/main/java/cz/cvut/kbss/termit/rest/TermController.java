@@ -8,17 +8,17 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.export.VocabularyExporter;
+import cz.cvut.kbss.termit.service.export.VocabularyExporters;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.Constants.Excel;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,6 +32,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,17 +43,17 @@ public class TermController extends BaseController {
 
     private final TermRepositoryService termService;
 
-    private final VocabularyExporter termExporter;
+    private final VocabularyExporters exporters;
 
     private final VocabularyRepositoryService vocabularyService;
 
     @Autowired
     public TermController(IdentifierResolver idResolver, Configuration config,
-                          TermRepositoryService termService, @Qualifier("csv") VocabularyExporter termExporter,
+                          TermRepositoryService termService, VocabularyExporters exporters,
                           VocabularyRepositoryService vocabularyService) {
         super(idResolver, config);
         this.termService = termService;
-        this.termExporter = termExporter;
+        this.exporters = exporters;
         this.vocabularyService = vocabularyService;
     }
 
@@ -74,7 +75,10 @@ public class TermController extends BaseController {
      * @return List of terms of the specific vocabulary
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE, CsvUtils.MEDIA_TYPE})
+            produces = {MediaType.APPLICATION_JSON_VALUE,
+                    JsonLd.MEDIA_TYPE,
+                    CsvUtils.MEDIA_TYPE,
+                    Excel.MEDIA_TYPE})
     public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
                                  @RequestParam(name = "namespace", required = false) String namespace,
                                  @RequestParam(name = "limit", required = false) Integer limit,
@@ -82,8 +86,9 @@ public class TermController extends BaseController {
                                  @RequestParam(name = "searchString", required = false) String searchString,
                                  @RequestHeader(value = "Accept", required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
-        if (Objects.equals(CsvUtils.MEDIA_TYPE, acceptType)) {
-            return exportToCsv(vocabularyUri, vocabularyIdFragment);
+        final Optional<ResponseEntity> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
+        if (export.isPresent()) {
+            return export.get();
         }
         // TODO: Change the limit/offset strategy to regular paging API (pageNo, page size)
         if (limit == null) {
@@ -98,16 +103,26 @@ public class TermController extends BaseController {
         return ResponseEntity.ok(termService.findAll(vocabularyUri, limit, offset));
     }
 
-    private ResponseEntity exportToCsv(URI vocabularyUri, String vocabularyNormalizedName) {
+    private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
+        final Resource content;
+        final String extension;
+        if (Objects.equals(CsvUtils.MEDIA_TYPE, mediaType)) {
+            content = exporters.exportVocabularyGlossaryToCsv(getVocabulary(vocabularyUri));
+            extension = CsvUtils.FILE_EXTENSION;
+        } else if (Objects.equals(Excel.MEDIA_TYPE, mediaType)) {
+            content = exporters.exportVocabularyGlossaryToExcel(getVocabulary(vocabularyUri));
+            extension = Excel.FILE_EXTENSION;
+        } else {
+            return Optional.empty();
+        }
         try {
-            final Resource content = termExporter.exportVocabularyGlossary(getVocabulary(vocabularyUri));
-            return ResponseEntity.ok()
-                                 .contentLength(content.contentLength())
-                                 .contentType(MediaType.parseMediaType(CsvUtils.MEDIA_TYPE))
-                                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                                         "attachment; filename=\"" + vocabularyNormalizedName +
-                                                 CsvUtils.FILE_EXTENSION + "\"")
-                                 .body(content);
+            return Optional.of(ResponseEntity.ok()
+                                             .contentLength(content.contentLength())
+                                             .contentType(MediaType.parseMediaType(mediaType))
+                                             .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                     "attachment; filename=\"" + vocabularyNormalizedName +
+                                                             extension + "\"")
+                                             .body(content));
         } catch (IOException e) {
             throw new TermItException("Unable to export vocabulary glossary as CSV.", e);
         }

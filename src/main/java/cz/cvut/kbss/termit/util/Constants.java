@@ -75,7 +75,8 @@ public class Constants {
     /**
      * Path to directory containing queries used by the system.
      * <p>
-     * The path should be relative to the classpath, so that queries from it can be loaded using {@link ClassLoader#getResourceAsStream(String)}.
+     * The path should be relative to the classpath, so that queries from it can be loaded using {@link
+     * ClassLoader#getResourceAsStream(String)}.
      */
     public static final String QUERY_DIRECTORY = "query";
 
@@ -119,6 +120,24 @@ public class Constants {
         public static final String PREFIX = "prefix";
 
         private RDFa() {
+            throw new AssertionError();
+        }
+    }
+
+    public static final class Excel {
+        /**
+         * Media type for MS Excel open format -> .xslx
+         *
+         * @see #FILE_EXTENSION
+         */
+        public static final String MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+        /**
+         * File extension for MS Excel open format
+         */
+        public static final String FILE_EXTENSION = ".xlsx";
+
+        private Excel() {
             throw new AssertionError();
         }
     }
