@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Term;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
     void exportVocabularyGlossaryOutputsExcelWorkbookWithSingleSheet() throws Exception {
         final Resource result = sut.exportVocabularyGlossary(vocabulary);
         assertNotNull(result);
-        final HSSFWorkbook wb = new HSSFWorkbook(result.getInputStream(), false);
+        final XSSFWorkbook wb = new XSSFWorkbook(result.getInputStream());
         assertEquals(1, wb.getNumberOfSheets());
         assertEquals(0, wb.getSheetIndex(SHEET_NAME));
     }
@@ -37,10 +37,10 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
     @Test
     void exportVocabularyGlossaryOutputsHeaderRowWithColumnNamesIntoSheet() throws Exception {
         final Resource result = sut.exportVocabularyGlossary(vocabulary);
-        final HSSFWorkbook wb = new HSSFWorkbook(result.getInputStream(), false);
-        final HSSFSheet sheet = wb.getSheet(SHEET_NAME);
+        final XSSFWorkbook wb = new XSSFWorkbook(result.getInputStream());
+        final XSSFSheet sheet = wb.getSheet(SHEET_NAME);
         assertNotNull(sheet);
-        final HSSFRow row = sheet.getRow(0);
+        final XSSFRow row = sheet.getRow(0);
         assertNotNull(row);
         for (int i = 0; i < Term.EXPORT_COLUMNS.length; i++) {
             assertEquals(Term.EXPORT_COLUMNS[i], row.getCell(i).getStringCellValue());
@@ -51,13 +51,13 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
     void exportVocabularyGlossaryOutputsGlossaryTermsIntoSheet() throws Exception {
         final List<Term> terms = generateTerms();
         final Resource result = sut.exportVocabularyGlossary(vocabulary);
-        final HSSFWorkbook wb = new HSSFWorkbook(result.getInputStream(), false);
-        final HSSFSheet sheet = wb.getSheet(SHEET_NAME);
+        final XSSFWorkbook wb = new XSSFWorkbook(result.getInputStream());
+        final XSSFSheet sheet = wb.getSheet(SHEET_NAME);
         assertNotNull(sheet);
         // Plus header row
         assertEquals(terms.size(), sheet.getLastRowNum());
         for (int i = 1; i < sheet.getLastRowNum(); i++) {
-            final HSSFRow row = sheet.getRow(i);
+            final XSSFRow row = sheet.getRow(i);
             final String id = row.getCell(0).getStringCellValue();
             assertTrue(terms.stream().anyMatch(t -> t.getUri().toString().equals(id)));
         }
@@ -68,13 +68,13 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
         final List<Term> terms = generateTerms();
         terms.sort(Comparator.comparing(Term::getLabel));
         final Resource result = sut.exportVocabularyGlossary(vocabulary);
-        final HSSFWorkbook wb = new HSSFWorkbook(result.getInputStream(), false);
-        final HSSFSheet sheet = wb.getSheet(SHEET_NAME);
+        final XSSFWorkbook wb = new XSSFWorkbook(result.getInputStream());
+        final XSSFSheet sheet = wb.getSheet(SHEET_NAME);
         assertNotNull(sheet);
         // Plus header row
         assertEquals(terms.size(), sheet.getLastRowNum());
         for (int i = 1; i < sheet.getLastRowNum(); i++) {
-            final HSSFRow row = sheet.getRow(i);
+            final XSSFRow row = sheet.getRow(i);
             final String id = row.getCell(0).getStringCellValue();
             assertEquals(terms.get(i - 1).getUri().toString(), id);
         }
