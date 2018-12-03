@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.security.model.LoginStatus;
-import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
