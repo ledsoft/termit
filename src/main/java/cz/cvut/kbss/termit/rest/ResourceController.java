@@ -44,12 +44,26 @@ public class ResourceController extends BaseController {
         return resourceService.findTerms(getResource(resourceId));
     }
 
+    @RequestMapping(value = "/resource/terms", method = RequestMethod.PUT,
+                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setTerms(@RequestParam(name = "iri") URI resourceId,
+                        @RequestParam(name = "terms") Set<URI> termIds) {
+        resourceService.setTags(resourceId, termIds);
+    }
+
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.GET,
                     produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Resource getResource(@PathVariable("normalizedName") String normalizedName,
                                 @RequestParam(name = "namespace", required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return getResource(identifier);
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.GET,
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<Resource> getAll() {
+        return resourceService.findAll();
     }
 
     private Resource getResource(URI resourceId) {
@@ -68,13 +82,5 @@ public class ResourceController extends BaseController {
             result.forEach(r -> r.setAuthor(null));
         }
         return result;
-    }
-
-    @RequestMapping(value = "/resource/annotate", method = RequestMethod.POST,
-                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void setTags(@RequestParam(name = "iri") URI resourceId,
-                        @RequestParam(name = "tags") Set<URI> termIds) {
-        resourceService.setTags(resourceId, termIds);
     }
 }
