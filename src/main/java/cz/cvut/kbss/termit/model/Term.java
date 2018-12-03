@@ -6,6 +6,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.apache.poi.ss.usermodel.Row;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -125,15 +126,7 @@ public class Term implements Serializable, HasTypes {
     /**
      * Generates a CSV line representing this term.
      * <p>
-     * The line contains:
-     * <ul>
-     * <li>IRI</li>
-     * <li>Label</li>
-     * <li>Comment</li>
-     * <li>Types</li>
-     * <li>Sources</li>
-     * <li>Subterm IRIs</li>
-     * </ul>
+     * The line contains columns specified in {@link #EXPORT_COLUMNS}
      *
      * @return CSV representation of this term
      */
@@ -158,6 +151,32 @@ public class Term implements Serializable, HasTypes {
 
     private String exportCollection(Collection<String> col) {
         return CsvUtils.sanitizeString("[" + String.join(";", col) + "]");
+    }
+
+    /**
+     * Generates an Excel line (line with tab separated values) representing this term.
+     * <p>
+     * The line contains columns specified in {@link #EXPORT_COLUMNS}
+     *
+     * @param row The row into which data of this term will be generated
+     */
+    public void toExcel(Row row) {
+        Objects.requireNonNull(row);
+        row.createCell(0).setCellValue(uri.toString());
+        row.createCell(1).setCellValue(label);
+        if (comment != null) {
+            row.createCell(2).setCellValue(comment);
+        }
+        if (types != null) {
+            row.createCell(3).setCellValue(String.join(";", types));
+        }
+        if (sources != null) {
+            row.createCell(4).setCellValue(String.join(";", sources));
+        }
+        if (subTerms != null) {
+            row.createCell(5)
+               .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+        }
     }
 
     @Override

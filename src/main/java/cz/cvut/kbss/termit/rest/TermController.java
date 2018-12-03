@@ -18,6 +18,7 @@ import cz.cvut.kbss.termit.util.CsvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class TermController extends BaseController {
 
     @Autowired
     public TermController(IdentifierResolver idResolver, Configuration config,
-                          TermRepositoryService termService, VocabularyExporter termExporter,
+                          TermRepositoryService termService, @Qualifier("csv") VocabularyExporter termExporter,
                           VocabularyRepositoryService vocabularyService) {
         super(idResolver, config);
         this.termService = termService;
