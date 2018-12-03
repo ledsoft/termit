@@ -10,6 +10,11 @@ public class CsvUtils {
      */
     public static final String MEDIA_TYPE = "text/csv";
 
+    /**
+     * Default CSV file extension, including the "."
+     */
+    public static final String FILE_EXTENSION = ".csv";
+
     private CsvUtils() {
         throw new AssertionError();
     }
@@ -17,8 +22,8 @@ public class CsvUtils {
     /**
      * Sanitizes string which should be a part of a CSV file.
      * <p>
-     * This means that if the string contains commas, it is enclosed in double quotes (") and if it contains double quotes,
-     * they are doubled, i.e., "test" becomes ""test"".
+     * This means that if the string contains commas, it is enclosed in double quotes (") and if it contains double
+     * quotes, they are doubled, i.e., "test" becomes ""test"".
      *
      * @param str The string to sanitize
      * @return Sanitized string

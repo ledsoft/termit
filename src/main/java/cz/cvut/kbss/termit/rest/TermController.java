@@ -73,7 +73,7 @@ public class TermController extends BaseController {
      * @return List of terms of the specific vocabulary
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.GET,
-                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE, CsvUtils.MEDIA_TYPE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE, CsvUtils.MEDIA_TYPE})
     public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
                                  @RequestParam(name = "namespace", required = false) String namespace,
                                  @RequestParam(name = "limit", required = false) Integer limit,
@@ -82,7 +82,7 @@ public class TermController extends BaseController {
                                  @RequestHeader(value = "Accept", required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         if (Objects.equals(CsvUtils.MEDIA_TYPE, acceptType)) {
-            return exportToCsv(vocabularyUri);
+            return exportToCsv(vocabularyUri, vocabularyIdFragment);
         }
         // TODO: Change the limit/offset strategy to regular paging API (pageNo, page size)
         if (limit == null) {
@@ -97,12 +97,15 @@ public class TermController extends BaseController {
         return ResponseEntity.ok(termService.findAll(vocabularyUri, limit, offset));
     }
 
-    private ResponseEntity exportToCsv(URI vocabularyUri) {
+    private ResponseEntity exportToCsv(URI vocabularyUri, String vocabularyNormalizedName) {
         try {
             final Resource content = termExporter.exportVocabularyGlossary(getVocabulary(vocabularyUri));
             return ResponseEntity.ok()
                                  .contentLength(content.contentLength())
                                  .contentType(MediaType.parseMediaType(CsvUtils.MEDIA_TYPE))
+                                 .header(HttpHeaders.CONTENT_DISPOSITION,
+                                         "attachment; filename=\"" + vocabularyNormalizedName +
+                                                 CsvUtils.FILE_EXTENSION + "\"")
                                  .body(content);
         } catch (IOException e) {
             throw new TermItException("Unable to export vocabulary glossary as CSV.", e);
@@ -124,7 +127,7 @@ public class TermController extends BaseController {
      * @return Response with {@code Location} header.
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.POST,
-                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createTerm(@PathVariable String vocabularyIdFragment,
                                            @RequestParam(name = "namespace", required = false) String namespace,
                                            @RequestParam(name = "parentTermUri", required = false) String parentTerm,
@@ -151,7 +154,7 @@ public class TermController extends BaseController {
      * @throws NotFoundException If term does not exist
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.GET,
-                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Term getById(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                         @PathVariable("termIdFragment") String termIdFragment,
                         @RequestParam(name = "namespace", required = false) String namespace) {
@@ -175,7 +178,7 @@ public class TermController extends BaseController {
      * @throws NotFoundException If term does not exist
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.PUT,
-                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                        @PathVariable("termIdFragment") String termIdFragment,
@@ -194,7 +197,7 @@ public class TermController extends BaseController {
     }
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/subterms", method = RequestMethod.GET,
-                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubTerms(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                   @PathVariable("termIdFragment") String termIdFragment,
                                   @RequestParam(name = "namespace", required = false) String namespace,
@@ -208,13 +211,13 @@ public class TermController extends BaseController {
                                .collect(Collectors.toList());
         }
         return parent.getSubTerms() == null ? Collections.emptyList() :
-                parent.getSubTerms().stream()
-                      .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
-                      .collect(Collectors.toList());
+               parent.getSubTerms().stream()
+                     .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
+                     .collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/assignments", method = RequestMethod.GET,
-                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<TermAssignment> getAssignments(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                                @PathVariable("termIdFragment") String termIdFragment,
                                                @RequestParam(name = "namespace", required = false) String namespace) {
