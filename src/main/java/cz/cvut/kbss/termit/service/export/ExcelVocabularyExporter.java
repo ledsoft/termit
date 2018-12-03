@@ -4,9 +4,9 @@ import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -38,8 +38,8 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
     @Override
     public Resource exportVocabularyGlossary(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final HSSFWorkbook wb = new HSSFWorkbook();
-        final HSSFSheet sheet = wb.createSheet(SHEET_NAME);
+        final XSSFWorkbook wb = new XSSFWorkbook();
+        final Sheet sheet = wb.createSheet(SHEET_NAME);
         generateHeaderRow(sheet);
         generateTermRows(termService.findAll(vocabulary.getUri(), Integer.MAX_VALUE, 0), sheet);
         try {
@@ -51,17 +51,17 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
         }
     }
 
-    private void generateHeaderRow(HSSFSheet sheet) {
-        final HSSFRow row = sheet.createRow(0);
+    private void generateHeaderRow(Sheet sheet) {
+        final Row row = sheet.createRow(0);
         for (int i = 0; i < Term.EXPORT_COLUMNS.length; i++) {
             row.createCell(i).setCellValue(Term.EXPORT_COLUMNS[i]);
         }
     }
 
-    private void generateTermRows(List<Term> terms, HSSFSheet sheet) {
+    private void generateTermRows(List<Term> terms, Sheet sheet) {
         // Row no. 0 is the header
         for (int i = 0; i < terms.size(); i++) {
-            final HSSFRow row = sheet.createRow(i + 1);
+            final Row row = sheet.createRow(i + 1);
             terms.get(i).toExcel(row);
         }
     }

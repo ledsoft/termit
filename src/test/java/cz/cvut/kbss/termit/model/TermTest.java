@@ -2,9 +2,9 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.util.Vocabulary;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -98,9 +98,9 @@ class TermTest {
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
-        final HSSFWorkbook wb = new HSSFWorkbook();
-        final HSSFSheet sheet = wb.createSheet("test");
-        final HSSFRow row = sheet.createRow(0);
+        final XSSFWorkbook wb = new XSSFWorkbook();
+        final XSSFSheet sheet = wb.createSheet("test");
+        final XSSFRow row = sheet.createRow(0);
         term.toExcel(row);
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
@@ -116,9 +116,9 @@ class TermTest {
     void toExcelHandlesEmptyOptionalAttributeValues() {
         final Term term = Generator.generateTermWithId();
         term.setComment(null);
-        final HSSFWorkbook wb = new HSSFWorkbook();
-        final HSSFSheet sheet = wb.createSheet("test");
-        final HSSFRow row = sheet.createRow(0);
+        final XSSFWorkbook wb = new XSSFWorkbook();
+        final XSSFSheet sheet = wb.createSheet("test");
+        final XSSFRow row = sheet.createRow(0);
         term.toExcel(row);
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
@@ -131,9 +131,9 @@ class TermTest {
         term.setComment(null);
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
-        final HSSFWorkbook wb = new HSSFWorkbook();
-        final HSSFSheet sheet = wb.createSheet("test");
-        final HSSFRow row = sheet.createRow(0);
+        final XSSFWorkbook wb = new XSSFWorkbook();
+        final XSSFSheet sheet = wb.createSheet("test");
+        final XSSFRow row = sheet.createRow(0);
         term.toExcel(row);
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
