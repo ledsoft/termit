@@ -32,7 +32,7 @@ public class TermDao extends BaseDao<Term> {
      * @param vocabulary Vocabulary whose terms should be returned
      * @return Matching terms, ordered by their label
      */
-    public List<Term> findAll(Pageable pageSpec, Vocabulary vocabulary) {
+    public List<Term> findAllRoots(Pageable pageSpec, Vocabulary vocabulary) {
         return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
@@ -54,10 +54,10 @@ public class TermDao extends BaseDao<Term> {
      * @param offset     number of terms to be skipped
      * @param vocabulary Vocabulary whose terms should be returned
      * @return Matching terms, ordered by their label
-     * @deprecated Should be replaced with {@link #findAll(Pageable, Vocabulary)}
+     * @deprecated Should be replaced with {@link #findAllRoots(Pageable, Vocabulary)}
      */
     @Deprecated
-    public List<Term> findAll(int limit, int offset, Vocabulary vocabulary) {
+    public List<Term> findAllRoots(int limit, int offset, Vocabulary vocabulary) {
         return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
@@ -82,7 +82,7 @@ public class TermDao extends BaseDao<Term> {
      * @param vocabulary   Vocabulary whose terms should be returned
      * @return List of root terms contain a matching term in subtree
      */
-    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
+    public List<Term> findAllRoots(String searchString, Vocabulary vocabulary) {
         return em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
                 "?root a ?type ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?root ." +

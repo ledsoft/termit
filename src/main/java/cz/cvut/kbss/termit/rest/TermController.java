@@ -150,7 +150,7 @@ public class TermController extends BaseController {
                                            @RequestBody Term term) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         if (parentTerm != null && !parentTerm.isEmpty()) {
-            termService.addTermToVocabulary(term, vocabularyUri, URI.create(parentTerm));
+            termService.addChildTerm(term, URI.create(parentTerm));
         } else {
             termService.addTermToVocabulary(term, vocabularyUri);
         }

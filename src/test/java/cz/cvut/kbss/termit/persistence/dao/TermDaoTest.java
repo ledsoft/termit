@@ -46,7 +46,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         transactional(() -> em.merge(vocabulary.getGlossary()));
 
-        final List<Term> result = sut.findAll(Constants.DEFAULT_PAGE_SPEC, vocabulary);
+        final List<Term> result = sut.findAllRoots(Constants.DEFAULT_PAGE_SPEC, vocabulary);
         assertEquals(terms.size(), result.size());
         assertEquals(terms, result);
     }
@@ -69,7 +69,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.merge(vocabulary.getGlossary()));
 
         // Paging starts at 0
-        final List<Term> result = sut.findAll(PageRequest.of(1, terms.size() / 2), vocabulary);
+        final List<Term> result = sut.findAllRoots(PageRequest.of(1, terms.size() / 2), vocabulary);
         final List<Term> subList = terms.subList(terms.size() / 2, terms.size());
         assertEquals(subList, result);
     }
@@ -88,7 +88,7 @@ class TermDaoTest extends BaseDaoTestRunner {
             em.merge(vocabulary.getGlossary());
         });
 
-        final List<Term> result = sut.findAll(PageRequest.of(0, terms.size() / 2), vocabulary);
+        final List<Term> result = sut.findAllRoots(PageRequest.of(0, terms.size() / 2), vocabulary);
         assertEquals(terms.size() / 2, result.size());
         assertTrue(terms.containsAll(result));
     }
@@ -100,7 +100,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         terms.forEach(t -> t.setSubTerms(new HashSet<URI>(generateTerms(2).stream().map(Term::getUri).collect(Collectors.toSet()))));
         transactional(() -> em.merge(vocabulary.getGlossary()));
 
-        final List<Term> result = sut.findAll(Constants.DEFAULT_PAGE_SPEC, vocabulary);
+        final List<Term> result = sut.findAllRoots(Constants.DEFAULT_PAGE_SPEC, vocabulary);
         assertEquals(terms.size(), result.size());
         for (int i = 0; i < terms.size(); i++) {
             assertEquals(terms.get(i), result.get(i));
@@ -114,7 +114,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         transactional(() -> em.merge(vocabulary.getGlossary()));
 
-        final List<Term> result = sut.findAll("term 3", vocabulary);
+        final List<Term> result = sut.findAllRoots("term 3", vocabulary);
         assertEquals(1, result.size());
         assertTrue(terms.contains(result.get(0)));
     }
@@ -138,7 +138,7 @@ class TermDaoTest extends BaseDaoTestRunner {
             em.merge(vocabulary.getGlossary());
         });
 
-        final List<Term> result = sut.findAll("plan", vocabulary);
+        final List<Term> result = sut.findAllRoots("plan", vocabulary);
         assertEquals(1, result.size());
         assertEquals(root, result.get(0));
     }

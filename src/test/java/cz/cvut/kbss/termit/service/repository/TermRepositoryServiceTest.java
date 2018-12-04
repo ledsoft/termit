@@ -105,21 +105,37 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistCreatesSubTermForSpecificTerm() {
-        final Term term1 = Generator.generateTerm();
-        URI uri1 = Generator.generateUri();
-        term1.setUri(uri1);
+    void addChildTermCreatesSubTermForSpecificTerm() {
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.merge(vocabulary);
+        });
 
-        final Term term2 = Generator.generateTerm();
-        URI uri2 = Generator.generateUri();
-        term2.setUri(uri2);
+        sut.addChildTerm(child, parent.getUri());
 
-        sut.addTermToVocabulary(term1, vocabulary.getUri());
-        sut.addTermToVocabulary(term2, vocabulary.getUri(), uri1);
+        Term result = em.find(Term.class, parent.getUri());
+        assertNotNull(result);
+        assertTrue(result.getSubTerms().contains(child.getUri()));
+        assertNotNull(em.find(Term.class, child.getUri()));
+    }
 
-        Term result1 = em.find(Term.class, uri1);
-        assertNotNull(result1);
-        assertTrue(result1.getSubTerms().contains(uri2));
+    @Test
+    void addChildTermDoesNotAddTermDirectlyIntoGlossary() {
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.merge(vocabulary);
+        });
+
+        sut.addChildTerm(child, parent.getUri());
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+        assertEquals(1, result.getTerms().size());
+        assertTrue(result.getTerms().contains(parent));
+        assertFalse(result.getTerms().contains(child));
+        assertNotNull(em.find(Term.class, child.getUri()));
     }
 
     @Test
