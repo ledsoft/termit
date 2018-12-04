@@ -8,8 +8,6 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 
-import java.util.Set;
-
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +43,10 @@ public class ResourceController extends BaseController {
     }
 
     @RequestMapping(value = "/resource/terms", method = RequestMethod.PUT,
-                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setTerms(@RequestParam(name = "iri") URI resourceId,
-                        @RequestParam(name = "terms") Set<URI> termIds) {
+                         @RequestBody  List<URI> termIds) {
         resourceService.setTags(resourceId, termIds);
     }
 
