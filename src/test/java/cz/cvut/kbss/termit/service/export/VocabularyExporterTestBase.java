@@ -6,6 +6,10 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -39,7 +43,21 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
             terms.add(term);
         }
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary));
+        transactional(() -> {
+            em.merge(vocabulary);
+            // Simulating inferred inverse property je_pojmem_ze_slovniku
+            final Repository repo = em.unwrap(Repository.class);
+            try (final RepositoryConnection conn = repo.getConnection()) {
+                final ValueFactory vf = repo.getValueFactory();
+                final IRI vocabIri = vf.createIRI(vocabulary.getUri().toString());
+                final IRI inVocab = vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku);
+                conn.begin();
+                for (Term t : terms) {
+                    conn.add(vf.createIRI(t.getUri().toString()), inVocab, vocabIri);
+                }
+                conn.commit();
+            }
+        });
         return terms;
     }
 }
