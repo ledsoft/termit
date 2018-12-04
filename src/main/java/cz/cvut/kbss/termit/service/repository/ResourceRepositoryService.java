@@ -11,7 +11,7 @@ import cz.cvut.kbss.termit.persistence.dao.TargetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import java.net.URI;
-import java.util.Set;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +70,7 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
      * @param iTerms Terms to be used for annotation
      */
     @Transactional
-    public void setTags(final URI iResource, final Set<URI> iTerms) {
+    public void setTags(final URI iResource, final Collection<URI> iTerms) {
         final Resource resource =
             resourceDao.find(iResource).orElseThrow(() -> NotFoundException
                 .create(Resource.class.getSimpleName(), iResource));
