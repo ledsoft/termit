@@ -41,6 +41,7 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
         try (final XSSFWorkbook wb = new XSSFWorkbook()) {
             final Sheet sheet = wb.createSheet(SHEET_NAME);
             generateHeaderRow(sheet);
+            // TODO This does not retrieve all terms from glossary, just the roots!!!
             generateTermRows(termService.findAll(vocabulary.getUri(), Integer.MAX_VALUE, 0), sheet);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             wb.write(bos);

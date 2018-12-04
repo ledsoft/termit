@@ -85,12 +85,12 @@ public class TermDao extends BaseDao<Term> {
     public List<Term> findAll(String searchString, Vocabulary vocabulary) {
         return em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
                 "?root a ?type ." +
-                "?term a ?type ;" +
-                "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?root ." +
                 "?root ?hasChild* ?term ." +
+                "{\n ?term a ?type ;" +
+                "rdfs:label ?label ." +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "} ORDER BY ?label", Term.class)
+                "}\n} ORDER BY ?label", Term.class)
                  .setParameter("type", typeUri)
                  .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
                  .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
