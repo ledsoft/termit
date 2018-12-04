@@ -85,7 +85,6 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
 
         // remove existing term assignments
         // TODO do not remove tags which will be set anyway
-        System.out.println("REMOVING ");
         final List<TermAssignment> termAssignments = termAssignmentDao.findByTarget(target);
         termAssignments.stream().forEach(termAssignmentDao::remove);
 
