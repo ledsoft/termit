@@ -25,7 +25,7 @@ public class CsvVocabularyExporter implements VocabularyExporter {
     public Resource exportVocabularyGlossary(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         final StringBuilder export = new StringBuilder(String.join(",", Term.EXPORT_COLUMNS));
-        final List<Term> terms = termService.findAll(vocabulary.getUri(), Integer.MAX_VALUE, 0);
+        final List<Term> terms = termService.findAll(vocabulary);
         terms.forEach(t -> export.append('\n').append(t.toCsv()));
         return new ByteArrayResource(export.toString().getBytes());
     }
