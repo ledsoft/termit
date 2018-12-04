@@ -69,10 +69,15 @@ class TermControllerTest extends BaseControllerTestRunner {
     @InjectMocks
     private TermController sut;
 
+    private cz.cvut.kbss.termit.model.Vocabulary vocabulary;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
+        this.vocabulary = Generator.generateVocabulary();
+        vocabulary.setName(VOCABULARY_NAME);
+        vocabulary.setUri(URI.create(VOCABULARY_URI));
     }
 
     @Test
@@ -240,7 +245,8 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
-        when(termServiceMock.findAll(eq(URI.create(VOCABULARY_URI)), anyInt(), anyInt())).thenReturn(terms);
+        when(vocabularyServiceMock.find(URI.create(VOCABULARY_URI))).thenReturn(Optional.of(vocabulary));
+        when(termServiceMock.findAllRoots(eq(vocabulary), any())).thenReturn(terms);
 
         final MvcResult mvcResult = mockMvc.perform(
                 get(PATH + "/" + VOCABULARY_NAME + "/terms/").param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
@@ -248,7 +254,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
-        verify(termServiceMock).findAll(URI.create(VOCABULARY_URI), Integer.MAX_VALUE, 0);
+        when(termServiceMock.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC)).thenReturn(terms);
     }
 
     @Test
@@ -258,7 +264,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
-        when(termServiceMock.findAll(any(), eq(URI.create(VOCABULARY_URI)))).thenReturn(terms);
+        when(termServiceMock.findAllRoots(any(), eq(URI.create(VOCABULARY_URI)))).thenReturn(terms);
         final String searchString = "test";
 
         final MvcResult mvcResult = mockMvc.perform(
@@ -268,7 +274,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
-        verify(termServiceMock).findAll(searchString, URI.create(VOCABULARY_URI));
+        verify(termServiceMock).findAllRoots(searchString, URI.create(VOCABULARY_URI));
     }
 
     @Test
@@ -315,7 +321,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         final String searchString = "test";
         final List<Term> searchResults = new ArrayList<>(terms);
         searchResults.add(Generator.generateTermWithId());
-        when(termServiceMock.findAll(searchString, URI.create(VOCABULARY_URI))).thenReturn(searchResults);
+        when(termServiceMock.findAllRoots(searchString, URI.create(VOCABULARY_URI))).thenReturn(searchResults);
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms")
@@ -325,7 +331,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         assertEquals(terms.size(), result.size());
         assertTrue(terms.containsAll(result));
         verify(termServiceMock).find(parent.getUri());
-        verify(termServiceMock).findAll(searchString, URI.create(VOCABULARY_URI));
+        verify(termServiceMock).findAllRoots(searchString, URI.create(VOCABULARY_URI));
     }
 
     @Test
@@ -340,7 +346,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
         mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + parent.getLabel() + "/subterms"))
                .andExpect(status().isNotFound());
-        verify(termServiceMock, never()).findAll(any(), any());
+        verify(termServiceMock, never()).findAllRoots(anyString(), any());
     }
 
     @Test

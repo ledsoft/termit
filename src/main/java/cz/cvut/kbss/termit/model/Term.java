@@ -81,12 +81,12 @@ public class Term implements Serializable, HasTypes {
         this.subTerms = subTerms;
     }
 
-    public void addSubTerm(URI childUri) {
+    public boolean addSubTerm(URI childUri) {
         Objects.requireNonNull(childUri);
         if (subTerms == null) {
             this.subTerms = new HashSet<>();
         }
-        subTerms.add(childUri);
+        return subTerms.add(childUri);
     }
 
     public Set<String> getSources() {

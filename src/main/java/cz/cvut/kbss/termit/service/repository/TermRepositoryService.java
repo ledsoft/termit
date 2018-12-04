@@ -8,15 +8,14 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
 import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 public class TermRepositoryService extends BaseRepositoryService<Term> {
@@ -55,36 +54,45 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
+    public void addChildTerm(Term instance, URI parentTermUri) {
         validate(instance);
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);
-        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
-
-        if (!vocabulary.getGlossary().addTerm(instance)) {
-            throw ResourceExistsException.create("Term", instance.getUri());
-        }
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
 
-        Set<URI> newTerms = parenTerm.getSubTerms();
-        if (newTerms == null) {
-            newTerms = new HashSet<>();
-        }
-        if (!newTerms.add(instance.getUri())) {
+        if (!parenTerm.addSubTerm(instance.getUri())) {
             throw ResourceExistsException
                     .create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
         }
-        parenTerm.setSubTerms(newTerms);
-
-        vocabularyService.update(vocabulary);
+        termDao.persist(instance);
+        termDao.update(parenTerm);
     }
 
-    public List<Term> findAll(URI vocabularyUri, int limit, int offset) {
-        Vocabulary vocabulary = getVocabulary(vocabularyUri);
+    /**
+     * Gets all terms from a vocabulary, regardless of their position in the term hierarchy.
+     * <p>
+     * This returns all terms contained in a vocabulary's glossary.
+     *
+     * @param vocabulary Vocabulary whose terms should be returned
+     * @return List of terms ordered by label
+     */
+    public List<Term> findAll(Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        return termDao.findAll(vocabulary);
+    }
 
-        return termDao.findAll(limit, offset, vocabulary);
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary.
+     *
+     * @param vocabulary Vocabulary whose terms should be returned
+     * @param pageSpec   Page specifying result number and position
+     * @return Matching root terms
+     */
+    public List<Term> findAllRoots(Vocabulary vocabulary, Pageable pageSpec) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(pageSpec);
+        return termDao.findAllRoots(vocabulary, pageSpec);
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
@@ -93,11 +101,11 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
                                         .create(Vocabulary.class.getSimpleName(), vocabularyUri));
     }
 
-    public List<Term> findAll(String searchString, URI vocabularyUri) {
+    public List<Term> findAllRoots(String searchString, URI vocabularyUri) {
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
         //TODO filter
-        return termDao.findAll(searchString, vocabulary);
+        return termDao.findAllRoots(searchString, vocabulary);
     }
 
     /**

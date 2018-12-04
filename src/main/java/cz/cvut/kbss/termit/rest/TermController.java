@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,17 +92,17 @@ public class TermController extends BaseController {
         if (export.isPresent()) {
             return export.get();
         }
-        // TODO: Change the limit/offset strategy to regular paging API (pageNo, page size)
-        if (limit == null) {
-            limit = Integer.MAX_VALUE;
-        }
-        if (offset == null) {
-            offset = 0;
-        }
         if (searchString != null && !searchString.isEmpty()) {
-            return ResponseEntity.ok(termService.findAll(searchString, vocabularyUri));
+            return ResponseEntity.ok(termService.findAllRoots(searchString, vocabularyUri));
         }
-        return ResponseEntity.ok(termService.findAll(vocabularyUri, limit, offset));
+        return ResponseEntity
+                .ok(termService.findAllRoots(getVocabulary(vocabularyUri), createPageRequest(limit, offset)));
+    }
+
+    private Pageable createPageRequest(Integer limit, Integer offset) {
+        final int pageSize = limit != null ? limit : Integer.MAX_VALUE;
+        final int pageNo = offset != null ? offset / pageSize : 0;
+        return PageRequest.of(pageNo, pageSize);
     }
 
     private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
@@ -150,7 +152,7 @@ public class TermController extends BaseController {
                                            @RequestBody Term term) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         if (parentTerm != null && !parentTerm.isEmpty()) {
-            termService.addTermToVocabulary(term, vocabularyUri, URI.create(parentTerm));
+            termService.addChildTerm(term, URI.create(parentTerm));
         } else {
             termService.addTermToVocabulary(term, vocabularyUri);
         }
@@ -222,7 +224,7 @@ public class TermController extends BaseController {
         if (searchString != null && !searchString.isEmpty()) {
             // NOTE: Consider adding a dedicated search method in case this late filter causes performance problems
             final List<Term> searchResult = termService
-                    .findAll(searchString, getVocabularyUri(namespace, vocabularyIdFragment));
+                    .findAllRoots(searchString, getVocabularyUri(namespace, vocabularyIdFragment));
             return searchResult.stream().filter(t -> parent.getSubTerms().contains(t.getUri()))
                                .collect(Collectors.toList());
         }

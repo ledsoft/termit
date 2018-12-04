@@ -11,9 +11,12 @@ import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -105,43 +108,57 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistCreatesSubTermForSpecificTerm() {
-        final Term term1 = Generator.generateTerm();
-        URI uri1 = Generator.generateUri();
-        term1.setUri(uri1);
+    void addChildTermCreatesSubTermForSpecificTerm() {
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.merge(vocabulary);
+        });
 
-        final Term term2 = Generator.generateTerm();
-        URI uri2 = Generator.generateUri();
-        term2.setUri(uri2);
+        sut.addChildTerm(child, parent.getUri());
 
-        sut.addTermToVocabulary(term1, vocabulary.getUri());
-        sut.addTermToVocabulary(term2, vocabulary.getUri(), uri1);
-
-        Term result1 = em.find(Term.class, uri1);
-        assertNotNull(result1);
-        assertTrue(result1.getSubTerms().contains(uri2));
+        Term result = em.find(Term.class, parent.getUri());
+        assertNotNull(result);
+        assertTrue(result.getSubTerms().contains(child.getUri()));
+        assertNotNull(em.find(Term.class, child.getUri()));
     }
 
     @Test
-    void findTermsWithSpecificLimitAndOffset() {
-        Set<Term> terms = new HashSet<>(10);
-        Term term;
-        for (int i = 0; i < 10; i++) {
-            term = generateTermWithUri();
-            terms.add(term);
-        }
+    void addChildTermDoesNotAddTermDirectlyIntoGlossary() {
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.merge(vocabulary);
+        });
 
-        final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setTerms(terms);
-        vrs.update(toPersist);
+        sut.addChildTerm(child, parent.getUri());
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+        assertEquals(1, result.getTerms().size());
+        assertTrue(result.getTerms().contains(parent));
+        assertFalse(result.getTerms().contains(child));
+        assertNotNull(em.find(Term.class, child.getUri()));
+    }
 
-        List<Term> result1 = sut.findAll(vocabulary.getUri(), 5, 0);
-        List<Term> result2 = sut.findAll(vocabulary.getUri(), 5, 5);
+    @Test
+    void findAllRootsReturnsRootTermsOnMatchingPage() {
+        final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
+                Collectors.toList());
+        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        transactional(() -> em.merge(vocabulary));
 
-        assertEquals(5, result1.size());
-        assertEquals(5, result2.size());
+        final List<Term> resultOne = sut.findAllRoots(vocabulary, PageRequest.of(0, 5));
+        final List<Term> resultTwo = sut.findAllRoots(vocabulary, PageRequest.of(1, 5));
 
-        result1.forEach(o -> assertFalse(result2.contains(o)));
+        assertEquals(5, resultOne.size());
+        assertEquals(5, resultTwo.size());
+
+        resultOne.forEach(t -> {
+            assertTrue(terms.contains(t));
+            assertFalse(resultTwo.contains(t));
+        });
+        resultTwo.forEach(t -> assertTrue(terms.contains(t)));
     }
 
     @Test
@@ -161,7 +178,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         toPersist.getGlossary().setTerms(terms);
         vrs.update(toPersist);
 
-        List<Term> result1 = sut.findAll("Result", vocabulary.getUri());
+        List<Term> result1 = sut.findAllRoots("Result", vocabulary.getUri());
 
         assertEquals(5, result1.size());
         result1.forEach(o -> assertTrue(o.getLabel().contains("Result")));
