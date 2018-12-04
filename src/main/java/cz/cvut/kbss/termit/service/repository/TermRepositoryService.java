@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
 import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 public class TermRepositoryService extends BaseRepositoryService<Term> {
@@ -55,36 +53,25 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, URI vocabularyUri, URI parentTermUri) {
+    public void addChildTerm(Term instance, URI parentTermUri) {
         validate(instance);
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(parentTermUri);
-        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
-
-        if (!vocabulary.getGlossary().addTerm(instance)) {
-            throw ResourceExistsException.create("Term", instance.getUri());
-        }
 
         Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
 
-        Set<URI> newTerms = parenTerm.getSubTerms();
-        if (newTerms == null) {
-            newTerms = new HashSet<>();
-        }
-        if (!newTerms.add(instance.getUri())) {
+        if (!parenTerm.addSubTerm(instance.getUri())) {
             throw ResourceExistsException
                     .create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
         }
-        parenTerm.setSubTerms(newTerms);
-
-        vocabularyService.update(vocabulary);
+        termDao.persist(instance);
+        termDao.update(parenTerm);
     }
 
     public List<Term> findAll(URI vocabularyUri, int limit, int offset) {
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
-        return termDao.findAll(limit, offset, vocabulary);
+        return termDao.findAllRoots(limit, offset, vocabulary);
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
@@ -97,7 +84,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
         //TODO filter
-        return termDao.findAll(searchString, vocabulary);
+        return termDao.findAllRoots(searchString, vocabulary);
     }
 
     /**
