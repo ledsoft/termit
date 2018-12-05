@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.language;
 
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -49,12 +50,15 @@ public class LanguageServiceJena extends LanguageService {
             m.read(resource.getURL().toString(), "text/turtle");
 
             final List<Term> terms = new ArrayList<>();
-            m.listSubjectsWithProperty(RDF.type,
-                    ResourceFactory.createResource(cz.cvut.kbss.termit.util.Vocabulary.s_c_term))
+            m.listSubjectsWithProperty(RDF.type, ResourceFactory.createResource(Vocabulary.s_c_term))
              .forEachRemaining(c -> {
                  final Term t = new Term();
                  t.setUri(URI.create(c.getURI()));
-                 t.setLabel(c.getProperty(RDFS.label, lang).getObject().asLiteral().getString());
+                 if (c.getProperty(RDFS.label, lang) != null) {
+                     t.setLabel(c.getProperty(RDFS.label, lang).getObject().asLiteral().getString());
+                 } else {
+                     t.setLabel(t.getUri().toString());
+                 }
 
                  final Statement st = c.getProperty(RDFS.comment, lang);
                  if (st != null) {
