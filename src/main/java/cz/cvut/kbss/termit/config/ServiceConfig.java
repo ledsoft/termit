@@ -5,11 +5,15 @@ import cz.cvut.kbss.termit.service.Services;
 import cz.cvut.kbss.termit.service.SystemInitializer;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -33,14 +37,25 @@ public class ServiceConfig {
 
     @Bean
     public RestTemplate restTemplate(@Qualifier("objectMapper") ObjectMapper objectMapper) {
-        final RestTemplate client = new RestTemplate();
+        final RestTemplate restTemplate = new RestTemplate();
+
+        // Using LaxRedirectStrategy to allow redirects of POST, PUT and DELETE requests
+        // Introduced here because text analysis invocations (POST) were redirected and the resulting documents were
+        // malformed (contained the redirect page instead of the result).
+        final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        final HttpClient httpClient = HttpClientBuilder.create()
+                                                       .setRedirectStrategy(new LaxRedirectStrategy())
+                                                       .build();
+        factory.setHttpClient(httpClient);
+        restTemplate.setRequestFactory(factory);
+
         final MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
         jacksonConverter.setObjectMapper(objectMapper);
         final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
                 Constants.UTF_8_ENCODING));
-        client.setMessageConverters(
+        restTemplate.setMessageConverters(
                 Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
-        return client;
+        return restTemplate;
     }
 
     /**
