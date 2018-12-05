@@ -113,15 +113,14 @@ public class TermDao extends BaseDao<Term> {
         Objects.requireNonNull(label);
         Objects.requireNonNull(vocabularyUri);
         return em.createNativeQuery("ASK { ?term a ?type ; " +
-                "?hasLabel ?label ." +
-                "?vocabulary ?hasGlossary/?hasTerm/(?hasChild)* ?term ." +
+                "?hasLabel ?label ;" +
+                "?inVocabulary ?vocabulary ." +
                 "FILTER (LCASE(?label) = LCASE(?searchString)) . }", Boolean.class)
                  .setParameter("type", typeUri)
                  .setParameter("hasLabel", URI.create(RDFS.LABEL))
-                 .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
-                 .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
+                 .setParameter("inVocabulary",
+                     URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .setParameter("vocabulary", vocabularyUri)
-                 .setParameter("hasChild", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_narrower))
                  .setParameter("searchString", label, config.get(ConfigParam.LANGUAGE)).getSingleResult();
     }
 }

@@ -10,6 +10,7 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -142,6 +143,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
+    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueForLabelExistingInVocabulary() {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
@@ -152,6 +154,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
+    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsFalseForUnknownLabel() {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
@@ -161,6 +164,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
+    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueWhenLabelDiffersOnlyInCase() {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
