@@ -1,19 +1,20 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Target;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import java.util.Date;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+import java.util.Optional;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TargetDaoTest extends BaseDaoTestRunner {
 
@@ -30,10 +31,11 @@ class TargetDaoTest extends BaseDaoTestRunner {
         this.resource = new Resource();
         resource.setUri(Generator.generateUri());
         resource.setName("Metropolitan Plan");
-        resource.setAuthor(Generator.generateUserWithId());
+        final User author = Generator.generateUserWithId();
+        Environment.setCurrentUser(author);
         resource.setDateCreated(new Date());
         transactional(() -> {
-            em.persist(resource.getAuthor());
+            em.persist(author);
             em.persist(resource);
         });
     }

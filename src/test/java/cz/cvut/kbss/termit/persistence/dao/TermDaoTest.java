@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -38,6 +39,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         vocabulary.setUri(Generator.generateUri());
         vocabulary.setDateCreated(new Date());
         vocabulary.setAuthor(Generator.generateUserWithId());
+        Environment.setCurrentUser(vocabulary.getAuthor());
         transactional(() -> {
             em.persist(vocabulary.getAuthor());
             em.persist(vocabulary);

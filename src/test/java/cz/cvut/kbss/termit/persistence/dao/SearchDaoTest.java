@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.*;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -39,6 +40,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
+        Environment.setCurrentUser(user);
     }
 
     @Test
@@ -64,8 +66,6 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final Vocabulary vocabulary = new Vocabulary();
         vocabulary.setName("test");
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setAuthor(user);
-        vocabulary.setDateCreated(new Date());
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {

@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
@@ -34,6 +35,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
+        Environment.setCurrentUser(user);
     }
 
     @Test

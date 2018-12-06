@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Target;
@@ -9,22 +10,18 @@ import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URI;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
@@ -40,6 +37,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     void setUp() {
         this.user = Generator.generateUserWithId();
         transactional(() -> em.persist(user));
+        Environment.setCurrentUser(user);
     }
 
     @Test
@@ -100,7 +98,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
             terms.add(term1);
             terms.add(term2);
             transactional(() -> sut.setTags(URI.create("http://unknown.uri/resource"),
-                terms.stream().map(t -> t.getUri()).collect(Collectors.toSet())));
+                    terms.stream().map(Term::getUri).collect(Collectors.toSet())));
         });
     }
 
@@ -128,7 +126,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> sut.setTags(resource.getUri(), tags));
 
         assertEquals(2, sut.findTerms(resource).size());
-        assertEquals(tags, sut.findTerms(resource).stream().map( t -> t.getUri()).collect(Collectors.toSet()));
+        assertEquals(tags, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
     }
 
     @Test
@@ -151,6 +149,6 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> sut.setTags(resource.getUri(), tags2));
 
         assertEquals(2, sut.findTerms(resource).size());
-        assertEquals(tags2, sut.findTerms(resource).stream().map( t -> t.getUri()).collect(Collectors.toSet()));
+        assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
     }
 }
