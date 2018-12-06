@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,7 +89,8 @@ class TermControllerTest extends BaseControllerTestRunner {
                 .thenReturn(URI.create(namespace + VOCABULARY_NAME));
         when(termServiceMock.existsInVocabulary(any(), any())).thenReturn(true);
         final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/name").param("namespace", namespace).param("value", name))
+                get(PATH + "/" + VOCABULARY_NAME + "/terms/name").param(NAMESPACE_PARAM, namespace)
+                                                                 .param("value", name))
                                            .andExpect(status().isOk()).andReturn();
         assertTrue(readValue(mvcResult, Boolean.class));
         verify(termServiceMock).existsInVocabulary(name, URI.create(namespace + VOCABULARY_NAME));
@@ -116,7 +118,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
         mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).param("namespace", vocabularyNamespace))
+                get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).param(NAMESPACE_PARAM, vocabularyNamespace))
                .andExpect(status().isNotFound());
         verify(termServiceMock).find(termUri);
     }
@@ -249,7 +251,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(termServiceMock.findAllRoots(eq(vocabulary), any())).thenReturn(terms);
 
         final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/").param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
+                get(PATH + "/" + VOCABULARY_NAME + "/terms/").param(NAMESPACE_PARAM, Vocabulary.ONTOLOGY_IRI_termit))
                                            .andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
@@ -269,7 +271,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
         final MvcResult mvcResult = mockMvc.perform(
                 get(PATH + "/" + VOCABULARY_NAME + "/terms/")
-                        .param("namespace", Vocabulary.ONTOLOGY_IRI_termit)
+                        .param(NAMESPACE_PARAM, Vocabulary.ONTOLOGY_IRI_termit)
                         .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });

@@ -11,20 +11,18 @@ import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+
+import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 
 @RestController
 @RequestMapping("/documents")
@@ -52,16 +50,16 @@ public class DocumentController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                   JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public Document getById(@PathVariable("fragment") String fragment,
-                            @RequestParam(name = "namespace", required = false) String namespace) {
+                            @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
         final URI id = resolveIdentifier(namespace, fragment, ConfigParam.NAMESPACE_DOCUMENT);
         return documentService.find(id).orElseThrow(() -> NotFoundException.create(Document.class.getSimpleName(), id));
     }
 
     @RequestMapping(value = "/{fragment}/content", method = RequestMethod.GET)
     public ResponseEntity<Resource> getFileContent(@PathVariable("fragment") String fragment,
-                                                   @RequestParam(name = "namespace", required = false) String namespace,
+                                                   @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                                    @RequestParam(name = "file") String fileName) {
         final Document document = getById(fragment, namespace);
         final File file = resolveFileFromName(document, fileName);
@@ -80,7 +78,7 @@ public class DocumentController extends BaseController {
     @RequestMapping(value = "/{fragment}/content", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateFileContent(@PathVariable("fragment") String fragment,
-                                  @RequestParam(name = "namespace", required = false) String namespace,
+                                  @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                   @RequestParam(name = "file") MultipartFile attachment) {
         final Document document = getById(fragment, namespace);
         String fileName = attachment.getOriginalFilename();
@@ -110,7 +108,7 @@ public class DocumentController extends BaseController {
     @RequestMapping(value = "/{document}/text-analysis", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void runTextAnalysis(@PathVariable("document") String documentName,
-                                @RequestParam(name = "namespace", required = false) String namespace,
+                                @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                 @RequestParam(value = "file", required = false) String fileName) {
         final Document document = getById(documentName, namespace);
         if (fileName != null) {

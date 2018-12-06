@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -147,7 +148,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
 
         final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE).param("namespace", namespace))
+                get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE).param(NAMESPACE_PARAM, namespace))
                                            .andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
         verify(idResolverMock).resolveIdentifier(namespace, fragment);
@@ -204,8 +205,9 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         vocabulary.setUri(uri);
         when(idResolverMock.resolveIdentifier(namespace, "test")).thenReturn(uri);
         when(serviceMock.exists(uri)).thenReturn(false);
-        mockMvc.perform(put(PATH + "/test").param("namespace", namespace).contentType(MediaType.APPLICATION_JSON_VALUE)
-                                           .content(toJson(vocabulary))).andExpect(status().isNotFound());
+        mockMvc.perform(
+                put(PATH + "/test").param(NAMESPACE_PARAM, namespace).contentType(MediaType.APPLICATION_JSON_VALUE)
+                                   .content(toJson(vocabulary))).andExpect(status().isNotFound());
         verify(serviceMock, never()).update(any());
     }
 
