@@ -1,10 +1,8 @@
 package cz.cvut.kbss.termit.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import cz.cvut.kbss.jopa.model.annotations.Inferred;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
-import cz.cvut.kbss.jopa.model.annotations.Types;
+import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.service.ProvenanceGenerator;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
@@ -13,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_soubor)
+@EntityListeners(ProvenanceGenerator.class)
 public class File extends Resource {
 
     /**

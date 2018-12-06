@@ -59,11 +59,8 @@ public class ResourceDao extends BaseDao<Resource> {
                 "?has-label ?label ." +
                 "?assignment ?is-assignment-of ?term ;" +
                 "?has-target/?has-source ?x ." +
-                "{" +
-                "SELECT ?t WHERE {" +
-                "?assignment2 ?is-assignment-of ?t ;" +
+                "?assignment2 ?is-assignment-of ?term ;" +
                 "?has-target/?has-source ?resource ." +
-                "}}" +
                 "FILTER (?x != ?resource)" +
                 "} ORDER BY ?label", Resource.class)
                  .setParameter("type", typeUri)
