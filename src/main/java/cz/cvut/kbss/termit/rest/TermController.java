@@ -37,6 +37,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
+
 @RestController
 @RequestMapping("/vocabularies")
 public class TermController extends BaseController {
@@ -99,7 +101,7 @@ public class TermController extends BaseController {
                 .ok(termService.findAllRoots(getVocabulary(vocabularyUri), createPageRequest(limit, offset)));
     }
 
-    private Pageable createPageRequest(Integer limit, Integer offset) {
+    private static Pageable createPageRequest(Integer limit, Integer offset) {
         final int pageSize = limit != null ? limit : Integer.MAX_VALUE;
         final int pageNo = offset != null ? offset / pageSize : 0;
         return PageRequest.of(pageNo, pageSize);
@@ -174,7 +176,7 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Term getById(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                         @PathVariable("termIdFragment") String termIdFragment,
-                        @RequestParam(name = "namespace", required = false) String namespace) {
+                        @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
         return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termUri));
     }
@@ -199,7 +201,7 @@ public class TermController extends BaseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                        @PathVariable("termIdFragment") String termIdFragment,
-                       @RequestParam(name = "namespace", required = false) String namespace,
+                       @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                        @RequestBody Term term) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
         if (!termUri.equals(term.getUri())) {
@@ -217,7 +219,7 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubTerms(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                   @PathVariable("termIdFragment") String termIdFragment,
-                                  @RequestParam(name = "namespace", required = false) String namespace,
+                                  @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                   @RequestParam(name = "searchString", required = false) String searchString) {
         final Term parent = getById(vocabularyIdFragment, termIdFragment, namespace);
         if (searchString != null && !searchString.isEmpty()) {
@@ -237,7 +239,7 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<TermAssignment> getAssignments(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                                @PathVariable("termIdFragment") String termIdFragment,
-                                               @RequestParam(name = "namespace", required = false) String namespace) {
+                                               @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
         final Term term = getById(vocabularyIdFragment, termIdFragment, namespace);
         return termService.getAssignments(term);
     }
@@ -254,7 +256,7 @@ public class TermController extends BaseController {
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/identifier", method = RequestMethod.GET)
     public String generateIdentifier(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
-                                     @RequestParam(name = "namespace", required = false) String namespace,
+                                     @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                      @RequestParam("name") String name) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         return idResolver.generateIdentifier(
@@ -264,7 +266,7 @@ public class TermController extends BaseController {
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/name", method = RequestMethod.GET)
     public Boolean doesNameExist(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
-                                 @RequestParam(name = "namespace", required = false) String namespace,
+                                 @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                  @RequestParam(name = "value") String name) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         return termService.existsInVocabulary(name, vocabularyUri);
