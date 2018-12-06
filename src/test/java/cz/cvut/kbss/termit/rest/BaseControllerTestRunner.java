@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static cz.cvut.kbss.termit.environment.Environment.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Common configuration for REST controller tests.
@@ -49,6 +50,9 @@ public class BaseControllerTestRunner {
 
     void verifyLocationEquals(String expectedPath, MvcResult result) {
         final String locationHeader = result.getResponse().getHeader(HttpHeaders.LOCATION);
-        assertEquals("http://localhost" + expectedPath, locationHeader);
+        assertNotNull(locationHeader);
+        final String path = locationHeader.substring(0,
+                locationHeader.indexOf('?') != -1 ? locationHeader.indexOf('?') : locationHeader.length());
+        assertEquals("http://localhost" + expectedPath, path);
     }
 }

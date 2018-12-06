@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.rest.util;
 
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.util.Constants;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.Cookie;
@@ -23,60 +22,48 @@ public class RestUtils {
     }
 
     /**
-     * Creates {@link HttpHeaders} object with location header corresponding to the current request's URI.
+     * Creates location URI corresponding to the current request's URI.
      *
-     * @return {@code HttpHeaders} with location header
+     * @return location {@code URI}
      */
-    public static HttpHeaders createLocationHeaderFromCurrentUri() {
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUri();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
-        return headers;
+    public static URI createLocationFromCurrentUri() {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUri();
     }
 
     /**
-     * Creates {@link HttpHeaders} object with a location header with the specified path appended to the current request
-     * URI.
+     * Creates location URI with the specified path appended to the current request URI.
      * <p>
      * The {@code uriVariableValues} are used to fill in possible variables specified in {@code path}.
      *
      * @param path              Path to add to the current request URI in order to construct a resource location
      * @param uriVariableValues Values used to replace possible variables in the path
-     * @return {@code HttpHeaders} with location header
-     * @see #createLocationHeaderFromCurrentUriWithQueryParam(String, Object...)
+     * @return location {@code URI}
+     * @see #createLocationFromCurrentUriWithQueryParam(String, Object...)
      */
-    public static HttpHeaders createLocationHeaderFromCurrentUriWithPath(String path, Object... uriVariableValues) {
+    public static URI createLocationFromCurrentUriWithPath(String path, Object... uriVariableValues) {
         Objects.requireNonNull(path);
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path(path).buildAndExpand(
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path(path).buildAndExpand(
                 uriVariableValues).toUri();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
-        return headers;
     }
 
     /**
-     * Creates {@link HttpHeaders} object with a location header with the specified query parameter appended to the
-     * current request URI.
+     * Creates location URI with the specified query parameter appended to the current request URI.
      * <p>
      * The {@code values} are used as values of {@code param} in the resulting URI.
      *
      * @param param  Query parameter to add to current request URI
      * @param values Values of the query parameter
-     * @return {@code HttpHeaders} with location header
-     * @see #createLocationHeaderFromCurrentUriWithPath(String, Object...)
+     * @return location {@code URI}
+     * @see #createLocationFromCurrentUriWithPath(String, Object...)
      */
-    public static HttpHeaders createLocationHeaderFromCurrentUriWithQueryParam(String param, Object... values) {
+    public static URI createLocationFromCurrentUriWithQueryParam(String param, Object... values) {
         Objects.requireNonNull(param);
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, values).build()
-                                                        .toUri();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
-        return headers;
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, values).build()
+                                          .toUri();
     }
 
     /**
-     * Creates {@link HttpHeaders} object with a location header with the specified path and query parameter appended to
-     * the current request URI.
+     * Creates location URI with the specified path and query parameter appended to the current request URI.
      * <p>
      * The {@code paramValue} is specified for the query parameter and {@code pathValues} are used to replace path
      * variables.
@@ -85,20 +72,17 @@ public class RestUtils {
      * @param param      Query parameter to add to current request URI
      * @param paramValue Value of the query parameter
      * @param pathValues Path variable values
-     * @return {@code HttpHeaders} with location header
-     * @see #createLocationHeaderFromCurrentUriWithPath(String, Object...)
-     * @see #createLocationHeaderFromCurrentUriWithQueryParam(String, Object...)
+     * @return location {@code URI}
+     * @see #createLocationFromCurrentUriWithPath(String, Object...)
+     * @see #createLocationFromCurrentUriWithQueryParam(String, Object...)
      */
-    public static HttpHeaders createLocationHeaderFromCurrentUriWithPathAndQuery(String path, String param,
-                                                                                 Object paramValue,
-                                                                                 Object... pathValues) {
+    public static URI createLocationFromCurrentUriWithPathAndQuery(String path, String param,
+                                                                   Object paramValue,
+                                                                   Object... pathValues) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(param);
-        final URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, paramValue)
-                                                        .path(path).buildAndExpand(pathValues).toUri();
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.LOCATION, location.toASCIIString());
-        return headers;
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().queryParam(param, paramValue)
+                                          .path(path).buildAndExpand(pathValues).toUri();
     }
 
     /**

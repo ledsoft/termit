@@ -9,8 +9,6 @@ import cz.cvut.kbss.termit.service.repository.DataRepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,19 +36,18 @@ public class DataController {
     }
 
     @RequestMapping(value = "/properties", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                   JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public List<RdfsResource> getProperties() {
         return dataService.findAllProperties();
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_USER + "')")
     @RequestMapping(value = "/properties", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                    JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createProperty(@RequestBody RdfsResource property) {
         dataService.persistProperty(property);
         LOG.debug("Created property {}.", property);
-        final HttpHeaders headers = RestUtils.createLocationHeaderFromCurrentUri();
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return ResponseEntity.created(RestUtils.createLocationFromCurrentUri()).build();
     }
 
     /**
@@ -60,7 +57,7 @@ public class DataController {
      * @return Metadata
      */
     @RequestMapping(value = "/resource", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                 JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public RdfsResource getById(@RequestParam("iri") URI id) {
         return dataService.find(id).orElseThrow(() -> NotFoundException.create("Resource", id));
     }
