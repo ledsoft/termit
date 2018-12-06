@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
@@ -44,6 +45,19 @@ public class Environment {
         SecurityContext context = new SecurityContextImpl();
         context.setAuthentication(new AuthenticationToken(userDetails.getAuthorities(), userDetails));
         SecurityContextHolder.setContext(context);
+    }
+
+    /**
+     * @see #setCurrentUser(UserAccount)
+     */
+    public static void setCurrentUser(User user) {
+        final UserAccount ua = new UserAccount();
+        ua.setUri(user.getUri());
+        ua.setFirstName(user.getFirstName());
+        ua.setLastName(user.getLastName());
+        ua.setUsername(user.getUsername());
+        ua.setTypes(user.getTypes());
+        setCurrentUser(ua);
     }
 
     /**

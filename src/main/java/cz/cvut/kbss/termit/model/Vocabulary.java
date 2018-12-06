@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.service.ProvenanceGenerator;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
+@EntityListeners(ProvenanceGenerator.class)
 public class Vocabulary extends HasProvenanceData implements Serializable {
 
     @Id
@@ -26,12 +28,12 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar,
-                       cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private Glossary glossary;
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_model, cascade = CascadeType.PERSIST,
-                       fetch = FetchType.EAGER)
+            fetch = FetchType.EAGER)
     private Model model;
 
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_informaci_o_verzi, fetch = FetchType.EAGER)

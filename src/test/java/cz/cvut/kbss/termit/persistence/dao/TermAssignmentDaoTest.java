@@ -1,17 +1,18 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,10 +33,10 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         this.resource = new Resource();
         resource.setUri(Generator.generateUri());
         resource.setName("Metropolitan Plan");
-        resource.setAuthor(Generator.generateUserWithId());
-        resource.setDateCreated(new Date());
+        final User author = Generator.generateUserWithId();
+        Environment.setCurrentUser(author);
         transactional(() -> {
-            em.persist(resource.getAuthor());
+            em.persist(author);
             em.persist(resource);
         });
     }
@@ -103,7 +104,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         target.setSource(resource);
         transactional(() -> em.persist(target));
 
-        final List<TermAssignment> expected = generateAssignmentsForTarget(term,target);
+        final List<TermAssignment> expected = generateAssignmentsForTarget(term, target);
         final List<TermAssignment> result = sut.findByTarget(target);
         assertEquals(expected.size(), result.size());
         for (TermAssignment ta : result) {

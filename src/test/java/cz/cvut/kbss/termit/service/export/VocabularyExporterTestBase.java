@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
@@ -23,10 +24,9 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
 
     void setUp() {
         this.vocabulary = Generator.generateVocabulary();
-        final User author = Generator.generateUserWithId();
-        vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
+        final User author = Generator.generateUserWithId();
+        Environment.setCurrentUser(author);
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary);
