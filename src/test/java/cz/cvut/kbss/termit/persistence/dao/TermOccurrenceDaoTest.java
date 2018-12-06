@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.Term;
@@ -31,6 +32,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
     @BeforeEach
     void setUp() {
         this.user = Generator.generateUserWithId();
+        Environment.setCurrentUser(user);
         transactional(() -> em.persist(user));
     }
 
@@ -84,8 +86,6 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         }
         transactional(() -> {
             for (File f : filesToProcess) {
-                f.setAuthor(user);
-                f.setDateCreated(new Date());
                 f.setUri(Generator.generateUri());
                 em.persist(f);
             }
