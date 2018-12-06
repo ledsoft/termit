@@ -11,7 +11,6 @@ import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +44,7 @@ public class VocabularyController extends BaseController {
     public ResponseEntity<Void> createVocabulary(@RequestBody Vocabulary vocabulary) {
         vocabularyService.persist(vocabulary);
         LOG.debug("Vocabulary {} created.", vocabulary);
-        final HttpHeaders headers = generateLocationHeader(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY);
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return ResponseEntity.created(generateLocation(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY)).build();
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
@@ -62,7 +60,7 @@ public class VocabularyController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                   JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateVocabulary(@PathVariable("fragment") String fragment,
                                  @RequestParam(name = "namespace", required = false) String namespace,

@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,8 +51,6 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
     private Resource generateResource() {
         final Resource resource = Generator.generateResourceWithId();
-        resource.setAuthor(user);
-        resource.setDateCreated(new Date());
         transactional(() -> em.persist(resource));
         return resource;
     }
@@ -150,5 +148,12 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         assertEquals(2, sut.findTerms(resource).size());
         assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
+    }
+
+    @Test
+    void persistThrowsValidationExceptionWhenResourceLabelIsMissing() {
+        final Resource resource = Generator.generateResourceWithId();
+        resource.setName(null);
+        assertThrows(ValidationException.class, () -> sut.persist(resource));
     }
 }

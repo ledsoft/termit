@@ -158,8 +158,7 @@ public class TermController extends BaseController {
         }
 
         LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
-        final HttpHeaders headers = generateLocationHeader(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY);
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return ResponseEntity.created(generateLocation(vocabularyUri, ConfigParam.NAMESPACE_VOCABULARY)).build();
     }
 
     /**

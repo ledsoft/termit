@@ -5,10 +5,11 @@ import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.net.URI;
+
+import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 
 /**
  * Base for application REST controllers.
@@ -28,7 +29,8 @@ public class BaseController {
     }
 
     /**
-     * Resolves identifier based on the specified resource (if provided) or the namespace loaded from application configuration.
+     * Resolves identifier based on the specified resource (if provided) or the namespace loaded from application
+     * configuration.
      *
      * @param namespace       Explicitly provided namespace. Optional
      * @param fragment        Locally unique identifier fragment
@@ -43,12 +45,12 @@ public class BaseController {
         }
     }
 
-    HttpHeaders generateLocationHeader(URI identifier, ConfigParam namespaceConfig) {
+    URI generateLocation(URI identifier, ConfigParam namespaceConfig) {
         if (identifier.toString().startsWith(config.get(namespaceConfig))) {
-            return RestUtils.createLocationHeaderFromCurrentUriWithPath("/{name}",
+            return RestUtils.createLocationFromCurrentUriWithPath("/{name}",
                     IdentifierResolver.extractIdentifierFragment(identifier));
         } else {
-            return RestUtils.createLocationHeaderFromCurrentUriWithPathAndQuery("/{name}", "namespace",
+            return RestUtils.createLocationFromCurrentUriWithPathAndQuery("/{name}", NAMESPACE_PARAM,
                     IdentifierResolver.extractIdentifierNamespace(identifier),
                     IdentifierResolver.extractIdentifierFragment(identifier));
         }
