@@ -5,8 +5,10 @@ import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.User;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.util.MetamodelUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private MetamodelUtils metamodelUtils;
 
     @Autowired
     private VocabularyDao sut;
@@ -97,8 +102,6 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     @Test
     void updateEvictsPossiblyPreviouslyLoadedInstanceFromSecondLevelCache() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
         final Descriptor descriptor = descriptorFor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
@@ -112,5 +115,46 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final List<Vocabulary> result = sut.findAll();
         assertEquals(1, result.size());
         assertEquals(newName, result.get(0).getName());
+    }
+
+    @Test
+    void updateWorksCorrectlyInContextsForDocumentVocabulary() {
+        final DocumentVocabulary vocabulary = new DocumentVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setName("test-vocabulary");
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        final Document doc = new Document();
+        doc.setName("test-document");
+        doc.setUri(Generator.generateUri());
+        final File file = new File();
+        file.setName("test-file");
+        file.setUri(Generator.generateUri());
+        doc.addFile(file);
+        vocabulary.setDocument(doc);
+        final EntityDescriptor vocabularyDescriptor = new EntityDescriptor(vocabulary.getUri());
+        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Vocabulary.class, "author"),
+                new EntityDescriptor(null));
+        final EntityDescriptor docDescriptor = new EntityDescriptor(vocabulary.getUri());
+        docDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "author"),
+                new EntityDescriptor(null));
+        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabulary.getUri());
+        fileDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(File.class, "author"),
+                new EntityDescriptor(null));
+        transactional(() -> {
+            em.persist(file, fileDescriptor);
+            em.persist(doc, docDescriptor);
+            em.persist(vocabulary, vocabularyDescriptor);
+        });
+        docDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "files"), fileDescriptor);
+        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(DocumentVocabulary.class, "document"),
+                docDescriptor);
+
+        final String newComment = "New comment";
+        vocabulary.setComment(newComment);
+        transactional(() -> sut.update(vocabulary));
+
+        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), vocabularyDescriptor);
+        assertEquals(newComment, result.getComment());
     }
 }
