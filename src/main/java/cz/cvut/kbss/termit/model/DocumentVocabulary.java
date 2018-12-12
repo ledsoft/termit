@@ -1,15 +1,14 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.model.annotations.FetchType;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
-import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.service.ProvenanceGenerator;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_dokumentovy_slovnik)
+@EntityListeners(ProvenanceGenerator.class)
 public class DocumentVocabulary extends Vocabulary {
 
     @NotNull
