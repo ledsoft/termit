@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.exceptions.NoResultException;
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.dto.RdfsResource;
 import cz.cvut.kbss.termit.exception.PersistenceException;
@@ -43,8 +44,7 @@ public class DataDao {
                 "OPTIONAL { ?x ?has-label ?label . }" +
                 "OPTIONAL { ?x ?has-comment ?comment . }" +
                 "}", "RdfsResource")
-                 // TODO Replace with RDF.PROPERTY once the new JOPA release which fixes the incorrect IRI is out
-                 .setParameter("property", URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"))
+                 .setParameter("property", URI.create(RDF.PROPERTY))
                  .setParameter("has-label", RDFS_LABEL)
                  .setParameter("has-comment", URI.create(RDFS.COMMENT)).getResultList();
     }
