@@ -6,10 +6,10 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.AfterEach;
@@ -29,14 +29,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.util.ConfigParam.NAMESPACE_RESOURCE;
 import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ResourceControllerTest extends BaseControllerTestRunner {
@@ -66,7 +66,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     void setUp() {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
-        when(configMock.get(ConfigParam.NAMESPACE_RESOURCE)).thenReturn(RESOURCE_NAMESPACE);
+        when(configMock.get(NAMESPACE_RESOURCE)).thenReturn(RESOURCE_NAMESPACE);
     }
 
     @AfterEach
@@ -177,7 +177,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setName(RESOURCE_NAME);
         final URI resourceId = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
         resource.setUri(resourceId);
-        when(identifierResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, RESOURCE_NAME))
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME))
                 .thenReturn(resourceId);
         when(resourceServiceMock.find(resourceId)).thenReturn(Optional.of(resource));
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + RESOURCE_NAME)).andExpect(status().isOk())
@@ -185,7 +185,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Resource result = readValue(mvcResult, Resource.class);
         assertEquals(resource, result);
         verify(resourceServiceMock).find(resourceId);
-        verify(identifierResolverMock).resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, RESOURCE_NAME);
+        verify(identifierResolverMock).resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME);
     }
 
     @Test
@@ -212,7 +212,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setName(RESOURCE_NAME);
         final URI resourceId = URI.create(RESOURCE_NAMESPACE + "/" + RESOURCE_NAME);
         resource.setUri(resourceId);
-        when(identifierResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_RESOURCE, RESOURCE_NAME))
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME))
                 .thenReturn(resourceId);
         mockMvc.perform(get(PATH + "/" + RESOURCE_NAME)).andExpect(status().isNotFound());
     }
@@ -248,5 +248,48 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         verifyLocationEquals(PATH + "/" + RESOURCE_NAME, mvcResult);
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
         assertThat(location, containsString(NAMESPACE_PARAM + "=" + namespace));
+    }
+
+    @Test
+    void updateResourcePassesUpdateDataToService() throws Exception {
+        final Resource resource = Generator.generateResource();
+        resource.setName(RESOURCE_NAME);
+        resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        when(resourceServiceMock.exists(resource.getUri())).thenReturn(true);
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
+        mockMvc.perform(
+                put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isNoContent());
+        verify(identifierResolverMock).resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME);
+        verify(resourceServiceMock).exists(resource.getUri());
+        verify(resourceServiceMock).update(resource);
+    }
+
+    @Test
+    void updateResourceThrowsNotFoundExceptionForUnknownResourceId() throws Exception {
+        final Resource resource = Generator.generateResource();
+        resource.setName(RESOURCE_NAME);
+        resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        when(resourceServiceMock.exists(resource.getUri())).thenReturn(false);
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
+        mockMvc.perform(
+                put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isNotFound());
+        verify(resourceServiceMock, never()).update(any());
+    }
+
+    @Test
+    void updateResourceThrowsConflictExceptionWhenRequestUrlIdentifierDiffersFromEntityIdentifier() throws Exception {
+        final Resource resource = Generator.generateResourceWithId();
+        resource.setName(RESOURCE_NAME);
+        when(resourceServiceMock.exists(resource.getUri())).thenReturn(true);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
+                .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        final MvcResult mvcResult = mockMvc.perform(
+                put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON)
+                                               .param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+                                           .andExpect(status().isConflict()).andReturn();
+        final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
+        assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
     }
 }
