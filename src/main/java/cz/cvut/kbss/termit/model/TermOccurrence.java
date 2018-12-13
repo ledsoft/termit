@@ -6,6 +6,13 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 @OWLClass(iri = Vocabulary.s_c_vyskyt_termu)
 public class TermOccurrence extends TermAssignment {
 
+    public TermOccurrence() {
+    }
+
+    public TermOccurrence(Term term, OccurrenceTarget target) {
+        super(term, target);
+    }
+
     @Override
     public OccurrenceTarget getTarget() {
         assert target == null || target instanceof OccurrenceTarget;

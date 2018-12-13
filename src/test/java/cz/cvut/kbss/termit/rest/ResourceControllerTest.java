@@ -322,4 +322,16 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                .andExpect(status().isNotFound());
         verify(resourceServiceMock, never()).setTags(any(Resource.class), anyCollection());
     }
+
+    @Test
+    void getAllRetrievesResourcesFromUnderlyingService() throws Exception {
+        final List<Resource> resources = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId())
+                                                  .collect(Collectors.toList());
+        when(resourceServiceMock.findAll()).thenReturn(resources);
+        final MvcResult mvcResult = mockMvc.perform(get(PATH)).andReturn();
+        final List<Resource> result = readValue(mvcResult, new TypeReference<List<Resource>>() {
+        });
+        verify(resourceServiceMock).findAll();
+        assertEquals(resources, result);
+    }
 }
