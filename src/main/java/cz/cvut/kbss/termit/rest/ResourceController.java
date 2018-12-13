@@ -41,6 +41,11 @@ public class ResourceController extends BaseController {
         this.securityUtils = securityUtils;
     }
 
+    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<Resource> getAll() {
+        return resourceService.findAll();
+    }
+
     @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createResource(@RequestBody Resource resource) {
         resourceService.persist(resource);
@@ -71,17 +76,13 @@ public class ResourceController extends BaseController {
         LOG.debug("Resource {} updated.", resource);
     }
 
-    @RequestMapping(value = "/resource/terms", method = RequestMethod.PUT,
-            consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void setTerms(@RequestParam(name = "iri") URI resourceId,
+    public void setTerms(@PathVariable("normalizedName") String normalizedName,
+                         @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                          @RequestBody List<URI> termIds) {
-        resourceService.setTags(resourceId, termIds);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Resource> getAll() {
-        return resourceService.findAll();
+        final Resource resource = getResource(normalizedName, namespace);
+        resourceService.setTags(resource, termIds);
     }
 
     private Resource getResource(URI resourceId) {

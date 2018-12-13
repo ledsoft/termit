@@ -292,4 +292,34 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
     }
+
+    @Test
+    void setTermsPassesNewTermUrisToService() throws Exception {
+        final Resource resource = Generator.generateResource();
+        resource.setName(RESOURCE_NAME);
+        resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
+        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        final List<URI> uris = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
+                                        .collect(Collectors.toList());
+        mockMvc.perform(put(PATH + "/" + RESOURCE_NAME + "/terms").content(toJson(uris))
+                                                                  .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isNoContent());
+        verify(resourceServiceMock).find(resource.getUri());
+        verify(resourceServiceMock).setTags(resource, uris);
+    }
+
+    @Test
+    void setTermsThrowsNotFoundForUnknownResourceIdentifier() throws Exception {
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
+                .thenReturn(Generator.generateUri());
+        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
+        final List<URI> uris = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
+                                        .collect(Collectors.toList());
+        mockMvc.perform(put(PATH + "/" + RESOURCE_NAME + "/terms").content(toJson(uris))
+                                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                                  .param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+               .andExpect(status().isNotFound());
+        verify(resourceServiceMock, never()).setTags(any(Resource.class), anyCollection());
+    }
 }

@@ -70,27 +70,13 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void setTagsForInvalidResource() {
-        assertThrows(NotFoundException.class, () -> {
-            final Term term1 = generateTermWithUriAndPersist();
-            final Term term2 = generateTermWithUriAndPersist();
-
-            final Set<Term> terms = new HashSet<>();
-            terms.add(term1);
-            terms.add(term2);
-            transactional(() -> sut.setTags(URI.create("http://unknown.uri/resource"),
-                    terms.stream().map(Term::getUri).collect(Collectors.toSet())));
-        });
-    }
-
-    @Test
     void setInvalidTagsForValidResource() {
         assertThrows(NotFoundException.class, () -> {
             final Resource resource = generateResource();
             final Set<URI> terms = new HashSet<>();
             terms.add(URI.create("http://unknown.uri/term1"));
             terms.add(URI.create("http://unknown.uri/term2"));
-            transactional(() -> sut.setTags(resource.getUri(), terms));
+            transactional(() -> sut.setTags(resource, terms));
         });
     }
 
@@ -104,7 +90,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         tags.add(term0);
         tags.add(term1);
 
-        transactional(() -> sut.setTags(resource.getUri(), tags));
+        transactional(() -> sut.setTags(resource, tags));
 
         assertEquals(2, sut.findTerms(resource).size());
         assertEquals(tags, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
@@ -120,14 +106,14 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         tags.add(term0);
         tags.add(term1);
 
-        transactional(() -> sut.setTags(resource.getUri(), tags));
+        transactional(() -> sut.setTags(resource, tags));
 
         final Set<URI> tags2 = new HashSet<>();
         final URI term2 = generateTermWithUriAndPersist().getUri();
         final URI term3 = generateTermWithUriAndPersist().getUri();
         tags2.add(term2);
         tags2.add(term3);
-        transactional(() -> sut.setTags(resource.getUri(), tags2));
+        transactional(() -> sut.setTags(resource, tags2));
 
         assertEquals(2, sut.findTerms(resource).size());
         assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
@@ -143,13 +129,13 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         tags.add(term0);
         tags.add(term1);
 
-        transactional(() -> sut.setTags(resource.getUri(), tags));
+        transactional(() -> sut.setTags(resource, tags));
         final Set<URI> tags2 = new HashSet<>();
         final URI term2 = generateTermWithUriAndPersist().getUri();
         tags2.add(term0);
         tags2.add(term2);
 
-        transactional(() -> sut.setTags(resource.getUri(), tags2));
+        transactional(() -> sut.setTags(resource, tags2));
 
         assertEquals(2, sut.findTerms(resource).size());
         assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
