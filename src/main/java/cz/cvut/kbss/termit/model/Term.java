@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.CsvUtils;
@@ -33,7 +34,7 @@ public class Term implements Serializable, HasTypes {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    @OWLDataProperty(iri = "http://purl.org/dc/elements/1.1/source")
+    @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
