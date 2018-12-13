@@ -20,16 +20,19 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
     private final ResourceDao resourceDao;
     private final TermAssignmentDao termAssignmentDao;
     private final TargetDao targetDao;
+    private final TermOccurrenceDao termOccurrenceDao;
     private final TermDao termDao;
 
     @Autowired
     public ResourceRepositoryService(Validator validator, ResourceDao resourceDao, TermDao termDao,
-                                     TermAssignmentDao termAssignmentDao, TargetDao targetDao) {
+                                     TermAssignmentDao termAssignmentDao, TargetDao targetDao,
+                                     TermOccurrenceDao termOccurrenceDao) {
         super(validator);
         this.resourceDao = resourceDao;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
         this.targetDao = targetDao;
+        this.termOccurrenceDao = termOccurrenceDao;
     }
 
     @Override
@@ -100,5 +103,19 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
         });
 
         update(resource);
+    }
+
+    @Override
+    protected void preRemove(Resource instance) {
+        termOccurrenceDao.findAll(instance).forEach(to -> {
+            termOccurrenceDao.remove(to);
+            targetDao.remove(to.getTarget());
+        });
+        final Optional<Target> target = targetDao.findByWholeResource(instance);
+        target.ifPresent(t -> {
+            final List<TermAssignment> assignments = termAssignmentDao.findByTarget(t);
+            assignments.forEach(termAssignmentDao::remove);
+            targetDao.remove(t);
+        });
     }
 }

@@ -338,7 +338,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final InputStream content = loadFile("data/rdfa-simple.html");
         generateFile();
         sut.generateAnnotations(content, file, document);
-        final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAllInFile(file);
+        final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAll(file);
         assertEquals(2, allOccurrences.size());
         assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
         assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));

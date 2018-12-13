@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -37,21 +37,21 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
     }
 
     /**
-     * Finds all term occurrences which have at least one target pointing to the specified file.
+     * Finds all term occurrences which have at least one target pointing to the specified resource.
      * <p>
-     * I.e., these term occurrences appear in the specified file.
+     * I.e., these term occurrences appear in the specified resource (presumably file).
      *
-     * @param file File to filter by
+     * @param resource Resource to filter by
      * @return List of matching term occurrences
      */
-    public List<TermOccurrence> findAllInFile(File file) {
-        Objects.requireNonNull(file);
+    public List<TermOccurrence> findAll(Resource resource) {
+        Objects.requireNonNull(resource);
         return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
                 "?x a ?type ;" +
                 "?hasTarget ?target ." +
-                "?target ?hasSource ?file . }", TermOccurrence.class).setParameter("type", typeUri)
+                "?target ?hasSource ?resource . }", TermOccurrence.class).setParameter("type", typeUri)
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
-                 .setParameter("file", file.getUri()).getResultList();
+                 .setParameter("resource", resource.getUri()).getResultList();
     }
 }

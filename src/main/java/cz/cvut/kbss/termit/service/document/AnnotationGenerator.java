@@ -61,7 +61,7 @@ public class AnnotationGenerator {
         LOG.debug("Resolving annotations of file {}.", source);
         occurrenceResolver.parseContent(content, source);
         final List<TermOccurrence> occurrences = occurrenceResolver.findTermOccurrences();
-        final List<TermOccurrence> existing = termOccurrenceDao.findAllInFile(source);
+        final List<TermOccurrence> existing = termOccurrenceDao.findAll(source);
         occurrences.stream().filter(o -> isNew(o, existing)).forEach(o -> {
             o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);
             targetDao.persist(o.getTarget());

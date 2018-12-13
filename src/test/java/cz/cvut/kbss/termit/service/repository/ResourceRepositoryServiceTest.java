@@ -5,15 +5,19 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.model.selector.TermSelector;
+import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
+
+    private static final String EXISTENCE_CHECK_QUERY = "ASK { ?x a ?type . }";
 
     @Autowired
     private EntityManager em;
@@ -146,5 +152,82 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         resource.setName(null);
         assertThrows(ValidationException.class, () -> sut.persist(resource));
+    }
+
+    @Test
+    void removeDeletesTargetAndTermAssignmentsAssociatedWithResource() {
+        final Resource resource = generateResource();
+        final Term tOne = generateTermWithUriAndPersist();
+        final Term tTwo = generateTermWithUriAndPersist();
+        final Target target = new Target(resource);
+        final TermAssignment assignmentOne = new TermAssignment(tOne, target);
+        final TermAssignment assignmentTwo = new TermAssignment(tTwo, target);
+        transactional(() -> {
+            em.persist(target);
+            em.persist(assignmentOne);
+            em.persist(assignmentTwo);
+        });
+
+        sut.remove(resource);
+        assertNull(em.find(Resource.class, resource.getUri()));
+        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
+        verifyInstancesRemoved(Vocabulary.s_c_cil);
+    }
+
+    private void verifyInstancesRemoved(String type) {
+        assertFalse(em.createNativeQuery(EXISTENCE_CHECK_QUERY, Boolean.class).setParameter("type", URI.create(type))
+                      .getSingleResult());
+    }
+
+    @Test
+    void removeDeletesOccurrenceTargetsAndTermOccurrencesAssociatedWithResource() {
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setName("test.txt");
+        transactional(() -> em.persist(file));
+        final Term tOne = generateTermWithUriAndPersist();
+        final OccurrenceTarget target = new OccurrenceTarget(file);
+        final TermSelector selector = new TextQuoteSelector("test");
+        target.setSelectors(Collections.singleton(selector));
+        final TermOccurrence occurrence = new TermOccurrence(tOne, target);
+        transactional(() -> {
+            em.persist(target);
+            em.persist(occurrence);
+        });
+
+        sut.remove(file);
+        assertNull(em.find(File.class, file.getUri()));
+        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
+        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
+        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+    }
+
+    @Test
+    void removeDeletesTermAssignmentsOccurrencesAndAllTargetsAssociatedWithResource() {
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setName("test.txt");
+        transactional(() -> em.persist(file));
+        final Term tOne = generateTermWithUriAndPersist();
+        final OccurrenceTarget occurrenceTarget = new OccurrenceTarget(file);
+        final TermSelector selector = new TextQuoteSelector("test");
+        occurrenceTarget.setSelectors(Collections.singleton(selector));
+        final TermOccurrence occurrence = new TermOccurrence(tOne, occurrenceTarget);
+        final Term tTwo = generateTermWithUriAndPersist();
+        final Target target = new Target(file);
+        final TermAssignment assignmentOne = new TermAssignment(tTwo, target);
+        transactional(() -> {
+            em.persist(occurrenceTarget);
+            em.persist(assignmentOne);
+            em.persist(target);
+            em.persist(occurrence);
+        });
+
+        sut.remove(file);
+        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
+        verifyInstancesRemoved(Vocabulary.s_c_cil);
+        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
+        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
+        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
     }
 }
