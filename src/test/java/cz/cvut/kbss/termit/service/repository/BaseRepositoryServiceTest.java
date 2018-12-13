@@ -183,4 +183,16 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
         assertFalse(sut.exists(id));
         verify(userAccountDaoMock).exists(id);
     }
+
+    @Test
+    void removeInvokesPreAndPostHooks() {
+        final UserAccount user = generateAccount();
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
+
+        final InOrder inOrder = inOrder(sut, userAccountDaoMock);
+        sut.remove(user);
+        inOrder.verify(sut).preRemove(user);
+        inOrder.verify(userAccountDaoMock).remove(user);
+        inOrder.verify(sut).postRemove(user);
+    }
 }

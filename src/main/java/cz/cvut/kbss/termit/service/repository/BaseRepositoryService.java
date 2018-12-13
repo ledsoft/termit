@@ -139,7 +139,32 @@ public abstract class BaseRepositoryService<T> {
      */
     @Transactional
     public void remove(T instance) {
+        Objects.requireNonNull(instance);
+        preRemove(instance);
         getPrimaryDao().remove(instance);
+        postRemove(instance);
+    }
+
+    /**
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(Object)}.
+     * <p>
+     * The default behavior is a no-op.
+     *
+     * @param instance The instance to be removed, not {@code null}
+     */
+    protected void preRemove(@NonNull T instance) {
+        // Do nothing
+    }
+
+    /**
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(Object)}.
+     * <p>
+     * The default behavior is a no-op.
+     *
+     * @param instance The removed instance, not {@code null}
+     */
+    protected void postRemove(@NonNull T instance) {
+        // Do nothing
     }
 
     /**
