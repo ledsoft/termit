@@ -23,6 +23,13 @@ Rules
     -------------------------------
     x b y
 
+  Id: rdfs9
+    a  <rdf:type>  x                [Constraint x != y]
+    x  <rdfs:subClassOf>  y
+    -------------------------------
+    a  <rdf:type>  y
+
+
   Id: psys_transitiveOver
     p <psys:transitiveOver> q
     x p y
