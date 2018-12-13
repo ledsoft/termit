@@ -5,24 +5,14 @@ import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.persistence.dao.GenericDao;
-import cz.cvut.kbss.termit.persistence.dao.ResourceDao;
-import cz.cvut.kbss.termit.persistence.dao.TargetDao;
-import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
-import cz.cvut.kbss.termit.persistence.dao.TermDao;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-
+import cz.cvut.kbss.termit.persistence.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
-import java.util.HashSet;
-import java.util.List;
-
-import org.springframework.transaction.annotation.Transactional;
+import java.net.URI;
+import java.util.*;
 
 @Service
 public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
@@ -72,14 +62,13 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
     /**
      * Annotates a resource with vocabulary terms.
      *
-     * @param iResource Resource to be annotated.
-     * @param iTerms    Terms to be used for annotation
+     * @param resource Resource to be annotated
+     * @param iTerms   Terms to be used for annotation
      */
     @Transactional
-    public void setTags(final URI iResource, final Collection<URI> iTerms) {
-        final Resource resource =
-                resourceDao.find(iResource).orElseThrow(() -> NotFoundException
-                        .create(Resource.class.getSimpleName(), iResource));
+    public void setTags(Resource resource, final Collection<URI> iTerms) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(iTerms);
 
         // get the whole-resource target
         final Target target = targetDao.findByWholeResource(resource).orElseGet(() -> {
