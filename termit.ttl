@@ -361,6 +361,12 @@ pojem:cil-vyskytu rdf:type owl:Class ;
 
 
 
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/dokument
+
+pojem:dokument rdfs:subClassOf pojem:zdroj .
+
+
+
 ###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/informace-o-verzi
 
 pojem:informace-o-verzi rdf:type owl:Class ;
@@ -464,6 +470,12 @@ pojem:selektor-xpath rdf:type owl:Class ;
                      rdfs:label "Selektor XPath"@cs ;
                      
                      rdfs:subClassOf pojem:selektor-termu .
+
+
+
+###  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/soubor
+
+pojem:soubor rdfs:subClassOf pojem:zdroj .
 
 
 
