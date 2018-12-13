@@ -56,6 +56,21 @@ public class ResourceController extends BaseController {
         return getResource(identifier);
     }
 
+    @RequestMapping(value = "/{normalizedName}", method = RequestMethod.PUT,
+            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateResource(@PathVariable("normalizedName") String normalizedName,
+                               @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
+                               @RequestBody Resource resource) {
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        verifyRequestAndEntityIdentifier(resource, identifier);
+        if (!resourceService.exists(identifier)) {
+            throw NotFoundException.create(Resource.class.getSimpleName(), identifier);
+        }
+        resourceService.update(resource);
+        LOG.debug("Resource {} updated.", resource);
+    }
+
     @RequestMapping(value = "/resource/terms", method = RequestMethod.PUT,
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
+import cz.cvut.kbss.termit.exception.ValidationException;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.rest.util.RestUtils;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -53,6 +55,21 @@ public class BaseController {
             return RestUtils.createLocationFromCurrentUriWithPathAndQuery("/{name}", NAMESPACE_PARAM,
                     IdentifierResolver.extractIdentifierNamespace(identifier),
                     IdentifierResolver.extractIdentifierFragment(identifier));
+        }
+    }
+
+    /**
+     * Ensures that the entity specified for update has the same identifier as the one that has been resolved from the
+     * request URL.
+     *
+     * @param entity            Entity
+     * @param requestIdentifier Identifier resolved from request
+     */
+    void verifyRequestAndEntityIdentifier(HasIdentifier entity, URI requestIdentifier) {
+        if (!requestIdentifier.equals(entity.getUri())) {
+            throw new ValidationException(
+                    "The ID " + requestIdentifier +
+                            ", resolved from request URL, does not match the ID of the specified entity.");
         }
     }
 }

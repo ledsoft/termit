@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_uzivatel_termitu)
-public class User implements Serializable, HasTypes {
+public class User implements HasIdentifier, HasTypes, Serializable {
 
     @Id
     private URI uri;
@@ -34,10 +35,12 @@ public class User implements Serializable, HasTypes {
     @Types
     private Set<String> types;
 
+    @Override
     public URI getUri() {
         return uri;
     }
 
+    @Override
     public void setUri(URI uri) {
         this.uri = uri;
     }

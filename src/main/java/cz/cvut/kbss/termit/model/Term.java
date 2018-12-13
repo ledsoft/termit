@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -16,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @OWLClass(iri = Vocabulary.s_c_term)
-public class Term implements Serializable, HasTypes {
+public class Term implements HasIdentifier, HasTypes, Serializable {
 
     /**
      * Names of columns used in term export.
@@ -50,10 +51,12 @@ public class Term implements Serializable, HasTypes {
     @Types
     private Set<String> types;
 
+    @Override
     public URI getUri() {
         return uri;
     }
 
+    @Override
     public void setUri(URI uri) {
         this.uri = uri;
     }

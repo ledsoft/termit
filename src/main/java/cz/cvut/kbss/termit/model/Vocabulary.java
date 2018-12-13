@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.service.ProvenanceGenerator;
 
 import javax.validation.constraints.NotBlank;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 @EntityListeners(ProvenanceGenerator.class)
-public class Vocabulary extends HasProvenanceData implements Serializable {
+public class Vocabulary extends HasProvenanceData implements HasIdentifier, Serializable {
 
     @Id
     private URI uri;
@@ -42,10 +43,12 @@ public class Vocabulary extends HasProvenanceData implements Serializable {
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
 
+    @Override
     public URI getUri() {
         return uri;
     }
 
+    @Override
     public void setUri(URI uri) {
         this.uri = uri;
     }

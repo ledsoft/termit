@@ -225,7 +225,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                                            .andExpect(status().isConflict()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertNotNull(errorInfo);
-        assertThat(errorInfo.getMessage(), containsString("does not match the id of the specified vocabulary"));
+        assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
         verify(serviceMock, never()).update(any());
     }
 }

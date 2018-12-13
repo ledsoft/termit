@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -68,10 +69,7 @@ public class VocabularyController extends BaseController {
                                  @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
                                  @RequestBody Vocabulary update) {
         final URI vocabularyUri = resolveVocabularyUri(fragment, namespace);
-        if (!vocabularyUri.equals(update.getUri())) {
-            throw new ValidationException(
-                    "Resolved vocabulary id " + vocabularyUri + " does not match the id of the specified vocabulary.");
-        }
+        verifyRequestAndEntityIdentifier(update, vocabularyUri);
         if (!vocabularyService.exists(vocabularyUri)) {
             throw NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri);
         }
