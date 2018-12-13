@@ -5,15 +5,19 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
+
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-@Repository public class TargetDao extends BaseDao<Target> {
+@Repository
+public class TargetDao extends BaseDao<Target> {
 
-    @Autowired public TargetDao(EntityManager em) {
+    @Autowired
+    public TargetDao(EntityManager em) {
         super(Target.class, em);
     }
 
@@ -24,11 +28,11 @@ import org.springframework.stereotype.Repository;
         Objects.requireNonNull(resource);
         try {
             return Optional.ofNullable(em.createNativeQuery(
-                "SELECT ?x WHERE {" + "?x a ?type ." + "?x ?hasSource ?resource . "
-                + "FILTER NOT EXISTS {?x ?hasSelector ?selector} }", Target.class)
+                    "SELECT ?x WHERE {" + "?x a ?type ." + "?x ?hasSource ?resource . "
+                            + "FILTER NOT EXISTS {?x ?hasSelector ?selector} }", Target.class)
                                          .setParameter("type", typeUri).setParameter("hasSource",
-                    URI.create(Vocabulary.s_p_ma_zdroj)).setParameter("hasSelector",
-                    URI.create(Vocabulary.s_p_ma_selektor))
+                            URI.create(Vocabulary.s_p_ma_zdroj)).setParameter("hasSelector",
+                            URI.create(Vocabulary.s_p_ma_selektor))
                                          .setParameter("resource", resource.getUri())
                                          .getSingleResult());
         } catch (NoResultException e) {
