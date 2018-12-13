@@ -5,9 +5,7 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
-import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -53,21 +51,6 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         transactional(() -> em.persist(resource));
         return resource;
-    }
-
-    private Target generateWholeResourceTarget(final Resource resource) {
-        final Target target = Generator.generateTargetWithId();
-        target.setSource(resource);
-        transactional(() -> em.persist(target));
-        return target;
-    }
-
-    private TermAssignment generateTermAssignment(final Target target, final Term term) {
-        final TermAssignment termAssignment = Generator.generateTermAssignmentWithId();
-        termAssignment.setTarget(target);
-        termAssignment.setTerm(term);
-        transactional(() -> em.persist(termAssignment));
-        return termAssignment;
     }
 
     @Test
@@ -144,6 +127,28 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final URI term3 = generateTermWithUriAndPersist().getUri();
         tags2.add(term2);
         tags2.add(term3);
+        transactional(() -> sut.setTags(resource.getUri(), tags2));
+
+        assertEquals(2, sut.findTerms(resource).size());
+        assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
+    }
+
+    @Test
+    void setTagsMergesExistingTagsAndNewlySpecifiedTags() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.setTags(resource.getUri(), tags));
+        final Set<URI> tags2 = new HashSet<>();
+        final URI term2 = generateTermWithUriAndPersist().getUri();
+        tags2.add(term0);
+        tags2.add(term2);
+
         transactional(() -> sut.setTags(resource.getUri(), tags2));
 
         assertEquals(2, sut.findTerms(resource).size());

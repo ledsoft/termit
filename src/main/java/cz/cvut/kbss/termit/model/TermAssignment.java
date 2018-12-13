@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_prirazeni_termu)
@@ -22,6 +23,14 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
 
     @Types
     private Set<String> types;
+
+    public TermAssignment() {
+    }
+
+    public TermAssignment(Term term, Target target) {
+        this.term = Objects.requireNonNull(term);
+        this.target = Objects.requireNonNull(target);
+    }
 
     public Term getTerm() {
         return term;

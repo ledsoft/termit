@@ -6,7 +6,6 @@ import cz.cvut.kbss.termit.service.ProvenanceGenerator;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,10 +28,6 @@ public class File extends Resource {
 
     @Types
     private Set<String> types;
-
-    public File() {
-        this.types = Collections.singleton(Vocabulary.s_c_zdroj);
-    }
 
     public URI getOrigin() {
         return origin;

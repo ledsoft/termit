@@ -10,13 +10,18 @@ import cz.cvut.kbss.termit.persistence.dao.ResourceDao;
 import cz.cvut.kbss.termit.persistence.dao.TargetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
+
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Validator;
+import java.util.HashSet;
 import java.util.List;
+
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -28,7 +33,8 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
     private final TermDao termDao;
 
     @Autowired
-    public ResourceRepositoryService(Validator validator, ResourceDao resourceDao, TermDao termDao, TermAssignmentDao termAssignmentDao, TargetDao targetDao) {
+    public ResourceRepositoryService(Validator validator, ResourceDao resourceDao, TermDao termDao,
+                                     TermAssignmentDao termAssignmentDao, TargetDao targetDao) {
         super(validator);
         this.resourceDao = resourceDao;
         this.termDao = termDao;
@@ -67,36 +73,41 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
      * Annotates a resource with vocabulary terms.
      *
      * @param iResource Resource to be annotated.
-     * @param iTerms Terms to be used for annotation
+     * @param iTerms    Terms to be used for annotation
      */
     @Transactional
     public void setTags(final URI iResource, final Collection<URI> iTerms) {
         final Resource resource =
-            resourceDao.find(iResource).orElseThrow(() -> NotFoundException
-                .create(Resource.class.getSimpleName(), iResource));
+                resourceDao.find(iResource).orElseThrow(() -> NotFoundException
+                        .create(Resource.class.getSimpleName(), iResource));
 
         // get the whole-resource target
         final Target target = targetDao.findByWholeResource(resource).orElseGet(() -> {
-            final Target target2 = new Target();
-            target2.setSource(resource);
+            final Target target2 = new Target(resource);
             targetDao.persist(target2);
             return target2;
         });
 
-        // remove existing term assignments
-        // TODO do not remove tags which will be set anyway
+        // remove obsolete existing term assignments and determine new assignments to add
         final List<TermAssignment> termAssignments = termAssignmentDao.findByTarget(target);
-        termAssignments.stream().forEach(termAssignmentDao::remove);
+        final Collection<URI> toAdd = new HashSet<>(iTerms);
+        final List<TermAssignment> toRemove = new ArrayList<>(termAssignments.size());
+        for (TermAssignment existing : termAssignments) {
+            if (!iTerms.contains(existing.getTerm().getUri())) {
+                toRemove.add(existing);
+            } else {
+                toAdd.remove(existing.getTerm().getUri());
+            }
+        }
+        toRemove.forEach(termAssignmentDao::remove);
 
         // create term assignments for each input term to the target
-        iTerms.forEach( iTerm -> {
+        toAdd.forEach(iTerm -> {
             final Term term = termDao.find(iTerm).orElseThrow(
-                () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
+                    () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
 
-            final TermAssignment termAssignment = new TermAssignment();
-            termAssignment.setTerm(term);
-            termAssignment.setTarget(target);
-            termAssignmentDao.update(termAssignment);
+            final TermAssignment termAssignment = new TermAssignment(term, target);
+            termAssignmentDao.persist(termAssignment);
         });
 
         update(resource);
