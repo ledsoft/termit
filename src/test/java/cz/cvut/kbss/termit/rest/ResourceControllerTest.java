@@ -334,4 +334,27 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         verify(resourceServiceMock).findAll();
         assertEquals(resources, result);
     }
+
+    @Test
+    void removeResourceRemovesResourceViaService() throws Exception {
+        final Resource resource = Generator.generateResource();
+        resource.setName(RESOURCE_NAME);
+        resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
+        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME)).andExpect(status().isNoContent());
+        verify(resourceServiceMock).find(resource.getUri());
+        verify(resourceServiceMock).remove(resource);
+    }
+
+    @Test
+    void removeResourceThrowsNotFoundExceptionForUnknownResourceIdentifier() throws Exception {
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
+                .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
+        mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME).param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+               .andExpect(status().isNotFound());
+        verify(resourceServiceMock, never()).remove(any(Resource.class));
+        verify(resourceServiceMock, never()).remove(any(URI.class));
+    }
 }
