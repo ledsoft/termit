@@ -20,10 +20,12 @@ public class BaseControllerTestRunner {
 
     ObjectMapper objectMapper;
 
+    ObjectMapper jsonLdObjectMapper;
+
     MockMvc mockMvc;
 
     public void setUp(Object controller) {
-        setupObjectMapper();
+        setupObjectMappers();
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new RestExceptionHandler())
                                       .setMessageConverters(createJsonLdMessageConverter(),
                                               createDefaultMessageConverter(), createStringEncodingMessageConverter(),
@@ -32,12 +34,17 @@ public class BaseControllerTestRunner {
                                       .build();
     }
 
-    void setupObjectMapper() {
+    void setupObjectMappers() {
         this.objectMapper = Environment.getObjectMapper();
+        this.jsonLdObjectMapper = Environment.getJsonLdObjectMapper();
     }
 
     String toJson(Object object) throws Exception {
         return objectMapper.writeValueAsString(object);
+    }
+
+    String toJsonLd(Object object) throws Exception {
+        return jsonLdObjectMapper.writeValueAsString(object);
     }
 
     <T> T readValue(MvcResult result, Class<T> targetType) throws Exception {

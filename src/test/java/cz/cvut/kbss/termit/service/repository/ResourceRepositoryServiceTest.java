@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
@@ -229,5 +230,36 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
         verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
         verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+    }
+
+    @Test
+    void updateSupportsSubclassesOfResource() {
+        final Document doc = new Document();
+        doc.setName("test document");
+        doc.setUri(Generator.generateUri());
+        final File fileOne = new File();
+        fileOne.setUri(Generator.generateUri());
+        fileOne.setName("test.txt");
+        doc.addFile(fileOne);
+        final File fileTwo = new File();
+        fileTwo.setUri(Generator.generateUri());
+        fileTwo.setName("testTwo.html");
+        transactional(() -> {
+            em.persist(doc);
+            em.persist(fileOne);
+            em.persist(fileTwo);
+        });
+
+        final String newName = "Updated name";
+        doc.setName(newName);
+        final String newDescription = "Document description.";
+        doc.setDescription(newDescription);
+        doc.addFile(fileTwo);
+        sut.update(doc);
+        final Document result = em.find(Document.class, doc.getUri());
+        assertEquals(newName, result.getName());
+        assertEquals(newDescription, result.getDescription());
+        assertEquals(2, result.getFiles().size());
+        assertTrue(result.getFiles().contains(fileTwo));
     }
 }

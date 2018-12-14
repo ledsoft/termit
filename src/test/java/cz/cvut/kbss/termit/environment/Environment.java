@@ -34,6 +34,8 @@ public class Environment {
 
     private static ObjectMapper objectMapper;
 
+    private static ObjectMapper jsonLdObjectMapper;
+
     /**
      * Initializes security context with the specified user.
      *
@@ -83,9 +85,9 @@ public class Environment {
     }
 
     /**
-     * Gets a Jackson object mapper for mapping JSON to Java and vice versa.
+     * Gets a Jackson {@link ObjectMapper} for mapping JSON to Java and vice versa.
      *
-     * @return Object mapper
+     * @return {@code ObjectMapper}
      */
     public static ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
@@ -98,19 +100,31 @@ public class Environment {
     }
 
     /**
+     * Gets a Jackson {@link ObjectMapper} for mapping JSON-LD to Java and vice versa.
+     *
+     * @return {@code ObjectMapper}
+     */
+    public static ObjectMapper getJsonLdObjectMapper() {
+        if (jsonLdObjectMapper == null) {
+            jsonLdObjectMapper = new ObjectMapper();
+            jsonLdObjectMapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
+            jsonLdObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            jsonLdObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final JsonLdModule module = new JsonLdModule();
+            module.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
+            jsonLdObjectMapper.registerModule(module);
+        }
+        return jsonLdObjectMapper;
+    }
+
+    /**
      * Creates a Jackson JSON-LD message converter.
      *
      * @return JSON-LD message converter
      */
     public static HttpMessageConverter<?> createJsonLdMessageConverter() {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        final JsonLdModule module = new JsonLdModule();
-        module.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
-        mapper.registerModule(module);
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
+                getJsonLdObjectMapper());
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.valueOf(JsonLd.MEDIA_TYPE)));
         return converter;
     }

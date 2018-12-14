@@ -71,7 +71,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        super.setupObjectMapper();
+        super.setupObjectMappers();
         // WebApplicationContext is required for proper security. Otherwise, standaloneSetup could be used
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity(springSecurityFilterChain))
                                       .build();

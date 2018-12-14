@@ -1,10 +1,13 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -15,6 +18,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -23,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -356,5 +361,21 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                .andExpect(status().isNotFound());
         verify(resourceServiceMock, never()).remove(any(Resource.class));
         verify(resourceServiceMock, never()).remove(any(URI.class));
+    }
+
+    @Test
+    void createResourceSupportsSubtypesOfResource() throws Exception {
+        final Document doc = new Document();
+        doc.setName(RESOURCE_NAME);
+        doc.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        final File file = new File();
+        file.setName("test-file.html");
+        file.setUri(URI.create(RESOURCE_NAMESPACE + file.getName()));
+        doc.setFiles(Collections.singleton(file));
+        mockMvc.perform(post(PATH).content(toJsonLd(doc)).contentType(JsonLd.MEDIA_TYPE)).andExpect(status().isCreated());
+        final ArgumentCaptor<Document> captor = ArgumentCaptor.forClass(Document.class);
+        verify(resourceServiceMock).persist(captor.capture());
+        assertEquals(doc, captor.getValue());
+        assertEquals(doc.getFiles(), captor.getValue().getFiles());
     }
 }
