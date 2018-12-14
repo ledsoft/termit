@@ -59,6 +59,6 @@ public class SearchDao {
                                               .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
                                               .setParameter("inVocabulary",
                                                       URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
-                                              .setParameter("searchString", searchString, null).getResultList();
+                                              .setParameter("searchString", searchString + "*", null).getResultList();
     }
 }
