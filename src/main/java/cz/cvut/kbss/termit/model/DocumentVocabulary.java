@@ -2,13 +2,13 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.model.resource.Document;
-import cz.cvut.kbss.termit.service.ProvenanceGenerator;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_dokumentovy_slovnik)
-@EntityListeners(ProvenanceGenerator.class)
+@EntityListeners(ProvenanceManager.class)
 public class DocumentVocabulary extends Vocabulary {
 
     @NotNull

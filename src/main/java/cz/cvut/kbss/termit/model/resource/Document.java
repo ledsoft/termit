@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.ProvenanceGenerator;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.util.HashSet;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_dokument)
-@EntityListeners(ProvenanceGenerator.class)
+@EntityListeners(ProvenanceManager.class)
 public class Document extends Resource {
 
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)

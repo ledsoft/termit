@@ -6,7 +6,6 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
-import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
@@ -31,14 +30,11 @@ public class ResourceController extends BaseController {
 
     private final ResourceRepositoryService resourceService;
 
-    private final SecurityUtils securityUtils;
-
     @Autowired
     public ResourceController(IdentifierResolver idResolver, Configuration config,
-                              ResourceRepositoryService resourceService, SecurityUtils securityUtils) {
+                              ResourceRepositoryService resourceService) {
         super(idResolver, config);
         this.resourceService = resourceService;
-        this.securityUtils = securityUtils;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
@@ -115,11 +111,6 @@ public class ResourceController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@RequestParam(name = "iri") URI resourceId) {
-        final List<Resource> result = resourceService.findRelated(getResource(resourceId));
-        // Clear author info for unauthenticated requests
-        if (!securityUtils.isAuthenticated()) {
-            result.forEach(r -> r.setAuthor(null));
-        }
-        return result;
+        return resourceService.findRelated(getResource(resourceId));
     }
 }
