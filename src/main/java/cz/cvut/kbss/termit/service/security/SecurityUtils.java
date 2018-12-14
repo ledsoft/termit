@@ -65,7 +65,8 @@ public class SecurityUtils {
      */
     public Optional<TermItUserDetails> getCurrentUserDetails() {
         final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null && context.getAuthentication().getDetails() instanceof TermItUserDetails) {
+        if (context.getAuthentication() != null &&
+                context.getAuthentication().getDetails() instanceof TermItUserDetails) {
             return Optional.of((TermItUserDetails) context.getAuthentication().getDetails());
         } else {
             return Optional.empty();
@@ -78,9 +79,17 @@ public class SecurityUtils {
      *
      * @return Whether a user is authenticated
      */
-    public boolean isAuthenticated() {
+    public static boolean authenticated() {
         final SecurityContext context = SecurityContextHolder.getContext();
-        return context.getAuthentication() != null && context.getAuthentication().getDetails() instanceof TermItUserDetails;
+        return context.getAuthentication() != null &&
+                context.getAuthentication().getDetails() instanceof TermItUserDetails;
+    }
+
+    /**
+     * @see #authenticated()
+     */
+    public boolean isAuthenticated() {
+        return authenticated();
     }
 
     /**

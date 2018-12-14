@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.util.HasIdentifier;
-import cz.cvut.kbss.termit.service.ProvenanceGenerator;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
-@EntityListeners(ProvenanceGenerator.class)
+@EntityListeners(ProvenanceManager.class)
 public class Vocabulary extends HasProvenanceData implements HasIdentifier, Serializable {
 
     @Id

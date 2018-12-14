@@ -156,27 +156,6 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getRelatedResourcesReturnsResourcesWithoutAuthorInformationWhenAnonymousRequestInvokesEndpoint()
-            throws Exception {
-        final User author = Generator.generateUserWithId();
-        final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
-        final List<Resource> related = generateRelatedResources(author);
-        when(resourceServiceMock.findRelated(resource)).thenReturn(related);
-        when(securityUtilsMock.isAuthenticated()).thenReturn(false);
-        final MvcResult mvcResult = mockMvc
-                .perform(get(PATH + "/resource/related").param(IRI_PARAM, resource.getUri().toString()))
-                .andExpect(status().isOk()).andReturn();
-        final List<Resource> result = readValue(mvcResult, new TypeReference<List<Resource>>() {
-        });
-        assertEquals(related.size(), result.size());
-        result.forEach(r -> {
-            assertNull(r.getAuthor());
-            assertNotNull(r.getDateCreated());
-        });
-    }
-
-    @Test
     void getResourceRetrievesResourceByDefaultNamespaceAndSpecifiedNormalizedName() throws Exception {
         final Resource resource = Generator.generateResource();
         resource.setName(RESOURCE_NAME);

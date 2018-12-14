@@ -108,4 +108,10 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         SecurityContextHolder.setContext(new SecurityContextImpl(token));
         assertFalse(sut.isAuthenticated());
     }
+
+    @Test
+    void isAuthenticatedWorksInStaticVersion() {
+        Environment.setCurrentUser(user);
+        assertTrue(SecurityUtils.authenticated());
+    }
 }

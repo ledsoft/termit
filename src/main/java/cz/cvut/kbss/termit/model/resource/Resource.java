@@ -4,7 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.HasProvenanceData;
 import cz.cvut.kbss.termit.model.util.HasIdentifier;
-import cz.cvut.kbss.termit.service.ProvenanceGenerator;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.Objects;
 
 @OWLClass(iri = Vocabulary.s_c_zdroj)
-@EntityListeners(ProvenanceGenerator.class)
+@EntityListeners(ProvenanceManager.class)
 public class Resource extends HasProvenanceData implements HasIdentifier, Serializable {
 
     @Id
