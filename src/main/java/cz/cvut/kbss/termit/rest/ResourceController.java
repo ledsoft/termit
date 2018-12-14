@@ -90,6 +90,15 @@ public class ResourceController extends BaseController {
                               .orElseThrow(() -> NotFoundException.create(Resource.class.getSimpleName(), resourceId));
     }
 
+    @RequestMapping(value = "/{normalizedName}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeResource(@PathVariable("normalizedName") String normalizedName,
+                               @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
+        final Resource toRemove = getResource(normalizedName, namespace);
+        resourceService.remove(toRemove);
+        LOG.debug("Resource {} removed.", toRemove);
+    }
+
     //
     // NKOD API
     //
