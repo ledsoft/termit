@@ -336,17 +336,25 @@
             <id>rdf4j</id>
             <properties>
                 <profile.name>rdf4j</profile.name>
+                <spring.profiles.active>lucene</spring.profiles.active>
             </properties>
         </profile>
         <profile>
             <id>graphdb</id>
             <properties>
                 <profile.name>graphdb</profile.name>
+                <spring.profiles.active>lucene</spring.profiles.active>
             </properties>
         </profile>
     </profiles>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
