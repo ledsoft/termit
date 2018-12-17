@@ -135,7 +135,7 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
      * @return CSV representation of this term
      */
     public String toCsv() {
-        final StringBuilder sb = new StringBuilder(uri.toString());
+        final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(uri.toString()));
         sb.append(',').append(CsvUtils.sanitizeString(label));
         sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
         sb.append(',');
