@@ -56,19 +56,19 @@ class TermTest {
     }
 
     @Test
-    void toCsvExportsTypesInSquareBracketsDelimitedBySemicolons() {
+    void toCsvExportsTypesDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
         term.setTypes(new LinkedHashSet<>(Arrays.asList(Vocabulary.s_c_object, Vocabulary.s_c_entity)));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(4));
         final String types = items[3];
-        assertTrue(types.matches("\\[.+;.+]"));
+        assertTrue(types.matches(".+;.+"));
         term.getTypes().forEach(t -> assertTrue(types.contains(t)));
     }
 
     @Test
-    void toCsvExportsSourcesInSquareBracketsDelimitedBySemicolons() {
+    void toCsvExportsSourcesDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
@@ -76,19 +76,19 @@ class TermTest {
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(5));
         final String sources = items[4];
-        assertTrue(sources.matches("\\[.+;.+]"));
+        assertTrue(sources.matches(".+;.+"));
         term.getSources().forEach(t -> assertTrue(sources.contains(t)));
     }
 
     @Test
-    void toCsvExportsSubTermIrisInSquareBracketsDelimitedBySemicolons() {
+    void toCsvExportsSubTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(6));
         final String subTerms = items[5];
-        assertTrue(subTerms.matches("\\[.+;.+]"));
+        assertTrue(subTerms.matches(".+;.+"));
         term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
     }
 

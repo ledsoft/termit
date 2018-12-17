@@ -154,7 +154,7 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
     }
 
     private static String exportCollection(Collection<String> col) {
-        return CsvUtils.sanitizeString("[" + String.join(";", col) + "]");
+        return CsvUtils.sanitizeString(String.join(";", col));
     }
 
     /**
