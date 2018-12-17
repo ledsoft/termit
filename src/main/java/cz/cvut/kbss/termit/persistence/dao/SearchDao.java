@@ -5,6 +5,8 @@ import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 public class SearchDao {
 
     private static final String FTS_QUERY_FILE = "fulltextsearch.rq";
+
+    private static final Logger LOG = LoggerFactory.getLogger(SearchDao.class);
 
     private String ftsQuery;
 
@@ -35,7 +39,8 @@ public class SearchDao {
                 Constants.QUERY_DIRECTORY + File.separator + FTS_QUERY_FILE);
         if (is == null) {
             throw new TermItException(
-                    "Initialization exception. Full text search query not found in " + Constants.QUERY_DIRECTORY + File.separator + FTS_QUERY_FILE);
+                    "Initialization exception. Full text search query not found in " + Constants.QUERY_DIRECTORY +
+                            File.separator + FTS_QUERY_FILE);
         }
         try (final BufferedReader in = new BufferedReader(new InputStreamReader(is))) {
             this.ftsQuery = in.lines().collect(Collectors.joining("\n"));
@@ -54,6 +59,7 @@ public class SearchDao {
      */
     public List<FullTextSearchResult> fullTextSearch(String searchString) {
         Objects.requireNonNull(searchString);
+        LOG.trace("Running full text search for search string \"{}\".", searchString);
         return (List<FullTextSearchResult>) em.createNativeQuery(ftsQuery, "FullTextSearchResult")
                                               .setParameter("term", URI.create(Vocabulary.s_c_term))
                                               .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
