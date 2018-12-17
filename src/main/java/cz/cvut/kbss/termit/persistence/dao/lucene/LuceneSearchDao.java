@@ -3,8 +3,6 @@ package cz.cvut.kbss.termit.persistence.dao.lucene;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.persistence.dao.SearchDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -24,11 +22,8 @@ public class LuceneSearchDao extends SearchDao {
 
     static final char LUCENE_WILDCARD = '*';
 
-    private static final Logger LOG = LoggerFactory.getLogger(LuceneSearchDao.class);
-
     public LuceneSearchDao(EntityManager em) {
         super(em);
-        LOG.debug("Instantiating LuceneSearchDao.");
     }
 
     @Override
