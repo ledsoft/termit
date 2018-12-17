@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -139,5 +140,14 @@ class TermTest {
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
         assertTrue(row.getCell(4).getStringCellValue().matches(".+;.+"));
         term.getSources().forEach(s -> assertTrue(row.getCell(4).getStringCellValue().contains(s)));
+    }
+
+    @Test
+    void toCsvSanitizesTermUriToHandleCommas() {
+        final Term term = Generator.generateTerm();
+        term.setUri(URI.create(
+                "http://onto.fel.cvut.cz/ontologies/slovnik/oha-togaf/pojem/koncept-katalogů,-matic-a-pohledů"));
+        final String result = term.toCsv();
+        assertTrue(result.startsWith("\"" + term.getUri().toString() + "\","));
     }
 }
