@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -114,6 +115,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addTerm(parent);
+            em.persist(parent);
             em.merge(vocabulary);
         });
 
@@ -131,7 +133,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addTerm(parent);
-            em.merge(vocabulary);
+            em.persist(parent);
+            em.merge(vocabulary.getGlossary());
         });
 
         sut.addChildTerm(child, parent.getUri());
@@ -147,7 +150,10 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
                 Collectors.toList());
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary));
+        transactional(() -> {
+            terms.forEach(em::persist);
+            em.merge(vocabulary.getGlossary());
+        });
 
         final List<Term> resultOne = sut.findAllRoots(vocabulary, PageRequest.of(0, 5));
         final List<Term> resultTwo = sut.findAllRoots(vocabulary, PageRequest.of(1, 5));
@@ -177,7 +183,10 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
         toPersist.getGlossary().setTerms(terms);
-        vrs.update(toPersist);
+        transactional(() -> {
+            terms.forEach(t -> em.persist(t, new EntityDescriptor(vocabulary.getUri())));
+            em.merge(toPersist.getGlossary());
+        });
 
         List<Term> result1 = sut.findAllRoots("Result", vocabulary.getUri());
 
@@ -208,10 +217,11 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term childOne = generateTermWithUri();
         t.addSubTerm(childOne.getUri());
         final Term termTwo = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(t);
         vocabulary.getGlossary().addTerm(termTwo);
         transactional(() -> {
             em.persist(childOne);
+            em.persist(t);
+            em.persist(termTwo);
             em.merge(vocabulary);
         });
 
@@ -231,7 +241,10 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term t = generateTermWithUri();
         vocabulary.getGlossary().addTerm(t);
         vocabulary.getGlossary().addTerm(t);
-        transactional(() -> em.merge(vocabulary));
+        transactional(() -> {
+            em.persist(t);
+            em.merge(vocabulary);
+        });
 
         t.setLabel("");
         assertThrows(ValidationException.class, () -> sut.update(t));
@@ -249,6 +262,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         ta.setTerm(t);
         ta.setTarget(new Target(resource));
         transactional(() -> {
+            em.persist(t);
             em.merge(vocabulary);
             em.persist(resource);
             em.persist(ta.getTarget());

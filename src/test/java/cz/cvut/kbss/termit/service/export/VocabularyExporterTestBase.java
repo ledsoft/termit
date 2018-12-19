@@ -13,7 +13,10 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
 
@@ -44,7 +47,8 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
         }
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         transactional(() -> {
-            em.merge(vocabulary);
+            em.merge(vocabulary.getGlossary());
+            terms.forEach(em::persist);
             // Simulating inferred inverse property je_pojmem_ze_slovniku
             final Repository repo = em.unwrap(Repository.class);
             try (final RepositoryConnection conn = repo.getConnection()) {
