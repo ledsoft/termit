@@ -49,12 +49,19 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllWithDefaultPageSpecReturnsAllTerms() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         final List<Term> result = sut.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC);
         assertEquals(terms.size(), result.size());
         assertEquals(terms, result);
+    }
+
+    private void addTermsAndSave(Set<Term> terms) {
+        vocabulary.getGlossary().setTerms(terms);
+        transactional(() -> {
+            em.merge(vocabulary.getGlossary());
+            terms.forEach(em::persist);
+        });
     }
 
     private List<Term> generateTerms(int count) {
@@ -65,8 +72,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsMatchingPageWithTerms() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         // Paging starts at 0
         final List<Term> result = sut.findAllRoots(vocabulary, PageRequest.of(1, terms.size() / 2));
@@ -77,16 +83,13 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsOnlyTermsInSpecifiedVocabulary() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        addTermsAndSave(new HashSet<>(terms));
         final Vocabulary another = Generator.generateVocabulary();
         another.setUri(Generator.generateUri());
         another.setAuthor(vocabulary.getAuthor());
         another.setDateCreated(new Date());
         another.getGlossary().setTerms(new HashSet<>(generateTerms(4)));
-        transactional(() -> {
-            em.persist(another);
-            em.merge(vocabulary.getGlossary());
-        });
+        transactional(() -> em.persist(another));
 
         final List<Term> result = sut.findAllRoots(vocabulary, PageRequest.of(0, terms.size() / 2));
         assertEquals(terms.size() / 2, result.size());
@@ -96,10 +99,9 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsOnlyRootTerms() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         terms.forEach(t -> t.setSubTerms(
                 new HashSet<URI>(generateTerms(2).stream().map(Term::getUri).collect(Collectors.toSet()))));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         final List<Term> result = sut.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC);
         assertEquals(terms.size(), result.size());
@@ -112,8 +114,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllBySearchStringReturnsRootTermsWithMatchingLabel() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         final List<Term> result = sut.findAllRoots(terms.get(0).getLabel(), vocabulary);
         assertEquals(1, result.size());
@@ -123,7 +124,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        addTermsAndSave(new HashSet<>(terms));
         final Term root = terms.get(Generator.randomIndex(terms));
         final Term child = new Term();
         child.setUri(Generator.generateUri());
@@ -136,7 +137,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         transactional(() -> {
             em.persist(child);
             em.persist(matchingDesc);
-            em.merge(vocabulary.getGlossary());
+            em.merge(root);
         });
 
         final List<Term> result = sut.findAllRoots("plan", vocabulary);
@@ -148,8 +149,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueForLabelExistingInVocabulary() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         final String label = terms.get(0).getLabel();
         assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
@@ -159,8 +159,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsFalseForUnknownLabel() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         assertFalse(sut.existsInVocabulary("unknown label", vocabulary.getUri()));
     }
@@ -169,8 +168,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueWhenLabelDiffersOnlyInCase() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
-        transactional(() -> em.merge(vocabulary.getGlossary()));
+        addTermsAndSave(new HashSet<>(terms));
 
         final String label = terms.get(0).getLabel().toLowerCase();
         assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
@@ -181,6 +179,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         transactional(() -> {
+            terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
             insertInVocabularyPropertyStatements(terms);
         });
@@ -212,6 +211,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         final List<Term> terms = generateTerms(10);
         vocabulary.getGlossary().setTerms(new HashSet<>(terms));
         transactional(() -> {
+            terms.forEach(em::merge);
             em.merge(vocabulary.getGlossary());
             insertInVocabularyPropertyStatements(terms);
         });

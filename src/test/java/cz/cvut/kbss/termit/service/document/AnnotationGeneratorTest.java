@@ -204,7 +204,12 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(mp);
         vocabulary.getGlossary().addTerm(ma);
         vocabulary.getGlossary().addTerm(area);
-        transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
+        transactional(() -> {
+            em.persist(mp, new EntityDescriptor(vocabulary.getUri()));
+            em.persist(ma, new EntityDescriptor(vocabulary.getUri()));
+            em.persist(area, new EntityDescriptor(vocabulary.getUri()));
+            em.merge(vocabulary.getGlossary(), vocabDescriptor);
+        });
 
         final InputStream content = loadFile("data/rdfa-large.html");
         file.setName("rdfa-large.html");

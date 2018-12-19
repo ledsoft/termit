@@ -28,8 +28,7 @@ public class Vocabulary extends HasProvenanceData implements HasIdentifier, Seri
     private String comment;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Glossary glossary;
 
     @ParticipationConstraints(nonEmpty = true)

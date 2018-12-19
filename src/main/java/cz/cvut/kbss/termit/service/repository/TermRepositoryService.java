@@ -50,7 +50,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         if (!vocabulary.getGlossary().addTerm(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
-        vocabularyService.update(vocabulary);
+        termDao.persist(instance);
+        // No need to explicitly merge glossary, it is managed during transaction and changes will be saved on commit
     }
 
     @Transactional
