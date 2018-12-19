@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-
-import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 
 @RestController
 @RequestMapping("/vocabularies")
@@ -50,7 +49,7 @@ public class VocabularyController extends BaseController {
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
     public Vocabulary getById(@PathVariable("fragment") String fragment,
-                              @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
+                              @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI id = resolveVocabularyUri(fragment, namespace);
         return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
@@ -64,7 +63,7 @@ public class VocabularyController extends BaseController {
             JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateVocabulary(@PathVariable("fragment") String fragment,
-                                 @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
+                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                  @RequestBody Vocabulary update) {
         final URI vocabularyUri = resolveVocabularyUri(fragment, namespace);
         verifyRequestAndEntityIdentifier(update, vocabularyUri);

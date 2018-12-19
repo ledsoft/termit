@@ -70,7 +70,7 @@ public class BaseController {
             return RestUtils.createLocationFromCurrentUriWithPath("/{name}",
                     IdentifierResolver.extractIdentifierFragment(identifier));
         } else {
-            return RestUtils.createLocationFromCurrentUriWithPathAndQuery("/{name}", NAMESPACE_PARAM,
+            return RestUtils.createLocationFromCurrentUriWithPathAndQuery("/{name}", QueryParams.NAMESPACE,
                     IdentifierResolver.extractIdentifierNamespace(identifier),
                     IdentifierResolver.extractIdentifierFragment(identifier));
         }

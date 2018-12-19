@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-
-import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 
 @RestController
 @RequestMapping("/resources")
@@ -52,7 +51,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Resource getResource(@PathVariable("normalizedName") String normalizedName,
-                                @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
+                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return getResource(identifier);
     }
@@ -61,7 +60,7 @@ public class ResourceController extends BaseController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResource(@PathVariable("normalizedName") String normalizedName,
-                               @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
+                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                @RequestBody Resource resource) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         verifyRequestAndEntityIdentifier(resource, identifier);
@@ -75,7 +74,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setTerms(@PathVariable("normalizedName") String normalizedName,
-                         @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace,
+                         @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                          @RequestBody List<URI> termIds) {
         final Resource resource = getResource(normalizedName, namespace);
         resourceService.setTags(resource, termIds);
@@ -89,7 +88,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeResource(@PathVariable("normalizedName") String normalizedName,
-                               @RequestParam(name = NAMESPACE_PARAM, required = false) String namespace) {
+                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final Resource toRemove = getResource(normalizedName, namespace);
         resourceService.remove(toRemove);
         LOG.debug("Resource {} removed.", toRemove);

@@ -14,6 +14,7 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,10 +36,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.termit.util.ConfigParam.NAMESPACE_RESOURCE;
-import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -231,7 +232,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                 .perform(post(PATH).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON)).andReturn();
         verifyLocationEquals(PATH + "/" + RESOURCE_NAME, mvcResult);
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
-        assertThat(location, containsString(NAMESPACE_PARAM + "=" + namespace));
+        assertThat(location, containsString(QueryParams.NAMESPACE + "=" + namespace));
     }
 
     @Test
@@ -271,7 +272,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                 .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         final MvcResult mvcResult = mockMvc.perform(
                 put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON)
-                                               .param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+                                               .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                                            .andExpect(status().isConflict()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
@@ -302,7 +303,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                                         .collect(Collectors.toList());
         mockMvc.perform(put(PATH + "/" + RESOURCE_NAME + "/terms").content(toJson(uris))
                                                                   .contentType(MediaType.APPLICATION_JSON)
-                                                                  .param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+                                                                  .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isNotFound());
         verify(resourceServiceMock, never()).setTags(any(Resource.class), anyCollection());
     }
@@ -336,7 +337,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
                 .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
-        mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME).param(NAMESPACE_PARAM, RESOURCE_NAMESPACE))
+        mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME).param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isNotFound());
         verify(resourceServiceMock, never()).remove(any(Resource.class));
         verify(resourceServiceMock, never()).remove(any(URI.class));
@@ -351,7 +352,8 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         file.setName("test-file.html");
         file.setUri(URI.create(RESOURCE_NAMESPACE + file.getName()));
         doc.setFiles(Collections.singleton(file));
-        mockMvc.perform(post(PATH).content(toJsonLd(doc)).contentType(JsonLd.MEDIA_TYPE)).andExpect(status().isCreated());
+        mockMvc.perform(post(PATH).content(toJsonLd(doc)).contentType(JsonLd.MEDIA_TYPE))
+               .andExpect(status().isCreated());
         final ArgumentCaptor<Document> captor = ArgumentCaptor.forClass(Document.class);
         verify(resourceServiceMock).persist(captor.capture());
         assertEquals(doc, captor.getValue());
