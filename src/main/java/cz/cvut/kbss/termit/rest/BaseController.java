@@ -7,11 +7,13 @@ import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.net.URI;
 
-import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
+import static cz.cvut.kbss.termit.util.Constants.*;
 
 /**
  * Base for application REST controllers.
@@ -28,6 +30,22 @@ public class BaseController {
     protected BaseController(IdentifierResolver idResolver, Configuration config) {
         this.idResolver = idResolver;
         this.config = config;
+    }
+
+    /**
+     * Creates a page request from the specified parameters.
+     * <p>
+     * Both parameters are optional and default values will be used if either parameter is not specified.
+     *
+     * @param size Page size
+     * @param page Page number
+     * @return Page specification
+     * @see cz.cvut.kbss.termit.util.Constants#DEFAULT_PAGE_SPEC
+     */
+    static Pageable createPageRequest(Integer size, Integer page) {
+        final int pageSize = size != null ? size : DEFAULT_PAGE_SIZE;
+        final int pageNo = page != null ? page : DEFAULT_PAGE_SPEC.getPageNumber();
+        return PageRequest.of(pageNo, pageSize);
     }
 
     /**

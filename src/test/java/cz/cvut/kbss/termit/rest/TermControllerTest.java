@@ -21,11 +21,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,7 +39,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.util.Constants.DEFAULT_PAGE_SPEC;
 import static cz.cvut.kbss.termit.util.Constants.NAMESPACE_PARAM;
+import static cz.cvut.kbss.termit.util.Constants.QueryParams.PAGE;
+import static cz.cvut.kbss.termit.util.Constants.QueryParams.PAGE_SIZE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -458,7 +464,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(exportersMock.exportVocabularyGlossaryToExcel(vocabulary)).thenReturn(export);
 
         final MvcResult mvcResult = mockMvc
-                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(Excel.MEDIA_TYPE)).andReturn();
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(Excel.MEDIA_TYPE)).andReturn();
         assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION), containsString("attachment"));
         assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION),
                 containsString("filename=\"" + VOCABULARY_NAME + Excel.FILE_EXTENSION + "\""));
@@ -468,5 +474,34 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
+    }
+
+    @Test
+    void getAllCreatesLoadsRootsFromCorrectPage() throws Exception {
+        initNamespaceAndIdentifierResolution();
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
+                                          .collect(Collectors.toList());
+        when(vocabularyServiceMock.find(URI.create(VOCABULARY_URI))).thenReturn(Optional.of(vocabulary));
+        when(termServiceMock.findAllRoots(eq(vocabulary), any())).thenReturn(terms);
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").param(PAGE, "5").param(PAGE_SIZE, "100"))
+               .andExpect(status().isOk());
+
+        final ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(termServiceMock).findAllRoots(eq(vocabulary), captor.capture());
+        assertEquals(PageRequest.of(5, 100), captor.getValue());
+    }
+
+    @Test
+    void getAllCreatesDefaultPageRequestWhenPagingInfoIsNotSpecified() throws Exception {
+        initNamespaceAndIdentifierResolution();
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
+                                          .collect(Collectors.toList());
+        when(vocabularyServiceMock.find(URI.create(VOCABULARY_URI))).thenReturn(Optional.of(vocabulary));
+        when(termServiceMock.findAllRoots(eq(vocabulary), any())).thenReturn(terms);
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms")).andExpect(status().isOk());
+
+        final ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(termServiceMock).findAllRoots(eq(vocabulary), captor.capture());
+        assertEquals(DEFAULT_PAGE_SPEC, captor.getValue());
     }
 }

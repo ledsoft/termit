@@ -56,11 +56,21 @@ public class Constants {
     public static final String ADMIN_CREDENTIALS_FILE = ".termit-admin";
 
     /**
+     * Default page size.
+     * <p>
+     * Implemented as maximum integer so that a default page specification corresponds to a find all query.
+     *
+     * @see #DEFAULT_PAGE_SPEC
+     */
+    public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE;
+
+    /**
      * Default page specification, corresponding to a find all query with no page specification.
      * <p>
      * I.e., the request asks for the first page (number = 0) and its size is {@link Integer#MAX_VALUE}.
      */
-    public static final Pageable DEFAULT_PAGE_SPEC = PageRequest.of(0, Integer.MAX_VALUE);
+    public static final Pageable DEFAULT_PAGE_SPEC = PageRequest.of(0, DEFAULT_PAGE_SIZE);
+
 
     /**
      * Piece of text appended to vocabulary IRI for term IRI generation.
@@ -147,5 +157,33 @@ public class Constants {
         private Excel() {
             throw new AssertionError();
         }
+    }
+
+    public static final class QueryParams {
+
+        /**
+         * HTTP request query parameter denoting identifier namespace.
+         * <p>
+         * Used in connection with normalized name of an individual.
+         */
+        public static final String NAMESPACE = "namespace";
+
+        /**
+         * HTTP request query parameter denoting page number.
+         * <p>
+         * Used for paging in collections of results.
+         *
+         * @see #PAGE_SIZE
+         */
+        public static final String PAGE = "page";
+
+        /**
+         * HTTP request query parameter denoting page size.
+         * <p>
+         * Used for paging in collections of results.
+         *
+         * @see #PAGE
+         */
+        public static final String PAGE_SIZE = "size";
     }
 }
