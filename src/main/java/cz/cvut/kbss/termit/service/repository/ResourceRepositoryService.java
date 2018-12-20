@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.*;
+import cz.cvut.kbss.termit.service.business.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.net.URI;
 import java.util.*;
 
 @Service
-public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
+public class ResourceRepositoryService extends BaseRepositoryService<Resource> implements ResourceService {
 
     private final ResourceDao resourceDao;
     private final TermAssignmentDao termAssignmentDao;
@@ -46,7 +47,7 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
      * @param resource Annotated resource
      * @return List of terms annotating the specified resource
      */
-    public List<Term> findTerms(Resource resource) {
+    public List<Term> findTags(Resource resource) {
         return resourceDao.findTerms(resource);
     }
 
