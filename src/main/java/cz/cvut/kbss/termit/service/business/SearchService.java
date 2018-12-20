@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service;
+package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.persistence.dao.SearchDao;
