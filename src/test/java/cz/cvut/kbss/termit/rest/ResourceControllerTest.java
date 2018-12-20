@@ -11,7 +11,7 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
+import cz.cvut.kbss.termit.service.business.ResourceService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
@@ -54,7 +54,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     private static final String RESOURCE_NAMESPACE = Vocabulary.ONTOLOGY_IRI_termit + "/";
 
     @Mock
-    private ResourceRepositoryService resourceServiceMock;
+    private ResourceService resourceServiceMock;
 
     @Mock
     private Configuration configMock;
@@ -86,7 +86,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
-        when(resourceServiceMock.findTerms(resource)).thenReturn(terms);
+        when(resourceServiceMock.findTags(resource)).thenReturn(terms);
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/resource/terms").param(IRI_PARAM, resource.getUri().toString()))
@@ -101,7 +101,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
         mockMvc.perform(get(PATH + "/resource/terms").param(IRI_PARAM, Generator.generateUri().toString()))
                .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).findTerms(any());
+        verify(resourceServiceMock, never()).findTags(any());
     }
 
     @Test
@@ -340,7 +340,6 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME).param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isNotFound());
         verify(resourceServiceMock, never()).remove(any(Resource.class));
-        verify(resourceServiceMock, never()).remove(any(URI.class));
     }
 
     @Test

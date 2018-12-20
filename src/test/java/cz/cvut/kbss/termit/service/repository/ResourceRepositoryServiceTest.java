@@ -49,7 +49,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     void findTermsReturnsEmptyListWhenNoTermsAreFoundForResource() {
         final Resource resource = generateResource();
 
-        final List<Term> result = sut.findTerms(resource);
+        final List<Term> result = sut.findTags(resource);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -99,8 +99,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.setTags(resource, tags));
 
-        assertEquals(2, sut.findTerms(resource).size());
-        assertEquals(tags, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
+        assertEquals(2, sut.findTags(resource).size());
+        assertEquals(tags, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
     }
 
     @Test
@@ -122,8 +122,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         tags2.add(term3);
         transactional(() -> sut.setTags(resource, tags2));
 
-        assertEquals(2, sut.findTerms(resource).size());
-        assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
+        assertEquals(2, sut.findTags(resource).size());
+        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
     }
 
     @Test
@@ -144,8 +144,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.setTags(resource, tags2));
 
-        assertEquals(2, sut.findTerms(resource).size());
-        assertEquals(tags2, sut.findTerms(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
+        assertEquals(2, sut.findTags(resource).size());
+        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
     }
 
     @Test

@@ -5,7 +5,7 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
+import cz.cvut.kbss.termit.service.business.ResourceService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
@@ -27,11 +27,11 @@ public class ResourceController extends BaseController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceController.class);
 
-    private final ResourceRepositoryService resourceService;
+    private final ResourceService resourceService;
 
     @Autowired
     public ResourceController(IdentifierResolver idResolver, Configuration config,
-                              ResourceRepositoryService resourceService) {
+                              ResourceService resourceService) {
         super(idResolver, config);
         this.resourceService = resourceService;
     }
@@ -102,7 +102,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "/resource/terms", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
             JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@RequestParam(name = "iri") URI resourceId) {
-        return resourceService.findTerms(getResource(resourceId));
+        return resourceService.findTags(getResource(resourceId));
     }
 
     @PreAuthorize("permitAll()")
