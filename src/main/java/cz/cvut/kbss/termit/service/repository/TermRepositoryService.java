@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,11 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     private final TermAssignmentDao termAssignmentDao;
 
-    private final VocabularyRepositoryService vocabularyService;
+    private final VocabularyService vocabularyService;
 
     public TermRepositoryService(Validator validator, TermDao termDao,
                                  TermAssignmentDao termAssignmentDao,
-                                 VocabularyRepositoryService vocabularyService) {
+                                 VocabularyService vocabularyService) {
         super(validator);
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;

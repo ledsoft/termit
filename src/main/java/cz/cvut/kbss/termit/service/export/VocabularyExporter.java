@@ -1,12 +1,11 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Vocabulary;
-import org.springframework.core.io.Resource;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
 
 /**
  * Allows to export a vocabulary and assets related to it.
  */
-@FunctionalInterface
 public interface VocabularyExporter {
 
     /**
@@ -17,5 +16,13 @@ public interface VocabularyExporter {
      * @param vocabulary Vocabulary whose glossary should be exported
      * @return IO resource representing the exported glossary
      */
-    Resource exportVocabularyGlossary(Vocabulary vocabulary);
+    TypeAwareResource exportVocabularyGlossary(Vocabulary vocabulary);
+
+    /**
+     * Checks whether this exporter supports the specified media type.
+     *
+     * @param mediaType Target media type for the export
+     * @return Whether the media type is supported
+     */
+    boolean supports(String mediaType);
 }

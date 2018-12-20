@@ -2,13 +2,13 @@ package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -20,7 +20,6 @@ import cz.cvut.kbss.termit.util.CsvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,11 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,12 +43,12 @@ public class TermController extends BaseController {
 
     private final VocabularyExporters exporters;
 
-    private final VocabularyRepositoryService vocabularyService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
     public TermController(IdentifierResolver idResolver, Configuration config,
                           TermRepositoryService termService, VocabularyExporters exporters,
-                          VocabularyRepositoryService vocabularyService) {
+                          VocabularyService vocabularyService) {
         super(idResolver, config);
         this.termService = termService;
         this.exporters = exporters;
@@ -85,7 +82,7 @@ public class TermController extends BaseController {
                                  @RequestParam(name = QueryParams.PAGE_SIZE, required = false) Integer pageSize,
                                  @RequestParam(name = QueryParams.PAGE, required = false) Integer pageNo,
                                  @RequestParam(name = "searchString", required = false) String searchString,
-                                 @RequestHeader(value = "Accept", required = false) String acceptType) {
+                                 @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         final Optional<ResponseEntity> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
         if (export.isPresent()) {
@@ -99,28 +96,15 @@ public class TermController extends BaseController {
     }
 
     private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
-        final Resource content;
-        final String extension;
-        if (Objects.equals(CsvUtils.MEDIA_TYPE, mediaType)) {
-            content = exporters.exportVocabularyGlossaryToCsv(getVocabulary(vocabularyUri));
-            extension = CsvUtils.FILE_EXTENSION;
-        } else if (Objects.equals(Excel.MEDIA_TYPE, mediaType)) {
-            content = exporters.exportVocabularyGlossaryToExcel(getVocabulary(vocabularyUri));
-            extension = Excel.FILE_EXTENSION;
-        } else {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(ResponseEntity.ok()
-                                             .contentLength(content.contentLength())
-                                             .contentType(MediaType.parseMediaType(mediaType))
-                                             .header(HttpHeaders.CONTENT_DISPOSITION,
-                                                     "attachment; filename=\"" + vocabularyNormalizedName +
-                                                             extension + "\"")
-                                             .body(content));
-        } catch (IOException e) {
-            throw new TermItException("Unable to export vocabulary glossary as CSV.", e);
-        }
+        final Optional<TypeAwareResource> content = exporters
+                .exportVocabularyGlossary(getVocabulary(vocabularyUri), mediaType);
+        return content.map(r -> ResponseEntity.ok()
+                                              .contentLength(r.contentLength())
+                                              .contentType(MediaType.parseMediaType(mediaType))
+                                              .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                      "attachment; filename=\"" + vocabularyNormalizedName +
+                                                              r.getFileExtension() + "\"")
+                                              .body(r));
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
@@ -195,10 +179,7 @@ public class TermController extends BaseController {
                        @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                        @RequestBody Term term) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
-        if (!termUri.equals(term.getUri())) {
-            throw new ValidationException(
-                    "Resolved term id " + termUri + " does not match the id of the specified term.");
-        }
+        verifyRequestAndEntityIdentifier(term, termUri);
         if (!termService.exists(termUri)) {
             throw NotFoundException.create(Term.class.getSimpleName(), termUri);
         }

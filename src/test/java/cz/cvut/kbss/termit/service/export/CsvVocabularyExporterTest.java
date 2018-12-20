@@ -1,10 +1,12 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.util.CsvUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,8 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CsvVocabularyExporterTest extends VocabularyExporterTestBase {
 
@@ -64,5 +65,15 @@ class CsvVocabularyExporterTest extends VocabularyExporterTestBase {
                 assertEquals(terms.get(i).getUri(), id);
             }
         }
+    }
+
+    @Test
+    void supportsReturnsTrueForCsvMediaType() {
+        assertTrue(sut.supports(CsvUtils.MEDIA_TYPE));
+    }
+
+    @Test
+    void supportsReturnsFalseNonCsvMediaType() {
+        assertFalse(sut.supports(MediaType.APPLICATION_JSON_VALUE));
     }
 }

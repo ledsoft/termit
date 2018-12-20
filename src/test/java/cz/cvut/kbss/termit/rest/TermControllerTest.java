@@ -10,6 +10,7 @@ import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -26,8 +27,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -162,7 +161,7 @@ class TermControllerTest extends BaseControllerTestRunner {
                 .perform(put(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).content(toJson(term)).contentType(
                         MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isConflict()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
-        assertThat(errorInfo.getMessage(), containsString("does not match the id of the specified term"));
+        assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
         verify(termServiceMock, never()).exists(termUri);
         verify(termServiceMock, never()).update(any());
     }
@@ -272,15 +271,15 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
+        when(vocabularyServiceMock.find(URI.create(VOCABULARY_URI))).thenReturn(Optional.of(vocabulary));
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(termServiceMock.findAllRoots(any(), eq(URI.create(VOCABULARY_URI)))).thenReturn(terms);
         final String searchString = "test";
 
-        final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/")
-                        .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit)
-                        .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms")
+                .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit)
+                .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
@@ -405,12 +404,13 @@ class TermControllerTest extends BaseControllerTestRunner {
         vocabulary.setUri(URI.create(VOCABULARY_URI));
         when(vocabularyServiceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
         final String content = String.join(",", Term.EXPORT_COLUMNS);
-        final Resource export = new ByteArrayResource(content.getBytes());
-        when(exportersMock.exportVocabularyGlossaryToCsv(vocabulary)).thenReturn(export);
+        final TypeAwareResource export = new TypeAwareResource(content.getBytes(), CsvUtils.MEDIA_TYPE,
+                CsvUtils.FILE_EXTENSION);
+        when(exportersMock.exportVocabularyGlossary(vocabulary, CsvUtils.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
         mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(CsvUtils.MEDIA_TYPE)).andExpect(
                 status().isOk());
-        verify(exportersMock).exportVocabularyGlossaryToCsv(vocabulary);
+        verify(exportersMock).exportVocabularyGlossary(vocabulary, CsvUtils.MEDIA_TYPE);
     }
 
     @Test
@@ -422,8 +422,9 @@ class TermControllerTest extends BaseControllerTestRunner {
         vocabulary.setUri(URI.create(VOCABULARY_URI));
         when(vocabularyServiceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
         final String content = String.join(",", Term.EXPORT_COLUMNS);
-        final Resource export = new ByteArrayResource(content.getBytes());
-        when(exportersMock.exportVocabularyGlossaryToCsv(vocabulary)).thenReturn(export);
+        final TypeAwareResource export = new TypeAwareResource(content.getBytes(), CsvUtils.MEDIA_TYPE,
+                CsvUtils.FILE_EXTENSION);
+        when(exportersMock.exportVocabularyGlossary(vocabulary, CsvUtils.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(CsvUtils.MEDIA_TYPE)).andReturn();
@@ -439,21 +440,21 @@ class TermControllerTest extends BaseControllerTestRunner {
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(URI.create(VOCABULARY_URI));
         when(vocabularyServiceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
-        final Resource export = prepareExcel();
-        when(exportersMock.exportVocabularyGlossaryToExcel(vocabulary)).thenReturn(export);
+        final TypeAwareResource export = prepareExcel();
+        when(exportersMock.exportVocabularyGlossary(vocabulary, Excel.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
         mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(Excel.MEDIA_TYPE)).andExpect(
                 status().isOk());
-        verify(exportersMock).exportVocabularyGlossaryToExcel(vocabulary);
+        verify(exportersMock).exportVocabularyGlossary(vocabulary, Excel.MEDIA_TYPE);
     }
 
-    private Resource prepareExcel() throws Exception {
+    private TypeAwareResource prepareExcel() throws Exception {
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet s = wb.createSheet("test");
         s.createRow(0).createCell(0).setCellValue("test");
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         wb.write(bos);
-        return new ByteArrayResource(bos.toByteArray());
+        return new TypeAwareResource(bos.toByteArray(), Excel.MEDIA_TYPE, Excel.FILE_EXTENSION);
     }
 
     @Test
@@ -462,8 +463,8 @@ class TermControllerTest extends BaseControllerTestRunner {
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(URI.create(VOCABULARY_URI));
         when(vocabularyServiceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
-        final Resource export = prepareExcel();
-        when(exportersMock.exportVocabularyGlossaryToExcel(vocabulary)).thenReturn(export);
+        final TypeAwareResource export = prepareExcel();
+        when(exportersMock.exportVocabularyGlossary(vocabulary, Excel.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(Excel.MEDIA_TYPE)).andReturn();
