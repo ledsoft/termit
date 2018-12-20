@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
@@ -41,7 +41,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     private static final String PATH = "/vocabularies";
 
     @Mock
-    private VocabularyRepositoryService serviceMock;
+    private VocabularyService serviceMock;
 
     @Mock
     private IdentifierResolver idResolverMock;
@@ -179,7 +179,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                 post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
-        assertThat(location, containsString("namespace=" + uriNs));
+        assertThat(location, containsString(QueryParams.NAMESPACE + "=" + uriNs));
     }
 
     @Test

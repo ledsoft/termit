@@ -4,7 +4,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
@@ -26,10 +26,10 @@ public class VocabularyController extends BaseController {
 
     private static final Logger LOG = LoggerFactory.getLogger(VocabularyController.class);
 
-    private final VocabularyRepositoryService vocabularyService;
+    private final VocabularyService vocabularyService;
 
     @Autowired
-    public VocabularyController(VocabularyRepositoryService vocabularyService, IdentifierResolver idResolver,
+    public VocabularyController(VocabularyService vocabularyService, IdentifierResolver idResolver,
                                 Configuration config) {
         super(idResolver, config);
         this.vocabularyService = vocabularyService;
