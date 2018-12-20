@@ -3,13 +3,10 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
-import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
-import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.business.UserService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,10 +36,7 @@ class UserControllerTest extends BaseControllerTestRunner {
     private static final String BASE_URL = "/users";
 
     @Mock
-    private UserRepositoryService userService;
-
-    @Mock
-    private SecurityUtils securityUtilsMock;
+    private UserService userService;
 
     @Mock
     private IdentifierResolver idResolverMock;
@@ -82,14 +76,13 @@ class UserControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void updateCurrentVerifiesOriginalPasswordWhenNewOneIsSet() throws Exception {
+    void updateCurrentSendsUserUpdateToService() throws Exception {
         final UserUpdateDto dto = dtoForUpdate();
 
         mockMvc.perform(
                 put(BASE_URL + "/current").content(toJson(dto)).contentType(MediaType.APPLICATION_JSON_VALUE))
                .andExpect(status().isNoContent());
-        verify(securityUtilsMock).verifyCurrentUserPassword(user.getPassword());
-        verify(userService).update(user);
+        verify(userService).updateCurrent(dto);
     }
 
     private UserUpdateDto dtoForUpdate() {
@@ -101,34 +94,6 @@ class UserControllerTest extends BaseControllerTestRunner {
         dto.setUsername(user.getUsername());
         dto.setOriginalPassword(user.getPassword());
         return dto;
-    }
-
-    @Test
-    void updateCurrentReturnsConflictWithValidationMessageWhenOriginalPasswordDoesNotMatchExisting() throws Exception {
-        final UserUpdateDto dto = dtoForUpdate();
-        dto.setOriginalPassword("test");
-        final String msg = "Provided original password does not match.";
-        doThrow(new ValidationException(msg)).when(securityUtilsMock)
-                                             .verifyCurrentUserPassword(dto.getOriginalPassword());
-        final MvcResult result = mockMvc.perform(
-                put(BASE_URL + "/current").content(toJson(dto)).contentType(MediaType.APPLICATION_JSON_VALUE))
-                                        .andExpect(status().isConflict()).andReturn();
-        final ErrorInfo errorInfo = readValue(result, ErrorInfo.class);
-        assertEquals(msg, errorInfo.getMessage());
-        verify(userService, never()).update(any());
-    }
-
-    @Test
-    void updateCurrentSkipsPasswordVerificationWhenNoPasswordIsSpecified() throws Exception {
-        final UserUpdateDto dto = dtoForUpdate();
-        dto.setPassword(null);
-        dto.setOriginalPassword(null);
-
-        mockMvc.perform(
-                put(BASE_URL + "/current").content(toJson(dto)).contentType(MediaType.APPLICATION_JSON_VALUE))
-               .andExpect(status().isNoContent());
-        verify(securityUtilsMock, never()).verifyCurrentUserPassword(anyString());
-        verify(userService).update(user);
     }
 
     @Test
