@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.util.Constants;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 
 import java.util.Comparator;
 import java.util.List;
@@ -78,5 +80,15 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
             final String id = row.getCell(0).getStringCellValue();
             assertEquals(terms.get(i - 1).getUri().toString(), id);
         }
+    }
+
+    @Test
+    void supportsReturnsTrueForExcelMediaType() {
+        assertTrue(sut.supports(Constants.Excel.MEDIA_TYPE));
+    }
+
+    @Test
+    void supportsReturnsFalseForNonExcelMediaType() {
+        assertFalse(sut.supports(MediaType.APPLICATION_JSON_VALUE));
     }
 }
