@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.Validator;
 
 @Service
-public class VocabularyRepositoryService extends BaseRepositoryService<Vocabulary> {
+public class VocabularyRepositoryService extends BaseRepositoryService<Vocabulary> implements VocabularyService {
 
     private final IdentifierResolver idResolver;
 
