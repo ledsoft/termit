@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.environment.config.TestRestSecurityConfig;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.handler.RestExceptionHandler;
 import cz.cvut.kbss.termit.security.JwtUtils;
-import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
+import cz.cvut.kbss.termit.service.business.UserService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,8 +48,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestConfig.class,
-                                 TestRestSecurityConfig.class,
-                                 UserControllerSecurityTest.Config.class})
+        TestRestSecurityConfig.class,
+        UserControllerSecurityTest.Config.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @WebAppConfiguration
 class UserControllerSecurityTest extends BaseControllerTestRunner {
@@ -63,10 +63,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     private WebApplicationContext context;
 
     @Autowired
-    private UserRepositoryService userService;
-
-    @Autowired
-    private SecurityUtils securityUtilsMock;
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
@@ -84,7 +81,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @Configuration
     public static class Config implements WebMvcConfigurer {
         @Mock
-        private UserRepositoryService userService;
+        private UserService userService;
 
         @Mock
         private SecurityUtils securityUtilsMock;
@@ -97,7 +94,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         }
 
         @Bean
-        public UserRepositoryService userService() {
+        public UserService userService() {
             return userService;
         }
 

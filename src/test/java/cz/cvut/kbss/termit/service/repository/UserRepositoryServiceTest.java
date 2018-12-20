@@ -2,8 +2,6 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
-import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
-import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
@@ -140,63 +138,6 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
         user.setPassword(null); // Simulate instance being loaded from repo
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.update(user));
         assertThat(ex.getMessage(), containsString("username must not be blank"));
-    }
-
-    @Test
-    void locksUserAccountWhenLoginLimitExceededEventIsReceived() {
-        final UserAccount user = persistUser();
-        assertFalse(user.isLocked());
-        final LoginAttemptsThresholdExceeded event = new LoginAttemptsThresholdExceeded(user);
-        sut.onLoginAttemptsThresholdExceeded(event);
-
-        final UserAccount result = em.find(UserAccount.class, user.getUri());
-        assertTrue(result.isLocked());
-    }
-
-    @Test
-    void unlockRemovesLockedClassFromUserAndSetsHimNewPassword() {
-        final UserAccount user = generateAccount();
-        user.lock();
-        transactional(() -> em.persist(user));
-        final String newPassword = "newPassword";
-
-        sut.unlock(user, newPassword);
-        final UserAccount result = em.find(UserAccount.class, user.getUri());
-        assertFalse(result.isLocked());
-        assertTrue(passwordEncoder.matches(newPassword, result.getPassword()));
-    }
-
-    @Test
-    void disableDisablesUserAccount() {
-        final UserAccount user = persistUser();
-        assertTrue(user.isEnabled());
-
-        sut.disable(user);
-        final UserAccount result = em.find(UserAccount.class, user.getUri());
-        assertFalse(result.isEnabled());
-    }
-
-    @Test
-    void enableEnablesDisabledUserAccount() {
-        final UserAccount user = generateAccount();
-        user.disable();
-        transactional(() -> em.persist(user));
-        assertFalse(user.isEnabled());
-
-        sut.enable(user);
-        final UserAccount result = em.find(UserAccount.class, user.getUri());
-        assertTrue(result.isEnabled());
-    }
-
-    @Test
-    void updateThrowsAuthorizationExceptionWhenUserAttemptsToUpdateAnotherUser() {
-        final UserAccount user = generateAccount();
-        transactional(() -> em.persist(user));
-        Environment.setCurrentUser(user);
-        final UserAccount toUpdate = generateAccount();
-
-        final AuthorizationException ex = assertThrows(AuthorizationException.class, () -> sut.update(toUpdate));
-        assertEquals("User " + user + " attempted to update a different user's account.", ex.getMessage());
     }
 
     @Test
