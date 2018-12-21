@@ -152,7 +152,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         addTermsAndSave(new HashSet<>(terms));
 
         final String label = terms.get(0).getLabel();
-        assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
+        assertTrue(sut.existsInVocabulary(label, vocabulary));
     }
 
     @Test
@@ -161,7 +161,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
 
-        assertFalse(sut.existsInVocabulary("unknown label", vocabulary.getUri()));
+        assertFalse(sut.existsInVocabulary("unknown label", vocabulary));
     }
 
     @Test
@@ -171,7 +171,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         addTermsAndSave(new HashSet<>(terms));
 
         final String label = terms.get(0).getLabel().toLowerCase();
-        assertTrue(sut.existsInVocabulary(label, vocabulary.getUri()));
+        assertTrue(sut.existsInVocabulary(label, vocabulary));
     }
 
     @Test

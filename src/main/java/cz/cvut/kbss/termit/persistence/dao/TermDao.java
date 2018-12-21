@@ -105,13 +105,13 @@ public class TermDao extends BaseDao<Term> {
      * Note that this method uses comparison ignoring case, so that two labels differing just in character case are
      * considered same here.
      *
-     * @param label         Label to check
-     * @param vocabularyUri Vocabulary in which terms will be searched
+     * @param label      Label to check
+     * @param vocabulary Vocabulary in which terms will be searched
      * @return Whether term with {@code label} already exists in vocabulary
      */
-    public boolean existsInVocabulary(String label, URI vocabularyUri) {
+    public boolean existsInVocabulary(String label, Vocabulary vocabulary) {
         Objects.requireNonNull(label);
-        Objects.requireNonNull(vocabularyUri);
+        Objects.requireNonNull(vocabulary);
         return em.createNativeQuery("ASK { ?term a ?type ; " +
                 "?hasLabel ?label ;" +
                 "?inVocabulary ?vocabulary ." +
@@ -119,8 +119,8 @@ public class TermDao extends BaseDao<Term> {
                  .setParameter("type", typeUri)
                  .setParameter("hasLabel", URI.create(RDFS.LABEL))
                  .setParameter("inVocabulary",
-                     URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
-                 .setParameter("vocabulary", vocabularyUri)
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                 .setParameter("vocabulary", vocabulary.getUri())
                  .setParameter("searchString", label, config.get(ConfigParam.LANGUAGE)).getSingleResult();
     }
 }

@@ -55,7 +55,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
 
-        sut.addTermToVocabulary(term, vocabulary.getUri());
+        transactional(() -> sut.addTermToVocabulary(term, vocabulary));
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
 
@@ -71,7 +71,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         final ValidationException exception =
                 assertThrows(
-                        ValidationException.class, () -> sut.addTermToVocabulary(term, vocabulary.getUri()));
+                        ValidationException.class, () -> sut.addTermToVocabulary(term, vocabulary));
         assertThat(exception.getMessage(), containsString("label must not be blank"));
     }
 
@@ -83,8 +83,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term2 = Generator.generateTerm();
         term2.setUri(Generator.generateUri());
 
-        sut.addTermToVocabulary(term1, vocabulary.getUri());
-        sut.addTermToVocabulary(term2, vocabulary.getUri());
+        sut.addTermToVocabulary(term1, vocabulary);
+        sut.addTermToVocabulary(term2, vocabulary);
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
 
@@ -101,12 +101,12 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term1 = Generator.generateTerm();
         URI uri = Generator.generateUri();
         term1.setUri(uri);
-        sut.addTermToVocabulary(term1, vocabulary.getUri());
+        sut.addTermToVocabulary(term1, vocabulary);
 
         final Term term2 = Generator.generateTerm();
         term2.setUri(uri);
         assertThrows(
-                ResourceExistsException.class, () -> sut.addTermToVocabulary(term2, vocabulary.getUri()));
+                ResourceExistsException.class, () -> sut.addTermToVocabulary(term2, vocabulary));
     }
 
     @Test
@@ -119,7 +119,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary);
         });
 
-        sut.addChildTerm(child, parent.getUri());
+        sut.addChildTerm(child, parent);
 
         Term result = em.find(Term.class, parent.getUri());
         assertNotNull(result);
@@ -137,7 +137,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary.getGlossary());
         });
 
-        sut.addChildTerm(child, parent.getUri());
+        sut.addChildTerm(child, parent);
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
         assertEquals(1, result.getTerms().size());
         assertTrue(result.getTerms().contains(parent));
@@ -201,7 +201,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(t);
         vrs.update(vocabulary);
 
-        assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary.getUri()));
+        assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary));
     }
 
     private Term generateTermWithUri() {

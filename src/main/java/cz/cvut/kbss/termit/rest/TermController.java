@@ -6,11 +6,8 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.business.VocabularyService;
-import cz.cvut.kbss.termit.service.export.VocabularyExporters;
+import cz.cvut.kbss.termit.service.business.TermService;
 import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
-import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
-import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants;
@@ -28,10 +25,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/vocabularies")
@@ -39,20 +34,12 @@ public class TermController extends BaseController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TermController.class);
 
-    private final TermRepositoryService termService;
-
-    private final VocabularyExporters exporters;
-
-    private final VocabularyService vocabularyService;
+    private final TermService termService;
 
     @Autowired
-    public TermController(IdentifierResolver idResolver, Configuration config,
-                          TermRepositoryService termService, VocabularyExporters exporters,
-                          VocabularyService vocabularyService) {
+    public TermController(IdentifierResolver idResolver, Configuration config, TermService termService) {
         super(idResolver, config);
         this.termService = termService;
-        this.exporters = exporters;
-        this.vocabularyService = vocabularyService;
     }
 
     private URI getVocabularyUri(String namespace, String fragment) {
@@ -88,16 +75,15 @@ public class TermController extends BaseController {
         if (export.isPresent()) {
             return export.get();
         }
+        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
         if (searchString != null && !searchString.isEmpty()) {
-            return ResponseEntity.ok(termService.findAllRoots(searchString, vocabularyUri));
+            return ResponseEntity.ok(termService.findAllRoots(vocabulary, searchString));
         }
-        return ResponseEntity
-                .ok(termService.findAllRoots(getVocabulary(vocabularyUri), createPageRequest(pageSize, pageNo)));
+        return ResponseEntity.ok(termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo)));
     }
 
     private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
-        final Optional<TypeAwareResource> content = exporters
-                .exportVocabularyGlossary(getVocabulary(vocabularyUri), mediaType);
+        final Optional<TypeAwareResource> content = termService.exportGlossary(getVocabulary(vocabularyUri), mediaType);
         return content.map(r -> ResponseEntity.ok()
                                               .contentLength(r.contentLength())
                                               .contentType(MediaType.parseMediaType(mediaType))
@@ -108,8 +94,7 @@ public class TermController extends BaseController {
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
-        return vocabularyService.find(vocabularyUri).orElseThrow(
-                () -> NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri));
+        return termService.findVocabulary(vocabularyUri);
     }
 
     /**
@@ -129,9 +114,9 @@ public class TermController extends BaseController {
                                            @RequestBody Term term) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         if (parentTerm != null && !parentTerm.isEmpty()) {
-            termService.addChildTerm(term, URI.create(parentTerm));
+            termService.persistChild(term, findTerm(URI.create(parentTerm)));
         } else {
-            termService.addTermToVocabulary(term, vocabularyUri);
+            termService.persistRoot(term, getVocabulary(vocabularyUri));
         }
 
         LOG.debug("Term {} in vocabulary {} created.", term, vocabularyUri);
@@ -153,13 +138,17 @@ public class TermController extends BaseController {
                         @PathVariable("termIdFragment") String termIdFragment,
                         @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
-        return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termUri));
+        return findTerm(termUri);
     }
 
     private URI getTermUri(String vocabIdFragment, String termIdFragment, String namespace) {
         return idResolver.resolveIdentifier(idResolver
                 .buildNamespace(getVocabularyUri(namespace, vocabIdFragment).toString(),
                         Constants.TERM_NAMESPACE_SEPARATOR), termIdFragment);
+    }
+
+    private Term findTerm(URI termUri) {
+        return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termUri));
     }
 
     /**
@@ -180,6 +169,7 @@ public class TermController extends BaseController {
                        @RequestBody Term term) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
         verifyRequestAndEntityIdentifier(term, termUri);
+        // TODO Move existence check on update to service
         if (!termService.exists(termUri)) {
             throw NotFoundException.create(Term.class.getSimpleName(), termUri);
         }
@@ -191,20 +181,9 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getSubTerms(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                   @PathVariable("termIdFragment") String termIdFragment,
-                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
-                                  @RequestParam(name = "searchString", required = false) String searchString) {
+                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final Term parent = getById(vocabularyIdFragment, termIdFragment, namespace);
-        if (searchString != null && !searchString.isEmpty()) {
-            // NOTE: Consider adding a dedicated search method in case this late filter causes performance problems
-            final List<Term> searchResult = termService
-                    .findAllRoots(searchString, getVocabularyUri(namespace, vocabularyIdFragment));
-            return searchResult.stream().filter(t -> parent.getSubTerms().contains(t.getUri()))
-                               .collect(Collectors.toList());
-        }
-        return parent.getSubTerms() == null ? Collections.emptyList() :
-               parent.getSubTerms().stream()
-                     .map(uri -> termService.find(uri).orElseThrow(() -> NotFoundException.create("Term", uri)))
-                     .collect(Collectors.toList());
+        return termService.findSubTerms(parent);
     }
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/assignments", method = RequestMethod.GET,
@@ -241,6 +220,6 @@ public class TermController extends BaseController {
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                  @RequestParam(name = "value") String name) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
-        return termService.existsInVocabulary(name, vocabularyUri);
+        return termService.existsInVocabulary(name, getVocabulary(vocabularyUri));
     }
 }
