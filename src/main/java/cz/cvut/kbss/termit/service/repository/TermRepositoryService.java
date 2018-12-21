@@ -42,11 +42,11 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, URI vocabularyUri) {
+    public void addTermToVocabulary(Term instance, Vocabulary vocabulary) {
+        // TODO Fix update of glossary, it is not managed here
         validate(instance);
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabularyUri);
-        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
+        Objects.requireNonNull(vocabulary);
 
         if (!vocabulary.getGlossary().addTerm(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
@@ -56,19 +56,17 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Transactional
-    public void addChildTerm(Term instance, URI parentTermUri) {
+    public void addChildTerm(Term instance, Term parentTerm) {
         validate(instance);
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(parentTermUri);
+        Objects.requireNonNull(parentTerm);
 
-        Term parenTerm = find(parentTermUri).orElseThrow(() -> NotFoundException.create("Term", parentTermUri));
-
-        if (!parenTerm.addSubTerm(instance.getUri())) {
+        if (!parentTerm.addSubTerm(instance.getUri())) {
             throw ResourceExistsException
-                    .create("SubTerm " + instance.getUri() + "already exist in term " + parentTermUri);
+                    .create("SubTerm " + instance.getUri() + "already exist in term " + parentTerm);
         }
         termDao.persist(instance);
-        termDao.update(parenTerm);
+        termDao.update(parentTerm);
     }
 
     /**
@@ -104,21 +102,26 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     public List<Term> findAllRoots(String searchString, URI vocabularyUri) {
+        // TODO remove
         Vocabulary vocabulary = getVocabulary(vocabularyUri);
 
         //TODO filter
         return termDao.findAllRoots(searchString, vocabulary);
     }
 
+    public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {
+        return termDao.findAllRoots(searchString, vocabulary);
+    }
+
     /**
      * Checks whether a term with the specified label exists in a vocabulary with the specified URI.
      *
-     * @param label         Label to check
-     * @param vocabularyUri Vocabulary in which terms will be searched
+     * @param label      Label to check
+     * @param vocabulary Vocabulary in which terms will be searched
      * @return Whether term with {@code label} already exists in vocabulary
      */
-    public boolean existsInVocabulary(String label, URI vocabularyUri) {
-        return termDao.existsInVocabulary(label, vocabularyUri);
+    public boolean existsInVocabulary(String label, Vocabulary vocabulary) {
+        return termDao.existsInVocabulary(label, vocabulary);
     }
 
     /**

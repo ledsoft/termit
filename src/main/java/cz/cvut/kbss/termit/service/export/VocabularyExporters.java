@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -28,6 +29,8 @@ public class VocabularyExporters {
      * @return Exported data wrapped in an {@code Optional}
      */
     public Optional<TypeAwareResource> exportVocabularyGlossary(Vocabulary vocabulary, String mediaType) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(mediaType);
         final Optional<VocabularyExporter> exporter = exporters.stream().filter(e -> e.supports(mediaType)).findFirst();
         return exporter.map(e -> e.exportVocabularyGlossary(vocabulary));
     }
