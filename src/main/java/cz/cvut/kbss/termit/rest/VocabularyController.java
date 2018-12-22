@@ -60,16 +60,13 @@ public class VocabularyController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                   JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateVocabulary(@PathVariable("fragment") String fragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                  @RequestBody Vocabulary update) {
         final URI vocabularyUri = resolveVocabularyUri(fragment, namespace);
         verifyRequestAndEntityIdentifier(update, vocabularyUri);
-        if (!vocabularyService.exists(vocabularyUri)) {
-            throw NotFoundException.create(Vocabulary.class.getSimpleName(), vocabularyUri);
-        }
         vocabularyService.update(update);
         LOG.debug("Vocabulary {} updated.", update);
     }

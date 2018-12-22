@@ -246,21 +246,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                 put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isNoContent());
         verify(identifierResolverMock).resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME);
-        verify(resourceServiceMock).exists(resource.getUri());
         verify(resourceServiceMock).update(resource);
-    }
-
-    @Test
-    void updateResourceThrowsNotFoundExceptionForUnknownResourceId() throws Exception {
-        final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
-        resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        when(resourceServiceMock.exists(resource.getUri())).thenReturn(false);
-        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
-        mockMvc.perform(
-                put(PATH + "/" + RESOURCE_NAME).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).update(any());
     }
 
     @Test

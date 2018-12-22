@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -98,6 +99,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateExecutesPreUpdateMethodBeforeUpdateOnDao() {
         final UserAccount user = generateAccount();
+        when(userAccountDaoMock.exists(user.getUri())).thenReturn(true);
         when(userAccountDaoMock.update(any())).thenReturn(user);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
@@ -111,6 +113,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     void updateInvokesPostUpdateAfterUpdateOnDao() {
         final UserAccount user = generateAccount();
         final UserAccount returned = generateAccount();
+        when(userAccountDaoMock.exists(user.getUri())).thenReturn(true);
         when(userAccountDaoMock.update(any())).thenReturn(returned);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
@@ -195,5 +198,11 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
         inOrder.verify(sut).preRemove(user);
         inOrder.verify(userAccountDaoMock).remove(user);
         inOrder.verify(sut).postRemove(user);
+    }
+
+    @Test
+    void updateThrowsNotFoundExceptionWhenInstanceDoesNotExistInRepository() {
+        final UserAccount user = generateAccount();
+        assertThrows(NotFoundException.class, () -> sut.update(user));
     }
 }

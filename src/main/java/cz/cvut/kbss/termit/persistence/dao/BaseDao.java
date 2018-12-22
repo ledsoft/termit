@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 
 import java.net.URI;
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.Optional;
 /**
  * Base implementation of the generic DAO API.
  */
-public abstract class BaseDao<T> implements GenericDao<T> {
+public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> {
 
     protected final Class<T> type;
     protected final URI typeUri;

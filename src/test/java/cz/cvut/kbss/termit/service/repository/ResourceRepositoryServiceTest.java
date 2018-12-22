@@ -13,6 +13,10 @@ import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -245,6 +249,12 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         fileTwo.setUri(Generator.generateUri());
         fileTwo.setName("testTwo.html");
         transactional(() -> {
+            // Ensure correct RDFS class hierarchy interpretation
+            final Repository repository = em.unwrap(Repository.class);
+            try (final RepositoryConnection conn = repository.getConnection()) {
+                final ValueFactory vf = conn.getValueFactory();
+                conn.add(vf.createIRI(Vocabulary.s_c_dokument), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
+            }
             em.persist(doc);
             em.persist(fileOne);
             em.persist(fileTwo);
