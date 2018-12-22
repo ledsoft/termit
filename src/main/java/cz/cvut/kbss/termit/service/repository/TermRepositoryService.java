@@ -1,6 +1,5 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -8,13 +7,12 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
-import cz.cvut.kbss.termit.service.business.VocabularyService;
+import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,15 +23,14 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
 
     private final TermAssignmentDao termAssignmentDao;
 
-    private final VocabularyService vocabularyService;
+    private final VocabularyDao vocabularyDao;
 
-    public TermRepositoryService(Validator validator, TermDao termDao,
-                                 TermAssignmentDao termAssignmentDao,
-                                 VocabularyService vocabularyService) {
+    public TermRepositoryService(Validator validator, TermDao termDao, TermAssignmentDao termAssignmentDao,
+                                 VocabularyDao vocabularyDao) {
         super(validator);
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
-        this.vocabularyService = vocabularyService;
+        this.vocabularyDao = vocabularyDao;
     }
 
     @Override
@@ -41,9 +38,14 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         return this.termDao;
     }
 
+    @Override
+    public void persist(Term instance) {
+        throw new UnsupportedOperationException(
+                "Persisting term by itself is not supported. It has to be connected to a vocabulary or a parent term.");
+    }
+
     @Transactional
     public void addTermToVocabulary(Term instance, Vocabulary vocabulary) {
-        // TODO Fix update of glossary, it is not managed here
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(vocabulary);
@@ -52,7 +54,8 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
         termDao.persist(instance);
-        // No need to explicitly merge glossary, it is managed during transaction and changes will be saved on commit
+        // Explicitly merge glossary to save the reference to the term, as vocabulary (and thus glossary) are detached in this transaction
+        vocabularyDao.updateGlossary(vocabulary);
     }
 
     @Transactional
@@ -93,20 +96,6 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
         Objects.requireNonNull(vocabulary);
         Objects.requireNonNull(pageSpec);
         return termDao.findAllRoots(vocabulary, pageSpec);
-    }
-
-    private Vocabulary getVocabulary(URI vocabularyUri) {
-        return vocabularyService.find(vocabularyUri)
-                                .orElseThrow(() -> NotFoundException
-                                        .create(Vocabulary.class.getSimpleName(), vocabularyUri));
-    }
-
-    public List<Term> findAllRoots(String searchString, URI vocabularyUri) {
-        // TODO remove
-        Vocabulary vocabulary = getVocabulary(vocabularyUri);
-
-        //TODO filter
-        return termDao.findAllRoots(searchString, vocabulary);
     }
 
     public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {

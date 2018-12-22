@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyDaoTest extends BaseDaoTestRunner {
 
@@ -132,9 +131,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         file.setUri(Generator.generateUri());
         doc.addFile(file);
         vocabulary.setDocument(doc);
-        final EntityDescriptor vocabularyDescriptor = new EntityDescriptor(vocabulary.getUri());
-        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Vocabulary.class, "author"),
-                new EntityDescriptor(null));
+        final EntityDescriptor vocabularyDescriptor = getVocabularyDescriptor(vocabulary);
         final EntityDescriptor docDescriptor = new EntityDescriptor(vocabulary.getUri());
         docDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "author"),
                 new EntityDescriptor(null));
@@ -156,5 +153,66 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), vocabularyDescriptor);
         assertEquals(newComment, result.getComment());
+    }
+
+    private EntityDescriptor getVocabularyDescriptor(Vocabulary vocabulary) {
+        final EntityDescriptor vocabularyDescriptor = new EntityDescriptor(vocabulary.getUri());
+        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Vocabulary.class, "author"),
+                new EntityDescriptor(null));
+        return vocabularyDescriptor;
+    }
+
+    @Test
+    void updateGlossaryMergesGlossaryIntoPersistenceContext() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        final Term term = Generator.generateTermWithId();
+        vocabulary.getGlossary().addTerm(term);
+        transactional(() -> {
+            em.persist(term, new EntityDescriptor(vocabulary.getUri()));
+            sut.updateGlossary(vocabulary);
+        });
+
+        transactional(() -> {
+            // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
+            // does not work
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+            assertTrue(result.getTerms().contains(term));
+        });
+    }
+
+    @Test
+    void updateGlossaryMergesGlossaryIntoCorrectRepositoryContext() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        final Term term = Generator.generateTermWithId();
+        vocabulary.getGlossary().addTerm(term);
+        transactional(() -> {
+            em.persist(term, new EntityDescriptor(vocabulary.getUri()));
+            sut.updateGlossary(vocabulary);
+        });
+
+        transactional(() -> {
+            // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
+            // does not work
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor);
+            assertTrue(result.getTerms().contains(term));
+        });
+    }
+
+    @Test
+    void updateGlossaryReturnsManagedGlossaryInstance() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        transactional(() -> {
+            final Glossary merged = sut.updateGlossary(vocabulary);
+            assertTrue(em.contains(merged));
+        });
     }
 }
