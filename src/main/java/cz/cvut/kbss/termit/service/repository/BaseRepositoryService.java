@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.TypeResolver;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.util.HasIdentifier;
@@ -60,10 +62,38 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
      *
      * @param id Identifier of the object to load
      * @return {@link Optional} with the loaded object or an empty one
+     * @see #findRequired(URI)
      */
     public Optional<T> find(URI id) {
-        final Optional<T> result = getPrimaryDao().find(id);
-        return result.map(this::postLoad);
+        return getPrimaryDao().find(id).map(this::postLoad);
+    }
+
+    /**
+     * Finds an object with the specified id and returns it.
+     * <p>
+     * In comparison to {@link #find(URI)}, this method guarantees to return a matching instance. If no such object is found,
+     * a {@link NotFoundException} is thrown.
+     *
+     * @param id Identifier of the object to load
+     * @return The matching object
+     * @throws NotFoundException If no matching instance is found
+     * @see #find(URI)
+     */
+    public T findRequired(URI id) {
+        return find(id).orElseThrow(() -> NotFoundException.create(resolveGenericType().getSimpleName(), id));
+    }
+
+    /**
+     * Resolves the actual generic type of the implementation of {@link BaseRepositoryService}.
+     *
+     * @return Actual generic type class
+     */
+    private Class<T> resolveGenericType() {
+        // Adapted from https://gist.github.com/yunspace/930d4d40a787a1f6a7d1
+        final List<ResolvedType> typeParameters =
+                new TypeResolver().resolve(this.getClass()).typeParametersFor(BaseRepositoryService.class);
+        assert typeParameters.size() == 1;
+        return (Class<T>) typeParameters.get(0).getErasedType();
     }
 
     /**

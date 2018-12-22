@@ -13,35 +13,31 @@ import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Vocabulary;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.notNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class DocumentControllerTest extends BaseControllerTestRunner {
@@ -76,7 +72,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
     void runTextAnalysisInvokesTextAnalysisOnSpecifiedFileInDocument() throws Exception {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(anyString(), eq(NORMALIZED_DOC_NAME))).thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String fileName = FILE_NAMES[Generator.randomIndex(FILE_NAMES)];
         mockMvc.perform(
                 put(PATH + "/" + NORMALIZED_DOC_NAME + "/text-analysis")
@@ -113,7 +109,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
     void runTextAnalysisInvokesTextAnalysisForAllFilesInDocumentWhenFileNameIsNotSpecified() throws Exception {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(anyString(), eq(NORMALIZED_DOC_NAME))).thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         mockMvc.perform(
                 put(PATH + "/" + NORMALIZED_DOC_NAME + "/text-analysis")
                         .param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
@@ -124,23 +120,10 @@ class DocumentControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void runTextAnalysisThrowsNotFoundExceptionForUnknownDocumentId() throws Exception {
-        final Document doc = generateTestData();
-        when(idResolverMock.resolveIdentifier(anyString(), eq(NORMALIZED_DOC_NAME))).thenReturn(doc.getUri());
-        final MvcResult mvcResult = mockMvc.perform(
-                put(PATH + "/" + NORMALIZED_DOC_NAME + "/text-analysis")
-                        .param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
-                                           .andExpect(status().isNotFound()).andReturn();
-        final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
-        assertThat(errorInfo.getMessage(), containsString(doc.getUri().toString()));
-        verify(textAnalysisServiceMock, never()).analyzeDocument(any(), any());
-    }
-
-    @Test
     void runTextAnalysisThrowsNotFoundExceptionForUnknownFileName() throws Exception {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(anyString(), eq(NORMALIZED_DOC_NAME))).thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String fileName = "unknownFile";
         final MvcResult mvcResult = mockMvc.perform(
                 put(PATH + "/" + NORMALIZED_DOC_NAME + "/text-analysis")
@@ -157,7 +140,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + NORMALIZED_DOC_NAME))
                                            .andExpect(status().isOk()).andReturn();
         final Document result = readValue(mvcResult, Document.class);
@@ -173,7 +156,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(anyString(), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String namespace = Vocabulary.ONTOLOGY_IRI_termit;
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + NORMALIZED_DOC_NAME).param("namespace", namespace))
                                            .andExpect(status().isOk()).andReturn();
@@ -190,7 +173,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String data = "<html><head><title>Test</title></head><body>test</body></html>";
         final java.io.File content = createTemporaryHtmlFile(data);
         when(documentManagerMock.getAsResource(doc, getFile(doc, FILE_NAMES[0])))
@@ -210,7 +193,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final Document doc = generateTestData();
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
                 .thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String name = "unknown.txt";
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + NORMALIZED_DOC_NAME + "/content").param("file", name))
@@ -226,19 +209,19 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final Document doc = generateTestData();
         final File file = doc.getFile(FILE_NAMES[0]).orElse(null);
         when(idResolverMock.resolveIdentifier(any(ConfigParam.class), eq(NORMALIZED_DOC_NAME)))
-            .thenReturn(doc.getUri());
-        when(documentServiceMock.find(doc.getUri())).thenReturn(Optional.of(doc));
+                .thenReturn(doc.getUri());
+        when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
 
         final java.io.File attachment = generateHtmlFile();
         final MockMultipartFile upload = new MockMultipartFile(
-            "file",
-            FILE_NAMES[0],
-            MediaType.TEXT_HTML_VALUE,
-            Files.readAllBytes(attachment.toPath())
+                "file",
+                FILE_NAMES[0],
+                MediaType.TEXT_HTML_VALUE,
+                Files.readAllBytes(attachment.toPath())
         );
         mockMvc.perform(
-            multipart(PATH + "/" + NORMALIZED_DOC_NAME + "/content")
-                .file(upload).param("file", FILE_NAMES[0])
+                multipart(PATH + "/" + NORMALIZED_DOC_NAME + "/content")
+                        .file(upload).param("file", FILE_NAMES[0])
         ).andExpect(status().isNoContent());
         verify(documentManagerMock).createBackup(eq(doc), eq(file));
         verify(documentManagerMock).saveFileContent(eq(doc), eq(file), notNull());

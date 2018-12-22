@@ -27,6 +27,15 @@ public interface AssetService<T> {
     Optional<T> find(URI id);
 
     /**
+     * Gets asset with the specified identifier.
+     *
+     * @param id Resource identifier
+     * @return Matching asset
+     * @throws cz.cvut.kbss.termit.exception.NotFoundException When no matching asset is found
+     */
+    T findRequired(URI id);
+
+    /**
      * Checks if an asset with the specified identifier exists.
      *
      * @param id Asset identifier

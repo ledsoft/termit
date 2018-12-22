@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -49,15 +48,15 @@ public class ResourceController extends BaseController {
     }
 
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Resource getResource(@PathVariable("normalizedName") String normalizedName,
                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
-        return getResource(identifier);
+        return resourceService.findRequired(identifier);
     }
 
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.PUT,
-            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+                    consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResource(@PathVariable("normalizedName") String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -68,18 +67,14 @@ public class ResourceController extends BaseController {
         LOG.debug("Resource {} updated.", resource);
     }
 
-    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT,
+                    consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setTerms(@PathVariable("normalizedName") String normalizedName,
                          @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                          @RequestBody List<URI> termIds) {
         final Resource resource = getResource(normalizedName, namespace);
         resourceService.setTags(resource, termIds);
-    }
-
-    private Resource getResource(URI resourceId) {
-        return resourceService.find(resourceId)
-                              .orElseThrow(() -> NotFoundException.create(Resource.class.getSimpleName(), resourceId));
     }
 
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.DELETE)
@@ -97,16 +92,16 @@ public class ResourceController extends BaseController {
 
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/resource/terms", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+                                                                                       JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@RequestParam(name = "iri") URI resourceId) {
-        return resourceService.findTags(getResource(resourceId));
+        return resourceService.findTags(resourceService.findRequired(resourceId));
     }
 
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/resource/related", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE,
-                    JsonLd.MEDIA_TYPE})
+                    produces = {MediaType.APPLICATION_JSON_VALUE,
+                                JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@RequestParam(name = "iri") URI resourceId) {
-        return resourceService.findRelated(getResource(resourceId));
+        return resourceService.findRelated(resourceService.findRequired(resourceId));
     }
 }

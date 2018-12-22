@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
@@ -53,6 +54,17 @@ public class UserService {
      */
     public Optional<UserAccount> find(URI id) {
         return repositoryService.find(id);
+    }
+
+    /**
+     * Finds a user with the specified id.
+     *
+     * @param id User identifier
+     * @return Matching user account
+     * @throws NotFoundException When no matching account is found
+     */
+    public UserAccount findRequired(URI id) {
+        return repositoryService.findRequired(id);
     }
 
     /**

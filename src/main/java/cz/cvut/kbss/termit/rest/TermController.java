@@ -94,7 +94,7 @@ public class TermController extends BaseController {
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
-        return termService.findVocabulary(vocabularyUri);
+        return termService.findVocabularyRequired(vocabularyUri);
     }
 
     /**
@@ -115,7 +115,7 @@ public class TermController extends BaseController {
                                            @RequestBody Term term) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         if (parentTerm != null && !parentTerm.isEmpty()) {
-            termService.persistChild(term, findTerm(URI.create(parentTerm)));
+            termService.persistChild(term, termService.findRequired(URI.create(parentTerm)));
         } else {
             termService.persistRoot(term, getVocabulary(vocabularyUri));
         }
@@ -139,17 +139,13 @@ public class TermController extends BaseController {
                         @PathVariable("termIdFragment") String termIdFragment,
                         @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
-        return findTerm(termUri);
+        return termService.findRequired(termUri);
     }
 
     private URI getTermUri(String vocabIdFragment, String termIdFragment, String namespace) {
         return idResolver.resolveIdentifier(idResolver
                 .buildNamespace(getVocabularyUri(namespace, vocabIdFragment).toString(),
                         Constants.TERM_NAMESPACE_SEPARATOR), termIdFragment);
-    }
-
-    private Term findTerm(URI termUri) {
-        return termService.find(termUri).orElseThrow(() -> NotFoundException.create("Term", termUri));
     }
 
     /**

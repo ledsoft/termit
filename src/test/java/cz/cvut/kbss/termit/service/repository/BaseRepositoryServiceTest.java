@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.UserAccount;
@@ -30,6 +31,9 @@ import static org.mockito.Mockito.*;
 
 @Tag("service")
 class BaseRepositoryServiceTest extends BaseServiceTestRunner {
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private UserAccountDao userAccountDao;
@@ -204,5 +208,32 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
     void updateThrowsNotFoundExceptionWhenInstanceDoesNotExistInRepository() {
         final UserAccount user = generateAccount();
         assertThrows(NotFoundException.class, () -> sut.update(user));
+    }
+
+    @Test
+    void findRequiredRetrievesObjectById() {
+        final UserAccount instance = generateAccount();
+        transactional(() -> em.persist(instance));
+
+        final UserAccount result = sut.findRequired(instance.getUri());
+        assertEquals(instance, result);
+    }
+
+    @Test
+    void findRequiredThrowsNotFoundExceptionWhenMatchingInstanceIsNotFound() {
+        assertThrows(NotFoundException.class, () -> sut.findRequired(Generator.generateUri()));
+    }
+
+    @Test
+    void findRequiredInvokesPostLoadOnLoadedInstance() {
+        final UserAccount instance = generateAccount();
+        when(userAccountDaoMock.find(instance.getUri())).thenReturn(Optional.of(instance));
+        final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
+
+        final UserAccount result = sut.findRequired(instance.getUri());
+        assertEquals(instance, result);
+        final InOrder inOrder = Mockito.inOrder(sut, userAccountDaoMock);
+        inOrder.verify(userAccountDaoMock).find(instance.getUri());
+        inOrder.verify(sut).postLoad(instance);
     }
 }

@@ -31,7 +31,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,8 +39,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,7 +82,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getTermsReturnsTermsAssignedToResourceWithSpecifiedIri() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(resourceServiceMock.findTags(resource)).thenReturn(terms);
@@ -97,17 +96,9 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getTermsThrowsNotFoundExceptionWhenResourceDoesNotExist() throws Exception {
-        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
-        mockMvc.perform(get(PATH + "/resource/terms").param(IRI_PARAM, Generator.generateUri().toString()))
-               .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).findTags(any());
-    }
-
-    @Test
     void getRelatedResourcesReturnsResourcesRelatedToResourceWithSpecifiedIri() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         final List<Resource> related = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId()).collect(
                 Collectors.toList());
         when(resourceServiceMock.findRelated(resource)).thenReturn(related);
@@ -120,18 +111,10 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getRelatedResourcesThrowsNotFoundExceptionWhenResourceDoesNotExist() throws Exception {
-        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
-        mockMvc.perform(get(PATH + "/resource/related").param(IRI_PARAM, Generator.generateUri().toString()))
-               .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).findRelated(any());
-    }
-
-    @Test
     void getRelatedResourcesReturnsResourcesWithAuthorInformationWhenUserIsAuthenticated() throws Exception {
         final User author = Generator.generateUserWithId();
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         final List<Resource> related = generateRelatedResources(author);
         when(resourceServiceMock.findRelated(resource)).thenReturn(related);
         when(securityUtilsMock.isAuthenticated()).thenReturn(true);
@@ -164,12 +147,12 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setUri(resourceId);
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME))
                 .thenReturn(resourceId);
-        when(resourceServiceMock.find(resourceId)).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resourceId)).thenReturn(resource);
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + RESOURCE_NAME)).andExpect(status().isOk())
                                            .andReturn();
         final Resource result = readValue(mvcResult, Resource.class);
         assertEquals(resource, result);
-        verify(resourceServiceMock).find(resourceId);
+        verify(resourceServiceMock).findRequired(resourceId);
         verify(identifierResolverMock).resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME);
     }
 
@@ -180,26 +163,15 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final URI resourceId = URI.create(RESOURCE_NAMESPACE + "/" + RESOURCE_NAME);
         resource.setUri(resourceId);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceId);
-        when(resourceServiceMock.find(resourceId)).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resourceId)).thenReturn(resource);
         final MvcResult mvcResult =
                 mockMvc.perform(get(PATH + "/" + RESOURCE_NAME).param("namespace", RESOURCE_NAMESPACE))
                        .andExpect(status().isOk())
                        .andReturn();
         final Resource result = readValue(mvcResult, Resource.class);
         assertEquals(resource, result);
-        verify(resourceServiceMock).find(resourceId);
+        verify(resourceServiceMock).findRequired(resourceId);
         verify(identifierResolverMock).resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME);
-    }
-
-    @Test
-    void getResourceThrowsNotFoundExceptionForUnknownResourceIdentifier() throws Exception {
-        final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
-        final URI resourceId = URI.create(RESOURCE_NAMESPACE + "/" + RESOURCE_NAME);
-        resource.setUri(resourceId);
-        when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME))
-                .thenReturn(resourceId);
-        mockMvc.perform(get(PATH + "/" + RESOURCE_NAME)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -270,28 +242,14 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setName(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         final List<URI> uris = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
                                         .collect(Collectors.toList());
         mockMvc.perform(put(PATH + "/" + RESOURCE_NAME + "/terms").content(toJson(uris))
                                                                   .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isNoContent());
-        verify(resourceServiceMock).find(resource.getUri());
+        verify(resourceServiceMock).findRequired(resource.getUri());
         verify(resourceServiceMock).setTags(resource, uris);
-    }
-
-    @Test
-    void setTermsThrowsNotFoundForUnknownResourceIdentifier() throws Exception {
-        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
-                .thenReturn(Generator.generateUri());
-        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
-        final List<URI> uris = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
-                                        .collect(Collectors.toList());
-        mockMvc.perform(put(PATH + "/" + RESOURCE_NAME + "/terms").content(toJson(uris))
-                                                                  .contentType(MediaType.APPLICATION_JSON)
-                                                                  .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
-               .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).setTags(any(Resource.class), anyCollection());
     }
 
     @Test
@@ -312,20 +270,10 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setName(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
-        when(resourceServiceMock.find(resource.getUri())).thenReturn(Optional.of(resource));
+        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME)).andExpect(status().isNoContent());
-        verify(resourceServiceMock).find(resource.getUri());
+        verify(resourceServiceMock).findRequired(resource.getUri());
         verify(resourceServiceMock).remove(resource);
-    }
-
-    @Test
-    void removeResourceThrowsNotFoundExceptionForUnknownResourceIdentifier() throws Exception {
-        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
-                .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        when(resourceServiceMock.find(any())).thenReturn(Optional.empty());
-        mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME).param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
-               .andExpect(status().isNotFound());
-        verify(resourceServiceMock, never()).remove(any(Resource.class));
     }
 
     @Test
