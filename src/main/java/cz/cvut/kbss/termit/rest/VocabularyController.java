@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.VocabularyService;
@@ -51,8 +50,7 @@ public class VocabularyController extends BaseController {
     public Vocabulary getById(@PathVariable("fragment") String fragment,
                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI id = resolveVocabularyUri(fragment, namespace);
-        return vocabularyService.find(id)
-                                .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
+        return vocabularyService.findRequired(id);
     }
 
     private URI resolveVocabularyUri(String fragment, String namespace) {

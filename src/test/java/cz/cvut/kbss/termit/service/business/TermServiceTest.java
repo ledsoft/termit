@@ -57,14 +57,14 @@ class TermServiceTest {
     @Test
     void findVocabularyLoadsVocabularyFromRepositoryService() {
         when(vocabularyService.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
-        sut.findVocabulary(vocabulary.getUri());
+        sut.findVocabularyRequired(vocabulary.getUri());
         verify(vocabularyService).find(vocabulary.getUri());
     }
 
     @Test
     void findVocabularyThrowsNotFoundExceptionWhenVocabularyIsNotFound() {
         when(vocabularyService.find(any())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> sut.findVocabulary(vocabulary.getUri()));
+        assertThrows(NotFoundException.class, () -> sut.findVocabularyRequired(vocabulary.getUri()));
     }
 
     @Test

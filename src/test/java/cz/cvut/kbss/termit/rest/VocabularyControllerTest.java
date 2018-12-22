@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -114,7 +113,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final String fragment = IdentifierResolver.extractIdentifierFragment(vocabulary.getUri());
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment))
                 .thenReturn(vocabulary.getUri());
-        when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
+        when(serviceMock.findRequired(vocabulary.getUri())).thenReturn(vocabulary);
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE))
@@ -126,18 +125,6 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getByIdReturnsNotFoundForUnknownVocabularyId() throws Exception {
-        final URI unknownUri = Generator.generateUri();
-        final String fragment = IdentifierResolver.extractIdentifierFragment(unknownUri);
-        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment))
-                .thenReturn(unknownUri);
-        when(serviceMock.find(any())).thenReturn(Optional.empty());
-
-        mockMvc.perform(get(PATH + "/" + fragment)).andExpect(status().isNotFound());
-        verify(serviceMock).find(unknownUri);
-    }
-
-    @Test
     void getByIdUsesSpecifiedNamespaceInsteadOfDefaultOneForResolvingIdentifier() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
@@ -145,7 +132,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final String namespace = vocabulary.getUri().toString()
                                            .substring(0, vocabulary.getUri().toString().lastIndexOf('/'));
         when(idResolverMock.resolveIdentifier(namespace, fragment)).thenReturn(vocabulary.getUri());
-        when(serviceMock.find(vocabulary.getUri())).thenReturn(Optional.of(vocabulary));
+        when(serviceMock.findRequired(vocabulary.getUri())).thenReturn(vocabulary);
 
         final MvcResult mvcResult = mockMvc.perform(
                 get(PATH + "/" + fragment).accept(MediaType.APPLICATION_JSON_VALUE)

@@ -90,7 +90,7 @@ public class TermService {
      * @return Matching vocabulary
      * @throws NotFoundException When vocabulary with the specified identifier does not exist
      */
-    public Vocabulary findVocabulary(URI id) {
+    public Vocabulary findVocabularyRequired(URI id) {
         return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }
@@ -103,6 +103,17 @@ public class TermService {
      */
     public Optional<Term> find(URI id) {
         return repositoryService.find(id);
+    }
+
+    /**
+     * Gets a term with the specified identifier.
+     *
+     * @param id Term identifier
+     * @return Matching term
+     * @throws NotFoundException When no matching term is found
+     */
+    public Term findRequired(URI id) {
+        return repositoryService.findRequired(id);
     }
 
     /**
