@@ -5,6 +5,7 @@ import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
+import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -74,5 +75,19 @@ public class VocabularyDao extends BaseDao<Vocabulary> {
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    /**
+     * Updates glossary contained in the specified vocabulary.
+     * <p>
+     * The vocabulary is passed for correct context resolution, as glossary existentially depends on its owning vocabulary.
+     *
+     * @param entity Owner of the updated glossary
+     * @return The updated entity
+     */
+    public Glossary updateGlossary(Vocabulary entity) {
+        Objects.requireNonNull(entity);
+        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
+        return em.merge(entity.getGlossary(), descriptor);
     }
 }

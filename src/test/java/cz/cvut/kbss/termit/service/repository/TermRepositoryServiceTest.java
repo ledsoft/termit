@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,20 +54,27 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistSetsVocabularyTerm() {
+    void persistThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> sut.persist(Generator.generateTerm()));
+    }
+
+    @Test
+    void addTermToVocabularySavesTermAsRoot() {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
 
         transactional(() -> sut.addTermToVocabulary(term, vocabulary));
 
-        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
-
-        assertNotNull(result);
-        assertTrue(result.getGlossary().getTerms().contains(term));
+        transactional(() -> {
+            // Need to put in transaction, otherwise EM delegate is closed after find and lazy loading of glossary terms does not work
+            final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
+            assertNotNull(result);
+            assertTrue(result.getGlossary().getTerms().contains(term));
+        });
     }
 
     @Test
-    void persistThrowsValidationExceptionWhenTermNameIsBlank() {
+    void addTermToVocabularyThrowsValidationExceptionWhenTermNameIsBlank() {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
         term.setLabel("");
@@ -76,28 +86,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistCreatesMultipleTerms() {
-        final Term term1 = Generator.generateTerm();
-        term1.setUri(Generator.generateUri());
-
-        final Term term2 = Generator.generateTerm();
-        term2.setUri(Generator.generateUri());
-
-        sut.addTermToVocabulary(term1, vocabulary);
-        sut.addTermToVocabulary(term2, vocabulary);
-
-        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
-
-        List<Term> terms = new ArrayList<>();
-        terms.add(term1);
-        terms.add(term2);
-
-        assertNotNull(result);
-        assertTrue(result.getGlossary().getTerms().containsAll(terms));
-    }
-
-    @Test
-    void persistThrowsResourceExistsExceptionWhenAnotherTermWithIdenticalAlreadyIriExists() {
+    void addTermToVocabularyThrowsResourceExistsExceptionWhenAnotherTermWithIdenticalAlreadyIriExists() {
         final Term term1 = Generator.generateTerm();
         URI uri = Generator.generateUri();
         term1.setUri(uri);
@@ -188,14 +177,15 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(toPersist.getGlossary());
         });
 
-        List<Term> result1 = sut.findAllRoots("Result", vocabulary.getUri());
+        List<Term> result1 = sut.findAllRoots(vocabulary, "Result");
 
         assertEquals(5, result1.size());
         result1.forEach(o -> assertTrue(o.getLabel().contains("Result")));
     }
 
     @Test
-    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
+    @Disabled(
+            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyChecksForTermWithMatchingLabel() {
         final Term t = generateTermWithUri();
         vocabulary.getGlossary().addTerm(t);
