@@ -1,5 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.Optional;
  *
  * @param <T> Type managed by this DAO
  */
-public interface GenericDao<T> {
+public interface GenericDao<T extends HasIdentifier> {
 
     /**
      * Finds all instances of the class managed by this DAO.

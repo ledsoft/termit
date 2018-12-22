@@ -1,6 +1,8 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.util.ValidationResult;
 import org.springframework.lang.NonNull;
@@ -21,11 +23,11 @@ import java.util.stream.Collectors;
  * <p>
  * In order to minimize chances of messing up the transactional behavior, subclasses *should not* override the main CRUD
  * methods and instead should provide custom business logic by overriding the helper hooks such as {@link
- * #prePersist(Object)}.
+ * #prePersist(HasIdentifier)}.
  *
  * @param <T> Domain object type managed by this service
  */
-public abstract class BaseRepositoryService<T> {
+public abstract class BaseRepositoryService<T extends HasIdentifier> {
 
     private final Validator validator;
 
@@ -87,7 +89,7 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #persist(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #persist(HasIdentifier)}.
      * <p>
      * The default behavior is to validate the specified instance.
      *
@@ -101,10 +103,14 @@ public abstract class BaseRepositoryService<T> {
      * Merges the specified updated instance into the repository.
      *
      * @param instance The instance to merge
+     * @throws NotFoundException If the entity does not exist in the repository
      */
     @Transactional
     public T update(T instance) {
         Objects.requireNonNull(instance);
+        if (!exists(instance.getUri())) {
+            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
+        }
         preUpdate(instance);
         final T result = getPrimaryDao().update(instance);
         assert result != null;
@@ -113,7 +119,7 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      * <p>
      * The default behavior is to validate the specified instance.
      *
@@ -124,9 +130,9 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      *
-     * @param instance The updated instance which will be returned by {@link #update(Object)}, not {@code null}
+     * @param instance The updated instance which will be returned by {@link #update(HasIdentifier)} )}, not {@code null}
      */
     protected void postUpdate(@NonNull T instance) {
         // Do nothing
@@ -146,7 +152,7 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(HasIdentifier)}.
      * <p>
      * The default behavior is a no-op.
      *
@@ -157,7 +163,7 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(HasIdentifier)}.
      * <p>
      * The default behavior is a no-op.
      *

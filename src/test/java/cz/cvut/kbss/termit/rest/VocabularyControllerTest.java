@@ -197,23 +197,6 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void updateVocabularyThrowsNotFoundWhenVocabularyToUpdateDoesNotExist() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setDateCreated(new Date());
-        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
-        final String namespace = "http://kbss.felk.cvut.cz/ontologies/termit/vocabularies/";
-        vocabulary.setUri(uri);
-        when(idResolverMock.resolveIdentifier(namespace, "test")).thenReturn(uri);
-        when(serviceMock.exists(uri)).thenReturn(false);
-        mockMvc.perform(
-                put(PATH + "/test").param(QueryParams.NAMESPACE, namespace)
-                                   .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                   .content(toJson(vocabulary))).andExpect(status().isNotFound());
-        verify(serviceMock, never()).update(any());
-    }
-
-    @Test
     void updateVocabularyThrowsValidationExceptionWhenVocabularyUriDiffersFromRequestBasedUri() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(user);

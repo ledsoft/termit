@@ -64,9 +64,6 @@ public class ResourceController extends BaseController {
                                @RequestBody Resource resource) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         verifyRequestAndEntityIdentifier(resource, identifier);
-        if (!resourceService.exists(identifier)) {
-            throw NotFoundException.create(Resource.class.getSimpleName(), identifier);
-        }
         resourceService.update(resource);
         LOG.debug("Resource {} updated.", resource);
     }

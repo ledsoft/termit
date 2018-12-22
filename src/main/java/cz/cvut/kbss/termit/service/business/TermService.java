@@ -114,9 +114,9 @@ public class TermService {
     public List<Term> findSubTerms(Term parent) {
         Objects.requireNonNull(parent);
         return parent.getSubTerms() == null ? Collections.emptyList() :
-               parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
-                       () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
-                     .collect(Collectors.toList());
+                parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
+                        () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
+                      .collect(Collectors.toList());
     }
 
     /**
@@ -178,10 +178,5 @@ public class TermService {
     public Term update(Term term) {
         Objects.requireNonNull(term);
         return repositoryService.update(term);
-    }
-
-    public boolean exists(URI uri) {
-        // TODO Will be removed
-        return repositoryService.exists(uri);
     }
 }

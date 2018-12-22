@@ -130,34 +130,20 @@ class TermControllerTest extends BaseControllerTestRunner {
         final URI termUri = initTermUriResolution();
         final Term term = Generator.generateTerm();
         term.setUri(termUri);
-        when(termServiceMock.exists(termUri)).thenReturn(true);
         mockMvc.perform(put(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).content(toJson(term)).contentType(
                 MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isNoContent());
         verify(termServiceMock).update(term);
     }
 
     @Test
-    void updateThrowsNotFoundWhenTermWithUriDoesNotExist() throws Exception {
-        final URI termUri = initTermUriResolution();
-        final Term term = Generator.generateTerm();
-        term.setUri(termUri);
-        when(termServiceMock.exists(termUri)).thenReturn(false);
-        mockMvc.perform(put(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).content(toJson(term)).contentType(
-                MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isNotFound());
-        verify(termServiceMock).exists(termUri);
-        verify(termServiceMock, never()).update(any());
-    }
-
-    @Test
     void updateThrowsValidationExceptionWhenTermUriDoesNotMatchRequestPath() throws Exception {
-        final URI termUri = initTermUriResolution();
+        initTermUriResolution();
         final Term term = Generator.generateTermWithId();
         final MvcResult mvcResult = mockMvc
                 .perform(put(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME).content(toJson(term)).contentType(
                         MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isConflict()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
-        verify(termServiceMock, never()).exists(termUri);
         verify(termServiceMock, never()).update(any());
     }
 

@@ -106,14 +106,6 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void updateThrowsNotFoundExceptionWhenUserDoesNotExist() {
-        final UserAccount user = generateAccount();
-        Environment.setCurrentUser(user);
-        final NotFoundException ex = assertThrows(NotFoundException.class, () -> sut.update(user));
-        assertEquals("User " + user + " does not exist.", ex.getMessage());
-    }
-
-    @Test
     void postLoadErasesPasswordFromInstance() {
         final UserAccount user = persistUser();
 
