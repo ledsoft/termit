@@ -1,25 +1,33 @@
 package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 class ResourceServiceTest {
 
     @Mock
     private ResourceRepositoryService resourceRepositoryService;
+
+    @Mock
+    private DocumentManager documentManager;
 
     @InjectMocks
     private ResourceService sut;
@@ -98,5 +106,51 @@ class ResourceServiceTest {
         final Resource resource = Generator.generateResourceWithId();
         sut.findRelated(resource);
         verify(resourceRepositoryService).findRelated(resource);
+    }
+
+    @Test
+    void getContentLoadsContentOfFileFromDocumentManager() {
+        final File file = new File();
+        file.setName("Test");
+        file.setUri(Generator.generateUri());
+        sut.getContent(file);
+        verify(documentManager).getAsResource(file);
+    }
+
+    @Test
+    void getContentThrowsUnsupportedAssetOperationWhenResourceIsNotFile() {
+        final Resource resource = Generator.generateResourceWithId();
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.getContent(resource));
+        verify(documentManager, never()).getAsResource(any());
+    }
+
+    @Test
+    void saveContentSavesFileContentViaDocumentManager() {
+        final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
+        final File file = new File();
+        file.setName("Test");
+        file.setUri(Generator.generateUri());
+        sut.saveContent(file, bis);
+        verify(documentManager).saveFileContent(file, bis);
+    }
+
+    @Test
+    void saveContentThrowsUnsupportedAssetOperationExceptionWhenResourceIsNotFile() {
+        final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
+        final Resource resource = Generator.generateResourceWithId();
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.saveContent(resource, bis));
+        verify(documentManager, never()).saveFileContent(any(), any());
+    }
+
+    @Test
+    void saveContentCreatesBackupBeforeSavingFileContentInDocumentManager() {
+        final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
+        final File file = new File();
+        file.setName("Test");
+        file.setUri(Generator.generateUri());
+        sut.saveContent(file, bis);
+        final InOrder inOrder = Mockito.inOrder(documentManager);
+        inOrder.verify(documentManager).createBackup(file);
+        inOrder.verify(documentManager).saveFileContent(file, bis);
     }
 }
