@@ -114,10 +114,10 @@ public class DocumentController extends BaseController {
         final Document document = getById(documentName, namespace);
         if (fileName != null) {
             File toAnalyze = resolveFileFromName(document, fileName);
-            textAnalysisService.analyzeDocument(toAnalyze, document);
+            textAnalysisService.analyzeFile(toAnalyze);
         } else {
             for (File f : document.getFiles()) {
-                textAnalysisService.analyzeDocument(f, document);
+                textAnalysisService.analyzeFile(f);
             }
         }
     }

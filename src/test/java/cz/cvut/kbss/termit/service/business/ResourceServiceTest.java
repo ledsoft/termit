@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
+import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class ResourceServiceTest {
 
     @Mock
     private DocumentManager documentManager;
+
+    @Mock
+    private TextAnalysisService textAnalysisService;
 
     @InjectMocks
     private ResourceService sut;
@@ -152,5 +156,21 @@ class ResourceServiceTest {
         final InOrder inOrder = Mockito.inOrder(documentManager);
         inOrder.verify(documentManager).createBackup(file);
         inOrder.verify(documentManager).saveFileContent(file, bis);
+    }
+
+    @Test
+    void runTextAnalysisInvokesTextAnalysisForSpecifiedFile() {
+        final File file = new File();
+        file.setName("Test");
+        file.setUri(Generator.generateUri());
+        sut.runTextAnalysis(file);
+        verify(textAnalysisService).analyzeFile(file);
+    }
+
+    @Test
+    void runTextAnalysisThrowsUnsupportedAssetOperationWhenResourceIsNotFile() {
+        final Resource resource = Generator.generateResourceWithId();
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.runTextAnalysis(resource));
+        verify(textAnalysisService, never()).analyzeFile(any());
     }
 }

@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -8,6 +9,7 @@ import cz.cvut.kbss.termit.service.business.ResourceService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -65,6 +69,57 @@ public class ResourceController extends BaseController {
         verifyRequestAndEntityIdentifier(resource, identifier);
         resourceService.update(resource);
         LOG.debug("Resource {} updated.", resource);
+    }
+
+    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.GET)
+    public ResponseEntity<org.springframework.core.io.Resource> getContent(
+            @PathVariable("normalizedName") String normalizedName,
+            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final Resource resource = getResource(normalizedName, namespace);
+        try {
+            final TypeAwareResource content = resourceService.getContent(resource);
+            return ResponseEntity.ok()
+                                 .contentLength(content.contentLength())
+                                 .contentType(MediaType.parseMediaType(
+                                         content.getMediaType().orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)))
+                                 .body(content);
+        } catch (IOException e) {
+            throw new TermItException("Unable to load content of resource " + resource, e);
+        }
+    }
+
+    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveContent(@PathVariable("normalizedName") String normalizedName,
+                            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                            @RequestParam(name = "file") MultipartFile attachment) {
+        final Resource resource = getResource(normalizedName, namespace);
+        try {
+            resourceService.saveContent(resource, attachment.getInputStream());
+        } catch (IOException e) {
+            throw new TermItException(
+                    "Unable to read file (fileName=\"" + attachment.getOriginalFilename() + "\") content from request",
+                    e);
+        }
+        LOG.debug("Content saved for resource {}.", resource);
+    }
+
+    /**
+     * Runs text analysis on the specified resource.
+     * <p>
+     * Note that the text analysis invocation is asynchronous, so this method returns immediately after invoking the
+     * text analysis with status {@link HttpStatus#ACCEPTED}.
+     *
+     * @param normalizedName Normalized name used to identify the resource
+     * @param namespace      Namespace used for resource identifier resolution. Optional, if not specified, the configured namespace is used
+     */
+    @RequestMapping(value = "/{normalizedName}/text-analysis", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void runTextAnalysis(@PathVariable("normalizedName") String normalizedName,
+                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final Resource resource = getResource(normalizedName, namespace);
+        resourceService.runTextAnalysis(resource);
+        LOG.debug("Text analysis invoked for resource {}.", resource);
     }
 
     @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT,

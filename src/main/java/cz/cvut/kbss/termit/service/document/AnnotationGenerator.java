@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.service.document;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.TermOccurrence;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.persistence.dao.TargetDao;
@@ -51,12 +50,11 @@ public class AnnotationGenerator {
     /**
      * Generates annotations (term occurrences) for terms identified in the specified document.
      *
-     * @param content  Content of file with identified term occurrences
-     * @param source   Source file of the annotated document
-     * @param document Logical document which contains content
+     * @param content Content of file with identified term occurrences
+     * @param source  Source file of the annotated document
      */
     @Transactional
-    public void generateAnnotations(InputStream content, File source, Document document) {
+    public void generateAnnotations(InputStream content, File source) {
         final TermOccurrenceResolver occurrenceResolver = findResolverFor(source);
         LOG.debug("Resolving annotations of file {}.", source);
         occurrenceResolver.parseContent(content, source);
@@ -67,7 +65,7 @@ public class AnnotationGenerator {
             targetDao.persist(o.getTarget());
             termOccurrenceDao.persist(o);
         });
-        saveAnnotatedContent(document, source, occurrenceResolver.getContent());
+        saveAnnotatedContent(source, occurrenceResolver.getContent());
     }
 
     private TermOccurrenceResolver findResolverFor(File file) {
@@ -111,7 +109,7 @@ public class AnnotationGenerator {
         return true;
     }
 
-    private void saveAnnotatedContent(Document document, File file, InputStream input) {
+    private void saveAnnotatedContent(File file, InputStream input) {
         documentManager.saveFileContent(file, input);
     }
 }

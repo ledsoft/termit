@@ -6,8 +6,8 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -113,7 +113,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST)).andExpect(content().string(containsString(CONTENT)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -138,7 +138,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -159,7 +159,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
                   .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -170,7 +170,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withServerError());
-        assertThrows(WebServiceIntegrationException.class, () -> sut.analyzeDocument(file, document));
+        assertThrows(WebServiceIntegrationException.class, () -> sut.analyzeFile(file));
         mockServer.verify();
     }
 
@@ -181,10 +181,10 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
         final ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
-        verify(annotationGeneratorMock).generateAnnotations(captor.capture(), eq(file), eq(document));
+        verify(annotationGeneratorMock).generateAnnotations(captor.capture(), eq(file));
         final String result = new BufferedReader(new InputStreamReader(captor.getValue())).lines().collect(
                 Collectors.joining("\n"));
         assertEquals(CONTENT, result);
@@ -194,7 +194,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
         file.setName("unknown.html");
         final NotFoundException result = assertThrows(NotFoundException.class,
-                () -> sut.analyzeDocument(file, document));
+                () -> sut.analyzeFile(file));
         assertThat(result.getMessage(), containsString("not found on file system"));
     }
 
@@ -206,7 +206,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess());
         final WebServiceIntegrationException result = assertThrows(WebServiceIntegrationException.class,
-                () -> sut.analyzeDocument(file, document));
+                () -> sut.analyzeFile(file));
         assertThat(result.getMessage(), containsString("empty response"));
         mockServer.verify();
     }
@@ -218,10 +218,10 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
         final InOrder inOrder = Mockito.inOrder(documentManagerSpy, annotationGeneratorMock);
         inOrder.verify(documentManagerSpy).createBackup(file);
-        inOrder.verify(annotationGeneratorMock).generateAnnotations(any(), eq(file), eq(document));
+        inOrder.verify(annotationGeneratorMock).generateAnnotations(any(), eq(file));
     }
 }
