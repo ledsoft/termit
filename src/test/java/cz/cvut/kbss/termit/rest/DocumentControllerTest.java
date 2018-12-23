@@ -176,7 +176,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         when(documentServiceMock.findRequired(doc.getUri())).thenReturn(doc);
         final String data = "<html><head><title>Test</title></head><body>test</body></html>";
         final java.io.File content = createTemporaryHtmlFile(data);
-        when(documentManagerMock.getAsResource(doc, getFile(doc, FILE_NAMES[0])))
+        when(documentManagerMock.getAsResource(getFile(doc, FILE_NAMES[0])))
                 .thenReturn(new FileSystemResource(content));
         when(documentManagerMock.getMediaType(doc, getFile(doc, FILE_NAMES[0])))
                 .thenReturn(Optional.of(MediaType.TEXT_HTML_VALUE));
@@ -201,7 +201,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final ErrorInfo result = readValue(mvcResult, ErrorInfo.class);
         assertNotNull(result);
         assertThat(result.getMessage(), containsString("not found in document"));
-        verify(documentManagerMock, never()).getAsResource(any(), any());
+        verify(documentManagerMock, never()).getAsResource(any());
     }
 
     @Test
@@ -223,8 +223,8 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                 multipart(PATH + "/" + NORMALIZED_DOC_NAME + "/content")
                         .file(upload).param("file", FILE_NAMES[0])
         ).andExpect(status().isNoContent());
-        verify(documentManagerMock).createBackup(eq(doc), eq(file));
-        verify(documentManagerMock).saveFileContent(eq(doc), eq(file), notNull());
+        verify(documentManagerMock).createBackup(eq(file));
+        verify(documentManagerMock).saveFileContent(eq(file), notNull());
     }
 
     @Test

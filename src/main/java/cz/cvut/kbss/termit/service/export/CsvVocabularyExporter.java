@@ -2,8 +2,9 @@ package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareByteArrayResource;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class CsvVocabularyExporter implements VocabularyExporter {
         final StringBuilder export = new StringBuilder(String.join(",", Term.EXPORT_COLUMNS));
         final List<Term> terms = termService.findAll(vocabulary);
         terms.forEach(t -> export.append('\n').append(t.toCsv()));
-        return new TypeAwareResource(export.toString().getBytes(), MEDIA_TYPE, FILE_EXTENSION);
+        return new TypeAwareByteArrayResource(export.toString().getBytes(), MEDIA_TYPE, FILE_EXTENSION);
     }
 
     @Override

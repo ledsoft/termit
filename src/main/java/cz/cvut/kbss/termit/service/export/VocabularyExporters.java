@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.export;
 
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

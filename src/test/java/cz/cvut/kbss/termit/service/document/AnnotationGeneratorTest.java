@@ -101,6 +101,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         this.file = new File();
         file.setUri(Generator.generateUri());
         file.setName("rdfa-simple.html");
+        file.setDocument(document);
         cz.cvut.kbss.termit.environment.Environment.setCurrentUser(author);
         document.addFile(file);
         transactional(() -> {

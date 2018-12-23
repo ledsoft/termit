@@ -3,8 +3,9 @@ package cz.cvut.kbss.termit.service.export;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareByteArrayResource;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -46,7 +47,7 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
             generateTermRows(termService.findAll(vocabulary), sheet);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             wb.write(bos);
-            return new TypeAwareResource(bos.toByteArray(), MEDIA_TYPE, FILE_EXTENSION);
+            return new TypeAwareByteArrayResource(bos.toByteArray(), MEDIA_TYPE, FILE_EXTENSION);
         } catch (IOException e) {
             throw new TermItException("Unable to generate excel file from glossary of " + vocabulary, e);
         }

@@ -112,6 +112,6 @@ public class AnnotationGenerator {
     }
 
     private void saveAnnotatedContent(Document document, File file, InputStream input) {
-        documentManager.saveFileContent(document, file, input);
+        documentManager.saveFileContent(file, input);
     }
 }
