@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -44,18 +43,16 @@ public class TextAnalysisService {
 
     /**
      * Passes the content of the specified file to the remote text analysis service, letting it find occurrences of
-     * terms from the vocabulary associated with the specified document in the text.
+     * terms from the vocabulary associated with parent document of the specified file in the text.
      * <p>
      * The analysis result is passed to the term occurrence generator.
      *
-     * @param file     File whose content shall be analyzed
-     * @param document Document to which the file belongs
+     * @param file File whose content shall be analyzed
      */
     @Async
-    public void analyzeDocument(File file, Document document) {
+    public void analyzeFile(File file) {
         Objects.requireNonNull(file);
-        Objects.requireNonNull(document);
-        final TextAnalysisInput input = createAnalysisInput(file, document);
+        final TextAnalysisInput input = createAnalysisInput(file);
         final HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
         try {
@@ -70,7 +67,7 @@ public class TextAnalysisService {
             documentManager.createBackup(file);
             final Resource resource = resp.getBody();
             try (final InputStream is = resource.getInputStream()) {
-                annotationGenerator.generateAnnotations(is, file, document);
+                annotationGenerator.generateAnnotations(is, file);
             }
         } catch (WebServiceIntegrationException e) {
             throw e;
@@ -81,10 +78,10 @@ public class TextAnalysisService {
         }
     }
 
-    private TextAnalysisInput createAnalysisInput(File file, Document document) {
+    private TextAnalysisInput createAnalysisInput(File file) {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(documentManager.loadFileContent(file));
-        input.setVocabularyContext(document.getVocabulary().getUri());
+        input.setVocabularyContext(file.getDocument().getVocabulary().getUri());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         return input;
     }

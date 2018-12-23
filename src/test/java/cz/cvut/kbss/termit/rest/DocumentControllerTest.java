@@ -78,7 +78,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                         .param("namespace", Vocabulary.ONTOLOGY_IRI_termit)
                         .param("file", fileName))
                .andExpect(status().isAccepted());
-        verify(textAnalysisServiceMock).analyzeDocument(getFile(doc, fileName), doc);
+        verify(textAnalysisServiceMock).analyzeFile(getFile(doc, fileName));
     }
 
     private static Document generateTestData() {
@@ -114,7 +114,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                         .param("namespace", Vocabulary.ONTOLOGY_IRI_termit))
                .andExpect(status().isAccepted());
         for (File f : doc.getFiles()) {
-            verify(textAnalysisServiceMock).analyzeDocument(f, doc);
+            verify(textAnalysisServiceMock).analyzeFile(f);
         }
     }
 
@@ -131,7 +131,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
                                            .andExpect(status().isNotFound()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertThat(errorInfo.getMessage(), containsString(fileName));
-        verify(textAnalysisServiceMock, never()).analyzeDocument(any(), any());
+        verify(textAnalysisServiceMock, never()).analyzeFile(any());
     }
 
     @Test

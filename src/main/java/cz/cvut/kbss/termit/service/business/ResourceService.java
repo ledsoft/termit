@@ -5,8 +5,11 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
+import cz.cvut.kbss.termit.service.document.TextAnalysisService;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +27,20 @@ import java.util.Optional;
 @Service
 public class ResourceService implements AssetService<Resource> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
+
     private final ResourceRepositoryService repositoryService;
 
     private final DocumentManager documentManager;
 
+    private final TextAnalysisService textAnalysisService;
+
     @Autowired
-    public ResourceService(ResourceRepositoryService repositoryService, DocumentManager documentManager) {
+    public ResourceService(ResourceRepositoryService repositoryService, DocumentManager documentManager,
+                           TextAnalysisService textAnalysisService) {
         this.repositoryService = repositoryService;
         this.documentManager = documentManager;
+        this.textAnalysisService = textAnalysisService;
     }
 
     /**
@@ -109,8 +118,24 @@ public class ResourceService implements AssetService<Resource> {
         if (!(resource instanceof File)) {
             throw new UnsupportedAssetOperationException("Content saving is not supported for resource " + resource);
         }
+        LOG.trace("Saving new content of resource {}.", resource);
         documentManager.createBackup((File) resource);
         documentManager.saveFileContent((File) resource, content);
+    }
+
+    /**
+     * Executes text analysis on the specified resource's content.
+     *
+     * @param resource Resource to analyze
+     * @throws UnsupportedAssetOperationException If text analysis is not supported for the specified resource
+     */
+    public void runTextAnalysis(Resource resource) {
+        Objects.requireNonNull(resource);
+        if (!(resource instanceof File)) {
+            throw new UnsupportedAssetOperationException("Text analysis is not supported for resource " + resource);
+        }
+        LOG.trace("Invoking text analysis on resource {}.", resource);
+        textAnalysisService.analyzeFile((File) resource);
     }
 
     @Override

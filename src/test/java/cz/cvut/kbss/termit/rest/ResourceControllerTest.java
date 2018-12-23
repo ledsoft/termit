@@ -12,7 +12,9 @@ import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.ResourceService;
+import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -25,9 +27,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +44,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,6 +58,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     private static final String RESOURCE_NAME = "test-resource";
     private static final String RESOURCE_NAMESPACE = Vocabulary.ONTOLOGY_IRI_termit + "/";
+    private static final String HTML_CONTENT = "<html><head><title>Test</title></head><body>test</body></html>";
 
     @Mock
     private ResourceService resourceServiceMock;
@@ -291,5 +299,63 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         verify(resourceServiceMock).persist(captor.capture());
         assertEquals(doc, captor.getValue());
         assertEquals(doc.getFiles(), captor.getValue().getFiles());
+    }
+
+    @Test
+    void getContentReturnsContentOfRequestedFile() throws Exception {
+        final File file = new File();
+        final String fileName = "mpp-3.3.html";
+        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
+        file.setName(fileName);
+        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
+                .thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        final java.io.File content = createTemporaryHtmlFile();
+        when(resourceServiceMock.getContent(file))
+                .thenReturn(new TypeAwareFileSystemResource(content, MediaType.TEXT_HTML_VALUE));
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + fileName + "/content"))
+                .andExpect(status().isOk()).andReturn();
+        final String resultContent = mvcResult.getResponse().getContentAsString();
+        assertEquals(HTML_CONTENT, resultContent);
+        assertEquals(MediaType.TEXT_HTML_VALUE, mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_TYPE));
+    }
+
+    private static java.io.File createTemporaryHtmlFile() throws Exception {
+        final java.io.File file = Files.createTempFile("document", ".html").toFile();
+        file.deleteOnExit();
+        Files.write(file.toPath(), HTML_CONTENT.getBytes());
+        return file;
+    }
+
+    @Test
+    void saveContentSavesContentViaServiceAndReturnsNoContentStatus() throws Exception {
+        final File file = new File();
+        final String fileName = "mpp-3.3.html";
+        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
+        file.setName(fileName);
+        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
+                .thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+
+        final java.io.File attachment = createTemporaryHtmlFile();
+        final MockMultipartFile upload = new MockMultipartFile("file", file.getName(), MediaType.TEXT_HTML_VALUE,
+                Files.readAllBytes(attachment.toPath())
+        );
+        mockMvc.perform(multipart(PATH + "/" + fileName + "/content").file(upload)).andExpect(status().isNoContent());
+        verify(resourceServiceMock).saveContent(eq(file), any(InputStream.class));
+    }
+
+    @Test
+    void runTextAnalysisInvokesTextAnalysisOnSpecifiedResource() throws Exception {
+        final File file = new File();
+        final String fileName = "mpp-3.3.html";
+        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
+        file.setName(fileName);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+               .andExpect(status().isAccepted());
+        verify(resourceServiceMock).runTextAnalysis(file);
     }
 }
