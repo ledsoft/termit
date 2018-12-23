@@ -64,7 +64,7 @@ public class DocumentController extends BaseController {
         final Document document = getById(fragment, namespace);
         final File file = resolveFileFromName(document, fileName);
         try {
-            final Resource resource = documentManager.getAsResource(document, file);
+            final Resource resource = documentManager.getAsResource(file);
             return ResponseEntity.ok()
                                  .contentLength(resource.contentLength())
                                  .contentType(MediaType.parseMediaType(documentManager.getMediaType(document, file)
@@ -84,8 +84,8 @@ public class DocumentController extends BaseController {
         String fileName = attachment.getOriginalFilename();
         final File file = resolveFileFromName(document, fileName);
         try {
-            documentManager.createBackup(document, file);
-            documentManager.saveFileContent(document, file, attachment.getInputStream());
+            documentManager.createBackup(file);
+            documentManager.saveFileContent(file, attachment.getInputStream());
         } catch (IOException e) {
             throw new TermItException("Unable to read file (fileName=\"" + fileName + "\") content from request", e);
         }

@@ -67,7 +67,7 @@ public class TextAnalysisService {
                 throw new WebServiceIntegrationException("Text analysis service returned empty response.");
             }
             assert resp.getBody() != null;
-            documentManager.createBackup(document, file);
+            documentManager.createBackup(file);
             final Resource resource = resp.getBody();
             try (final InputStream is = resource.getInputStream()) {
                 annotationGenerator.generateAnnotations(is, file, document);
@@ -83,7 +83,7 @@ public class TextAnalysisService {
 
     private TextAnalysisInput createAnalysisInput(File file, Document document) {
         final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(documentManager.loadFileContent(document, file));
+        input.setContent(documentManager.loadFileContent(file));
         input.setVocabularyContext(document.getVocabulary().getUri());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         return input;

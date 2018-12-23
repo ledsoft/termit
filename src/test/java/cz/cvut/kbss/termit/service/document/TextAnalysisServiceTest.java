@@ -98,10 +98,11 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         vocabulary.setDocument(document);
         this.file = new File();
         file.setName(FILE_NAME);
+        file.setDocument(document);
         generateFile();
         this.documentManagerSpy = spy(documentManager);
-        doCallRealMethod().when(documentManagerSpy).loadFileContent(any(), any());
-        doNothing().when(documentManagerSpy).createBackup(any(), any());
+        doCallRealMethod().when(documentManagerSpy).loadFileContent(any());
+        doNothing().when(documentManagerSpy).createBackup(any());
         this.sut = new TextAnalysisService(restTemplate, config, documentManagerSpy, annotationGeneratorMock);
     }
 
@@ -220,7 +221,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         sut.analyzeDocument(file, document);
         mockServer.verify();
         final InOrder inOrder = Mockito.inOrder(documentManagerSpy, annotationGeneratorMock);
-        inOrder.verify(documentManagerSpy).createBackup(document, file);
+        inOrder.verify(documentManagerSpy).createBackup(file);
         inOrder.verify(annotationGeneratorMock).generateAnnotations(any(), eq(file), eq(document));
     }
 }

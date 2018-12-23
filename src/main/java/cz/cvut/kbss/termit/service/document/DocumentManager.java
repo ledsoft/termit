@@ -23,24 +23,22 @@ public interface DocumentManager {
     /**
      * Gets the content of the specified file.
      *
-     * @param document Document containing the file. Used for path resolution
-     * @param file     File representing the physical item
+     * @param file File representing the physical item
      * @return Content of the file
      * @throws NotFoundException If the file cannot be found
      */
-    String loadFileContent(Document document, File file);
+    String loadFileContent(File file);
 
     /**
      * Gets the file as a {@link Resource}.
      * <p>
      * Resource is more suitable for sending the content over network.
      *
-     * @param document Document containing the file. Used for path resolution
-     * @param file     File representing the physical item
+     * @param file File representing the physical item
      * @return Resource representation of the physical item
      * @throws NotFoundException If the file cannot be found
      */
-    Resource getAsResource(Document document, File file);
+    Resource getAsResource(File file);
 
     /**
      * Resolves media type of the content of the specified file.
@@ -59,20 +57,18 @@ public interface DocumentManager {
      * If no physical location exists for the specified file, a new one is created, otherwise the existing content is
      * overwritten by the new content.
      *
-     * @param document Document containing the file. Used for path resolution
-     * @param file     File representing the physical item
-     * @param content  Content to save
+     * @param file    File representing the physical item
+     * @param content Content to save
      */
-    void saveFileContent(Document document, File file, InputStream content);
+    void saveFileContent(File file, InputStream content);
 
     /**
      * Creates backup of the specified file.
      * <p>
      * Multiple backups of a file can be created and they should be distinguishable.
      *
-     * @param document Document containing file. Used for path resolution
-     * @param file     File to backup
+     * @param file File to backup
      * @throws NotFoundException If the file cannot be found
      */
-    void createBackup(Document document, File file);
+    void createBackup(File file);
 }

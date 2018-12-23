@@ -2,18 +2,15 @@ package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.TermService;
-import cz.cvut.kbss.termit.service.export.util.TypeAwareResource;
-import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Configuration;
-import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.*;
 import cz.cvut.kbss.termit.util.Constants.Excel;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
-import cz.cvut.kbss.termit.util.CsvUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -83,14 +81,21 @@ public class TermController extends BaseController {
     }
 
     private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
-        final Optional<TypeAwareResource> content = termService.exportGlossary(getVocabulary(vocabularyUri), mediaType);
-        return content.map(r -> ResponseEntity.ok()
-                                              .contentLength(r.contentLength())
-                                              .contentType(MediaType.parseMediaType(mediaType))
-                                              .header(HttpHeaders.CONTENT_DISPOSITION,
-                                                      "attachment; filename=\"" + vocabularyNormalizedName +
-                                                              r.getFileExtension() + "\"")
-                                              .body(r));
+        final Optional<TypeAwareResource> content =
+                termService.exportGlossary(getVocabulary(vocabularyUri), mediaType);
+        return content.map(r -> {
+            try {
+                return ResponseEntity.ok()
+                                     .contentLength(r.contentLength())
+                                     .contentType(MediaType.parseMediaType(mediaType))
+                                     .header(HttpHeaders.CONTENT_DISPOSITION,
+                                             "attachment; filename=\"" + vocabularyNormalizedName +
+                                                     r.getFileExtension().orElse("") + "\"")
+                                     .body(r);
+            } catch (IOException e) {
+                throw new TermItException("Unable to export terms.", e);
+            }
+        });
     }
 
     private Vocabulary getVocabulary(URI vocabularyUri) {

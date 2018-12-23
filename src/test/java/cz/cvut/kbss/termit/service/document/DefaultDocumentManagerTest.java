@@ -71,7 +71,8 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final File file = new File();
         file.setName("unknown.html");
         document.addFile(file);
-        assertThrows(NotFoundException.class, () -> sut.loadFileContent(document, file));
+        file.setDocument(document);
+        assertThrows(NotFoundException.class, () -> sut.loadFileContent(file));
     }
 
     @Test
@@ -80,7 +81,8 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File physicalFile = generateFile();
         file.setName(physicalFile.getName());
         document.addFile(file);
-        final String result = sut.loadFileContent(document, file);
+        file.setDocument(document);
+        final String result = sut.loadFileContent(file);
         assertEquals(CONTENT, result);
     }
 
@@ -90,7 +92,8 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File physicalFile = generateFile();
         file.setName(physicalFile.getName());
         document.addFile(file);
-        final Resource result = sut.getAsResource(document, file);
+        file.setDocument(document);
+        final Resource result = sut.getAsResource(file);
         assertNotNull(result);
         assertEquals(physicalFile, result.getFile());
     }
@@ -103,7 +106,8 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         physicalFile.delete();
         file.setName(physicalFile.getName());
         document.addFile(file);
-        sut.saveFileContent(document, file, content);
+        file.setDocument(document);
+        sut.saveFileContent(file, content);
         assertTrue(physicalFile.exists());
     }
 
@@ -114,7 +118,8 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File physicalFile = generateFile();
         file.setName(physicalFile.getName());
         document.addFile(file);
-        sut.saveFileContent(document, file, content);
+        file.setDocument(document);
+        sut.saveFileContent(file, content);
         final java.io.File contentFile = new java.io.File(
                 environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
                         document.getFileDirectoryName() + java.io.File.separator + file.getName());
@@ -129,6 +134,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File physicalFile = generateFile();
         file.setName(physicalFile.getName());
         document.addFile(file);
+        file.setDocument(document);
         final Optional<String> result = sut.getMediaType(document, file);
         assertTrue(result.isPresent());
         assertEquals(MediaType.TEXT_HTML_VALUE, result.get());
@@ -140,10 +146,11 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File physicalFile = generateFile();
         file.setName(physicalFile.getName());
         document.addFile(file);
+        file.setDocument(document);
         final java.io.File docDir = physicalFile.getParentFile();
         assertNotNull(docDir.listFiles());
         assertEquals(1, docDir.listFiles().length);
-        sut.createBackup(document, file);
+        sut.createBackup(file);
         assertEquals(2, docDir.listFiles().length);
         for (java.io.File f : docDir.listFiles()) {
             f.deleteOnExit();
@@ -162,8 +169,9 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         Files.copy(physicalFile.toPath(), withoutExtension.toPath());
         file.setName(withoutExtension.getName());
         document.addFile(file);
+        file.setDocument(document);
         assertNotNull(docDir.listFiles());
-        sut.createBackup(document, file);
+        sut.createBackup(file);
         final java.io.File[] files = docDir.listFiles((d, name) -> name.startsWith("withoutExtension"));
         assertEquals(2, files.length);
         for (java.io.File f : files) {

@@ -41,9 +41,9 @@ public class DefaultDocumentManager implements DocumentManager {
         this.config = config;
     }
 
-    private java.io.File resolveFile(Document document, File file, boolean verifyExists) {
-        Objects.requireNonNull(document);
+    private java.io.File resolveFile(File file, boolean verifyExists) {
         Objects.requireNonNull(file);
+        final Document document = file.getDocument();
         final String path =
                 config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + document.getFileDirectoryName() +
                         java.io.File.separator + file.getName();
@@ -56,9 +56,9 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public String loadFileContent(Document document, File file) {
+    public String loadFileContent(File file) {
         try {
-            final java.io.File content = resolveFile(document, file, true);
+            final java.io.File content = resolveFile(file, true);
             LOG.debug("Loading file content from {}.", content);
             final List<String> lines = Files.readAllLines(content.toPath());
             return String.join("\n", lines);
@@ -68,13 +68,13 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public Resource getAsResource(Document document, File file) {
-        return new FileSystemResource(resolveFile(document, file, true));
+    public Resource getAsResource(File file) {
+        return new FileSystemResource(resolveFile(file, true));
     }
 
     @Override
     public Optional<String> getMediaType(Document document, File file) {
-        final java.io.File content = resolveFile(document, file, true);
+        final java.io.File content = resolveFile(file, true);
         try {
             return Optional.ofNullable(Files.probeContentType(content.toPath()));
         } catch (IOException e) {
@@ -83,9 +83,9 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public void saveFileContent(Document document, File file, InputStream content) {
+    public void saveFileContent(File file, InputStream content) {
         try {
-            final java.io.File target = resolveFile(document, file, false);
+            final java.io.File target = resolveFile(file, false);
             LOG.debug("Saving file content to {}.", target);
             Files.copy(content, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -94,9 +94,9 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public void createBackup(Document document, File file) {
+    public void createBackup(File file) {
         try {
-            final java.io.File toBackup = resolveFile(document, file, true);
+            final java.io.File toBackup = resolveFile(file, true);
             final java.io.File backupFile = new java.io.File(
                     toBackup.getParent() + java.io.File.separator + generateBackupFileName(file));
             LOG.debug("Backing up file {} to {}.", toBackup, backupFile);
