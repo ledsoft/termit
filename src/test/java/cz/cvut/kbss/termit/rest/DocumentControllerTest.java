@@ -10,6 +10,7 @@ import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.document.TextAnalysisService;
+import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -177,9 +176,7 @@ class DocumentControllerTest extends BaseControllerTestRunner {
         final String data = "<html><head><title>Test</title></head><body>test</body></html>";
         final java.io.File content = createTemporaryHtmlFile(data);
         when(documentManagerMock.getAsResource(getFile(doc, FILE_NAMES[0])))
-                .thenReturn(new FileSystemResource(content));
-        when(documentManagerMock.getMediaType(doc, getFile(doc, FILE_NAMES[0])))
-                .thenReturn(Optional.of(MediaType.TEXT_HTML_VALUE));
+                .thenReturn(new TypeAwareFileSystemResource(content, MediaType.TEXT_HTML_VALUE));
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + NORMALIZED_DOC_NAME + "/content").param("file", FILE_NAMES[0]))
                 .andExpect(status().isOk()).andReturn();

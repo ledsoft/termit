@@ -6,7 +6,8 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.*;
-import cz.cvut.kbss.termit.service.business.ResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,9 @@ import java.net.URI;
 import java.util.*;
 
 @Service
-public class ResourceRepositoryService extends BaseRepositoryService<Resource> implements ResourceService {
+public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
     private final ResourceDao resourceDao;
     private final TermAssignmentDao termAssignmentDao;
@@ -73,6 +76,7 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> i
     public void setTags(Resource resource, final Collection<URI> iTerms) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(iTerms);
+        LOG.trace("Setting tags {} on resource {}.", iTerms, resourceDao);
 
         // get the whole-resource target
         final Target target = targetDao.findByWholeResource(resource).orElseGet(() -> {
@@ -104,16 +108,19 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> i
         });
 
         update(resource);
+        LOG.trace("Finished setting tags on resource {}.", resource);
     }
 
     @Override
     protected void preRemove(Resource instance) {
+        LOG.trace("Removing term occurrences in resource {} which is about to be removed.", instance);
         termOccurrenceDao.findAll(instance).forEach(to -> {
             termOccurrenceDao.remove(to);
             targetDao.remove(to.getTarget());
         });
         final Optional<Target> target = targetDao.findByWholeResource(instance);
         target.ifPresent(t -> {
+            LOG.trace("removing term assignments to resource {} which is about to be removed.", instance);
             final List<TermAssignment> assignments = termAssignmentDao.findByTarget(t);
             assignments.forEach(termAssignmentDao::remove);
             targetDao.remove(t);

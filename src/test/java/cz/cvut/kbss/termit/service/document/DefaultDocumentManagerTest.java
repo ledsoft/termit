@@ -7,6 +7,7 @@ import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +100,18 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void getAsResourceReturnsResourceAwareOfMediaType() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setName(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+        final TypeAwareResource result = sut.getAsResource(file);
+        assertTrue(result.getMediaType().isPresent());
+        assertEquals(MediaType.TEXT_HTML_VALUE, result.getMediaType().get());
+    }
+
+    @Test
     void saveFileContentCreatesNewFileWhenNoneExists() throws Exception {
         final InputStream content = loadFile("data/rdfa-simple.html");
         final File file = new File();
@@ -126,18 +139,6 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final List<String> lines = Files.readAllLines(contentFile.toPath());
         final String result = String.join("\n", lines);
         assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void getMediaTypeResolvesMediaTypeOfFile() throws Exception {
-        final File file = new File();
-        final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
-        document.addFile(file);
-        file.setDocument(document);
-        final Optional<String> result = sut.getMediaType(document, file);
-        assertTrue(result.isPresent());
-        assertEquals(MediaType.TEXT_HTML_VALUE, result.get());
     }
 
     @Test
