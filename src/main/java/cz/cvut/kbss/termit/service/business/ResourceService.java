@@ -2,16 +2,20 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -22,9 +26,12 @@ public class ResourceService implements AssetService<Resource> {
 
     private final ResourceRepositoryService repositoryService;
 
+    private final DocumentManager documentManager;
+
     @Autowired
-    public ResourceService(ResourceRepositoryService repositoryService) {
+    public ResourceService(ResourceRepositoryService repositoryService, DocumentManager documentManager) {
         this.repositoryService = repositoryService;
+        this.documentManager = documentManager;
     }
 
     /**
@@ -82,8 +89,28 @@ public class ResourceService implements AssetService<Resource> {
      * @throws UnsupportedAssetOperationException When content of the specified resource cannot be retrieved
      */
     public TypeAwareResource getContent(Resource resource) {
-        // TODO
-        return null;
+        Objects.requireNonNull(resource);
+        if (!(resource instanceof File)) {
+            throw new UnsupportedAssetOperationException("Content retrieval is not supported for resource " + resource);
+        }
+        return documentManager.getAsResource((File) resource);
+    }
+
+    /**
+     * Saves content of the specified resource.
+     *
+     * @param resource Domain resource associated with the content
+     * @param content  Resource content
+     * @throws UnsupportedAssetOperationException If content saving is not supported for the specified resource
+     */
+    public void saveContent(Resource resource, InputStream content) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(content);
+        if (!(resource instanceof File)) {
+            throw new UnsupportedAssetOperationException("Content saving is not supported for resource " + resource);
+        }
+        documentManager.createBackup((File) resource);
+        documentManager.saveFileContent((File) resource, content);
     }
 
     @Override
