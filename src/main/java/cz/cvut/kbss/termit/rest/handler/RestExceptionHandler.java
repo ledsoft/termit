@@ -99,4 +99,11 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(new ErrorInfo("Error when processing JSON-LD.", request.getRequestURI()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(UnsupportedAssetOperationException.class)
+    public ResponseEntity<ErrorInfo> unsupportedAssetOperationException(HttpServletRequest request,
+                                                                        UnsupportedAssetOperationException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
+    }
 }

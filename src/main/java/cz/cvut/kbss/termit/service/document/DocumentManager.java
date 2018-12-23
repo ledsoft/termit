@@ -1,12 +1,11 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
-import java.util.Optional;
 
 /**
  * Manages the physical aspect of documents supported by the system, i.e., mainly the files stored for each document.
@@ -38,18 +37,7 @@ public interface DocumentManager {
      * @return Resource representation of the physical item
      * @throws NotFoundException If the file cannot be found
      */
-    Resource getAsResource(File file);
-
-    /**
-     * Resolves media type of the content of the specified file.
-     *
-     * @param document Document containing the file. Used for path resolution
-     * @param file     File representing the physical item
-     * @return Media type of the file content. If the file content does not represent any known media type, an empty
-     * {@code Optional} is returned
-     * @throws NotFoundException If the file cannot be found
-     */
-    Optional<String> getMediaType(Document document, File file);
+    TypeAwareResource getAsResource(File file);
 
     /**
      * Saves the specified content to a physical location represented by the specified file.

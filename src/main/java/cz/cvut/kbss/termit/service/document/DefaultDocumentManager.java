@@ -4,13 +4,13 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Default document manager uses files on filesystem to store content.
@@ -68,15 +67,14 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public Resource getAsResource(File file) {
-        return new FileSystemResource(resolveFile(file, true));
+    public TypeAwareResource getAsResource(File file) {
+        return new TypeAwareFileSystemResource(resolveFile(file, true), getMediaType(file));
     }
 
-    @Override
-    public Optional<String> getMediaType(Document document, File file) {
+    private String getMediaType(File file) {
         final java.io.File content = resolveFile(file, true);
         try {
-            return Optional.ofNullable(Files.probeContentType(content.toPath()));
+            return Files.probeContentType(content.toPath());
         } catch (IOException e) {
             throw new TermItException("Unable to determine file content type.", e);
         }

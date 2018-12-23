@@ -12,6 +12,7 @@ import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -64,11 +65,11 @@ public class DocumentController extends BaseController {
         final Document document = getById(fragment, namespace);
         final File file = resolveFileFromName(document, fileName);
         try {
-            final Resource resource = documentManager.getAsResource(file);
+            final TypeAwareResource resource = documentManager.getAsResource(file);
             return ResponseEntity.ok()
                                  .contentLength(resource.contentLength())
-                                 .contentType(MediaType.parseMediaType(documentManager.getMediaType(document, file)
-                                                                                      .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)))
+                                 .contentType(MediaType.parseMediaType(
+                                         resource.getMediaType().orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)))
                                  .body(resource);
         } catch (IOException e) {
             throw new TermItException("Unable to load file " + file, e);
