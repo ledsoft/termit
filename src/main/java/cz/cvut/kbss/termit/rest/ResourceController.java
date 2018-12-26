@@ -122,6 +122,13 @@ public class ResourceController extends BaseController {
         LOG.debug("Text analysis invoked for resource {}.", resource);
     }
 
+    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.GET,
+                    produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<Term> getTerms(@PathVariable("normalizedName") String normalizedName,
+                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        return resourceService.findTags(getResource(normalizedName, namespace));
+    }
+
     @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT,
                     consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
