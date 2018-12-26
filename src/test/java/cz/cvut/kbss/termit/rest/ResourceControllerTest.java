@@ -88,7 +88,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getTermsReturnsTermsAssignedToResourceWithSpecifiedIri() throws Exception {
+    void getTermsForNKODReturnsTermsAssignedToResourceWithSpecifiedIri() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
         when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
@@ -101,6 +101,27 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
+        verify(resourceServiceMock).findTags(resource);
+    }
+
+    @Test
+    void getTermsReturnsTermsAssignedToResource() throws Exception {
+        final URI resourceUri = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
+        final Resource resource = Generator.generateResource();
+        resource.setUri(resourceUri);
+        resource.setName(RESOURCE_NAME);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
+        when(resourceServiceMock.findRequired(resourceUri)).thenReturn(resource);
+        final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
+                                          .collect(Collectors.toList());
+        when(resourceServiceMock.findTags(resource)).thenReturn(terms);
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + RESOURCE_NAME + "/terms").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+                .andExpect(status().isOk()).andReturn();
+        final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
+        });
+        assertEquals(terms, result);
+        verify(resourceServiceMock).findTags(resource);
     }
 
     @Test
