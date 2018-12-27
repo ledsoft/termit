@@ -5,6 +5,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableMBeanExport
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 @Import({PersistenceConfig.class, ServiceConfig.class, WebAppConfig.class})
 @PropertySource("classpath:config.properties")
 public class AppConfig {
