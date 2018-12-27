@@ -112,6 +112,7 @@ public class ResourceService implements AssetService<Resource> {
      * @param content  Resource content
      * @throws UnsupportedAssetOperationException If content saving is not supported for the specified resource
      */
+    @Transactional
     public void saveContent(Resource resource, InputStream content) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(content);
