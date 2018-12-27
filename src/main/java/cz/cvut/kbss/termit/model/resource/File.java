@@ -23,7 +23,7 @@ public class File extends Resource {
 
     @JsonIgnore
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu)
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu, fetch = FetchType.EAGER)
     private Document document;
 
     @Types
@@ -72,8 +72,7 @@ public class File extends Resource {
 
     @Override
     public String toString() {
-        return "File{" +
-                ", origin=" + origin +
+        return "File{origin=" + origin +
                 super.toString() + '}';
     }
 }
