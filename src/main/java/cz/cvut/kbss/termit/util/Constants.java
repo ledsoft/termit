@@ -181,5 +181,9 @@ public class Constants {
          * @see #PAGE
          */
         public static final String PAGE_SIZE = "size";
+
+        private QueryParams() {
+            throw new AssertionError();
+        }
     }
 }
