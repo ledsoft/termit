@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
+@Namespace(prefix = "termit", namespace = Vocabulary.ONTOLOGY_IRI_termit)
 @SparqlResultSetMapping(name = "FullTextSearchResult", classes = {@ConstructorResult(targetClass = FullTextSearchResult.class,
         variables = {
                 @VariableResult(name = "entity", type = URI.class),
@@ -28,17 +29,20 @@ public class FullTextSearchResult implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String label;
 
+    @OWLDataProperty(iri = "termit:fts/snippet-text")
+    private String snippetText;
+
+    @OWLDataProperty(iri = "termit:fts/snippet-field")
+    private String snippetField;
+
+    @OWLDataProperty(iri = "termit:fts/score")
+    private Double score;
+
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
 
     @Types
     private Set<String> types;
-
-    private String snippetText;
-
-    private String snippetField;
-
-    private Double score;
 
     public FullTextSearchResult() {
     }
