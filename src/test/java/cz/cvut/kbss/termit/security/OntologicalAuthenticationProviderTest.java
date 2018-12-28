@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.security;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
@@ -24,7 +25,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +59,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccountWithPassword();
         this.plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(plainPassword));
         transactional(() -> userAccountDao.persist(user));
@@ -78,7 +78,8 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
         assertNull(context.getAuthentication());
         final Authentication result = provider.authenticate(auth);
         assertNotNull(SecurityContextHolder.getContext());
-        final TermItUserDetails details = (TermItUserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        final TermItUserDetails details =
+                (TermItUserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         assertEquals(user.getUsername(), details.getUsername());
         assertTrue(result.isAuthenticated());
     }

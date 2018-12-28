@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.rest.servlet;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
@@ -15,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Collections;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
@@ -40,7 +40,7 @@ class DiagnosticsContextFilterTest {
 
     @Test
     void setsDiagnosticsContextWhenProcessingChain() throws Exception {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
         final Principal token = new AuthenticationToken(Collections.emptyList(), new TermItUserDetails(user));
         when(requestMock.getUserPrincipal()).thenReturn(token);
         doAnswer((answer) -> {

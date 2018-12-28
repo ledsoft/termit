@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.security;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
@@ -17,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -47,7 +47,7 @@ public class RuntimeBasedLoginTrackerTest {
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccount();
     }
 
     @Test

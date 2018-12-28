@@ -80,7 +80,7 @@ public class TermItUserDetails implements UserDetails {
     }
 
     public UserAccount getUser() {
-        return user;
+        return user.copy();
     }
 
     @Override

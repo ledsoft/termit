@@ -9,18 +9,18 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserAccountTest {
+class UserAccountTest {
 
     private UserAccount sut;
 
     @BeforeEach
     void setUp() {
-        this.sut = generateAccount();
+        this.sut = Generator.generateUserAccount();
     }
 
     @Test
     void toUserReturnsUserWithIdenticalAttributes() {
-        final UserAccount ua = generateAccount();
+        final UserAccount ua = Generator.generateUserAccount();
         ua.setTypes(Collections.singleton(Vocabulary.s_c_administrator_termitu));
 
         final User result = ua.toUser();
@@ -29,16 +29,6 @@ public class UserAccountTest {
                 () -> assertEquals(ua.getLastName(), result.getLastName()),
                 () -> assertEquals(ua.getUsername(), result.getUsername()),
                 () -> assertEquals(ua.getTypes(), result.getTypes()));
-    }
-
-    public static UserAccount generateAccount() {
-        final UserAccount ua = new UserAccount();
-        ua.setUri(Generator.generateUri());
-        ua.setFirstName("first");
-        ua.setLastName("last");
-        ua.setUsername("username" + Generator.randomInt());
-        ua.setPassword("12345");
-        return ua;
     }
 
     @Test

@@ -68,6 +68,17 @@ public class UserService {
     }
 
     /**
+     * Retrieves currently logged in user.
+     *
+     * @return Currently logged in user's account
+     */
+    public UserAccount getCurrent() {
+        final UserAccount account = securityUtils.getCurrentUser();
+        account.erasePassword();
+        return account;
+    }
+
+    /**
      * Persists the specified user account.
      *
      * @param account Account to save

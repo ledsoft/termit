@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.util.Date;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +34,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccountWithPassword();
         transactional(() -> em.persist(user));
         Environment.setCurrentUser(user);
     }

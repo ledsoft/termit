@@ -134,6 +134,19 @@ public class Generator {
     }
 
     /**
+     * Generates a random {@link UserAccount} instance, initialized with first name, last name, username, password and
+     * identifier.
+     *
+     * @return A new {@code UserAccount} instance
+     * @see #generateUserAccount()
+     */
+    public static UserAccount generateUserAccountWithPassword() {
+        final UserAccount account = generateUserAccount();
+        account.setPassword("Pass" + randomInt(0, 10000));
+        return account;
+    }
+
+    /**
      * Generates a {@link cz.cvut.kbss.termit.model.Vocabulary} instance with a name, an empty glossary and a model.
      *
      * @return New {@code Vocabulary} instance

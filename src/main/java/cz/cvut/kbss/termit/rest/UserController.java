@@ -52,9 +52,8 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/current", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
                                                                                 JsonLd.MEDIA_TYPE})
-    public UserAccount getCurrent(Principal principal) {
-        final AuthenticationToken auth = (AuthenticationToken) principal;
-        return auth.getDetails().getUser();
+    public UserAccount getCurrent() {
+        return userService.getCurrent();
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

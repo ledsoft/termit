@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestConfig;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
@@ -31,7 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.servlet.FilterChain;
 import java.util.Date;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,7 +73,7 @@ class JwtAuthorizationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccount();
         this.jwtUtilsSpy = spy(new JwtUtils(config));
         this.objectMapper = Environment.getObjectMapper();
         this.sut = new JwtAuthorizationFilter(authManagerMock, jwtUtilsSpy, securityUtilsMock, detailsServiceMock,

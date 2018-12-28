@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,13 +47,13 @@ class UserControllerTest extends BaseControllerTestRunner {
     void setUp() {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccount();
         Environment.setCurrentUser(user);
     }
 
     @Test
     void getAllReturnsAllUsers() throws Exception {
-        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> generateAccount())
+        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserAccount())
                                                  .collect(Collectors.toList());
         when(userService.findAll()).thenReturn(users);
 
@@ -66,7 +66,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
     @Test
     void createUserPersistsUser() throws Exception {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
         mockMvc.perform(post(BASE_URL).content(toJson(user)).contentType(MediaType.APPLICATION_JSON_VALUE))
                .andExpect(status().isCreated());
         verify(userService).persist(user);

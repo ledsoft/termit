@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -68,7 +67,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistExecutesTransactionalPersist() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
 
         sut.persist(user);
         assertTrue(userAccountDao.exists(user.getUri()));
@@ -76,7 +75,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistExecutesPrePersistMethodBeforePersistOnDao() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
         sut.persist(user);
@@ -87,7 +86,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateExecutesTransactionalUpdate() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         transactional(() -> userAccountDao.persist(user));
 
         final String updatedLastName = "Married";
@@ -102,7 +101,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateExecutesPreUpdateMethodBeforeUpdateOnDao() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         when(userAccountDaoMock.exists(user.getUri())).thenReturn(true);
         when(userAccountDaoMock.update(any())).thenReturn(user);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
@@ -115,8 +114,8 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateInvokesPostUpdateAfterUpdateOnDao() {
-        final UserAccount user = generateAccount();
-        final UserAccount returned = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
+        final UserAccount returned = Generator.generateUserAccountWithPassword();
         when(userAccountDaoMock.exists(user.getUri())).thenReturn(true);
         when(userAccountDaoMock.update(any())).thenReturn(returned);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
@@ -130,7 +129,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeExecutesTransactionalRemove() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         transactional(() -> userAccountDao.persist(user));
 
         sut.remove(user);
@@ -139,7 +138,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeByIdExecutesTransactionalRemove() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         transactional(() -> userAccountDao.persist(user));
 
         sut.remove(user.getUri());
@@ -148,7 +147,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findExecutesPostLoadAfterLoadingEntityFromDao() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         when(userAccountDaoMock.find(user.getUri())).thenReturn(Optional.of(user));
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
@@ -172,7 +171,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findAllExecutesPostLoadForEachLoadedEntity() {
-        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> generateAccount())
+        final List<UserAccount> users = IntStream.range(0, 5).mapToObj(i -> Generator.generateUserAccountWithPassword())
                                                  .collect(Collectors.toList());
         when(userAccountDaoMock.findAll()).thenReturn(users);
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
@@ -194,7 +193,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void removeInvokesPreAndPostHooks() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
         final InOrder inOrder = inOrder(sut, userAccountDaoMock);
@@ -206,13 +205,13 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateThrowsNotFoundExceptionWhenInstanceDoesNotExistInRepository() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         assertThrows(NotFoundException.class, () -> sut.update(user));
     }
 
     @Test
     void findRequiredRetrievesObjectById() {
-        final UserAccount instance = generateAccount();
+        final UserAccount instance = Generator.generateUserAccountWithPassword();
         transactional(() -> em.persist(instance));
 
         final UserAccount result = sut.findRequired(instance.getUri());
@@ -226,7 +225,7 @@ class BaseRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findRequiredInvokesPostLoadOnLoadedInstance() {
-        final UserAccount instance = generateAccount();
+        final UserAccount instance = Generator.generateUserAccountWithPassword();
         when(userAccountDaoMock.find(instance.getUri())).thenReturn(Optional.of(instance));
         final BaseRepositoryServiceImpl sut = spy(new BaseRepositoryServiceImpl(userAccountDaoMock, validator));
 
