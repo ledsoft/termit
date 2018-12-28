@@ -2,7 +2,7 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
-import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.net.URI;
 import java.util.Optional;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +31,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void existsByUsernameReturnsTrueForExistingUsername() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         transactional(() -> em.persist(user));
 
         assertTrue(sut.exists(user.getUsername()));
@@ -40,7 +39,8 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistGeneratesIdentifierForUser() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
+        user.setPassword("12345");
         user.setUri(null);
         sut.persist(user);
         assertNotNull(user.getUri());
@@ -52,8 +52,9 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistEncodesUserPassword() {
-        final UserAccount user = generateAccount();
-        final String plainPassword = user.getPassword();
+        final UserAccount user = Generator.generateUserAccount();
+        final String plainPassword = "12345";
+        user.setPassword(plainPassword);
 
         sut.persist(user);
         final UserAccount result = em.find(UserAccount.class, user.getUri());
@@ -62,7 +63,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsValidationExceptionWhenPasswordIsNull() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
         user.setPassword(null);
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
         assertThat(ex.getMessage(), containsString("password must not be blank"));
@@ -70,7 +71,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsValidationExceptionWhenPasswordIsEmpty() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
         user.setPassword("");
         final ValidationException ex = assertThrows(ValidationException.class, () -> sut.persist(user));
         assertThat(ex.getMessage(), containsString("password must not be blank"));
@@ -90,7 +91,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateRetainsOriginalPasswordWhenItDoesNotChange() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         final String plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
@@ -115,7 +116,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     private UserAccount persistUser() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         transactional(() -> em.persist(user));
         return user;
@@ -134,7 +135,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistAddsUserRestrictedType() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         sut.persist(user);
 
         final UserAccount result = em.find(UserAccount.class, user.getUri());
@@ -143,7 +144,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistEnsuresAdminTypeIsNotPresentInUserAccount() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         user.addType(Vocabulary.s_c_administrator_termitu);
         sut.persist(user);
 
@@ -153,7 +154,7 @@ class UserRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistDoesNotGenerateUriIfItIsAlreadyPresent() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         final URI originalUri = user.getUri();
         sut.persist(user);
 

@@ -4,7 +4,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.event.LoginFailureEvent;
 import cz.cvut.kbss.termit.event.LoginSuccessEvent;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -54,12 +54,12 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
     @Autowired
     private Listener listener;
 
-    private User user;
+    private UserAccount user;
     private String plainPassword;
 
     @BeforeEach
     void setUp() {
-        this.user = Generator.generateUserWithId();
+        this.user = Generator.generateUserAccountWithPassword();
         this.plainPassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(plainPassword));
         transactional(() -> userAccountDao.persist(user));
@@ -78,7 +78,8 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
         assertNull(context.getAuthentication());
         final Authentication result = provider.authenticate(auth);
         assertNotNull(SecurityContextHolder.getContext());
-        final TermItUserDetails details = (TermItUserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        final TermItUserDetails details =
+                (TermItUserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         assertEquals(user.getUsername(), details.getUsername());
         assertTrue(result.isAuthenticated());
     }
@@ -152,7 +153,7 @@ class OntologicalAuthenticationProviderTest extends BaseServiceTestRunner {
 
     public static class Listener {
 
-        private User user;
+        private UserAccount user;
 
         @EventListener
         public void onSuccess(LoginSuccessEvent event) {

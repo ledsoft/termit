@@ -95,13 +95,29 @@ public class UserAccount extends AbstractUser {
      */
     public User toUser() {
         final User user = new User();
-        user.setUri(uri);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setUsername(username);
-        if (types != null) {
-            user.setTypes(new HashSet<>(types));
-        }
+        copyAttributes(user);
         return user;
+    }
+
+    private void copyAttributes(AbstractUser target) {
+        target.setUri(uri);
+        target.setFirstName(firstName);
+        target.setLastName(lastName);
+        target.setUsername(username);
+        if (types != null) {
+            target.setTypes(new HashSet<>(types));
+        }
+    }
+
+    /**
+     * Returns a copy of this user account.
+     *
+     * @return This instance's copy
+     */
+    public UserAccount copy() {
+        final UserAccount clone = new UserAccount();
+        copyAttributes(clone);
+        clone.password = password;
+        return clone;
     }
 }

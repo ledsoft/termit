@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import java.util.Collections;
 import java.util.Optional;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +35,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccountWithPassword();
     }
 
     @AfterEach

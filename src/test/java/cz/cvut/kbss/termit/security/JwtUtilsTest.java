@@ -1,11 +1,11 @@
 package cz.cvut.kbss.termit.security;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestConfig;
 import cz.cvut.kbss.termit.exception.IncompleteJwtException;
 import cz.cvut.kbss.termit.exception.JwtException;
 import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.model.UserAccount;
-import cz.cvut.kbss.termit.model.UserAccountTest;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -51,7 +51,7 @@ class JwtUtilsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.user = UserAccountTest.generateAccount();
+        this.user = Generator.generateUserAccount();
         this.sut = new JwtUtils(config);
     }
 
