@@ -144,4 +144,10 @@ class TermServiceTest {
         sut.existsInVocabulary(label, vocabulary);
         verify(termRepositoryService).existsInVocabulary(label, vocabulary);
     }
+
+    @Test
+    void findAllRetrievesAllTermsFromVocabularyUsingRepositoryService() {
+        sut.findAll(vocabulary);
+        verify(termRepositoryService).findAll(vocabulary);
+    }
 }

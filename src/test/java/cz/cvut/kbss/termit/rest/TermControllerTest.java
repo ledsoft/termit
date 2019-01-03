@@ -216,20 +216,20 @@ class TermControllerTest extends BaseControllerTestRunner {
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
-        when(termServiceMock.findAllRoots(eq(vocabulary), any(Pageable.class))).thenReturn(terms);
+        when(termServiceMock.findAll(eq(vocabulary))).thenReturn(terms);
 
         final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/")
+                get(PATH + "/" + VOCABULARY_NAME + "/terms")
                         .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit))
                                            .andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
-        when(termServiceMock.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC)).thenReturn(terms);
+        verify(termServiceMock).findAll(vocabulary);
     }
 
     @Test
-    void getAllUsesSearchStringToFindMatchingTerms() throws Exception {
+    void getAllRootsUsesSearchStringToFindMatchingTerms() throws Exception {
         when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
@@ -239,7 +239,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(termServiceMock.findAllRoots(any(), anyString())).thenReturn(terms);
         final String searchString = "test";
 
-        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms")
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/roots")
                 .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit)
                 .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
@@ -310,7 +310,7 @@ class TermControllerTest extends BaseControllerTestRunner {
                 CsvUtils.FILE_EXTENSION);
         when(termServiceMock.exportGlossary(vocabulary, CsvUtils.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
-        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(CsvUtils.MEDIA_TYPE)).andExpect(
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(CsvUtils.MEDIA_TYPE)).andExpect(
                 status().isOk());
         verify(termServiceMock).exportGlossary(vocabulary, CsvUtils.MEDIA_TYPE);
     }
@@ -330,7 +330,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         when(termServiceMock.exportGlossary(vocabulary, CsvUtils.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
         final MvcResult mvcResult = mockMvc
-                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(CsvUtils.MEDIA_TYPE)).andReturn();
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(CsvUtils.MEDIA_TYPE)).andReturn();
         assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION), containsString("attachment"));
         assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION),
                 containsString("filename=\"" + VOCABULARY_NAME + CsvUtils.FILE_EXTENSION + "\""));
@@ -346,7 +346,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         final TypeAwareByteArrayResource export = prepareExcel();
         when(termServiceMock.exportGlossary(vocabulary, Excel.MEDIA_TYPE)).thenReturn(Optional.of(export));
 
-        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/").accept(Excel.MEDIA_TYPE)).andExpect(
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(Excel.MEDIA_TYPE)).andExpect(
                 status().isOk());
         verify(termServiceMock).exportGlossary(vocabulary, Excel.MEDIA_TYPE);
     }
@@ -383,13 +383,13 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getAllLoadsRootsFromCorrectPage() throws Exception {
+    void getAllRootsLoadsRootsFromCorrectPage() throws Exception {
         initNamespaceAndIdentifierResolution();
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
         when(termServiceMock.findAllRoots(eq(vocabulary), any(Pageable.class))).thenReturn(terms);
-        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").param(PAGE, "5").param(PAGE_SIZE, "100"))
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/roots").param(PAGE, "5").param(PAGE_SIZE, "100"))
                .andExpect(status().isOk());
 
         final ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
@@ -398,13 +398,13 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getAllCreatesDefaultPageRequestWhenPagingInfoIsNotSpecified() throws Exception {
+    void getAllRootsCreatesDefaultPageRequestWhenPagingInfoIsNotSpecified() throws Exception {
         initNamespaceAndIdentifierResolution();
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
         when(termServiceMock.findAllRoots(eq(vocabulary), any(Pageable.class))).thenReturn(terms);
-        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms")).andExpect(status().isOk());
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/roots")).andExpect(status().isOk());
 
         final ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         verify(termServiceMock).findAllRoots(eq(vocabulary), captor.capture());
