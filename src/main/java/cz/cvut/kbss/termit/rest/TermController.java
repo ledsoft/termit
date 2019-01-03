@@ -47,14 +47,10 @@ public class TermController extends BaseController {
     /**
      * Get all terms from vocabulary with the specified identification.
      * <p>
-     * Optionally, the terms can be filtered by the specified search string, so that only terms with label matching the
-     * specified string are returned.
+     * This method also allows to export the terms into CSV or Excel by using HTTP content type negotiation.
      *
      * @param vocabularyIdFragment Vocabulary name
      * @param namespace            Vocabulary namespace. Optional
-     * @param pageSize             Limit the number of elements in the returned page. Optional
-     * @param pageNo               Number of the page to return. Optional
-     * @param searchString         String to filter term labels by. Optional
      * @return List of terms of the specific vocabulary
      */
     @RequestMapping(value = "/{vocabularyIdFragment}/terms", method = RequestMethod.GET,
@@ -64,20 +60,10 @@ public class TermController extends BaseController {
                     Excel.MEDIA_TYPE})
     public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
-                                 @RequestParam(name = QueryParams.PAGE_SIZE, required = false) Integer pageSize,
-                                 @RequestParam(name = QueryParams.PAGE, required = false) Integer pageNo,
-                                 @RequestParam(name = "searchString", required = false) String searchString,
                                  @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         final Optional<ResponseEntity> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
-        if (export.isPresent()) {
-            return export.get();
-        }
-        final Vocabulary vocabulary = getVocabulary(vocabularyUri);
-        if (searchString != null && !searchString.isEmpty()) {
-            return ResponseEntity.ok(termService.findAllRoots(vocabulary, searchString));
-        }
-        return ResponseEntity.ok(termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo)));
+        return export.orElse(ResponseEntity.ok(termService.findAll(getVocabulary(vocabularyUri))));
     }
 
     private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
@@ -100,6 +86,33 @@ public class TermController extends BaseController {
 
     private Vocabulary getVocabulary(URI vocabularyUri) {
         return termService.findVocabularyRequired(vocabularyUri);
+    }
+
+    /**
+     * Get all root terms from vocabulary with the specified identification.
+     * <p>
+     * Optionally, the terms can be filtered by the specified search string, so that only roots with descendants with
+     * label matching the specified string are returned.
+     *
+     * @param vocabularyIdFragment Vocabulary name
+     * @param namespace            Vocabulary namespace. Optional
+     * @param pageSize             Limit the number of elements in the returned page. Optional
+     * @param pageNo               Number of the page to return. Optional
+     * @param searchString         String to filter term labels by. Optional
+     * @return List of root terms of the specific vocabulary
+     */
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms/roots", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<Term> getAllRoots(@PathVariable String vocabularyIdFragment,
+                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                                  @RequestParam(name = QueryParams.PAGE_SIZE, required = false) Integer pageSize,
+                                  @RequestParam(name = QueryParams.PAGE, required = false) Integer pageNo,
+                                  @RequestParam(name = "searchString", required = false) String searchString) {
+        final Vocabulary vocabulary = getVocabulary(getVocabularyUri(namespace, vocabularyIdFragment));
+        if (searchString != null && !searchString.trim().isEmpty()) {
+            return termService.findAllRoots(vocabulary, searchString);
+        }
+        return termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo));
     }
 
     /**

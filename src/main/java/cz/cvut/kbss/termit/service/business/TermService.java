@@ -53,6 +53,17 @@ public class TermService {
     }
 
     /**
+     * Retrieves all terms from the specified vocabulary.
+     *
+     * @param vocabulary Vocabulary whose terms will be returned
+     * @return Matching terms
+     */
+    public List<Term> findAll(Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        return repositoryService.findAll(vocabulary);
+    }
+
+    /**
      * Retrieves root terms (terms without parent) from the specified vocabulary.
      * <p>
      * The page specification parameter allows configuration of the number of results and their offset.
@@ -125,9 +136,9 @@ public class TermService {
     public List<Term> findSubTerms(Term parent) {
         Objects.requireNonNull(parent);
         return parent.getSubTerms() == null ? Collections.emptyList() :
-                parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
-                        () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
-                      .collect(Collectors.toList());
+               parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
+                       () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
+                     .collect(Collectors.toList());
     }
 
     /**
