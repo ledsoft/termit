@@ -8,7 +8,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
-import cz.cvut.kbss.termit.model.util.MetamodelUtils;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,6 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private EntityManager em;
-
-    @Autowired
-    private MetamodelUtils metamodelUtils;
 
     @Autowired
     private VocabularyDao sut;
@@ -53,7 +50,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         transactional(() -> vocabularies.forEach(v -> em.persist(v, descriptorFor(v))));
 
         final List<Vocabulary> result = sut.findAll();
-        vocabularies.sort(Comparator.comparing(Vocabulary::getName));
+        vocabularies.sort(Comparator.comparing(Vocabulary::getLabel));
         for (int i = 0; i < vocabularies.size(); i++) {
             assertEquals(vocabularies.get(i).getUri(), result.get(i).getUri());
         }
@@ -90,12 +87,12 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.persist(vocabulary, descriptor));
 
         final String newName = "Updated vocabulary name";
-        vocabulary.setName(newName);
+        vocabulary.setLabel(newName);
         transactional(() -> sut.update(vocabulary));
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), descriptor);
         assertNotNull(result);
-        assertEquals(newName, result.getName());
+        assertEquals(newName, result.getLabel());
     }
 
     @Test
@@ -109,43 +106,35 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertEquals(1, vocabularies.size());
 
         final String newName = "Updated vocabulary name";
-        vocabulary.setName(newName);
+        vocabulary.setLabel(newName);
         transactional(() -> sut.update(vocabulary));
         final List<Vocabulary> result = sut.findAll();
         assertEquals(1, result.size());
-        assertEquals(newName, result.get(0).getName());
+        assertEquals(newName, result.get(0).getLabel());
     }
 
     @Test
     void updateWorksCorrectlyInContextsForDocumentVocabulary() {
         final DocumentVocabulary vocabulary = new DocumentVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setName("test-vocabulary");
+        vocabulary.setLabel("test-vocabulary");
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
         final Document doc = new Document();
-        doc.setName("test-document");
+        doc.setLabel("test-document");
         doc.setUri(Generator.generateUri());
         final File file = new File();
-        file.setName("test-file");
+        file.setLabel("test-file");
         file.setUri(Generator.generateUri());
         doc.addFile(file);
         vocabulary.setDocument(doc);
-        final EntityDescriptor vocabularyDescriptor = getVocabularyDescriptor(vocabulary);
-        final EntityDescriptor docDescriptor = new EntityDescriptor(vocabulary.getUri());
-        docDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "author"),
-                new EntityDescriptor(null));
-        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabulary.getUri());
-        fileDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(File.class, "author"),
-                new EntityDescriptor(null));
+        final Descriptor vocabularyDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor docDescriptor = DescriptorFactory.documentDescriptor(vocabulary);
         transactional(() -> {
-            em.persist(file, fileDescriptor);
+            em.persist(file, docDescriptor);
             em.persist(doc, docDescriptor);
             em.persist(vocabulary, vocabularyDescriptor);
         });
-        docDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "files"), fileDescriptor);
-        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(DocumentVocabulary.class, "document"),
-                docDescriptor);
 
         final String newComment = "New comment";
         vocabulary.setComment(newComment);
@@ -155,23 +144,17 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertEquals(newComment, result.getComment());
     }
 
-    private EntityDescriptor getVocabularyDescriptor(Vocabulary vocabulary) {
-        final EntityDescriptor vocabularyDescriptor = new EntityDescriptor(vocabulary.getUri());
-        vocabularyDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Vocabulary.class, "author"),
-                new EntityDescriptor(null));
-        return vocabularyDescriptor;
-    }
-
     @Test
     void updateGlossaryMergesGlossaryIntoPersistenceContext() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
         vocabulary.getGlossary().addTerm(term);
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
-            em.persist(term, new EntityDescriptor(vocabulary.getUri()));
+            em.persist(term, termDescriptor);
             sut.updateGlossary(vocabulary);
         });
 
@@ -187,19 +170,22 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void updateGlossaryMergesGlossaryIntoCorrectRepositoryContext() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
         vocabulary.getGlossary().addTerm(term);
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
-            em.persist(term, new EntityDescriptor(vocabulary.getUri()));
+            em.persist(term, termDescriptor);
             sut.updateGlossary(vocabulary);
         });
 
         transactional(() -> {
             // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
             // does not work
-            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor);
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor
+                    .getAttributeDescriptor(
+                            em.getMetamodel().entity(Vocabulary.class).getFieldSpecification("glossary")));
             assertTrue(result.getTerms().contains(term));
         });
     }
@@ -208,7 +194,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void updateGlossaryReturnsManagedGlossaryInstance() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        final EntityDescriptor descriptor = getVocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         transactional(() -> {
             final Glossary merged = sut.updateGlossary(vocabulary);

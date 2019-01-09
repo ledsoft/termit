@@ -155,7 +155,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void persistThrowsValidationExceptionWhenResourceLabelIsMissing() {
         final Resource resource = Generator.generateResourceWithId();
-        resource.setName(null);
+        resource.setLabel(null);
         assertThrows(ValidationException.class, () -> sut.persist(resource));
     }
 
@@ -188,7 +188,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     void removeDeletesOccurrenceTargetsAndTermOccurrencesAssociatedWithResource() {
         final File file = new File();
         file.setUri(Generator.generateUri());
-        file.setName("test.txt");
+        file.setLabel("test.txt");
         transactional(() -> em.persist(file));
         final Term tOne = generateTermWithUriAndPersist();
         final OccurrenceTarget target = new OccurrenceTarget(file);
@@ -211,7 +211,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     void removeDeletesTermAssignmentsOccurrencesAndAllTargetsAssociatedWithResource() {
         final File file = new File();
         file.setUri(Generator.generateUri());
-        file.setName("test.txt");
+        file.setLabel("test.txt");
         transactional(() -> em.persist(file));
         final Term tOne = generateTermWithUriAndPersist();
         final OccurrenceTarget occurrenceTarget = new OccurrenceTarget(file);
@@ -239,15 +239,15 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateSupportsSubclassesOfResource() {
         final Document doc = new Document();
-        doc.setName("test document");
+        doc.setLabel("test document");
         doc.setUri(Generator.generateUri());
         final File fileOne = new File();
         fileOne.setUri(Generator.generateUri());
-        fileOne.setName("test.txt");
+        fileOne.setLabel("test.txt");
         doc.addFile(fileOne);
         final File fileTwo = new File();
         fileTwo.setUri(Generator.generateUri());
-        fileTwo.setName("testTwo.html");
+        fileTwo.setLabel("testTwo.html");
         transactional(() -> {
             // Ensure correct RDFS class hierarchy interpretation
             final Repository repository = em.unwrap(Repository.class);
@@ -261,13 +261,13 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         final String newName = "Updated name";
-        doc.setName(newName);
+        doc.setLabel(newName);
         final String newDescription = "Document description.";
         doc.setDescription(newDescription);
         doc.addFile(fileTwo);
         sut.update(doc);
         final Document result = em.find(Document.class, doc.getUri());
-        assertEquals(newName, result.getName());
+        assertEquals(newName, result.getLabel());
         assertEquals(newDescription, result.getDescription());
         assertEquals(2, result.getFiles().size());
         assertTrue(result.getFiles().contains(fileTwo));

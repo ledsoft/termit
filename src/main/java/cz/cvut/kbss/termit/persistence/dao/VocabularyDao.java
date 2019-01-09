@@ -1,15 +1,10 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
-import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.model.resource.Document;
-import cz.cvut.kbss.termit.model.resource.File;
-import cz.cvut.kbss.termit.model.util.MetamodelUtils;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -20,18 +15,15 @@ import java.util.Objects;
 @Repository
 public class VocabularyDao extends BaseDao<Vocabulary> {
 
-    private final MetamodelUtils metamodelUtils;
-
     @Autowired
-    public VocabularyDao(EntityManager em, MetamodelUtils metamodelUtils) {
+    public VocabularyDao(EntityManager em) {
         super(Vocabulary.class, em);
-        this.metamodelUtils = metamodelUtils;
     }
 
     @Override
     public List<Vocabulary> findAll() {
         final List<Vocabulary> result = super.findAll();
-        result.sort(Comparator.comparing(Vocabulary::getName));
+        result.sort(Comparator.comparing(Vocabulary::getLabel));
         return result;
     }
 
@@ -39,30 +31,10 @@ public class VocabularyDao extends BaseDao<Vocabulary> {
     public void persist(Vocabulary entity) {
         Objects.requireNonNull(entity);
         try {
-            em.persist(entity, descriptorFor(entity));
+            em.persist(entity, DescriptorFactory.vocabularyDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
-    }
-
-    private Descriptor descriptorFor(Vocabulary entity) {
-        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
-        descriptor.addAttributeDescriptor(metamodelUtils.getMappedField(Vocabulary.class, "author"),
-                new EntityDescriptor(null));
-        final EntityDescriptor docDescriptor = new EntityDescriptor(entity.getUri());
-        docDescriptor
-                .addAttributeDescriptor(metamodelUtils.getMappedField(Document.class, "author"),
-                        new EntityDescriptor(null));
-        final EntityDescriptor fileDescriptor = new EntityDescriptor(entity.getUri());
-        fileDescriptor.addAttributeDescriptor(metamodelUtils.getMappedField(File.class, "author"),
-                new EntityDescriptor(null));
-        docDescriptor
-                .addAttributeDescriptor(em.getMetamodel().entity(Document.class).getAttribute("files").getJavaField(),
-                        fileDescriptor);
-        descriptor.addAttributeDescriptor(
-                em.getMetamodel().entity(DocumentVocabulary.class).getAttribute("document").getJavaField(),
-                docDescriptor);
-        return descriptor;
     }
 
     @Override
@@ -71,7 +43,7 @@ public class VocabularyDao extends BaseDao<Vocabulary> {
         try {
             // Evict possibly cached instance loaded from default context
             em.getEntityManagerFactory().getCache().evict(Vocabulary.class, entity.getUri(), null);
-            return em.merge(entity, descriptorFor(entity));
+            return em.merge(entity, DescriptorFactory.vocabularyDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -80,14 +52,14 @@ public class VocabularyDao extends BaseDao<Vocabulary> {
     /**
      * Updates glossary contained in the specified vocabulary.
      * <p>
-     * The vocabulary is passed for correct context resolution, as glossary existentially depends on its owning vocabulary.
+     * The vocabulary is passed for correct context resolution, as glossary existentially depends on its owning
+     * vocabulary.
      *
      * @param entity Owner of the updated glossary
      * @return The updated entity
      */
     public Glossary updateGlossary(Vocabulary entity) {
         Objects.requireNonNull(entity);
-        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
-        return em.merge(entity.getGlossary(), descriptor);
+        return em.merge(entity.getGlossary(), DescriptorFactory.glossaryDescriptor(entity));
     }
 }

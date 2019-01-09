@@ -4,33 +4,25 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
-import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.model.util.HasTypes;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @OWLClass(iri = Vocabulary.s_c_term)
-public class Term implements HasIdentifier, HasTypes, Serializable {
+@EntityListeners(ProvenanceManager.class)
+public class Term extends Asset implements HasTypes, Serializable {
 
     /**
      * Names of columns used in term export.
      */
     public static final String[] EXPORT_COLUMNS = {"IRI", "Label", "Comment", "Types", "Sources", "SubTerms"};
-
-    @Id
-    private URI uri;
-
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
-    private String label;
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
@@ -50,24 +42,6 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
 
     @Types
     private Set<String> types;
-
-    @Override
-    public URI getUri() {
-        return uri;
-    }
-
-    @Override
-    public void setUri(URI uri) {
-        this.uri = uri;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
 
     public String getComment() {
         return comment;
@@ -135,8 +109,8 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
      * @return CSV representation of this term
      */
     public String toCsv() {
-        final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(uri.toString()));
-        sb.append(',').append(CsvUtils.sanitizeString(label));
+        final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
+        sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
         sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
         sb.append(',');
         if (types != null && !types.isEmpty()) {
@@ -166,8 +140,8 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
      */
     public void toExcel(Row row) {
         Objects.requireNonNull(row);
-        row.createCell(0).setCellValue(uri.toString());
-        row.createCell(1).setCellValue(label);
+        row.createCell(0).setCellValue(getUri().toString());
+        row.createCell(1).setCellValue(getLabel());
         if (comment != null) {
             row.createCell(2).setCellValue(comment);
         }
@@ -192,19 +166,19 @@ public class Term implements HasIdentifier, HasTypes, Serializable {
             return false;
         }
         Term term = (Term) o;
-        return Objects.equals(uri, term.uri);
+        return Objects.equals(getUri(), term.getUri());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(getUri());
     }
 
     @Override
     public String toString() {
         return "Term{" +
-                label +
-                " <" + uri + '>' +
+                getLabel() +
+                " <" + getUri() + '>' +
                 ", types=" + types +
                 '}';
     }

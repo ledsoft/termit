@@ -53,7 +53,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         final File[] filesToProcess;
         if (files.length == 0) {
             final File file = new File();
-            file.setName("test.html");
+            file.setLabel("test.html");
             filesToProcess = new File[]{file};
         } else {
             filesToProcess = files;
@@ -103,9 +103,9 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllInFileReturnsTermOccurrencesWithTargetFile() {
         final File fOne = new File();
-        fOne.setName("fOne.html");
+        fOne.setLabel("fOne.html");
         final File fTwo = new File();
-        fTwo.setName("fTwo.html");
+        fTwo.setLabel("fTwo.html");
         final Map<Term, List<TermOccurrence>> allOccurrences = generateOccurrences(fOne, fTwo);
         final List<TermOccurrence> matching = allOccurrences.values().stream().flatMap(
                 l -> l.stream().filter(to -> to.getTarget().getSource().getUri().equals(fOne.getUri())))

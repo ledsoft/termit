@@ -78,7 +78,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         super.setUp(sut);
         this.vocabulary = Generator.generateVocabulary();
         when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(Vocabulary.ONTOLOGY_IRI_termit + "/");
-        vocabulary.setName(VOCABULARY_NAME);
+        vocabulary.setLabel(VOCABULARY_NAME);
         vocabulary.setUri(URI.create(VOCABULARY_URI));
     }
 

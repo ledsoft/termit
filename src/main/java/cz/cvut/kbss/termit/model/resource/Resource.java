@@ -1,49 +1,21 @@
 package cz.cvut.kbss.termit.model.resource;
 
-import cz.cvut.kbss.jopa.model.annotations.*;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
-import cz.cvut.kbss.termit.model.HasProvenanceData;
-import cz.cvut.kbss.termit.model.util.HasIdentifier;
+import cz.cvut.kbss.jopa.model.annotations.EntityListeners;
+import cz.cvut.kbss.jopa.model.annotations.OWLClass;
+import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Objects;
 
 @OWLClass(iri = Vocabulary.s_c_zdroj)
 @EntityListeners(ProvenanceManager.class)
-public class Resource extends HasProvenanceData implements HasIdentifier, Serializable {
-
-    @Id
-    private URI uri;
-
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
-    private String name;
+public class Resource extends Asset implements Serializable {
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)
     private String description;
-
-    @Override
-    public URI getUri() {
-        return uri;
-    }
-
-    @Override
-    public void setUri(URI uri) {
-        this.uri = uri;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;
@@ -62,19 +34,19 @@ public class Resource extends HasProvenanceData implements HasIdentifier, Serial
             return false;
         }
         Resource resource = (Resource) o;
-        return Objects.equals(uri, resource.uri);
+        return Objects.equals(getUri(), resource.getUri());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(getUri());
     }
 
     @Override
     public String toString() {
         return "Resource{" +
-                "uri=" + uri +
-                ", name='" + name + '\'' +
+                getLabel() +
+                " <" + getUri() + '>' +
                 "}";
     }
 }

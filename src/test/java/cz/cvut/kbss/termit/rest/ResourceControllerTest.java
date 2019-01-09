@@ -109,7 +109,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final URI resourceUri = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
         final Resource resource = Generator.generateResource();
         resource.setUri(resourceUri);
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
         when(resourceServiceMock.findRequired(resourceUri)).thenReturn(resource);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
@@ -171,7 +171,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getResourceRetrievesResourceByDefaultNamespaceAndSpecifiedNormalizedName() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         final URI resourceId = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
         resource.setUri(resourceId);
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME))
@@ -188,7 +188,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getResourceUsesSpecifiedNamespaceForResourceRetrieval() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         final URI resourceId = URI.create(RESOURCE_NAMESPACE + "/" + RESOURCE_NAME);
         resource.setUri(resourceId);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceId);
@@ -206,7 +206,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void createResourcePassesNewResourceToService() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         mockMvc.perform(post(PATH).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isCreated());
@@ -216,7 +216,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void createResourceReturnsLocationHeaderOnSuccess() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         final MvcResult mvcResult = mockMvc
                 .perform(post(PATH).content(toJson(resource)).contentType(MediaType.APPLICATION_JSON)).andReturn();
@@ -226,7 +226,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void createResourceReturnsLocationHeaderWithNamespaceParameterWhenItDiffersFromDefault() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         final String namespace = "http://onto.fel.cvut.cz/ontologies/test/termit/resources/";
         resource.setUri(URI.create(namespace + RESOURCE_NAME));
         final MvcResult mvcResult = mockMvc
@@ -239,7 +239,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void updateResourcePassesUpdateDataToService() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(resourceServiceMock.exists(resource.getUri())).thenReturn(true);
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
@@ -253,7 +253,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void updateResourceThrowsConflictExceptionWhenRequestUrlIdentifierDiffersFromEntityIdentifier() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         when(resourceServiceMock.exists(resource.getUri())).thenReturn(true);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME))
                 .thenReturn(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
@@ -268,7 +268,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void setTermsPassesNewTermUrisToService() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
         when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
@@ -296,7 +296,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void removeResourceRemovesResourceViaService() throws Exception {
         final Resource resource = Generator.generateResource();
-        resource.setName(RESOURCE_NAME);
+        resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
         when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
@@ -308,11 +308,11 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void createResourceSupportsSubtypesOfResource() throws Exception {
         final Document doc = new Document();
-        doc.setName(RESOURCE_NAME);
+        doc.setLabel(RESOURCE_NAME);
         doc.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         final File file = new File();
-        file.setName("test-file.html");
-        file.setUri(URI.create(RESOURCE_NAMESPACE + file.getName()));
+        file.setLabel("test-file.html");
+        file.setUri(URI.create(RESOURCE_NAMESPACE + file.getLabel()));
         doc.setFiles(Collections.singleton(file));
         mockMvc.perform(post(PATH).content(toJsonLd(doc)).contentType(JsonLd.MEDIA_TYPE))
                .andExpect(status().isCreated());
@@ -327,7 +327,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final File file = new File();
         final String fileName = "mpp-3.3.html";
         file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setName(fileName);
+        file.setLabel(fileName);
         when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
                 .thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
@@ -354,13 +354,13 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final File file = new File();
         final String fileName = "mpp-3.3.html";
         file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setName(fileName);
+        file.setLabel(fileName);
         when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
                 .thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
 
         final java.io.File attachment = createTemporaryHtmlFile();
-        final MockMultipartFile upload = new MockMultipartFile("file", file.getName(), MediaType.TEXT_HTML_VALUE,
+        final MockMultipartFile upload = new MockMultipartFile("file", file.getLabel(), MediaType.TEXT_HTML_VALUE,
                 Files.readAllBytes(attachment.toPath())
         );
         mockMvc.perform(multipart(PATH + "/" + fileName + "/content").file(upload)).andExpect(status().isNoContent());
@@ -372,7 +372,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final File file = new File();
         final String fileName = "mpp-3.3.html";
         file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setName(fileName);
+        file.setLabel(fileName);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
         mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))

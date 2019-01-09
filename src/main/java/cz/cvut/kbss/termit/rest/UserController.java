@@ -4,7 +4,6 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.security.SecurityConstants;
-import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.UserService;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -19,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -51,14 +49,14 @@ public class UserController extends BaseController {
     }
 
     @RequestMapping(value = "/current", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public UserAccount getCurrent() {
         return userService.getCurrent();
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @RequestMapping(value = "/current", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     public void updateCurrent(@RequestBody UserUpdateDto update) {
         userService.updateCurrent(update);
         LOG.debug("User {} successfully updated.", update);

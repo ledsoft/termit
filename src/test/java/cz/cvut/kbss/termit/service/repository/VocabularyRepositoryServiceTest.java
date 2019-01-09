@@ -55,9 +55,9 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     void persistThrowsValidationExceptionWhenVocabularyNameIsBlank() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setName("");
+        vocabulary.setLabel("");
         final ValidationException exception = assertThrows(ValidationException.class, () -> sut.persist(vocabulary));
-        assertThat(exception.getMessage(), containsString("name must not be blank"));
+        assertThat(exception.getMessage(), containsString("label must not be blank"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertThat(result.getUri().toString(), containsString(IdentifierResolver.normalize(vocabulary.getName())));
+        assertThat(result.getUri().toString(), containsString(IdentifierResolver.normalize(vocabulary.getLabel())));
     }
 
     @Test
@@ -88,7 +88,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     void persistCreatesGlossaryAndModelInstances() {
         final Vocabulary vocabulary = new Vocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setName("TestVocabulary");
+        vocabulary.setLabel("TestVocabulary");
         sut.persist(vocabulary);
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result.getGlossary());
@@ -116,7 +116,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         vocabulary.setDateCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
-        vocabulary.setName("");
+        vocabulary.setLabel("");
         assertThrows(ValidationException.class, () -> sut.update(vocabulary));
     }
 
@@ -137,10 +137,10 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
 
         final String newName = "Updated name";
-        vocabulary.setName(newName);
+        vocabulary.setLabel(newName);
         sut.update(vocabulary);
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertEquals(newName, result.getName());
+        assertEquals(newName, result.getLabel());
     }
 }

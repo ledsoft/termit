@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
@@ -45,7 +44,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     @BeforeEach
     void setUp() {
         this.document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         document.setUri(Generator.generateUri());
         document.setDateCreated(new Date());
     }
@@ -70,7 +69,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
         final File file = new File();
-        file.setName("unknown.html");
+        file.setLabel("unknown.html");
         document.addFile(file);
         file.setDocument(document);
         assertThrows(NotFoundException.class, () -> sut.loadFileContent(file));
@@ -80,7 +79,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void loadFileContentLoadsFileContentFromDisk() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         final String result = sut.loadFileContent(file);
@@ -91,7 +90,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void getAsResourceReturnsResourceRepresentationOfFileOnDisk() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         final Resource result = sut.getAsResource(file);
@@ -103,7 +102,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void getAsResourceReturnsResourceAwareOfMediaType() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         final TypeAwareResource result = sut.getAsResource(file);
@@ -117,7 +116,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
         physicalFile.delete();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         sut.saveFileContent(file, content);
@@ -129,13 +128,13 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final InputStream content = loadFile("data/rdfa-simple.html");
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         sut.saveFileContent(file, content);
         final java.io.File contentFile = new java.io.File(
                 environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
-                        document.getFileDirectoryName() + java.io.File.separator + file.getName());
+                        document.getFileDirectoryName() + java.io.File.separator + file.getLabel());
         final List<String> lines = Files.readAllLines(contentFile.toPath());
         final String result = String.join("\n", lines);
         assertFalse(result.isEmpty());
@@ -145,7 +144,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
     void createBackupCreatesBackupFileWithIdenticalContent() throws Exception {
         final File file = new File();
         final java.io.File physicalFile = generateFile();
-        file.setName(physicalFile.getName());
+        file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
         final java.io.File docDir = physicalFile.getParentFile();
@@ -168,7 +167,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
                 docDir.getAbsolutePath() + java.io.File.separator + "withoutExtension");
         withoutExtension.deleteOnExit();
         Files.copy(physicalFile.toPath(), withoutExtension.toPath());
-        file.setName(withoutExtension.getName());
+        file.setLabel(withoutExtension.getName());
         document.addFile(file);
         file.setDocument(document);
         assertNotNull(docDir.listFiles());

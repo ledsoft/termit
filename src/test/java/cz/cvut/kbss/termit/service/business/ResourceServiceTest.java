@@ -115,7 +115,7 @@ class ResourceServiceTest {
     @Test
     void getContentLoadsContentOfFileFromDocumentManager() {
         final File file = new File();
-        file.setName("Test");
+        file.setLabel("Test");
         file.setUri(Generator.generateUri());
         sut.getContent(file);
         verify(documentManager).getAsResource(file);
@@ -132,7 +132,7 @@ class ResourceServiceTest {
     void saveContentSavesFileContentViaDocumentManager() {
         final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
         final File file = new File();
-        file.setName("Test");
+        file.setLabel("Test");
         file.setUri(Generator.generateUri());
         sut.saveContent(file, bis);
         verify(documentManager).saveFileContent(file, bis);
@@ -150,7 +150,7 @@ class ResourceServiceTest {
     void saveContentCreatesBackupBeforeSavingFileContentInDocumentManager() {
         final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
         final File file = new File();
-        file.setName("Test");
+        file.setLabel("Test");
         file.setUri(Generator.generateUri());
         sut.saveContent(file, bis);
         final InOrder inOrder = Mockito.inOrder(documentManager);
@@ -161,7 +161,7 @@ class ResourceServiceTest {
     @Test
     void runTextAnalysisInvokesTextAnalysisForSpecifiedFile() {
         final File file = new File();
-        file.setName("Test");
+        file.setLabel("Test");
         file.setUri(Generator.generateUri());
         sut.runTextAnalysis(file);
         verify(textAnalysisService).analyzeFile(file);
