@@ -2,27 +2,18 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
-import cz.cvut.kbss.termit.model.util.HasIdentifier;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.net.URI;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 @EntityListeners(ProvenanceManager.class)
-public class Vocabulary extends HasProvenanceData implements HasIdentifier, Serializable {
-
-    @Id
-    private URI uri;
-
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
-    private String name;
+public class Vocabulary extends Asset implements Serializable {
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
@@ -41,24 +32,6 @@ public class Vocabulary extends HasProvenanceData implements HasIdentifier, Seri
 
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
-
-    @Override
-    public URI getUri() {
-        return uri;
-    }
-
-    @Override
-    public void setUri(URI uri) {
-        this.uri = uri;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getComment() {
         return comment;
@@ -109,21 +82,29 @@ public class Vocabulary extends HasProvenanceData implements HasIdentifier, Seri
             return false;
         }
         Vocabulary that = (Vocabulary) o;
-        return Objects.equals(uri, that.uri);
+        return Objects.equals(getUri(), that.getUri());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(getUri());
     }
 
     @Override
     public String toString() {
         return "Vocabulary{" +
-                "uri=" + uri +
-                ", name='" + name + '\'' +
+                getLabel() +
+                " <" + getUri() + '>' +
                 ", glossary=" + glossary +
                 ", version=" + versionInfo +
                 '}';
+    }
+
+    public static Field getGlossaryField() {
+        try {
+            return Vocabulary.class.getDeclaredField("glossary");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"glossary\" field.");
+        }
     }
 }

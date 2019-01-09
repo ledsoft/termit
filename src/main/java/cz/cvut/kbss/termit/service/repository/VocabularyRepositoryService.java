@@ -38,7 +38,7 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
     protected void prePersist(Vocabulary instance) {
         super.prePersist(instance);
         if (instance.getUri() == null) {
-            instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getName()));
+            instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
         if (instance.getGlossary() == null) {

@@ -3,14 +3,17 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.OWL;
 import cz.cvut.kbss.termit.dto.RdfsResource;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,6 +32,13 @@ class DataDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private DataDao sut;
+
+    @BeforeEach
+    void setUp() {
+        final User author = Generator.generateUserWithId();
+        transactional(() -> em.persist(author));
+        Environment.setCurrentUser(author);
+    }
 
     @Test
     void findAllPropertiesGetsPropertiesFromRepository() {

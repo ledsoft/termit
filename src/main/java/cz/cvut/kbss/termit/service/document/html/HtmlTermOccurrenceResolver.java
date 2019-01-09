@@ -169,6 +169,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public boolean supports(File source) {
-        return source.getName().endsWith("html") || source.getName().endsWith("htm");
+        return source.getLabel().endsWith("html") || source.getLabel().endsWith("htm");
     }
 }

@@ -32,7 +32,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.resource = new Resource();
         resource.setUri(Generator.generateUri());
-        resource.setName("Metropolitan Plan");
+        resource.setLabel("Metropolitan Plan");
         final User author = Generator.generateUserWithId();
         Environment.setCurrentUser(author);
         transactional(() -> {

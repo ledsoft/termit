@@ -155,7 +155,7 @@ public class Generator {
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = new cz.cvut.kbss.termit.model.Vocabulary();
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
-        vocabulary.setName("Vocabulary" + randomInt());
+        vocabulary.setLabel("Vocabulary" + randomInt());
         return vocabulary;
     }
 
@@ -174,7 +174,7 @@ public class Generator {
 
     public static Resource generateResource() {
         final Resource resource = new Resource();
-        resource.setName("Resource " + randomInt());
+        resource.setLabel("Resource " + randomInt());
         resource.setDescription("Resource description ");
         return resource;
     }

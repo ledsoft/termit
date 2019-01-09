@@ -89,15 +89,15 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.mockServer = MockRestServiceServer.createServer(restTemplate);
         this.objectMapper = cz.cvut.kbss.termit.environment.Environment.getObjectMapper();
         this.vocabulary = new DocumentVocabulary();
-        vocabulary.setName("TestVocabulary");
+        vocabulary.setLabel("TestVocabulary");
         vocabulary.setUri(Generator.generateUri());
         this.document = new Document();
-        document.setName("text-analysis-test");
+        document.setLabel("text-analysis-test");
         document.setUri(DOC_URI);
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
         this.file = new File();
-        file.setName(FILE_NAME);
+        file.setLabel(FILE_NAME);
         file.setDocument(document);
         generateFile();
         this.documentManagerSpy = spy(documentManager);
@@ -192,7 +192,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
-        file.setName("unknown.html");
+        file.setLabel("unknown.html");
         final NotFoundException result = assertThrows(NotFoundException.class,
                 () -> sut.analyzeFile(file));
         assertThat(result.getMessage(), containsString("not found on file system"));

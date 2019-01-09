@@ -2,11 +2,13 @@ package cz.cvut.kbss.termit.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +49,7 @@ public class Document extends Resource {
      * @return {@code Optional} containing the file with a matching filename or an empty {@code Optional}
      */
     public Optional<File> getFile(String fileName) {
-        return files != null ? files.stream().filter(f -> f.getName().equals(fileName)).findAny() :
+        return files != null ? files.stream().filter(f -> f.getLabel().equals(fileName)).findAny() :
                Optional.empty();
     }
 
@@ -70,10 +72,10 @@ public class Document extends Resource {
      * @return Document-specific directory name
      */
     public String getFileDirectoryName() {
-        if (getName() == null || getUri() == null) {
+        if (getLabel() == null || getUri() == null) {
             throw new IllegalStateException("Missing document name or URI required for directory name resolution.");
         }
-        return IdentifierResolver.normalize(getName()) + "_" + getUri().hashCode();
+        return IdentifierResolver.normalize(getLabel()) + "_" + getUri().hashCode();
     }
 
     @Override
@@ -97,11 +99,19 @@ public class Document extends Resource {
     public String toString() {
         return "Document{" +
                 "uri=" + getUri() +
-                ", name='" + getName() + '\'' +
+                ", name='" + getLabel() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", files=" + files +
                 ", author=" + getAuthor() +
                 ", dateCreated=" + getDateCreated() +
                 '}';
+    }
+
+    public static Field getFilesField() {
+        try {
+            return Document.class.getDeclaredField("files");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"files\" field.");
+        }
     }
 }

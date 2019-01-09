@@ -64,7 +64,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
 
     private Vocabulary generateTerms() {
         final Vocabulary vocabulary = new Vocabulary();
-        vocabulary.setName("test");
+        vocabulary.setLabel("test");
         vocabulary.setUri(Generator.generateUri());
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
@@ -92,7 +92,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
     void defaultFullTextSearchFindsVocabulariesWithMatchingLabel() {
         final List<Vocabulary> vocabularies = generateVocabularies();
         transactional(() -> vocabularies.forEach(em::persist));
-        final Collection<Vocabulary> matching = vocabularies.stream().filter(v -> v.getName().contains("Matching"))
+        final Collection<Vocabulary> matching = vocabularies.stream().filter(v -> v.getLabel().contains("Matching"))
                                                             .collect(Collectors.toList());
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matching.size(), result.size());
@@ -111,7 +111,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
             v.setAuthor(user);
             v.setDateCreated(new Date());
             if (Generator.randomBoolean()) {
-                v.setName("Matching label " + Generator.randomInt());
+                v.setLabel("Matching label " + Generator.randomInt());
             }
         });
         return vocabularies;
@@ -130,7 +130,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
                                                     .filter(t -> t.getLabel().contains("Matching")).collect(
                         Collectors.toList());
         final Collection<Vocabulary> matchingVocabularies = vocabularies.stream()
-                                                                        .filter(v -> v.getName().contains("Matching"))
+                                                                        .filter(v -> v.getLabel().contains("Matching"))
                                                                         .collect(Collectors.toList());
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matchingTerms.size() + matchingVocabularies.size(), result.size());

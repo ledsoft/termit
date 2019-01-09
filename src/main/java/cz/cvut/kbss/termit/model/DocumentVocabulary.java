@@ -1,10 +1,12 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_dokumentovy_slovnik)
@@ -46,5 +48,13 @@ public class DocumentVocabulary extends Vocabulary {
         return "DocumentVocabulary{" +
                 "document=" + document +
                 "} " + super.toString();
+    }
+
+    public static Field getDocumentField() {
+        try {
+            return DocumentVocabulary.class.getDeclaredField("document");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"document\" field.");
+        }
     }
 }

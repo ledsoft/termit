@@ -121,7 +121,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final Vocabulary result = readValue(mvcResult, Vocabulary.class);
         assertNotNull(result);
         assertEquals(vocabulary.getUri(), result.getUri());
-        assertEquals(vocabulary.getName(), result.getName());
+        assertEquals(vocabulary.getLabel(), result.getLabel());
     }
 
     @Test

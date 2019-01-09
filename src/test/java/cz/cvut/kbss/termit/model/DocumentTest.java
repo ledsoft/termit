@@ -17,11 +17,11 @@ class DocumentTest {
     @Test
     void getFileDirectoryNameReturnsNameBasedOnNormalizedNameAndUriHash() {
         final Document document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         document.setUri(URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan"));
         final String result = document.getFileDirectoryName();
         assertNotNull(result);
-        assertThat(result, startsWith(IdentifierResolver.normalize(document.getName())));
+        assertThat(result, startsWith(IdentifierResolver.normalize(document.getLabel())));
     }
 
     @Test
@@ -34,21 +34,21 @@ class DocumentTest {
     @Test
     void getFileDirectoryNameThrowsIllegalStateWhenUriIsMissing() {
         final Document document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         assertThrows(IllegalStateException.class, document::getFileDirectoryName);
     }
 
     @Test
     void getFileReturnsOptionalWithFileWithMatchingName() {
         final Document document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         final File fOne = new File();
-        fOne.setName("test1.html");
+        fOne.setLabel("test1.html");
         document.addFile(fOne);
         final File fTwo = new File();
-        fTwo.setName("test2.html");
+        fTwo.setLabel("test2.html");
         document.addFile(fTwo);
-        final Optional<File> result = document.getFile(fOne.getName());
+        final Optional<File> result = document.getFile(fOne.getLabel());
         assertTrue(result.isPresent());
         assertSame(fOne, result.get());
     }
@@ -56,9 +56,9 @@ class DocumentTest {
     @Test
     void getFileReturnsEmptyOptionalForUnknownFileName() {
         final Document document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         final File fOne = new File();
-        fOne.setName("test1.html");
+        fOne.setLabel("test1.html");
         document.addFile(fOne);
         assertFalse(document.getFile("unknown.html").isPresent());
     }
@@ -66,7 +66,7 @@ class DocumentTest {
     @Test
     void getFileReturnsEmptyOptionalForDocumentWithoutFiles() {
         final Document document = new Document();
-        document.setName("Metropolitan plan");
+        document.setLabel("Metropolitan plan");
         assertFalse(document.getFile("unknown.html").isPresent());
     }
 }

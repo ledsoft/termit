@@ -1,13 +1,14 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
+import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -63,7 +64,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private AnnotationGenerator sut;
 
     private DocumentVocabulary vocabulary;
-    private EntityDescriptor vocabDescriptor;
+    private Descriptor vocabDescriptor;
     private cz.cvut.kbss.termit.model.resource.Document document;
     private File file;
     private String fileLocation;
@@ -72,7 +73,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private Term termTwo;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.term = new Term();
         term.setUri(TERM_ID);
         term.setLabel("Územní plán");
@@ -81,34 +82,33 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         termTwo.setLabel("Územní plán hlavního města Prahy");
         final User author = Generator.generateUserWithId();
         this.vocabulary = new DocumentVocabulary();
-        vocabulary.setName("Test Vocabulary");
+        vocabulary.setLabel("Test Vocabulary");
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
         vocabulary.setUri(Generator.generateUri());
         this.document = new cz.cvut.kbss.termit.model.resource.Document();
         document.setAuthor(author);
         document.setDateCreated(new Date());
-        document.setName("metropolitan-plan");
+        document.setLabel("metropolitan-plan");
         document.setUri(Generator.generateUri());
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
         vocabulary.getGlossary().addTerm(term);
         vocabulary.getGlossary().addTerm(termTwo);
-        this.vocabDescriptor = new EntityDescriptor(vocabulary.getUri());
-        vocabDescriptor.addAttributeContext(HasProvenanceData.class.getDeclaredField("author"), null);
+        this.vocabDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         vocabulary.setAuthor(author);
         vocabulary.setDateCreated(new Date());
         this.file = new File();
         file.setUri(Generator.generateUri());
-        file.setName("rdfa-simple.html");
+        file.setLabel("rdfa-simple.html");
         file.setDocument(document);
         cz.cvut.kbss.termit.environment.Environment.setCurrentUser(author);
         document.addFile(file);
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary, vocabDescriptor);
-            em.persist(document, vocabDescriptor);
-            em.persist(file);
+            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.documentDescriptor(vocabulary));
         });
     }
 
@@ -121,7 +121,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         docDir.deleteOnExit();
         final java.io.File f = new java.io.File(
                 folder.getAbsolutePath() + java.io.File.separator + docFolderName + java.io.File.separator +
-                        file.getName());
+                        file.getLabel());
         f.createNewFile();
         f.deleteOnExit();
         this.fileLocation = f.getAbsolutePath();
@@ -157,7 +157,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
         final InputStream content = loadFile("data/rdfa-simple.html");
-        file.setName("test.txt");
+        file.setLabel("test.txt");
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
@@ -166,7 +166,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() throws Exception {
         final InputStream content = loadFile("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setLabel("rdfa-overlapping.html");
         generateFile();
         sut.generateAnnotations(content, file);
         assertEquals(1, termOccurrenceDao.findAll(term).size());
@@ -206,14 +206,14 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(ma);
         vocabulary.getGlossary().addTerm(area);
         transactional(() -> {
-            em.persist(mp, new EntityDescriptor(vocabulary.getUri()));
-            em.persist(ma, new EntityDescriptor(vocabulary.getUri()));
-            em.persist(area, new EntityDescriptor(vocabulary.getUri()));
-            em.merge(vocabulary.getGlossary(), vocabDescriptor);
+            em.persist(mp, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(ma, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(area, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
         final InputStream content = loadFile("data/rdfa-large.html");
-        file.setName("rdfa-large.html");
+        file.setLabel("rdfa-large.html");
         generateFile();
         sut.generateAnnotations(content, file);
         assertFalse(termOccurrenceDao.findAll(mp).isEmpty());
@@ -224,7 +224,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() throws Exception {
         final InputStream content = loadFile("data/rdfa-overlapping.html");
-        file.setName("rdfa-overlapping.html");
+        file.setLabel("rdfa-overlapping.html");
         generateFile();
         sut.generateAnnotations(content, file);
         final List<TermOccurrence> result = termOccurrenceDao.findAll();
@@ -237,7 +237,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsDoesNotAddTermsForSuggestedKeywords() throws Exception {
         final InputStream content = loadFile("data/rdfa-new-terms.html");
-        file.setName("rdfa-new-terms.html");
+        file.setLabel("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
         sut.generateAnnotations(content, file);
@@ -248,7 +248,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsDoesNotModifyIncomingRdfWhenItContainsNewTermSuggestions() throws Exception {
         final InputStream content = loadFile("data/rdfa-new-terms.html");
-        file.setName("rdfa-new-terms.html");
+        file.setLabel("rdfa-new-terms.html");
         generateFile();
         sut.generateAnnotations(content, file);
         final Document originalDoc;
@@ -268,7 +268,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     @Test
     void generateAnnotationsResolvesTermOccurrenceWhenItOverlapsWithNewTermSuggestion() throws Exception {
         final InputStream content = loadFile("data/rdfa-new-terms-overlapping.html");
-        file.setName("rdfa-new-terms-overlapping.html");
+        file.setLabel("rdfa-new-terms-overlapping.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
         sut.generateAnnotations(content, file);
