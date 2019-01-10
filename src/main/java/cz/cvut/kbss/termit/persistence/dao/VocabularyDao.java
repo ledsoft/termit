@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class VocabularyDao extends BaseDao<Vocabulary> {
+public class VocabularyDao extends AssetDao<Vocabulary> {
 
     @Autowired
     public VocabularyDao(EntityManager em) {

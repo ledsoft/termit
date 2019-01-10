@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class TermDao extends BaseDao<Term> {
+public class TermDao extends AssetDao<Term> {
 
     private final Configuration config;
 
