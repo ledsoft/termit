@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class ResourceDao extends BaseDao<Resource> {
+public class ResourceDao extends AssetDao<Resource> {
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
