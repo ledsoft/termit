@@ -159,6 +159,12 @@ public class Generator {
         return vocabulary;
     }
 
+    public static cz.cvut.kbss.termit.model.Vocabulary generateVocabularyWithId() {
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        return vocabulary;
+    }
+
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());

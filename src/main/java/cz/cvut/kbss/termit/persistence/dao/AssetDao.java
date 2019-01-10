@@ -7,7 +7,12 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import java.net.URI;
 import java.util.List;
 
-abstract class AssetDao<T extends Asset> extends BaseDao<T> {
+/**
+ * Base DAO implementation for assets managed by the application.
+ *
+ * @param <T> Type of the asset
+ */
+public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
 
     AssetDao(Class<T> type, EntityManager em) {
         super(type, em);
