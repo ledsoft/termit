@@ -4,7 +4,7 @@ import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.persistence.dao.GenericDao;
+import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class TermRepositoryService extends BaseRepositoryService<Term> {
+public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
 
     private final TermDao termDao;
 
@@ -34,7 +34,7 @@ public class TermRepositoryService extends BaseRepositoryService<Term> {
     }
 
     @Override
-    protected GenericDao<Term> getPrimaryDao() {
+    protected AssetDao<Term> getPrimaryDao() {
         return this.termDao;
     }
 
