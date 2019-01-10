@@ -34,18 +34,18 @@ public class AssetService {
     /**
      * Finds the specified number of most recently added/edited assets.
      *
-     * @param count Maximum number of assets to retrieve
+     * @param limit Maximum number of assets to retrieve
      * @return List of recently added/edited assets
      */
-    public List<Asset> findRecentlyEdited(int count) {
-        if (count < 0) {
+    public List<Asset> findLastEdited(int limit) {
+        if (limit < 0) {
             throw new IllegalArgumentException("Maximum for recently edited assets must not be less than 0.");
         }
-        final List<Resource> resources = resourceRepositoryService.findRecentlyEdited(count);
-        final List<Term> terms = termRepositoryService.findRecentlyEdited(count);
-        final List<Vocabulary> vocabularies = vocabularyRepositoryService.findRecentlyEdited(count);
+        final List<Resource> resources = resourceRepositoryService.findLastEdited(limit);
+        final List<Term> terms = termRepositoryService.findLastEdited(limit);
+        final List<Vocabulary> vocabularies = vocabularyRepositoryService.findLastEdited(limit);
         final List<Asset> result = mergeAssets(mergeAssets(resources, terms), vocabularies);
-        return result.subList(0, result.size() > count ? count : result.size());
+        return result.subList(0, result.size() > limit ? limit : result.size());
     }
 
     private List<Asset> mergeAssets(List<? extends Asset> listOne, List<? extends Asset> listTwo) {

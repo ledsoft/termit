@@ -30,6 +30,6 @@ public class AssetController {
     @RequestMapping(value = "/last-edited", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Asset> getLastEdited(
             @RequestParam(name = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit) {
-        return assetService.findRecentlyEdited(limit);
+        return assetService.findLastEdited(limit);
     }
 }

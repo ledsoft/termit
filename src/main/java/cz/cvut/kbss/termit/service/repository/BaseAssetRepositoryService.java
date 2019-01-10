@@ -26,11 +26,11 @@ public abstract class BaseAssetRepositoryService<T extends Asset> extends BaseRe
      * <p>
      * The returned assets are sorted by added/edited date in descending order.
      *
-     * @param count Maximum number of assets returned
+     * @param limit Maximum number of assets returned
      * @return List of most recently added/edited assets
      */
-    public List<T> findRecentlyEdited(int count) {
-        final List<T> result = getPrimaryDao().findRecentlyEdited(count);
+    public List<T> findLastEdited(int limit) {
+        final List<T> result = getPrimaryDao().findLastEdited(limit);
         return result.stream().map(this::postLoad).collect(Collectors.toList());
     }
 }

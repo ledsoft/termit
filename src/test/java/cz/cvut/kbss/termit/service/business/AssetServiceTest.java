@@ -47,12 +47,12 @@ class AssetServiceTest {
         final List<Asset> assets = generateAssets(15);
 
         final int count = assets.size();
-        final List<Asset> result = sut.findRecentlyEdited(count);
+        final List<Asset> result = sut.findLastEdited(count);
         assertEquals(count, result.size());
         assertTrue(assets.containsAll(result));
-        verify(resourceService).findRecentlyEdited(count);
-        verify(termService).findRecentlyEdited(count);
-        verify(vocabularyService).findRecentlyEdited(count);
+        verify(resourceService).findLastEdited(count);
+        verify(termService).findLastEdited(count);
+        verify(vocabularyService).findLastEdited(count);
     }
 
     private List<Asset> generateAssets(int count) {
@@ -79,9 +79,9 @@ class AssetServiceTest {
             asset.setDateCreated(new Date(System.currentTimeMillis() - i * 1000));
             assets.add(asset);
         }
-        when(resourceService.findRecentlyEdited(anyInt())).thenReturn(resources);
-        when(termService.findRecentlyEdited(anyInt())).thenReturn(terms);
-        when(vocabularyService.findRecentlyEdited(anyInt())).thenReturn(vocabularies);
+        when(resourceService.findLastEdited(anyInt())).thenReturn(resources);
+        when(termService.findLastEdited(anyInt())).thenReturn(terms);
+        when(vocabularyService.findLastEdited(anyInt())).thenReturn(vocabularies);
         return assets;
     }
 
@@ -89,7 +89,7 @@ class AssetServiceTest {
     void findRecentlyEditedReturnsAssetsSortedByDateCreatedDescending() {
         final List<Asset> assets = generateAssets(6);
         assets.sort(Comparator.comparing(Asset::getDateCreated).reversed());
-        final List<Asset> result = sut.findRecentlyEdited(10);
+        final List<Asset> result = sut.findLastEdited(10);
         assertEquals(assets, result);
     }
 
@@ -98,15 +98,15 @@ class AssetServiceTest {
         final List<Asset> assets = generateAssets(10);
         assets.sort(Comparator.comparing(Asset::getDateCreated).reversed());
         final int count = 6;
-        final List<Asset> result = sut.findRecentlyEdited(count);
+        final List<Asset> result = sut.findLastEdited(count);
         assertEquals(assets.subList(0, count), result);
     }
 
     @Test
     void findRecentlyEditedThrowsIllegalArgumentForCountLessThanZero() {
-        assertThrows(IllegalArgumentException.class, () -> sut.findRecentlyEdited(-1));
-        verify(resourceService, never()).findRecentlyEdited(anyInt());
-        verify(termService, never()).findRecentlyEdited(anyInt());
-        verify(vocabularyService, never()).findRecentlyEdited(anyInt());
+        assertThrows(IllegalArgumentException.class, () -> sut.findLastEdited(-1));
+        verify(resourceService, never()).findLastEdited(anyInt());
+        verify(termService, never()).findLastEdited(anyInt());
+        verify(vocabularyService, never()).findLastEdited(anyInt());
     }
 }

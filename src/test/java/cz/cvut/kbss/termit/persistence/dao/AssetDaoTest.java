@@ -48,7 +48,7 @@ class AssetDaoTest extends BaseDaoTestRunner {
 
 
         final int count = 3;
-        final List<Resource> result = sut.findRecentlyEdited(count);
+        final List<Resource> result = sut.findLastEdited(count);
         assertEquals(count, result.size());
         assertTrue(recent.containsAll(result));
     }
