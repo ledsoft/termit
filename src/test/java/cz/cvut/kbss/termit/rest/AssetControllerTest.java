@@ -44,19 +44,19 @@ class AssetControllerTest extends BaseControllerTestRunner {
     void getLastEditedRetrievesLastEditedAssetsFromService() throws Exception {
         final List<Asset> assets = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                             .collect(Collectors.toList());
-        when(assetService.findRecentlyEdited(anyInt())).thenReturn(assets);
+        when(assetService.findLastEdited(anyInt())).thenReturn(assets);
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/last-edited")).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(assets, result);
-        verify(assetService).findRecentlyEdited(Integer.parseInt(AssetController.DEFAULT_LIMIT));
+        verify(assetService).findLastEdited(Integer.parseInt(AssetController.DEFAULT_LIMIT));
     }
 
     @Test
     void getLastEditedUsesQueryParameterToSpecifyMaximumNumberOfReturnedResults() throws Exception {
-        when(assetService.findRecentlyEdited(anyInt())).thenReturn(Collections.emptyList());
+        when(assetService.findLastEdited(anyInt())).thenReturn(Collections.emptyList());
         final int limit = 10;
         mockMvc.perform(get(PATH + "/last-edited").param("limit", Integer.toString(limit))).andExpect(status().isOk());
-        verify(assetService).findRecentlyEdited(limit);
+        verify(assetService).findLastEdited(limit);
     }
 }

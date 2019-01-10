@@ -68,7 +68,7 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         final int count = 2;
-        final List<Vocabulary> result = sut.findRecentlyEdited(count);
+        final List<Vocabulary> result = sut.findLastEdited(count);
         assertEquals(count, result.size());
         vocabularies.sort(Comparator.comparing(Vocabulary::getDateCreated).reversed());
         assertEquals(vocabularies.subList(0, count), result);
@@ -79,12 +79,12 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> Generator.generateVocabularyWithId())
                                                        .collect(Collectors.toList());
         final VocabularyDao vocabularyDao = mock(VocabularyDao.class);
-        when(vocabularyDao.findRecentlyEdited(anyInt())).thenReturn(vocabularies);
+        when(vocabularyDao.findLastEdited(anyInt())).thenReturn(vocabularies);
         final BaseAssetRepositoryService<Vocabulary> localSut = spy(
                 new BaseAssetRepositoryServiceImpl(vocabularyDao, mock(Validator.class)));
         final int count = 117;
-        localSut.findRecentlyEdited(count);
-        verify(vocabularyDao).findRecentlyEdited(count);
+        localSut.findLastEdited(count);
+        verify(vocabularyDao).findLastEdited(count);
         vocabularies.forEach(v -> verify(localSut).postLoad(v));
     }
 }
