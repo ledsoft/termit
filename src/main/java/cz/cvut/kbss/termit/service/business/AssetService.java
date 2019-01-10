@@ -48,10 +48,9 @@ public class AssetService {
         return result.subList(0, result.size() > limit ? limit : result.size());
     }
 
-    private List<Asset> mergeAssets(List<? extends Asset> listOne, List<? extends Asset> listTwo) {
+    private static List<Asset> mergeAssets(List<? extends Asset> listOne, List<? extends Asset> listTwo) {
         int oneIndex = 0;
         int twoIndex = 0;
-        int count = 0;
         final List<Asset> result = new ArrayList<>(listOne.size() + listTwo.size());
         while (oneIndex < listOne.size() && twoIndex < listTwo.size()) {
             // TODO Add support for last edit when it is implemented
@@ -68,7 +67,7 @@ public class AssetService {
         return result;
     }
 
-    private void addRest(List<Asset> target, List<? extends Asset> source, int index) {
+    private static void addRest(List<Asset> target, List<? extends Asset> source, int index) {
         while (index < source.size()) {
             target.add(source.get(index++));
         }
