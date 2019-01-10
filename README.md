@@ -4,6 +4,12 @@ TermIt is a terminology management tool based on Semantic Web technologies.
 It allows to manage vocabularies consisting of thesauri and ontologies. It can also manage documents
 which use terms from the vocabularies and analyze the documents to find occurrences of these terms.
 
+## Terminology
+
+#### Asset
+
+An **asset** is an object of one of the main domain types managed by the system - _Resource_, _Term_ or _Vocabulary_.
+
 ## Required Technologies
 
 - JDK 8 (preferably Oracle)

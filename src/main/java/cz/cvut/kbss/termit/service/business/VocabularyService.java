@@ -5,5 +5,5 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 /**
  * Interface of business logic concerning vocabularies.
  */
-public interface VocabularyService extends AssetService<Vocabulary> {
+public interface VocabularyService extends CrudService<Vocabulary> {
 }

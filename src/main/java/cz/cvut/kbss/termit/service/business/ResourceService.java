@@ -25,7 +25,7 @@ import java.util.Optional;
  * Interface of business logic concerning resources.
  */
 @Service
-public class ResourceService implements AssetService<Resource> {
+public class ResourceService implements CrudService<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
 
