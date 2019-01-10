@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.*;
 
 @Service
-public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
+public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
@@ -40,7 +40,7 @@ public class ResourceRepositoryService extends BaseRepositoryService<Resource> {
     }
 
     @Override
-    protected GenericDao<Resource> getPrimaryDao() {
+    protected AssetDao<Resource> getPrimaryDao() {
         return resourceDao;
     }
 

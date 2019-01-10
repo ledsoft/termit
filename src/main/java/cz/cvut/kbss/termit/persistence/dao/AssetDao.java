@@ -25,6 +25,7 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
      * @return List of recently added/edited assets
      */
     public List<T> findRecentlyEdited(int count) {
+        // TODO Add support for last modified once it is implemented
         return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
                 "?x a ?type ;" +
                 "?dateCreated ?created ." +

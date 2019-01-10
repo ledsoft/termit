@@ -4,7 +4,7 @@ import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Model;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.persistence.dao.GenericDao;
+import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.VocabularyService;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.Validator;
 
 @Service
-public class VocabularyRepositoryService extends BaseRepositoryService<Vocabulary> implements VocabularyService {
+public class VocabularyRepositoryService extends BaseAssetRepositoryService<Vocabulary> implements VocabularyService {
 
     private final IdentifierResolver idResolver;
 
@@ -30,7 +30,7 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
     }
 
     @Override
-    protected GenericDao<Vocabulary> getPrimaryDao() {
+    protected AssetDao<Vocabulary> getPrimaryDao() {
         return vocabularyDao;
     }
 
