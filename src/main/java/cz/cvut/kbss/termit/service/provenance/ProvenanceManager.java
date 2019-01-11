@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.provenance;
 
 import cz.cvut.kbss.jopa.model.annotations.PostLoad;
 import cz.cvut.kbss.jopa.model.annotations.PrePersist;
+import cz.cvut.kbss.jopa.model.annotations.PreUpdate;
 import cz.cvut.kbss.termit.model.HasProvenanceData;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 
@@ -24,6 +25,15 @@ public class ProvenanceManager {
 
         instance.setAuthor(SecurityUtils.currentUser().toUser());
         instance.setDateCreated(new Date());
+    }
+
+    @PreUpdate
+    void generateOnUpdate(HasProvenanceData instance) {
+        assert instance != null;
+        assert SecurityUtils.currentUser() != null;
+
+        instance.setLastEditor(SecurityUtils.currentUser().toUser());
+        instance.setLastModified(new Date());
     }
 
     /**
