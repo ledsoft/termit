@@ -56,6 +56,17 @@ public abstract class HasProvenanceData {
         this.lastModified = lastModified;
     }
 
+    /**
+     * Gets the datetime of this asset's last modification.
+     * <p>
+     * If {@link #getLastModified()} is set, its value is returned. Otherwise, {@link #getCreated()} is returned.
+     *
+     * @return Datetime of the last modification, if present, or creation of this asset
+     */
+    public Date getLastModifiedOrCreated() {
+        return lastModified != null ? lastModified : created;
+    }
+
     public static Field getAuthorField() {
         try {
             return HasProvenanceData.class.getDeclaredField("author");

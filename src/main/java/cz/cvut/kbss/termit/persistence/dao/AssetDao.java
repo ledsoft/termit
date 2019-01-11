@@ -25,13 +25,15 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
      * @return List of recently added/edited assets
      */
     public List<T> findLastEdited(int limit) {
-        // TODO Add support for last modified once it is implemented
         return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
                 "?x a ?type ;" +
                 "?dateCreated ?created ." +
-                "} ORDER BY DESC(?created) LIMIT ?limit", type)
+                "OPTIONAL { ?x ?lastModified ?modified . }" +
+                "BIND (IF (BOUND(?modified), ?modified, ?created) AS ?lastEdited)" +
+                "} ORDER BY DESC(?lastEdited) LIMIT ?limit", type)
                  .setParameter("type", typeUri)
                  .setParameter("dateCreated", URI.create(Vocabulary.s_p_created))
+                 .setParameter("lastModified", URI.create(Vocabulary.s_p_ma_posledni_modifikaci))
                  .setUntypedParameter("limit", limit).getResultList();
     }
 }
