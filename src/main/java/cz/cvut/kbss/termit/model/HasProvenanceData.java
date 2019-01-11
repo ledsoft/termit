@@ -16,7 +16,7 @@ public abstract class HasProvenanceData {
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLDataProperty(iri = Vocabulary.s_p_created)
-    private Date dateCreated;
+    private Date created;
 
 
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_posledniho_editora, fetch = FetchType.EAGER)
@@ -33,12 +33,12 @@ public abstract class HasProvenanceData {
         this.author = author;
     }
 
-    public Date getDateCreated() {
-        return dateCreated;
+    public Date getCreated() {
+        return created;
     }
 
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
     public User getLastEditor() { return lastEditor; }

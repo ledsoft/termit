@@ -48,7 +48,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
         assertEquals(user.toUser(), result.getAuthor());
-        assertNotNull(result.getDateCreated());
+        assertNotNull(result.getCreated());
     }
 
     @Test
@@ -100,7 +100,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
         vocabulary.setAuthor(user.toUser());
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         final Vocabulary toPersist = Generator.generateVocabulary();
@@ -113,7 +113,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
         vocabulary.setAuthor(user.toUser());
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         vocabulary.setLabel("");
@@ -133,7 +133,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
         vocabulary.setAuthor(user.toUser());
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
 
         final String newName = "Updated name";

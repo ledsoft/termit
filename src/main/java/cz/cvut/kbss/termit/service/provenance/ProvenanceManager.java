@@ -24,7 +24,7 @@ public class ProvenanceManager {
         assert SecurityUtils.currentUser() != null;
 
         instance.setAuthor(SecurityUtils.currentUser().toUser());
-        instance.setDateCreated(new Date());
+        instance.setCreated(new Date());
     }
 
     @PreUpdate

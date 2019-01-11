@@ -109,7 +109,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         vocabularies.forEach(v -> {
             v.setUri(Generator.generateUri());
             v.setAuthor(user);
-            v.setDateCreated(new Date());
+            v.setCreated(new Date());
             if (Generator.randomBoolean()) {
                 v.setLabel("Matching label " + Generator.randomInt());
             }

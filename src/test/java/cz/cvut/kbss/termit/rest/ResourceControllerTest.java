@@ -155,7 +155,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         assertEquals(related.size(), result.size());
         result.forEach(r -> {
             assertEquals(author, r.getAuthor());
-            assertNotNull(r.getDateCreated());
+            assertNotNull(r.getCreated());
         });
     }
 
@@ -163,7 +163,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         return IntStream.range(0, 5).mapToObj(i -> {
             final Resource r = Generator.generateResourceWithId();
             r.setAuthor(author);
-            r.setDateCreated(new Date());
+            r.setCreated(new Date());
             return r;
         }).collect(Collectors.toList());
     }

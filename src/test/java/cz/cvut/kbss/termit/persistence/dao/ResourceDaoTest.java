@@ -51,7 +51,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
     private Resource generateResource() {
         final Resource resource = Generator.generateResourceWithId();
         resource.setAuthor(user);
-        resource.setDateCreated(new Date());
+        resource.setCreated(new Date());
         transactional(() -> em.persist(resource));
         return resource;
     }

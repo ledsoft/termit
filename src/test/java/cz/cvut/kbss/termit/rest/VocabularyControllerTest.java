@@ -67,7 +67,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> {
             final Vocabulary vocab = Generator.generateVocabulary();
             vocab.setAuthor(user);
-            vocab.setDateCreated(new Date());
+            vocab.setCreated(new Date());
             vocab.setUri(Generator.generateUri());
             return vocab;
         }).collect(Collectors.toList());
@@ -173,7 +173,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     void updateVocabularyUpdatesVocabularyUpdateToService() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(user);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
         vocabulary.setUri(uri);
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_VOCABULARY), any())).thenReturn(uri);
@@ -187,7 +187,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     void updateVocabularyThrowsValidationExceptionWhenVocabularyUriDiffersFromRequestBasedUri() throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(user);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
         vocabulary.setUri(Generator.generateUri());
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, "test")).thenReturn(uri);

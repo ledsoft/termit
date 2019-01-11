@@ -88,7 +88,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setUri(Generator.generateUri());
         this.document = new cz.cvut.kbss.termit.model.resource.Document();
         document.setAuthor(author);
-        document.setDateCreated(new Date());
+        document.setCreated(new Date());
         document.setLabel("metropolitan-plan");
         document.setUri(Generator.generateUri());
         document.setVocabulary(vocabulary);
@@ -97,7 +97,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addTerm(termTwo);
         this.vocabDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         this.file = new File();
         file.setUri(Generator.generateUri());
         file.setLabel("rdfa-simple.html");
