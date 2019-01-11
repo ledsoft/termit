@@ -14,10 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -86,7 +83,7 @@ class AssetServiceTest {
     }
 
     @Test
-    void findRecentlyEditedReturnsAssetsSortedByDateCreatedDescending() {
+    void findLastEditedReturnsAssetsSortedByDateCreatedDescending() {
         final List<Asset> assets = generateAssets(6);
         assets.sort(Comparator.comparing(Asset::getCreated).reversed());
         final List<Asset> result = sut.findLastEdited(10);
@@ -94,7 +91,7 @@ class AssetServiceTest {
     }
 
     @Test
-    void findRecentlyEditedReturnsSublistOfAssetsWhenCountIsLessThanTotalNumber() {
+    void findLastEditedReturnsSublistOfAssetsWhenCountIsLessThanTotalNumber() {
         final List<Asset> assets = generateAssets(10);
         assets.sort(Comparator.comparing(Asset::getCreated).reversed());
         final int count = 6;
@@ -103,10 +100,29 @@ class AssetServiceTest {
     }
 
     @Test
-    void findRecentlyEditedThrowsIllegalArgumentForCountLessThanZero() {
+    void findLastEditedThrowsIllegalArgumentForCountLessThanZero() {
         assertThrows(IllegalArgumentException.class, () -> sut.findLastEdited(-1));
         verify(resourceService, never()).findLastEdited(anyInt());
         verify(termService, never()).findLastEdited(anyInt());
         verify(vocabularyService, never()).findLastEdited(anyInt());
+    }
+
+    @Test
+    void findLastEditedResolvesLastEditedUsingLastModifiedDateAsWell() {
+        final Resource r = Generator.generateResourceWithId();
+        r.setCreated(new Date(System.currentTimeMillis() - 10000));
+        r.setLastModified(new Date());
+        final Term t = Generator.generateTermWithId();
+        t.setCreated(new Date(System.currentTimeMillis() - 3000));
+        final Vocabulary v = Generator.generateVocabularyWithId();
+        v.setCreated(new Date(System.currentTimeMillis() - 15000));
+        v.setLastModified(new Date(System.currentTimeMillis() - 7000));
+        when(resourceService.findLastEdited(anyInt())).thenReturn(Collections.singletonList(r));
+        when(termService.findLastEdited(anyInt())).thenReturn(Collections.singletonList(t));
+        when(vocabularyService.findLastEdited(anyInt())).thenReturn(Collections.singletonList(v));
+
+        final List<Asset> expected = Arrays.asList(r, t, v);
+        final List<Asset> result = sut.findLastEdited(10);
+        assertEquals(expected, result);
     }
 }
