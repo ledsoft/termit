@@ -38,7 +38,7 @@ class ProvenanceManagerTest {
         final Resource entity = Generator.generateResourceWithId();
 
         sut.generateOnPersist(entity);
-        assertNotNull(entity.getDateCreated());
+        assertNotNull(entity.getCreated());
     }
 
     @Test
@@ -67,11 +67,11 @@ class ProvenanceManagerTest {
         final Resource entity = Generator.generateResourceWithId();
         final UserAccount ua = Generator.generateUserAccount();
         entity.setAuthor(ua.toUser());
-        entity.setDateCreated(new Date());
+        entity.setCreated(new Date());
 
         sut.clearForAnonymousOnLoad(entity);
         assertNull(entity.getAuthor());
-        assertNotNull(entity.getDateCreated());
+        assertNotNull(entity.getCreated());
     }
 
     @Test
@@ -79,11 +79,11 @@ class ProvenanceManagerTest {
         final Resource entity = Generator.generateResourceWithId();
         final UserAccount ua = Generator.generateUserAccount();
         entity.setAuthor(ua.toUser());
-        entity.setDateCreated(new Date());
+        entity.setCreated(new Date());
         Environment.setCurrentUser(Generator.generateUserAccount());
 
         sut.clearForAnonymousOnLoad(entity);
         assertNotNull(entity.getAuthor());
-        assertNotNull(entity.getDateCreated());
+        assertNotNull(entity.getCreated());
     }
 }

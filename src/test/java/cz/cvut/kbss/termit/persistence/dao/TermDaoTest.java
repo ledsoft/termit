@@ -37,7 +37,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         vocabulary.setAuthor(Generator.generateUserWithId());
         Environment.setCurrentUser(vocabulary.getAuthor());
         transactional(() -> {
@@ -87,7 +87,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Vocabulary another = Generator.generateVocabulary();
         another.setUri(Generator.generateUri());
         another.setAuthor(vocabulary.getAuthor());
-        another.setDateCreated(new Date());
+        another.setCreated(new Date());
         another.getGlossary().setTerms(new HashSet<>(generateTerms(4)));
         transactional(() -> em.persist(another));
 

@@ -248,7 +248,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         final Resource resource = Generator.generateResourceWithId();
         resource.setAuthor(user.toUser());
-        resource.setDateCreated(new Date());
+        resource.setCreated(new Date());
         final TermAssignment ta = new TermAssignment();
         ta.setTerm(t);
         ta.setTarget(new Target(resource));

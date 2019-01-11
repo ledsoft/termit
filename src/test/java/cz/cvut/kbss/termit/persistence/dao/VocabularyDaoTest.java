@@ -44,7 +44,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             final Vocabulary vocab = Generator.generateVocabulary();
             vocab.setUri(Generator.generateUri());
             vocab.setAuthor(author);
-            vocab.setDateCreated(new Date());
+            vocab.setCreated(new Date());
             return vocab;
         }).collect(Collectors.toList());
         transactional(() -> vocabularies.forEach(v -> em.persist(v, descriptorFor(v))));
@@ -60,7 +60,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void persistSavesVocabularyIntoContextGivenByItsIri() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
         transactional(() -> sut.persist(vocabulary));
 
@@ -81,7 +81,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void updateUpdatesVocabularyInContextGivenByItsIri() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
         final Descriptor descriptor = descriptorFor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));

@@ -76,7 +76,7 @@ class AssetServiceTest {
                     vocabularies.add((Vocabulary) asset);
                     break;
             }
-            asset.setDateCreated(new Date(System.currentTimeMillis() - i * 1000));
+            asset.setCreated(new Date(System.currentTimeMillis() - i * 1000));
             assets.add(asset);
         }
         when(resourceService.findLastEdited(anyInt())).thenReturn(resources);
@@ -88,7 +88,7 @@ class AssetServiceTest {
     @Test
     void findRecentlyEditedReturnsAssetsSortedByDateCreatedDescending() {
         final List<Asset> assets = generateAssets(6);
-        assets.sort(Comparator.comparing(Asset::getDateCreated).reversed());
+        assets.sort(Comparator.comparing(Asset::getCreated).reversed());
         final List<Asset> result = sut.findLastEdited(10);
         assertEquals(assets, result);
     }
@@ -96,7 +96,7 @@ class AssetServiceTest {
     @Test
     void findRecentlyEditedReturnsSublistOfAssetsWhenCountIsLessThanTotalNumber() {
         final List<Asset> assets = generateAssets(10);
-        assets.sort(Comparator.comparing(Asset::getDateCreated).reversed());
+        assets.sort(Comparator.comparing(Asset::getCreated).reversed());
         final int count = 6;
         final List<Asset> result = sut.findLastEdited(count);
         assertEquals(assets.subList(0, count), result);

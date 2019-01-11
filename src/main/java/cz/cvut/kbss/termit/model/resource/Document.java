@@ -103,7 +103,7 @@ public class Document extends Resource {
                 ", description='" + getDescription() + '\'' +
                 ", files=" + files +
                 ", author=" + getAuthor() +
-                ", dateCreated=" + getDateCreated() +
+                ", dateCreated=" + getCreated() +
                 '}';
     }
 

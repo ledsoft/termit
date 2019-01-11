@@ -54,7 +54,7 @@ public class AssetService {
         final List<Asset> result = new ArrayList<>(listOne.size() + listTwo.size());
         while (oneIndex < listOne.size() && twoIndex < listTwo.size()) {
             // TODO Add support for last edit when it is implemented
-            if (listOne.get(oneIndex).getDateCreated().compareTo(listTwo.get(twoIndex).getDateCreated()) >= 0) {
+            if (listOne.get(oneIndex).getCreated().compareTo(listTwo.get(twoIndex).getCreated()) >= 0) {
                 result.add(listOne.get(oneIndex));
                 oneIndex++;
             } else {

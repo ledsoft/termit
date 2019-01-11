@@ -62,7 +62,7 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> vocabularies.forEach(em::persist));
         transactional(() -> {
             for (int i = 0; i < vocabularies.size(); i++) {
-                vocabularies.get(i).setDateCreated(new Date(System.currentTimeMillis() - i * 1000));
+                vocabularies.get(i).setCreated(new Date(System.currentTimeMillis() - i * 1000));
                 em.merge(vocabularies.get(i));
             }
         });
@@ -70,7 +70,7 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         final int count = 2;
         final List<Vocabulary> result = sut.findLastEdited(count);
         assertEquals(count, result.size());
-        vocabularies.sort(Comparator.comparing(Vocabulary::getDateCreated).reversed());
+        vocabularies.sort(Comparator.comparing(Vocabulary::getCreated).reversed());
         assertEquals(vocabularies.subList(0, count), result);
     }
 

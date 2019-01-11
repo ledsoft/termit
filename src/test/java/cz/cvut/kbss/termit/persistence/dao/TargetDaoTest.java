@@ -33,7 +33,7 @@ class TargetDaoTest extends BaseDaoTestRunner {
         resource.setLabel("Metropolitan Plan");
         final User author = Generator.generateUserWithId();
         Environment.setCurrentUser(author);
-        resource.setDateCreated(new Date());
+        resource.setCreated(new Date());
         transactional(() -> {
             em.persist(author);
             em.persist(resource);

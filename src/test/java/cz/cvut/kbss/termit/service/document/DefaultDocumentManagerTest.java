@@ -46,7 +46,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         this.document = new Document();
         document.setLabel("Metropolitan plan");
         document.setUri(Generator.generateUri());
-        document.setDateCreated(new Date());
+        document.setCreated(new Date());
     }
 
     private java.io.File generateFile() throws Exception {
