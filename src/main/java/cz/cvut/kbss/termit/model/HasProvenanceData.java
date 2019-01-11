@@ -18,11 +18,10 @@ public abstract class HasProvenanceData {
     @OWLDataProperty(iri = Vocabulary.s_p_created)
     private Date created;
 
-
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_posledniho_editora, fetch = FetchType.EAGER)
     private User lastEditor;
 
-    @OWLDataProperty(iri = Vocabulary.s_p_ma_posledni_modifikaci, fetch = FetchType.EAGER)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_posledni_modifikaci)
     private Date lastModified;
 
     public User getAuthor() {
@@ -41,11 +40,17 @@ public abstract class HasProvenanceData {
         this.created = created;
     }
 
-    public User getLastEditor() { return lastEditor; }
+    public User getLastEditor() {
+        return lastEditor;
+    }
 
-    public void setLastEditor(User lastEditor) { this.lastEditor = lastEditor; }
+    public void setLastEditor(User lastEditor) {
+        this.lastEditor = lastEditor;
+    }
 
-    public Date getLastModified() { return lastModified; }
+    public Date getLastModified() {
+        return lastModified;
+    }
 
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
@@ -56,6 +61,14 @@ public abstract class HasProvenanceData {
             return HasProvenanceData.class.getDeclaredField("author");
         } catch (NoSuchFieldException e) {
             throw new TermItException("Fatal error! Unable to retrieve \"author\" field.");
+        }
+    }
+
+    public static Field getLastEditorField() {
+        try {
+            return HasProvenanceData.class.getDeclaredField("lastEditor");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"lastEditor\" field.");
         }
     }
 }

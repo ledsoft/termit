@@ -7,7 +7,6 @@ import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.HasProvenanceData;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
-import cz.cvut.kbss.termit.model.resource.File;
 
 import java.util.Objects;
 
@@ -34,10 +33,15 @@ public class DescriptorFactory {
     public static Descriptor vocabularyDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        descriptor.addAttributeDescriptor(Vocabulary.getAuthorField(), new EntityDescriptor(null));
+        addAuthorAndEditorDescriptors(descriptor);
         descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabulary));
         descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabulary));
         return descriptor;
+    }
+
+    private static void addAuthorAndEditorDescriptors(EntityDescriptor targetDescriptor) {
+        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
     }
 
     /**
@@ -55,9 +59,9 @@ public class DescriptorFactory {
     public static Descriptor documentDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        descriptor.addAttributeDescriptor(Document.getAuthorField(), new EntityDescriptor(null));
+        addAuthorAndEditorDescriptors(descriptor);
         final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabulary.getUri());
-        fileDescriptor.addAttributeDescriptor(File.getAuthorField(), new EntityDescriptor(null));
+        addAuthorAndEditorDescriptors(fileDescriptor);
         descriptor.addAttributeDescriptor(Document.getFilesField(), fileDescriptor);
         return descriptor;
     }
@@ -76,7 +80,7 @@ public class DescriptorFactory {
     public static Descriptor glossaryDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        descriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+        addAuthorAndEditorDescriptors(descriptor);
         descriptor.addAttributeDescriptor(Glossary.getTermsField(), termDescriptor(vocabulary));
         return descriptor;
     }
@@ -95,7 +99,7 @@ public class DescriptorFactory {
     public static Descriptor termDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        descriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+        addAuthorAndEditorDescriptors(descriptor);
         return descriptor;
     }
 }
