@@ -46,10 +46,7 @@ class AssetDaoTest extends BaseDaoTestRunner {
         final List<Resource> old = resources.subList(0, 5);
         final List<Resource> recent = resources.subList(5, resources.size());
         // We are setting the date here to work around the ProvenanceManager, which sets creation date on persist automatically
-        transactional(() -> old.forEach(res -> {
-            res.setCreated(new Date(System.currentTimeMillis() - 100000));
-            em.merge(res);
-        }));
+        transactional(() -> setOldCreated(old));
 
         final int count = 3;
         final List<Resource> result = sut.findLastEdited(count);

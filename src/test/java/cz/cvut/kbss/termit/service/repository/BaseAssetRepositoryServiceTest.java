@@ -7,6 +7,9 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,18 +63,32 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> Generator.generateVocabularyWithId())
                                                        .collect(Collectors.toList());
         transactional(() -> vocabularies.forEach(em::persist));
-        transactional(() -> {
-            for (int i = 0; i < vocabularies.size(); i++) {
-                vocabularies.get(i).setCreated(new Date(System.currentTimeMillis() - i * 1000));
-                em.merge(vocabularies.get(i));
-            }
-        });
+        transactional(() -> setCreated(vocabularies));
+        em.getEntityManagerFactory().getCache().evictAll();
 
         final int count = 2;
+        final List<Vocabulary> all = sut.findAll();
+        all.sort(Comparator.comparing(Vocabulary::getLastModifiedOrCreated).reversed());
         final List<Vocabulary> result = sut.findLastEdited(count);
         assertEquals(count, result.size());
-        vocabularies.sort(Comparator.comparing(Vocabulary::getCreated).reversed());
-        assertEquals(vocabularies.subList(0, count), result);
+        assertEquals(all.subList(0, count), result);
+    }
+
+    private void setCreated(List<Vocabulary> vocabularies) {
+        final Repository repo = em.unwrap(Repository.class);
+        final ValueFactory vf = repo.getValueFactory();
+        try (final RepositoryConnection con = repo.getConnection()) {
+            con.begin();
+            for (int i = 0; i < vocabularies.size(); i++) {
+                final Vocabulary r = vocabularies.get(i);
+                con.remove(vf.createIRI(r.getUri().toString()),
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_created), null);
+                con.add(vf.createIRI(r.getUri().toString()),
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_created),
+                        vf.createLiteral(new Date(System.currentTimeMillis() - i * 1000 * 60)));
+            }
+            con.commit();
+        }
     }
 
     @Test
