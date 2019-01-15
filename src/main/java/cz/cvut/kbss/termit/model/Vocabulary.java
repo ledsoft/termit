@@ -104,7 +104,7 @@ public class Vocabulary extends Asset implements Serializable {
         try {
             return Vocabulary.class.getDeclaredField("glossary");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"glossary\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"glossary\" field.", e);
         }
     }
 }
