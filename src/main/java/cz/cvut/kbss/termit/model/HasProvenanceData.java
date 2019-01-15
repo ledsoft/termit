@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -63,6 +64,7 @@ public abstract class HasProvenanceData {
      *
      * @return Datetime of the last modification, if present, or creation of this asset
      */
+    @JsonIgnore
     public Date getLastModifiedOrCreated() {
         return lastModified != null ? lastModified : created;
     }
