@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.config;
 
 import cz.cvut.kbss.termit.rest.servlet.DiagnosticsContextFilter;
+import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.util.Constants;
 import net.bull.javamelody.Parameter;
 import org.slf4j.Logger;
@@ -92,9 +93,9 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         if (registration == null) {
             return;
         }
-        // Allows access from our current subnet
+        // Allows access only to admin user
         registration
-                .setInitParameter(Parameter.ALLOWED_ADDR_PATTERN.getCode(), "192\\.168\\.88\\..*|255\\.255\\.240\\.0");
+                .setInitParameter(Parameter.AUTHORIZED_USERS.getCode(), SecurityConstants.MONITORING_USER_CREDENTIALS);
     }
 
     @Override
