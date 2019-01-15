@@ -99,3 +99,8 @@ Fulltext search currently supports multiple types of implementation:
 Each implementation has its own search query which is loaded and used by `SearchDao`. In order for the more advanced implementations
 for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
 artifact during build. If none of the profiles is selected, the default search is used.
+
+## Monitoring
+
+We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
+on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.
