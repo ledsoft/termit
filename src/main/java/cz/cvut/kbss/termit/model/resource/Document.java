@@ -111,7 +111,7 @@ public class Document extends Resource {
         try {
             return Document.class.getDeclaredField("files");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"files\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"files\" field.", e);
         }
     }
 }

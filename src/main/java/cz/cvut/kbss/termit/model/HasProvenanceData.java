@@ -73,7 +73,7 @@ public abstract class HasProvenanceData {
         try {
             return HasProvenanceData.class.getDeclaredField("author");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"author\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"author\" field.", e);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class HasProvenanceData {
         try {
             return HasProvenanceData.class.getDeclaredField("lastEditor");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"lastEditor\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"lastEditor\" field.", e);
         }
     }
 }

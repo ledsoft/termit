@@ -54,7 +54,7 @@ public class Glossary extends AbstractEntity {
         try {
             return Glossary.class.getDeclaredField("terms");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"terms\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"terms\" field.", e);
         }
     }
 }
