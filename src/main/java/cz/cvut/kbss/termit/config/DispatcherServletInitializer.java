@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.config;
 
 import cz.cvut.kbss.termit.rest.servlet.DiagnosticsContextFilter;
 import cz.cvut.kbss.termit.util.Constants;
+import net.bull.javamelody.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextListener;
@@ -43,6 +44,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         initSecurityFilter(servletContext);
         initMdcFilter(servletContext);
         initUTF8Filter(servletContext);
+        secureMelodyMonitoring(servletContext);
         servletContext.addListener(new RequestContextListener());
     }
 
@@ -78,11 +80,21 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
      */
     private static void initUTF8Filter(ServletContext servletContext) {
         FilterRegistration.Dynamic mdcFilter = servletContext
-            .addFilter("urlEncodingFilter", new CharacterEncodingFilter());
-        mdcFilter.setInitParameter("encoding","UTF-8");
-        mdcFilter.setInitParameter("forceEncoding","true");
+                .addFilter("urlEncodingFilter", new CharacterEncodingFilter());
+        mdcFilter.setInitParameter("encoding", "UTF-8");
+        mdcFilter.setInitParameter("forceEncoding", "true");
         final EnumSet<DispatcherType> es = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
         mdcFilter.addMappingForUrlPatterns(es, true, "/*");
+    }
+
+    private static void secureMelodyMonitoring(ServletContext servletContext) {
+        final FilterRegistration registration = servletContext.getFilterRegistration("javamelody");
+        if (registration == null) {
+            return;
+        }
+        // Allows access from our current subnet
+        registration
+                .setInitParameter(Parameter.ALLOWED_ADDR_PATTERN.getCode(), "192\\.168\\.88\\..*|255\\.255\\.240\\.0");
     }
 
     @Override
