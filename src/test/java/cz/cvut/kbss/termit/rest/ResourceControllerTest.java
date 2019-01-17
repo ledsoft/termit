@@ -28,6 +28,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.InputStream;
@@ -378,5 +379,16 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isAccepted());
         verify(resourceServiceMock).runTextAnalysis(file);
+    }
+
+    @Test
+    void generateIdentifierLetsIdentifierResolverToGenerateIdentifierUsingSpecifiedName() throws Exception {
+        final String name = "metropolitan-plan";
+        final URI uri = Generator.generateUri();
+        when(identifierResolverMock.generateIdentifier(NAMESPACE_RESOURCE, name)).thenReturn(uri);
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", name))
+                                           .andExpect(status().isOk()).andReturn();
+        assertEquals(uri.toString(), readValue(mvcResult, String.class));
+        verify(identifierResolverMock).generateIdentifier(NAMESPACE_RESOURCE, name);
     }
 }
