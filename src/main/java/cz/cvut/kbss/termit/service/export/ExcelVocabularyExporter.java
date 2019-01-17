@@ -60,7 +60,7 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
         }
     }
 
-    private void generateTermRows(List<Term> terms, Sheet sheet) {
+    private static void generateTermRows(List<Term> terms, Sheet sheet) {
         // Row no. 0 is the header
         for (int i = 0; i < terms.size(); i++) {
             final Row row = sheet.createRow(i + 1);

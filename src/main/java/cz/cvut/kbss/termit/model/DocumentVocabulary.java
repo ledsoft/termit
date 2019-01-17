@@ -54,7 +54,7 @@ public class DocumentVocabulary extends Vocabulary {
         try {
             return DocumentVocabulary.class.getDeclaredField("document");
         } catch (NoSuchFieldException e) {
-            throw new TermItException("Fatal error! Unable to retrieve \"document\" field.");
+            throw new TermItException("Fatal error! Unable to retrieve \"document\" field.", e);
         }
     }
 }
