@@ -182,14 +182,14 @@ class TermControllerTest extends BaseControllerTestRunner {
                 Constants.TERM_NAMESPACE_SEPARATOR + "/" + TERM_NAME);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
-        when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
-        when(idResolverMock.generateIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.generateIdentifier(URI.create(VOCABULARY_URI), TERM_NAME)).thenReturn(termUri);
 
         final MvcResult mvcResult = mockMvc
                 .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/identifier").param("name", TERM_NAME))
                 .andExpect(status().isOk()).andReturn();
         final String result = readValue(mvcResult, String.class);
         assertEquals(termUri.toString(), result);
+        verify(termServiceMock).generateIdentifier(URI.create(VOCABULARY_URI), TERM_NAME);
     }
 
     @Test

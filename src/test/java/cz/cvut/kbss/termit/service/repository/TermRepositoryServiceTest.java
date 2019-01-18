@@ -10,6 +10,8 @@ import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -74,6 +76,16 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void addTermToVocabularyGeneratesTermIdentifierWhenItIsNotSet() {
+        final Term term = Generator.generateTerm();
+        transactional(() -> sut.addTermToVocabulary(term, vocabulary));
+
+        assertNotNull(term.getUri());
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+    }
+
+    @Test
     void addTermToVocabularyThrowsValidationExceptionWhenTermNameIsBlank() {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
@@ -99,6 +111,16 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void generateIdentifierGeneratesTermIdentifierBasedOnVocabularyUriAndTermLabel() {
+        final URI vocabularyUri = vocabulary.getUri();
+        final String termLabel = "Test term";
+        assertEquals(
+                vocabularyUri.toString() + Constants.TERM_NAMESPACE_SEPARATOR + "/" +
+                        IdentifierResolver.normalize(termLabel),
+                sut.generateIdentifier(vocabularyUri, termLabel).toString());
+    }
+
+    @Test
     void addChildTermCreatesSubTermForSpecificTerm() {
         final Term parent = Generator.generateTermWithId();
         final Term child = Generator.generateTermWithId();
@@ -114,6 +136,24 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result);
         assertTrue(result.getSubTerms().contains(child.getUri()));
         assertNotNull(em.find(Term.class, child.getUri()));
+    }
+
+    @Test
+    void addChildTermGeneratesIdentifierWhenItIsNotSet() {
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTerm();
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.persist(parent);
+            em.merge(vocabulary);
+        });
+
+        // This is normally inferred
+        parent.setVocabulary(vocabulary.getUri());
+        sut.addChildTerm(child, parent);
+        assertNotNull(child.getUri());
+        final Term result = em.find(Term.class, child.getUri());
+        assertNotNull(result);
     }
 
     @Test
