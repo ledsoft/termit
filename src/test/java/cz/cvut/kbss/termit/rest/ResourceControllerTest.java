@@ -28,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.InputStream;
@@ -382,13 +381,13 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void generateIdentifierLetsIdentifierResolverToGenerateIdentifierUsingSpecifiedName() throws Exception {
-        final String name = "metropolitan-plan";
+    void generateIdentifierLetsServiceGenerateIdentifierUsingSpecifiedLabel() throws Exception {
+        final String label = "Metropolitan plan";
         final URI uri = Generator.generateUri();
-        when(identifierResolverMock.generateIdentifier(NAMESPACE_RESOURCE, name)).thenReturn(uri);
-        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", name))
+        when(resourceServiceMock.generateIdentifier(label)).thenReturn(uri);
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", label))
                                            .andExpect(status().isOk()).andReturn();
         assertEquals(uri.toString(), readValue(mvcResult, String.class));
-        verify(identifierResolverMock).generateIdentifier(NAMESPACE_RESOURCE, name);
+        verify(resourceServiceMock).generateIdentifier(label);
     }
 }

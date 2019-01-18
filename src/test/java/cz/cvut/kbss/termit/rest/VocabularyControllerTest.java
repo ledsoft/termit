@@ -147,10 +147,10 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final String name = "Metropolitní plán";
         final URI uri = URI.create(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/" +
                 IdentifierResolver.normalize(name));
-        when(idResolverMock.generateIdentifier(any(ConfigParam.class), eq(name))).thenReturn(uri);
+        when(serviceMock.generateIdentifier(name)).thenReturn(uri);
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", name)).andReturn();
         assertEquals(uri.toString(), readValue(mvcResult, String.class));
-        verify(idResolverMock).generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, name);
+        verify(serviceMock).generateIdentifier(name);
     }
 
     @Test

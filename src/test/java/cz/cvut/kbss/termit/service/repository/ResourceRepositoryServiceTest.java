@@ -12,6 +12,9 @@ import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -33,6 +36,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
     private static final String EXISTENCE_CHECK_QUERY = "ASK { ?x a ?type . }";
+
+    @Autowired
+    private Configuration config;
 
     @Autowired
     private EntityManager em;
@@ -271,5 +277,22 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertEquals(newDescription, result.getDescription());
         assertEquals(2, result.getFiles().size());
         assertTrue(result.getFiles().contains(fileTwo));
+    }
+
+    @Test
+    void persistGeneratesResourceIdentifierWhenItIsNotSet() {
+        final Resource resource = Generator.generateResource();
+        assertNull(resource.getUri());
+        transactional(() -> sut.persist(resource));
+        assertNotNull(resource.getUri());
+        final Resource result = em.find(Resource.class, resource.getUri());
+        assertEquals(resource, result);
+    }
+
+    @Test
+    void generateIdentifierGeneratesIdentifierBasedOnSpecifiedLabel() {
+        final String label = "Test resource";
+        assertEquals(config.get(ConfigParam.NAMESPACE_RESOURCE) + IdentifierResolver.normalize(label),
+                sut.generateIdentifier(label).toString());
     }
 }
