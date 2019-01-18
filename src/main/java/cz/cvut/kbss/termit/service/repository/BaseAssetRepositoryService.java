@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 
@@ -32,5 +33,11 @@ public abstract class BaseAssetRepositoryService<T extends Asset> extends BaseRe
     public List<T> findLastEdited(int limit) {
         final List<T> result = getPrimaryDao().findLastEdited(limit);
         return result.stream().map(this::postLoad).collect(Collectors.toList());
+    }
+
+    protected void verifyIdentifierUnique(T instance) {
+        if (exists(instance.getUri())) {
+            throw ResourceExistsException.create(instance.getClass().getSimpleName(), instance.getUri());
+        }
     }
 }
