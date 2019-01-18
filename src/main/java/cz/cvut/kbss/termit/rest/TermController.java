@@ -240,13 +240,11 @@ public class TermController extends BaseController {
      */
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/identifier", method = RequestMethod.GET)
-    public String generateIdentifier(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
+    public URI generateIdentifier(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                      @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                      @RequestParam("name") String name) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
-        return idResolver.generateIdentifier(
-                idResolver.buildNamespace(vocabularyUri.toString(), Constants.TERM_NAMESPACE_SEPARATOR), name)
-                         .toString();
+        return termService.generateIdentifier(vocabularyUri, name);
     }
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/name", method = RequestMethod.GET)

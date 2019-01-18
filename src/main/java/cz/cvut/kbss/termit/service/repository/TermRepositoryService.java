@@ -8,16 +8,21 @@ import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
+
+    private final IdentifierResolver idResolver;
 
     private final TermDao termDao;
 
@@ -25,9 +30,11 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
 
     private final VocabularyDao vocabularyDao;
 
-    public TermRepositoryService(Validator validator, TermDao termDao, TermAssignmentDao termAssignmentDao,
+    public TermRepositoryService(Validator validator, IdentifierResolver idResolver,
+                                 TermDao termDao, TermAssignmentDao termAssignmentDao,
                                  VocabularyDao vocabularyDao) {
         super(validator);
+        this.idResolver = idResolver;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
         this.vocabularyDao = vocabularyDao;
@@ -50,6 +57,9 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         Objects.requireNonNull(instance);
         Objects.requireNonNull(vocabulary);
 
+        if (instance.getUri() == null) {
+            instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
+        }
         if (!vocabulary.getGlossary().addTerm(instance)) {
             throw ResourceExistsException.create("Term", instance.getUri());
         }
@@ -58,11 +68,29 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         vocabularyDao.updateGlossary(vocabulary);
     }
 
+    /**
+     * Generates term identifier based on the specified parent vocabulary identifier and a term label.
+     *
+     * @param vocabularyUri Vocabulary identifier
+     * @param termLabel     Term label
+     * @return Generated term identifier
+     */
+    public URI generateIdentifier(URI vocabularyUri, String termLabel) {
+        Objects.requireNonNull(vocabularyUri);
+        Objects.requireNonNull(termLabel);
+        return idResolver.generateIdentifier(
+                idResolver.buildNamespace(vocabularyUri.toString(), Constants.TERM_NAMESPACE_SEPARATOR),
+                termLabel);
+    }
+
     @Transactional
     public void addChildTerm(Term instance, Term parentTerm) {
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(parentTerm);
+        if (instance.getUri() == null) {
+            instance.setUri(generateIdentifier(parentTerm.getVocabulary(), instance.getLabel()));
+        }
 
         if (!parentTerm.addSubTerm(instance.getUri())) {
             throw ResourceExistsException

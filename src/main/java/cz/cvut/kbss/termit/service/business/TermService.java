@@ -201,4 +201,15 @@ public class TermService {
         Objects.requireNonNull(term);
         return repositoryService.update(term);
     }
+
+    /**
+     * Generates identifier for a term with the specified label and in a vocabulary with the specified identifier.
+     *
+     * @param vocabularyUri Vocabulary identifier
+     * @param termLabel     Term label
+     * @return Generated term identifier
+     */
+    public URI generateIdentifier(URI vocabularyUri, String termLabel) {
+        return repositoryService.generateIdentifier(vocabularyUri, termLabel);
+    }
 }
