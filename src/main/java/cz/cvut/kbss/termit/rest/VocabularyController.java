@@ -58,7 +58,7 @@ public class VocabularyController extends BaseController {
     }
 
     @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-                                                                                   JsonLd.MEDIA_TYPE})
+            JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateVocabulary(@PathVariable("fragment") String fragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -78,7 +78,7 @@ public class VocabularyController extends BaseController {
      */
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/identifier", method = RequestMethod.GET)
-    public String generateIdentifier(@RequestParam("name") String name) {
-        return idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, name).toString();
+    public URI generateIdentifier(@RequestParam("name") String name) {
+        return vocabularyService.generateIdentifier(name);
     }
 }

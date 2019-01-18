@@ -11,6 +11,8 @@ import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
+
+    @Autowired
+    private Configuration config;
 
     @Autowired
     private EntityManager em;
@@ -142,5 +147,12 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
         assertEquals(newName, result.getLabel());
+    }
+
+    @Test
+    void generateIdentifierGeneratesIdentifierBasedOnSpecifiedLabel() {
+        final String label = "Test vocabulary";
+        assertEquals(config.get(ConfigParam.NAMESPACE_VOCABULARY) + IdentifierResolver.normalize(label),
+                sut.generateIdentifier(label).toString());
     }
 }

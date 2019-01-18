@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Validator;
+import java.net.URI;
+import java.util.Objects;
 
 @Service
 public class VocabularyRepositoryService extends BaseAssetRepositoryService<Vocabulary> implements VocabularyService {
@@ -38,7 +40,7 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
     protected void prePersist(Vocabulary instance) {
         super.prePersist(instance);
         if (instance.getUri() == null) {
-            instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getLabel()));
+            instance.setUri(generateIdentifier(instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
         if (instance.getGlossary() == null) {
@@ -53,5 +55,17 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
         if (exists(instance.getUri())) {
             throw ResourceExistsException.create("Vocabulary", instance.getUri());
         }
+    }
+
+    /**
+     * Generates a vocabulary identifier based on the specified label.
+     *
+     * @param label Vocabulary label
+     * @return Vocabulary identifier
+     */
+    @Override
+    public URI generateIdentifier(String label) {
+        Objects.requireNonNull(label);
+        return idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, label);
     }
 }

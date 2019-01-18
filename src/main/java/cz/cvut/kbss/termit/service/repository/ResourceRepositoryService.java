@@ -6,6 +6,8 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.*;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,21 +29,33 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     private final TermOccurrenceDao termOccurrenceDao;
     private final TermDao termDao;
 
+    private final IdentifierResolver idResolver;
+
     @Autowired
     public ResourceRepositoryService(Validator validator, ResourceDao resourceDao, TermDao termDao,
                                      TermAssignmentDao termAssignmentDao, TargetDao targetDao,
-                                     TermOccurrenceDao termOccurrenceDao) {
+                                     TermOccurrenceDao termOccurrenceDao,
+                                     IdentifierResolver idResolver) {
         super(validator);
         this.resourceDao = resourceDao;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
         this.targetDao = targetDao;
         this.termOccurrenceDao = termOccurrenceDao;
+        this.idResolver = idResolver;
     }
 
     @Override
     protected AssetDao<Resource> getPrimaryDao() {
         return resourceDao;
+    }
+
+    @Override
+    protected void prePersist(Resource instance) {
+        super.prePersist(instance);
+        if (instance.getUri() == null) {
+            instance.setUri(generateIdentifier(instance.getLabel()));
+        }
     }
 
     /**
@@ -125,5 +139,16 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
             assignments.forEach(termAssignmentDao::remove);
             targetDao.remove(t);
         });
+    }
+
+    /**
+     * Generates a resource identifier based on the specified label.
+     *
+     * @param label Resource label
+     * @return Resource identifier
+     */
+    public URI generateIdentifier(String label) {
+        Objects.requireNonNull(label);
+        return idResolver.generateIdentifier(ConfigParam.NAMESPACE_RESOURCE, label);
     }
 }
