@@ -175,6 +175,22 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void addChildThrowsResourceExistsExceptionWhenTermWithIdenticalIdentifierAlreadyExists() {
+        final Term existing = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        final Term child = Generator.generateTerm();
+        child.setUri(existing.getUri());
+        transactional(() -> {
+            vocabulary.getGlossary().addTerm(parent);
+            em.persist(existing);
+            em.persist(parent);
+            em.merge(vocabulary.getGlossary());
+        });
+
+        assertThrows(ResourceExistsException.class, () -> sut.addChildTerm(child, parent));
+    }
+
+    @Test
     void findAllRootsReturnsRootTermsOnMatchingPage() {
         final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
                 Collectors.toList());

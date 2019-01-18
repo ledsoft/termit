@@ -1,6 +1,5 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -60,9 +59,8 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
-        if (!vocabulary.getGlossary().addTerm(instance)) {
-            throw ResourceExistsException.create("Term", instance.getUri());
-        }
+        verifyIdentifierUnique(instance);
+        vocabulary.getGlossary().addTerm(instance);
         termDao.persist(instance);
         // Explicitly merge glossary to save the reference to the term, as vocabulary (and thus glossary) are detached in this transaction
         vocabularyDao.updateGlossary(vocabulary);
@@ -91,11 +89,8 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(parentTerm.getVocabulary(), instance.getLabel()));
         }
-
-        if (!parentTerm.addSubTerm(instance.getUri())) {
-            throw ResourceExistsException
-                    .create("SubTerm " + instance.getUri() + "already exist in term " + parentTerm);
-        }
+        verifyIdentifierUnique(instance);
+        parentTerm.addSubTerm(instance.getUri());
         termDao.persist(instance);
         termDao.update(parentTerm);
     }

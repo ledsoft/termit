@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
@@ -294,5 +295,15 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final String label = "Test resource";
         assertEquals(config.get(ConfigParam.NAMESPACE_RESOURCE) + IdentifierResolver.normalize(label),
                 sut.generateIdentifier(label).toString());
+    }
+
+    @Test
+    void persistThrowsResourceExistsExceptionWhenResourceIdentifierAlreadyExists() {
+        final Resource existing = Generator.generateResourceWithId();
+        transactional(() -> em.persist(existing));
+
+        final Resource toPersist = Generator.generateResource();
+        toPersist.setUri(existing.getUri());
+        assertThrows(ResourceExistsException.class, () -> sut.persist(toPersist));
     }
 }

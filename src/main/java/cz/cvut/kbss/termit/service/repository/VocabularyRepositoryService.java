@@ -1,6 +1,5 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Model;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -48,12 +47,6 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
         }
         if (instance.getModel() == null) {
             instance.setModel(new Model());
-        }
-    }
-
-    private void verifyIdentifierUnique(Vocabulary instance) {
-        if (exists(instance.getUri())) {
-            throw ResourceExistsException.create("Vocabulary", instance.getUri());
         }
     }
 

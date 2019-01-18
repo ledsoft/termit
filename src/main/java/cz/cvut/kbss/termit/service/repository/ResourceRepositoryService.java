@@ -56,6 +56,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(instance.getLabel()));
         }
+        verifyIdentifierUnique(instance);
     }
 
     /**
