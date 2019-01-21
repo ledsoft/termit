@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.CsvUtils;
@@ -16,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @OWLClass(iri = Vocabulary.s_c_term)
+@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class Term extends Asset implements HasTypes, Serializable {
 

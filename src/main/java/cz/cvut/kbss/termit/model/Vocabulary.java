@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
+@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class Vocabulary extends Asset implements Serializable {
 
