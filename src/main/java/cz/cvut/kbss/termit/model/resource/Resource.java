@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.model.resource;
 import cz.cvut.kbss.jopa.model.annotations.EntityListeners;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 @OWLClass(iri = Vocabulary.s_c_zdroj)
 @EntityListeners(ProvenanceManager.class)
+@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class Resource extends Asset implements Serializable {
 
     @OWLDataProperty(iri = Vocabulary.s_p_description)
