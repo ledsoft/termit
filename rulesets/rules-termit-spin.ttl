@@ -25,9 +25,9 @@ pdp:term a rdfs:Class ;
 		a sp:Construct ;
 	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovniku ?vocabulary . ?this skos:inScheme ?glossary.}
+	           CONSTRUCT { ?glossary pdp:obsahuje-pojem ?this . ?this skos:inScheme ?glossary.}
 	           WHERE { ?vocabulary pdp:ma-glosar ?glossary .
-	                   ?glossary pdp:obsahuje-pojem/(skos:narrower*) ?this . }"""
+	                   ?this pdp:je-pojmem-ze-slovniku ?vocabulary . }"""
     ];
 # Term is a skos:Concept
 # REPLACE BY RDFS inference
