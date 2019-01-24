@@ -19,45 +19,58 @@ INSERT {
        popis-dat-pojem:ma-model ?m ;
        popis-dat-pojem:popisuje-dokument ?d ;
        popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t .
+       dc:created ?t ;
+       rdfs:label ?vTitle .
         
     ?d a popis-dat-pojem:dokument ;
-       rdfs:label ""@cs ;
+       rdfs:label ?dTitle ;
        dce:description ""@cs ;
        popis-dat-pojem:ma-autora ?a ;
        dc:created ?t ;
        popis-dat-pojem:ma-soubor ?s .
 
     ?s a popis-dat-pojem:soubor ;
-       rdfs:label ""@cs ;
+       rdfs:label ?sTitle ;
        dce:description ""@cs ;
        popis-dat-pojem:ma-autora ?a ;
        dc:created ?t .
         
     ?m a popis-dat-pojem:model .
     ?g a popis-dat-pojem:glosar .
-    ?g popis-dat-pojem:obsahuje-pojem ?c .
     ?c a popis-dat-pojem:term ;
        rdfs:label ?l ;
        popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t .
+       dc:created ?t ;
+       popis-dat-pojem:je-pojmem-ze-slovniku ?x .
+    ?g popis-dat-pojem:obsahuje-korenovy-pojem ?cTop .
     }
 } WHERE { 
     GRAPH g: {
     ?x a v-sgov-pojem:slovník ;
        v-sgov-pojem:má-glosář ?g ;
-       v-sgov-pojem:má-model ?m .
+       v-sgov-pojem:má-model ?m ;
+       dce:title ?vTitle .
     ?c skos:inScheme ?g ;
 	   skos:prefLabel ?l .
+	FILTER(lang(?vTitle)="cs")
     OPTIONAL {
         ?x dc:created ?y .
 	}
     OPTIONAL {
         ?c dc:created ?y2 .
 	}
+    OPTIONAL {
+        FILTER NOT EXISTS {
+            ?c skos:broader|^skos:narrower ?cSuper.
+            FILTER (strstarts(str(?cSuper),g:))
+        }
+        BIND( ?c AS ?cTop )
+	}
     BIND (<http://onto.fel.cvut.cz/ontologies/uzivatel/petr-kremen> as ?a)
     BIND (iri(concat(str(?x),"/document")) as ?d)
+    BIND (strlang(concat("Dokument pro ",str(?vTitle)),"cs") as ?dTitle)
     BIND (iri(concat(str(?d),"/file")) as ?s)
+    BIND (strlang(concat("Soubor pro ",str(?vTitle)),"cs") as ?sTitle)
     BIND (NOW() as ?t)
     OPTIONAL {
         ?d dc:created ?y3 .

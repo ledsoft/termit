@@ -63,9 +63,9 @@ Rules
 
   Id: pdp_term_2_5
     vocabulary <pdp:ma-glosar> glossary
-    glossary <pdp:obsahuje-pojem> this
-    -------------------------------
     this <pdp:je-pojmem-ze-slovniku> vocabulary
+    -------------------------------
+    glossary <pdp:obsahuje-pojem> this
     this <skos:inScheme> glossary
 
   Id: pdp_term_3

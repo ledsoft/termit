@@ -1,0 +1,17 @@
+# Rename the vocabulary to be TermIt compliant. TermIt uses fragments to identify vocabularies and thus, the fragment needs to be different than 'slovník'
+
+PREFIX g: <__VOC_IRI__>
+PREFIX base: <__VOC_IRI__/>
+
+DELETE {
+    ?s ?p base:slovník .
+}
+INSERT {
+    GRAPH g: {
+		?s ?p g: .
+    }
+} WHERE {
+    GRAPH g: {
+        ?s ?p base:slovník .
+	}
+}
