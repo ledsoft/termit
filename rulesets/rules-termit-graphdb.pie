@@ -17,6 +17,12 @@ Axioms
 
 Rules
 {
+  Id: rdfs5
+     a  <rdfs:subPropertyOf>  b               [Constraint a != b, a != c, b != c]
+     b  <rdfs:subPropertyOf>  c
+    -------------------------------
+     a  <rdfs:subPropertyOf>  c
+
   Id: rdfs7
     x a y
     a <rdfs:subPropertyOf> b        [Constraint a != b]
@@ -28,6 +34,12 @@ Rules
     x  <rdfs:subClassOf>  y
     -------------------------------
     a  <rdf:type>  y
+
+  Id: rdfs11
+     x  <rdfs:subClassOf>  y                  [Constraint x != y, x != z, y != z]
+     y  <rdfs:subClassOf>  z
+    -------------------------------
+     x  <rdfs:subClassOf>  z
 
 
   Id: psys_transitiveOver
@@ -47,16 +59,7 @@ Rules
 
     occurrence <pdp:je-vyskytem-termu> this 
     -------------------------------
-    this <pdp:ma-vyskyt-termu> occurrence 
-
-  Id: pdp_term_2
-
-    vocabulary <pdp:ma-glosar> glossary
-    glossary <pdp:obsahuje-pojem> term
-    term <skos:narrowerTransitive> this 
-    -------------------------------
-    this <pdp:je-pojmem-ze-slovniku> vocabulary  
-    this <skos:inScheme> glossary
+    this <pdp:ma-vyskyt-termu> occurrence
 
   Id: pdp_term_2_5
     vocabulary <pdp:ma-glosar> glossary
