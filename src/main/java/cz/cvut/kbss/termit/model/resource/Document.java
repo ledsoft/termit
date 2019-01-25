@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_dokument)
 @EntityListeners(ProvenanceManager.class)
+@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class Document extends Resource {
 
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)

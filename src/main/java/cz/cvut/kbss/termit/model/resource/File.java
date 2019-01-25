@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 
 @OWLClass(iri = Vocabulary.s_c_soubor)
 @EntityListeners(ProvenanceManager.class)
+@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class File extends Resource {
 
     /**
