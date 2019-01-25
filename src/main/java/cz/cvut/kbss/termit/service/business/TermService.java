@@ -175,7 +175,7 @@ public class TermService {
     public void persistRoot(Term term, Vocabulary owner) {
         Objects.requireNonNull(term);
         Objects.requireNonNull(owner);
-        repositoryService.addTermToVocabulary(term, owner);
+        repositoryService.addRootTermToVocabulary(term, owner);
     }
 
     /**

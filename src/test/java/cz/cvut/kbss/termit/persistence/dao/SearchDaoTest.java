@@ -50,7 +50,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
             em.persist(vocabulary);
             insertInVocabularyStatements(vocabulary);
         });
-        final Collection<Term> matching = vocabulary.getGlossary().getTerms().stream()
+        final Collection<Term> matching = vocabulary.getGlossary().getRootTerms().stream()
                                                     .filter(t -> t.getLabel().contains("Matching")).collect(
                         Collectors.toList());
 
@@ -72,7 +72,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
             final Term term = new Term();
             term.setUri(Generator.generateUri());
             term.setLabel(Generator.randomBoolean() ? "Matching label " + i : "Unknown label " + i);
-            vocabulary.getGlossary().addTerm(term);
+            vocabulary.getGlossary().addRootTerm(term);
         }
         return vocabulary;
     }
@@ -82,7 +82,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final Repository repo = em.unwrap(Repository.class);
         try (final RepositoryConnection con = repo.getConnection()) {
             final ValueFactory vf = con.getValueFactory();
-            vocabulary.getGlossary().getTerms().forEach(t -> con.add(vf.createIRI(t.getUri().toString()),
+            vocabulary.getGlossary().getRootTerms().forEach(t -> con.add(vf.createIRI(t.getUri().toString()),
                     vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku),
                     vf.createIRI(vocabulary.getUri().toString())));
         }
@@ -126,7 +126,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
             insertInVocabularyStatements(terms);
             vocabularies.forEach(em::persist);
         });
-        final Collection<Term> matchingTerms = terms.getGlossary().getTerms().stream()
+        final Collection<Term> matchingTerms = terms.getGlossary().getRootTerms().stream()
                                                     .filter(t -> t.getLabel().contains("Matching")).collect(
                         Collectors.toList());
         final Collection<Vocabulary> matchingVocabularies = vocabularies.stream()

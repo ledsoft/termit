@@ -12,8 +12,8 @@ class GlossaryTest {
         final Glossary glossary = new Glossary();
         final Term term = new Term();
         term.setLabel("test term");
-        glossary.addTerm(term);
-        assertNotNull(glossary.getTerms());
-        assertTrue(glossary.getTerms().contains(term));
+        glossary.addRootTerm(term);
+        assertNotNull(glossary.getRootTerms());
+        assertTrue(glossary.getRootTerms().contains(term));
     }
 }

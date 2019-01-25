@@ -51,7 +51,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     }
 
     @Transactional
-    public void addTermToVocabulary(Term instance, Vocabulary vocabulary) {
+    public void addRootTermToVocabulary(Term instance, Vocabulary vocabulary) {
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(vocabulary);
@@ -60,7 +60,8 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
-        vocabulary.getGlossary().addTerm(instance);
+        vocabulary.getGlossary().addRootTerm(instance);
+        instance.setVocabulary(vocabulary.getUri());
         termDao.persist(instance);
         // Explicitly merge glossary to save the reference to the term, as vocabulary (and thus glossary) are detached in this transaction
         vocabularyDao.updateGlossary(vocabulary);
@@ -91,6 +92,11 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         }
         verifyIdentifierUnique(instance);
         parentTerm.addSubTerm(instance.getUri());
+
+        if ( instance.getVocabulary() == null ) {
+            instance.setVocabulary(parentTerm.getVocabulary());
+        }
+
         termDao.persist(instance);
         termDao.update(parentTerm);
     }

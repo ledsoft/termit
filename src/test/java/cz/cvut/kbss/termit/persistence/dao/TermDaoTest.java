@@ -57,7 +57,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     private void addTermsAndSave(Set<Term> terms) {
-        vocabulary.getGlossary().setTerms(terms);
+        vocabulary.getGlossary().setRootTerms(terms);
         transactional(() -> {
             em.merge(vocabulary.getGlossary());
             terms.forEach(em::persist);
@@ -88,7 +88,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         another.setUri(Generator.generateUri());
         another.setAuthor(vocabulary.getAuthor());
         another.setCreated(new Date());
-        another.getGlossary().setTerms(new HashSet<>(generateTerms(4)));
+        another.getGlossary().setRootTerms(new HashSet<>(generateTerms(4)));
         transactional(() -> em.persist(another));
 
         final List<Term> result = sut.findAllRoots(vocabulary, PageRequest.of(0, terms.size() / 2));
@@ -177,7 +177,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllGetsAllTermsInVocabulary() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
         transactional(() -> {
             terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
@@ -209,7 +209,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsAllTermsFromVocabularyOrderedByLabel() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
         transactional(() -> {
             terms.forEach(em::merge);
             em.merge(vocabulary.getGlossary());

@@ -98,7 +98,7 @@ class TermServiceTest {
     void persistUsesRepositoryServiceToPersistTermIntoVocabulary() {
         final Term term = Generator.generateTermWithId();
         sut.persistRoot(term, vocabulary);
-        verify(termRepositoryService).addTermToVocabulary(term, vocabulary);
+        verify(termRepositoryService).addRootTermToVocabulary(term, vocabulary);
     }
 
     @Test
