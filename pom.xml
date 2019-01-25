@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>termit</artifactId>
-    <version>0.0.1</version>
+    <version>0.4.0</version>
     <name>TermIt</name>
     <description>Terminology manager based on Semantic Web technologies.</description>
     <packaging>war</packaging>
@@ -31,14 +31,30 @@
         <org.springframework.data.version>2.0.8.RELEASE</org.springframework.data.version>
         <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
         <org.hibernate.validator.version>6.0.11.Final</org.hibernate.validator.version>
-        <cz.cvut.kbss.jopa.version>0.10.6</cz.cvut.kbss.jopa.version>
-        <cz.cvut.kbss.jsonld.version>0.3.6</cz.cvut.kbss.jsonld.version>
+        <cz.cvut.kbss.jopa.version>0.11.0</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jsonld.version>0.3.7</cz.cvut.kbss.jsonld.version>
+        <org.aspectj.version>1.9.2</org.aspectj.version>
 
         <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
         <org.mockito.version>2.19.1</org.mockito.version>
+
+        <!-- Default value for deployment type property which should otherwise specified on command line -->
+        <deployment>DEV</deployment>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mitre.dsmiley.httpproxy</groupId>
+            <artifactId>smiley-http-proxy-servlet</artifactId>
+            <version>1.10</version>
+        </dependency>
+
         <!-- JOPA -->
         <dependency>
             <groupId>cz.cvut.kbss.jopa</groupId>
@@ -50,7 +66,11 @@
             <artifactId>ontodriver-sesame</artifactId>
             <version>${cz.cvut.kbss.jopa.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>3.8.0</version>
+        </dependency>
 
 
         <!-- Spring declarative transactions with JOPA -->
@@ -177,6 +197,20 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <!-- Apache POI (Excel support) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+
+        <!-- Java Melody Monitoring -->
+        <dependency>
+            <groupId>net.bull.javamelody</groupId>
+            <artifactId>javamelody-core</artifactId>
+            <version>1.75.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -256,24 +290,24 @@
                         <artifactId>replacer</artifactId>
                         <version>1.5.3</version>
                         <executions>
-                            <!--<execution>-->
-                            <!--<id>admin-jmx-name</id>-->
-                            <!--<phase>process-sources</phase>-->
-                            <!--<goals>-->
-                            <!--<goal>replace</goal>-->
-                            <!--</goals>-->
-                            <!--<configuration>-->
-                            <!--<file>-->
-                            <!--${project.basedir}/src/main/java/cz/cvut/kbss/reporting/service/jmx/AppAdminBean.java-->
-                            <!--</file>-->
-                            <!--<outputFile>-->
-                            <!--${project.basedir}/src/main/java/cz/cvut/kbss/reporting/service/jmx/AppAdminBean.java-->
-                            <!--</outputFile>-->
-                            <!--<regex>false</regex>-->
-                            <!--<token>INBASAdminBean</token>-->
-                            <!--<value>${deployment}-AdminBean</value>-->
-                            <!--</configuration>-->
-                            <!--</execution>-->
+                            <execution>
+                                <id>admin-jmx-name</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                                <configuration>
+                                    <file>
+                                        ${project.basedir}/src/main/java/cz/cvut/kbss/termit/service/jmx/AppAdminBean.java
+                                    </file>
+                                    <outputFile>
+                                        ${project.basedir}/src/main/java/cz/cvut/kbss/termit/service/jmx/AppAdminBean.java
+                                    </outputFile>
+                                    <regex>false</regex>
+                                    <token>TermItAdminBean</token>
+                                    <value>TermItAdminBean-${deployment}</value>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>project-version</id>
                                 <phase>process-sources</phase>
@@ -303,9 +337,31 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- Profiles for storages. Important for correct full text search functionality -->
+        <profile>
+            <id>rdf4j</id>
+            <properties>
+                <profile.name>rdf4j</profile.name>
+                <spring.profiles.active>lucene</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>graphdb</id>
+            <properties>
+                <profile.name>graphdb</profile.name>
+                <spring.profiles.active>lucene</spring.profiles.active>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -340,12 +396,12 @@
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjtools</artifactId>
-                        <version>1.9.1</version>
+                        <version>${org.aspectj.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.aspectj</groupId>
                         <artifactId>aspectjrt</artifactId>
-                        <version>1.9.1</version>
+                        <version>${org.aspectj.version}</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -395,19 +451,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>1.2.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${org.junit.jupiter.version}</version>
-                    </dependency>
-                </dependencies>
+                <version>2.22.1</version>
             </plugin>
             <!-- Code coverage plugin -->
             <plugin>
@@ -444,6 +488,32 @@
                             <sources>
                                 <source>src/main/generated-sources</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>profile/${profile.name}</directory>
+                                    <includes>
+                                        <include>query/*.rq</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

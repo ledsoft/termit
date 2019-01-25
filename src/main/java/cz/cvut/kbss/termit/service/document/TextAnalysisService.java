@@ -1,11 +1,8 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
-import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.Document;
-import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
@@ -20,8 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -33,36 +28,35 @@ public class TextAnalysisService {
 
     private final Configuration config;
 
-    private final DocumentRepositoryService documentService;
+    private final DocumentManager documentManager;
 
     private final AnnotationGenerator annotationGenerator;
 
     @Autowired
-    public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentRepositoryService documentService,
+    public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentManager documentManager,
                                AnnotationGenerator annotationGenerator) {
         this.restClient = restClient;
         this.config = config;
-        this.documentService = documentService;
+        this.documentManager = documentManager;
         this.annotationGenerator = annotationGenerator;
     }
 
     /**
      * Passes the content of the specified file to the remote text analysis service, letting it find occurrences of
-     * terms from the vocabulary associated with the specified document in the text.
+     * terms from the vocabulary associated with parent document of the specified file in the text.
      * <p>
      * The analysis result is passed to the term occurrence generator.
      *
-     * @param file     File whose content shall be analyzed
-     * @param document Document to which the file belongs
+     * @param file File whose content shall be analyzed
      */
     @Async
-    public void analyzeDocument(File file, Document document) {
+    public void analyzeFile(File file) {
         Objects.requireNonNull(file);
-        Objects.requireNonNull(document);
-        final TextAnalysisInput input = createAnalysisInput(file, document);
+        final TextAnalysisInput input = createAnalysisInput(file);
         final HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE);
         try {
+            LOG.debug("Invoking text analysis on input: {}", input);
             final ResponseEntity<Resource> resp = restClient
                     .exchange(config.get(ConfigParam.TEXT_ANALYSIS_SERVICE_URL), HttpMethod.POST,
                             new HttpEntity<>(input, headers), Resource.class);
@@ -70,9 +64,10 @@ public class TextAnalysisService {
                 throw new WebServiceIntegrationException("Text analysis service returned empty response.");
             }
             assert resp.getBody() != null;
+            documentManager.createBackup(file);
             final Resource resource = resp.getBody();
             try (final InputStream is = resource.getInputStream()) {
-                annotationGenerator.generateAnnotations(is, file, document);
+                annotationGenerator.generateAnnotations(is, file);
             }
         } catch (WebServiceIntegrationException e) {
             throw e;
@@ -83,22 +78,11 @@ public class TextAnalysisService {
         }
     }
 
-    private TextAnalysisInput createAnalysisInput(File file, Document document) {
+    private TextAnalysisInput createAnalysisInput(File file) {
         final TextAnalysisInput input = new TextAnalysisInput();
-        input.setContent(loadFileContent(file, document));
-        input.setVocabularyContext(document.getVocabulary().getUri());
+        input.setContent(documentManager.loadFileContent(file));
+        input.setVocabularyContext(file.getDocument().getVocabulary().getUri());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         return input;
-    }
-
-    private String loadFileContent(File file, Document document) {
-        try {
-            final java.io.File content = documentService.resolveFile(document, file);
-            LOG.debug("Loading file for text analysis from {}.", content);
-            final List<String> lines = Files.readAllLines(content.toPath());
-            return String.join("\n", lines);
-        } catch (IOException e) {
-            throw new TermItException("Unable to read file for text analysis.", e);
-        }
     }
 }

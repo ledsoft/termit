@@ -7,6 +7,9 @@ import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.AdjustedUriTemplateProxyServlet;
+import java.util.Properties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,12 +28,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.ServletWrappingController;
+
+import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 
 @Configuration
 @EnableWebMvc
 @EnableAsync
 @Import({RestConfig.class, SecurityConfig.class})
 public class WebAppConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private cz.cvut.kbss.termit.util.Configuration config;
 
     @Bean(name = "multipartResolver")
     public MultipartResolver multipartResolver() {
@@ -54,6 +64,35 @@ public class WebAppConfig implements WebMvcConfigurer {
         jsonLdModule.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
         mapper.registerModule(jsonLdModule);
         return mapper;
+    }
+
+    /**
+     * Register the proxy for SPARQL endpoint.
+     * @return Returns the ServletWrappingController for the SPARQL endpoint.
+     */
+    @Bean(name = "sparqlEndpointProxyServlet")
+    public ServletWrappingController sparqlEndpointController() throws Exception {
+        ServletWrappingController controller = new ServletWrappingController();
+        controller.setServletClass(AdjustedUriTemplateProxyServlet.class);
+        controller.setBeanName("sparqlEndpointProxyServlet");
+        final Properties p = new Properties();
+        p.setProperty("targetUri",config.get(REPOSITORY_URL));
+        p.setProperty("log","false");
+        controller.setInitParameters(p);
+        controller.afterPropertiesSet();
+        return controller;
+    }
+
+    /**
+     * @return Returns the SimpleUrlHandlerMapping.
+     */
+    @Bean
+    public SimpleUrlHandlerMapping sparqlQueryControllerMapping() {
+        SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+        Properties urlProperties = new Properties();
+        urlProperties.put("/query", "sparqlEndpointProxyServlet");
+        mapping.setMappings(urlProperties);
+        return mapping;
     }
 
     @Override

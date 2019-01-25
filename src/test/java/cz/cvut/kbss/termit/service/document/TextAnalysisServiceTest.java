@@ -6,19 +6,16 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
-import cz.cvut.kbss.termit.model.Document;
 import cz.cvut.kbss.termit.model.DocumentVocabulary;
-import cz.cvut.kbss.termit.model.File;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
-import cz.cvut.kbss.termit.service.repository.DocumentRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -43,8 +40,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -65,7 +63,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     private Configuration config;
 
     @Autowired
-    private DocumentRepositoryService documentService;
+    private DocumentManager documentManager;
 
     @Autowired
     private Environment environment;
@@ -78,6 +76,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
     private MockRestServiceServer mockServer;
 
     private ObjectMapper objectMapper;
+    private DocumentManager documentManagerSpy;
 
     private DocumentVocabulary vocabulary;
     private Document document;
@@ -90,17 +89,21 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.mockServer = MockRestServiceServer.createServer(restTemplate);
         this.objectMapper = cz.cvut.kbss.termit.environment.Environment.getObjectMapper();
         this.vocabulary = new DocumentVocabulary();
-        vocabulary.setName("TestVocabulary");
+        vocabulary.setLabel("TestVocabulary");
         vocabulary.setUri(Generator.generateUri());
         this.document = new Document();
-        document.setName("text-analysis-test");
+        document.setLabel("text-analysis-test");
         document.setUri(DOC_URI);
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
         this.file = new File();
-        file.setFileName(FILE_NAME);
+        file.setLabel(FILE_NAME);
+        file.setDocument(document);
         generateFile();
-        this.sut = new TextAnalysisService(restTemplate, config, documentService, annotationGeneratorMock);
+        this.documentManagerSpy = spy(documentManager);
+        doCallRealMethod().when(documentManagerSpy).loadFileContent(any());
+        doNothing().when(documentManagerSpy).createBackup(any());
+        this.sut = new TextAnalysisService(restTemplate, config, documentManagerSpy, annotationGeneratorMock);
     }
 
     @Test
@@ -110,7 +113,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST)).andExpect(content().string(containsString(CONTENT)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -135,7 +138,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -156,7 +159,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
                   .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
     }
 
@@ -167,7 +170,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withServerError());
-        assertThrows(WebServiceIntegrationException.class, () -> sut.analyzeDocument(file, document));
+        assertThrows(WebServiceIntegrationException.class, () -> sut.analyzeFile(file));
         mockServer.verify();
     }
 
@@ -178,10 +181,10 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
-        sut.analyzeDocument(file, document);
+        sut.analyzeFile(file);
         mockServer.verify();
         final ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
-        verify(annotationGeneratorMock).generateAnnotations(captor.capture(), eq(file), eq(document));
+        verify(annotationGeneratorMock).generateAnnotations(captor.capture(), eq(file));
         final String result = new BufferedReader(new InputStreamReader(captor.getValue())).lines().collect(
                 Collectors.joining("\n"));
         assertEquals(CONTENT, result);
@@ -189,9 +192,9 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
     @Test
     void analyzeDocumentThrowsNotFoundExceptionWhenFileCannotBeFound() {
-        file.setFileName("unknown.html");
+        file.setLabel("unknown.html");
         final NotFoundException result = assertThrows(NotFoundException.class,
-                () -> sut.analyzeDocument(file, document));
+                () -> sut.analyzeFile(file));
         assertThat(result.getMessage(), containsString("not found on file system"));
     }
 
@@ -203,8 +206,22 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
                   .andRespond(withSuccess());
         final WebServiceIntegrationException result = assertThrows(WebServiceIntegrationException.class,
-                () -> sut.analyzeDocument(file, document));
+                () -> sut.analyzeFile(file));
         assertThat(result.getMessage(), containsString("empty response"));
         mockServer.verify();
+    }
+
+    @Test
+    void analyzeDocumentCreatesFileBackupBeforeInvokingAnnotationGenerator() throws Exception {
+        final TextAnalysisInput input = textAnalysisInput();
+        mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
+                  .andExpect(method(HttpMethod.POST))
+                  .andExpect(content().string(objectMapper.writeValueAsString(input)))
+                  .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
+        sut.analyzeFile(file);
+        mockServer.verify();
+        final InOrder inOrder = Mockito.inOrder(documentManagerSpy, annotationGeneratorMock);
+        inOrder.verify(documentManagerSpy).createBackup(file);
+        inOrder.verify(annotationGeneratorMock).generateAnnotations(any(), eq(file));
     }
 }

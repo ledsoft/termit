@@ -1,16 +1,16 @@
 package cz.cvut.kbss.termit.rest.dto;
 
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.UserAccount;
 import org.junit.jupiter.api.Test;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserUpdateDtoTest {
 
     @Test
     void asUserAccountCopiesAllAttributesIntoNewUserInstance() {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccount();
         final UserUpdateDto dto = new UserUpdateDto();
         dto.setUri(user.getUri());
         dto.setFirstName(user.getFirstName());

@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
@@ -32,6 +34,8 @@ public class Environment {
 
     private static ObjectMapper objectMapper;
 
+    private static ObjectMapper jsonLdObjectMapper;
+
     /**
      * Initializes security context with the specified user.
      *
@@ -39,10 +43,23 @@ public class Environment {
      */
     public static void setCurrentUser(UserAccount user) {
         currentUser = user;
-        final UserDetails userDetails = new UserDetails(user, new HashSet<>());
+        final TermItUserDetails userDetails = new TermItUserDetails(user, new HashSet<>());
         SecurityContext context = new SecurityContextImpl();
         context.setAuthentication(new AuthenticationToken(userDetails.getAuthorities(), userDetails));
         SecurityContextHolder.setContext(context);
+    }
+
+    /**
+     * @see #setCurrentUser(UserAccount)
+     */
+    public static void setCurrentUser(User user) {
+        final UserAccount ua = new UserAccount();
+        ua.setUri(user.getUri());
+        ua.setFirstName(user.getFirstName());
+        ua.setLastName(user.getLastName());
+        ua.setUsername(user.getUsername());
+        ua.setTypes(user.getTypes());
+        setCurrentUser(ua);
     }
 
     /**
@@ -52,7 +69,7 @@ public class Environment {
      */
     public static Optional<Principal> getCurrentUserPrincipal() {
         return SecurityContextHolder.getContext() != null ?
-                Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
+               Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()) : Optional.empty();
     }
 
     public static UserAccount getCurrentUser() {
@@ -60,9 +77,17 @@ public class Environment {
     }
 
     /**
-     * Gets a Jackson object mapper for mapping JSON to Java and vice versa.
+     * Resets security context, removing any previously set data.
+     */
+    public static void resetCurrentUser() {
+        currentUser = null;
+        SecurityContextHolder.clearContext();
+    }
+
+    /**
+     * Gets a Jackson {@link ObjectMapper} for mapping JSON to Java and vice versa.
      *
-     * @return Object mapper
+     * @return {@code ObjectMapper}
      */
     public static ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
@@ -75,19 +100,31 @@ public class Environment {
     }
 
     /**
+     * Gets a Jackson {@link ObjectMapper} for mapping JSON-LD to Java and vice versa.
+     *
+     * @return {@code ObjectMapper}
+     */
+    public static ObjectMapper getJsonLdObjectMapper() {
+        if (jsonLdObjectMapper == null) {
+            jsonLdObjectMapper = new ObjectMapper();
+            jsonLdObjectMapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
+            jsonLdObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            jsonLdObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final JsonLdModule module = new JsonLdModule();
+            module.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
+            jsonLdObjectMapper.registerModule(module);
+        }
+        return jsonLdObjectMapper;
+    }
+
+    /**
      * Creates a Jackson JSON-LD message converter.
      *
      * @return JSON-LD message converter
      */
     public static HttpMessageConverter<?> createJsonLdMessageConverter() {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        final JsonLdModule module = new JsonLdModule();
-        module.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
-        mapper.registerModule(module);
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
+                getJsonLdObjectMapper());
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.valueOf(JsonLd.MEDIA_TYPE)));
         return converter;
     }
@@ -102,5 +139,9 @@ public class Environment {
 
     public static HttpMessageConverter<?> createResourceMessageConverter() {
         return new ResourceHttpMessageConverter();
+    }
+
+    public static InputStream loadFile(String file) {
+        return Environment.class.getClassLoader().getResourceAsStream(file);
     }
 }

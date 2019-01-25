@@ -4,6 +4,12 @@ TermIt is a terminology management tool based on Semantic Web technologies.
 It allows to manage vocabularies consisting of thesauri and ontologies. It can also manage documents
 which use terms from the vocabularies and analyze the documents to find occurrences of these terms.
 
+## Terminology
+
+#### Asset
+
+An **asset** is an object of one of the main domain types managed by the system - _Resource_, _Term_ or _Vocabulary_.
+
 ## Required Technologies
 
 - JDK 8 (preferably Oracle)
@@ -64,10 +70,37 @@ support OWL stuff like inverse properties (which are used in the model). Thus, w
 with **RDFS+SPIN support** should be selected. Then, rules contained in `rdf4j-spin-rules.ttl` should be added to the repository, 
 as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
 
+Note that JOPA currently does not support creating in-memory repository with SPIN rules, so SPIN inference is not supported in
+tests, yet.
+
 
 ### User vs UserAccount
 `User` is a domain class used for domain functions, mostly for resource provenance (author). It does not support password.
  `UserAccount` is used for security-related functions and supports password. Most parts of the application **should** use
  `User`.
 
-## TODO
+### JMX
+
+A JMX bean called `AppAdminBean` was added to the application. Currently, it supports invalidation of application caches.
+The bean's name is set during Maven build. In case multiple deployments of TermIt are running on the same application server,
+it is necessary to provide different names for it. A Maven property with default value _DEV_ was introduced for it. To specify
+a different value, pass a command line parameter to Maven, so the build call might look as follows:
+
+`mvn clean package -B -P production "-Ddeployment=DEV"`
+
+### Fulltext Search
+
+Fulltext search currently supports multiple types of implementation:
+
+* Simple substring matching on term and vocabulary label _(default)_
+* RDF4J with Lucene SAIL
+* GraphDB with Lucene connector using czech analyzer
+
+Each implementation has its own search query which is loaded and used by `SearchDao`. In order for the more advanced implementations
+for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
+artifact during build. If none of the profiles is selected, the default search is used.
+
+## Monitoring
+
+We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
+on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.

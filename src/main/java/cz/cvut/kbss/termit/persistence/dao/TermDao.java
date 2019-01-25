@@ -1,66 +1,74 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
-public class TermDao extends BaseDao<Term> {
+public class TermDao extends AssetDao<Term> {
+
+    private final Configuration config;
 
     @Autowired
-    public TermDao(EntityManager em) {
+    public TermDao(EntityManager em, Configuration config) {
         super(Term.class, em);
+        this.config = config;
     }
 
     /**
-     * Loads a page of terms contained in the specified vocabulary.
+     * Gets all terms on the specified vocabulary.
+     * <p>
+     * No differences are made between root terms and terms with parents.
      *
-     * @param pageSpec   Page specification
      * @param vocabulary Vocabulary whose terms should be returned
-     * @return Matching terms, ordered by their label
+     * @return Matching terms, ordered by label
      */
-    public List<Term> findAll(Pageable pageSpec, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?term WHERE {" +
+    public List<Term> findAll(Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
-                "rdfs:label ?label ." +
-                "?vocabulary ?hasGlossary/?hasTerm ?term ." +
-                "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class)
+                "rdfs:label ?label ;" +
+                "?inVocabulary ?vocabulary ." +
+                "} ORDER BY ?label", Term.class)
                  .setParameter("type", typeUri)
-                 .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
-                 .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
                  .setParameter("vocabulary", vocabulary.getUri())
-                 .setUntypedParameter("offset", pageSpec.getOffset())
-                 .setUntypedParameter("limit", pageSpec.getPageSize())
+                 .setParameter("inVocabulary",
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .getResultList();
     }
 
     /**
      * Loads a page of terms contained in the specified vocabulary.
      *
-     * @param limit   number of terms to be fetched
-     * @param offset   number of terms to be skipped
      * @param vocabulary Vocabulary whose terms should be returned
+     * @param pageSpec   Page specification
      * @return Matching terms, ordered by their label
      */
-    public List<Term> findAll(int limit, int offset, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?term WHERE {" +
+    public List<Term> findAllRoots(Vocabulary vocabulary, Pageable pageSpec) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(pageSpec);
+        return em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
                 "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class)
-                .setParameter("type", typeUri)
-                .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
-                .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
-                .setParameter("vocabulary", vocabulary.getUri())
-                .setUntypedParameter("offset", offset)
-                .setUntypedParameter("limit", limit)
-                .getResultList();
+                 .setParameter("type", typeUri)
+                 .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
+                 .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_korenovy_pojem))
+                 .setParameter("vocabulary", vocabulary.getUri())
+                 .setUntypedParameter("offset", pageSpec.getOffset())
+                 .setUntypedParameter("limit", pageSpec.getPageSize())
+                 .getResultList();
     }
 
     /**
@@ -73,21 +81,46 @@ public class TermDao extends BaseDao<Term> {
      * @param vocabulary   Vocabulary whose terms should be returned
      * @return List of root terms contain a matching term in subtree
      */
-    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
-        return em.createNativeQuery("SELECT ?root WHERE {" +
+    public List<Term> findAllRoots(String searchString, Vocabulary vocabulary) {
+        return em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
                 "?root a ?type ." +
-                "?term a ?type ;" +
-                "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?root ." +
                 "?root ?hasChild* ?term ." +
+                "{\n ?term a ?type ;" +
+                "rdfs:label ?label ." +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "} ORDER BY ?label", Term.class)
+                "}\n} ORDER BY ?label", Term.class)
                  .setParameter("type", typeUri)
                  .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
-                 .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_pojem))
+                 .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_korenovy_pojem))
                  .setParameter("vocabulary", vocabulary.getUri())
                  .setParameter("hasChild", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_narrower))
-                 .setParameter("searchString", searchString, null)
+                 .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE))
                  .getResultList();
+    }
+
+    /**
+     * Checks whether a term with the specified label exists in a vocabulary with the specified URI.
+     * <p>
+     * Note that this method uses comparison ignoring case, so that two labels differing just in character case are
+     * considered same here.
+     *
+     * @param label      Label to check
+     * @param vocabulary Vocabulary in which terms will be searched
+     * @return Whether term with {@code label} already exists in vocabulary
+     */
+    public boolean existsInVocabulary(String label, Vocabulary vocabulary) {
+        Objects.requireNonNull(label);
+        Objects.requireNonNull(vocabulary);
+        return em.createNativeQuery("ASK { ?term a ?type ; " +
+                "?hasLabel ?label ;" +
+                "?inVocabulary ?vocabulary ." +
+                "FILTER (LCASE(?label) = LCASE(?searchString)) . }", Boolean.class)
+                 .setParameter("type", typeUri)
+                 .setParameter("hasLabel", URI.create(RDFS.LABEL))
+                 .setParameter("inVocabulary",
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                 .setParameter("vocabulary", vocabulary.getUri())
+                 .setParameter("searchString", label, config.get(ConfigParam.LANGUAGE)).getSingleResult();
     }
 }

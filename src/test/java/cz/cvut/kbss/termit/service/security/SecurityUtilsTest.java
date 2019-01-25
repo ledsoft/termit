@@ -5,17 +5,20 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.persistence.dao.UserAccountDao;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.util.Collections;
 import java.util.Optional;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,16 +26,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class SecurityUtilsTest extends BaseServiceTestRunner {
 
     @Autowired
-    private SecurityUtils securityUtils;
+    private UserAccountDao userAccountDao;
 
     @Autowired
-    private UserAccountDao userAccountDao;
+    private SecurityUtils sut;
 
     private UserAccount user;
 
     @BeforeEach
     void setUp() {
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccountWithPassword();
     }
 
     @AfterEach
@@ -43,14 +46,14 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
     @Test
     void getCurrentUserReturnsCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final UserAccount result = securityUtils.getCurrentUser();
+        final UserAccount result = sut.getCurrentUser();
         assertEquals(user, result);
     }
 
     @Test
     void getCurrentUserDetailsReturnsUserDetailsOfCurrentlyLoggedInUser() {
         Environment.setCurrentUser(user);
-        final Optional<UserDetails> result = securityUtils.getCurrentUserDetails();
+        final Optional<TermItUserDetails> result = sut.getCurrentUserDetails();
         assertTrue(result.isPresent());
         assertTrue(result.get().isEnabled());
         assertEquals(user, result.get().getUser());
@@ -58,7 +61,7 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
 
     @Test
     void getCurrentUserDetailsReturnsEmptyOptionalWhenNoUserIsLoggedIn() {
-        assertFalse(securityUtils.getCurrentUserDetails().isPresent());
+        assertFalse(sut.getCurrentUserDetails().isPresent());
     }
 
     @Test
@@ -71,9 +74,9 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         update.setPassword(user.getPassword());
         update.setUsername(user.getUsername());
         transactional(() -> userAccountDao.update(update));
-        securityUtils.updateCurrentUser();
+        sut.updateCurrentUser();
 
-        final UserAccount currentUser = securityUtils.getCurrentUser();
+        final UserAccount currentUser = sut.getCurrentUser();
         assertEquals(update, currentUser);
     }
 
@@ -82,8 +85,32 @@ class SecurityUtilsTest extends BaseServiceTestRunner {
         Environment.setCurrentUser(user);
         final String password = "differentPassword";
         final ValidationException ex = assertThrows(ValidationException.class,
-                () -> securityUtils.verifyCurrentUserPassword(password));
+                () -> sut.verifyCurrentUserPassword(password));
         assertThat(ex.getMessage(), containsString("does not match"));
+    }
 
+    @Test
+    void isAuthenticatedReturnsFalseForUnauthenticatedUser() {
+        assertFalse(sut.isAuthenticated());
+    }
+
+    @Test
+    void isAuthenticatedReturnsTrueForAuthenticatedUser() {
+        Environment.setCurrentUser(user);
+        assertTrue(sut.isAuthenticated());
+    }
+
+    @Test
+    void isAuthenticatedReturnsFalseForAnonymousRequest() {
+        final AnonymousAuthenticationToken token = new AnonymousAuthenticationToken("anonymousUser", "anonymousUser",
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+        SecurityContextHolder.setContext(new SecurityContextImpl(token));
+        assertFalse(sut.isAuthenticated());
+    }
+
+    @Test
+    void isAuthenticatedWorksInStaticVersion() {
+        Environment.setCurrentUser(user);
+        assertTrue(SecurityUtils.authenticated());
     }
 }

@@ -3,9 +3,12 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.User;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyDaoTest extends BaseDaoTestRunner {
 
@@ -33,6 +35,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.author = Generator.generateUserWithId();
         transactional(() -> em.persist(author));
+        Environment.setCurrentUser(author);
     }
 
     @Test
@@ -41,13 +44,13 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             final Vocabulary vocab = Generator.generateVocabulary();
             vocab.setUri(Generator.generateUri());
             vocab.setAuthor(author);
-            vocab.setDateCreated(new Date());
+            vocab.setCreated(new Date());
             return vocab;
         }).collect(Collectors.toList());
         transactional(() -> vocabularies.forEach(v -> em.persist(v, descriptorFor(v))));
 
         final List<Vocabulary> result = sut.findAll();
-        vocabularies.sort(Comparator.comparing(Vocabulary::getName));
+        vocabularies.sort(Comparator.comparing(Vocabulary::getLabel));
         for (int i = 0; i < vocabularies.size(); i++) {
             assertEquals(vocabularies.get(i).getUri(), result.get(i).getUri());
         }
@@ -57,7 +60,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void persistSavesVocabularyIntoContextGivenByItsIri() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
         transactional(() -> sut.persist(vocabulary));
 
@@ -78,17 +81,124 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void updateUpdatesVocabularyInContextGivenByItsIri() {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         vocabulary.setUri(Generator.generateUri());
         final Descriptor descriptor = descriptorFor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
 
         final String newName = "Updated vocabulary name";
-        vocabulary.setName(newName);
+        vocabulary.setLabel(newName);
         transactional(() -> sut.update(vocabulary));
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), descriptor);
         assertNotNull(result);
-        assertEquals(newName, result.getName());
+        assertEquals(newName, result.getLabel());
+    }
+
+    @Test
+    void updateEvictsPossiblyPreviouslyLoadedInstanceFromSecondLevelCache() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final Descriptor descriptor = descriptorFor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        // This causes the second level cache to be initialized with the loaded vocabulary (in the default context)
+        final List<Vocabulary> vocabularies = sut.findAll();
+        assertEquals(1, vocabularies.size());
+
+        final String newName = "Updated vocabulary name";
+        vocabulary.setLabel(newName);
+        transactional(() -> sut.update(vocabulary));
+        final List<Vocabulary> result = sut.findAll();
+        assertEquals(1, result.size());
+        assertEquals(newName, result.get(0).getLabel());
+    }
+
+    @Test
+    void updateWorksCorrectlyInContextsForDocumentVocabulary() {
+        final DocumentVocabulary vocabulary = new DocumentVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setLabel("test-vocabulary");
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        final Document doc = new Document();
+        doc.setLabel("test-document");
+        doc.setUri(Generator.generateUri());
+        final File file = new File();
+        file.setLabel("test-file");
+        file.setUri(Generator.generateUri());
+        doc.addFile(file);
+        vocabulary.setDocument(doc);
+        final Descriptor vocabularyDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor docDescriptor = DescriptorFactory.documentDescriptor(vocabulary);
+        transactional(() -> {
+            em.persist(file, docDescriptor);
+            em.persist(doc, docDescriptor);
+            em.persist(vocabulary, vocabularyDescriptor);
+        });
+
+        final String newComment = "New comment";
+        vocabulary.setComment(newComment);
+        transactional(() -> sut.update(vocabulary));
+
+        final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), vocabularyDescriptor);
+        assertEquals(newComment, result.getComment());
+    }
+
+    @Test
+    void updateGlossaryMergesGlossaryIntoPersistenceContext() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        final Term term = Generator.generateTermWithId();
+        vocabulary.getGlossary().addRootTerm(term);
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        transactional(() -> {
+            em.persist(term, termDescriptor);
+            sut.updateGlossary(vocabulary);
+        });
+
+        transactional(() -> {
+            // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
+            // does not work
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+            assertTrue(result.getRootTerms().contains(term));
+        });
+    }
+
+    @Test
+    void updateGlossaryMergesGlossaryIntoCorrectRepositoryContext() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        final Term term = Generator.generateTermWithId();
+        vocabulary.getGlossary().addRootTerm(term);
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        transactional(() -> {
+            em.persist(term, termDescriptor);
+            sut.updateGlossary(vocabulary);
+        });
+
+        transactional(() -> {
+            // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
+            // does not work
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor
+                    .getAttributeDescriptor(
+                            em.getMetamodel().entity(Vocabulary.class).getFieldSpecification("glossary")));
+            assertTrue(result.getRootTerms().contains(term));
+        });
+    }
+
+    @Test
+    void updateGlossaryReturnsManagedGlossaryInstance() {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        transactional(() -> em.persist(vocabulary, descriptor));
+        transactional(() -> {
+            final Glossary merged = sut.updateGlossary(vocabulary);
+            assertTrue(em.contains(merged));
+        });
     }
 }

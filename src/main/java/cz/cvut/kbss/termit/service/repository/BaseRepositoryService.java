@@ -1,6 +1,10 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.TypeResolver;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ValidationException;
+import cz.cvut.kbss.termit.model.util.HasIdentifier;
 import cz.cvut.kbss.termit.persistence.dao.GenericDao;
 import cz.cvut.kbss.termit.util.ValidationResult;
 import org.springframework.lang.NonNull;
@@ -21,11 +25,11 @@ import java.util.stream.Collectors;
  * <p>
  * In order to minimize chances of messing up the transactional behavior, subclasses *should not* override the main CRUD
  * methods and instead should provide custom business logic by overriding the helper hooks such as {@link
- * #prePersist(Object)}.
+ * #prePersist(HasIdentifier)}.
  *
  * @param <T> Domain object type managed by this service
  */
-public abstract class BaseRepositoryService<T> {
+public abstract class BaseRepositoryService<T extends HasIdentifier> {
 
     private final Validator validator;
 
@@ -58,10 +62,38 @@ public abstract class BaseRepositoryService<T> {
      *
      * @param id Identifier of the object to load
      * @return {@link Optional} with the loaded object or an empty one
+     * @see #findRequired(URI)
      */
     public Optional<T> find(URI id) {
-        final Optional<T> result = getPrimaryDao().find(id);
-        return result.isPresent() ? Optional.ofNullable(postLoad(result.get())) : result;
+        return getPrimaryDao().find(id).map(this::postLoad);
+    }
+
+    /**
+     * Finds an object with the specified id and returns it.
+     * <p>
+     * In comparison to {@link #find(URI)}, this method guarantees to return a matching instance. If no such object is found,
+     * a {@link NotFoundException} is thrown.
+     *
+     * @param id Identifier of the object to load
+     * @return The matching object
+     * @throws NotFoundException If no matching instance is found
+     * @see #find(URI)
+     */
+    public T findRequired(URI id) {
+        return find(id).orElseThrow(() -> NotFoundException.create(resolveGenericType().getSimpleName(), id));
+    }
+
+    /**
+     * Resolves the actual generic type of the implementation of {@link BaseRepositoryService}.
+     *
+     * @return Actual generic type class
+     */
+    private Class<T> resolveGenericType() {
+        // Adapted from https://gist.github.com/yunspace/930d4d40a787a1f6a7d1
+        final List<ResolvedType> typeParameters =
+                new TypeResolver().resolve(this.getClass()).typeParametersFor(BaseRepositoryService.class);
+        assert typeParameters.size() == 1;
+        return (Class<T>) typeParameters.get(0).getErasedType();
     }
 
     /**
@@ -87,22 +119,28 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #persist(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #persist(HasIdentifier)}.
+     * <p>
+     * The default behavior is to validate the specified instance.
      *
      * @param instance The instance to be persisted, not {@code null}
      */
     protected void prePersist(@NonNull T instance) {
-        // Do nothing, intended for overriding
+        validate(instance);
     }
 
     /**
      * Merges the specified updated instance into the repository.
      *
      * @param instance The instance to merge
+     * @throws NotFoundException If the entity does not exist in the repository
      */
     @Transactional
     public T update(T instance) {
         Objects.requireNonNull(instance);
+        if (!exists(instance.getUri())) {
+            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
+        }
         preUpdate(instance);
         final T result = getPrimaryDao().update(instance);
         assert result != null;
@@ -111,18 +149,20 @@ public abstract class BaseRepositoryService<T> {
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
+     * <p>
+     * The default behavior is to validate the specified instance.
      *
      * @param instance The instance to be updated, not {@code null}
      */
     protected void preUpdate(@NonNull T instance) {
-        // Do nothing
+        validate(instance);
     }
 
     /**
-     * Override this method to plug custom behavior into the transactional cycle of {@link #update(Object)}.
+     * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      *
-     * @param instance The updated instance which will be returned by {@link #update(Object)}, not {@code null}
+     * @param instance The updated instance which will be returned by {@link #update(HasIdentifier)} )}, not {@code null}
      */
     protected void postUpdate(@NonNull T instance) {
         // Do nothing
@@ -135,7 +175,32 @@ public abstract class BaseRepositoryService<T> {
      */
     @Transactional
     public void remove(T instance) {
+        Objects.requireNonNull(instance);
+        preRemove(instance);
         getPrimaryDao().remove(instance);
+        postRemove(instance);
+    }
+
+    /**
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(HasIdentifier)}.
+     * <p>
+     * The default behavior is a no-op.
+     *
+     * @param instance The instance to be removed, not {@code null}
+     */
+    protected void preRemove(@NonNull T instance) {
+        // Do nothing
+    }
+
+    /**
+     * Override this method to plug custom behavior into the transactional cycle of {@link #remove(HasIdentifier)}.
+     * <p>
+     * The default behavior is a no-op.
+     *
+     * @param instance The removed instance, not {@code null}
+     */
+    protected void postRemove(@NonNull T instance) {
+        // Do nothing
     }
 
     /**

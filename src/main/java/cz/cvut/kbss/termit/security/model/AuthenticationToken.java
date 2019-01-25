@@ -9,9 +9,9 @@ import java.util.Objects;
 
 public class AuthenticationToken extends AbstractAuthenticationToken implements Principal {
 
-    private UserDetails userDetails;
+    private TermItUserDetails userDetails;
 
-    public AuthenticationToken(Collection<? extends GrantedAuthority> authorities, UserDetails userDetails) {
+    public AuthenticationToken(Collection<? extends GrantedAuthority> authorities, TermItUserDetails userDetails) {
         super(authorities);
         this.userDetails = userDetails;
         super.setAuthenticated(true);
@@ -29,7 +29,7 @@ public class AuthenticationToken extends AbstractAuthenticationToken implements 
     }
 
     @Override
-    public UserDetails getDetails() {
+    public TermItUserDetails getDetails() {
         return userDetails;
     }
 

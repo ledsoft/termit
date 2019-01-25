@@ -1,12 +1,12 @@
 package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestSecurityConfig;
 import cz.cvut.kbss.termit.model.UserAccount;
-import cz.cvut.kbss.termit.model.UserAccountTest;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.LoginStatus;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = {TestSecurityConfig.class})
 class AuthenticationSuccessTest extends BaseServiceTestRunner {
 
-    private UserAccount person = UserAccountTest.generateAccount();
+    private UserAccount person = Generator.generateUserAccount();
 
     @Autowired
     private AuthenticationSuccess success;
@@ -54,7 +54,7 @@ class AuthenticationSuccessTest extends BaseServiceTestRunner {
     }
 
     private Authentication generateAuthenticationToken() {
-        final UserDetails userDetails = new UserDetails(person);
+        final TermItUserDetails userDetails = new TermItUserDetails(person);
         return new AuthenticationToken(userDetails.getAuthorities(), userDetails);
     }
 

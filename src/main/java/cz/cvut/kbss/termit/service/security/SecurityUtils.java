@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.service.security;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -43,7 +43,7 @@ public class SecurityUtils {
     public static UserAccount currentUser() {
         final SecurityContext context = SecurityContextHolder.getContext();
         assert context != null;
-        final UserDetails userDetails = (UserDetails) context.getAuthentication().getDetails();
+        final TermItUserDetails userDetails = (TermItUserDetails) context.getAuthentication().getDetails();
         return userDetails.getUser();
     }
 
@@ -63,13 +63,33 @@ public class SecurityUtils {
      *
      * @return Currently authenticated user details
      */
-    public Optional<UserDetails> getCurrentUserDetails() {
+    public Optional<TermItUserDetails> getCurrentUserDetails() {
         final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null && context.getAuthentication().getDetails() instanceof UserDetails) {
-            return Optional.of((UserDetails) context.getAuthentication().getDetails());
+        if (context.getAuthentication() != null &&
+                context.getAuthentication().getDetails() instanceof TermItUserDetails) {
+            return Optional.of((TermItUserDetails) context.getAuthentication().getDetails());
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Checks if a user is currently authenticated, or if the current thread is processing a request from an anonymous
+     * user.
+     *
+     * @return Whether a user is authenticated
+     */
+    public static boolean authenticated() {
+        final SecurityContext context = SecurityContextHolder.getContext();
+        return context.getAuthentication() != null &&
+                context.getAuthentication().getDetails() instanceof TermItUserDetails;
+    }
+
+    /**
+     * @see #authenticated()
+     */
+    public boolean isAuthenticated() {
+        return authenticated();
     }
 
     /**
@@ -79,7 +99,7 @@ public class SecurityUtils {
      * @param userDetails Details of the user to set as current
      * @return The generated authentication token
      */
-    public AuthenticationToken setCurrentUser(UserDetails userDetails) {
+    public AuthenticationToken setCurrentUser(TermItUserDetails userDetails) {
         final AuthenticationToken token = new AuthenticationToken(userDetails.getAuthorities(), userDetails);
         token.setAuthenticated(true);
 
@@ -93,8 +113,8 @@ public class SecurityUtils {
      * Reloads the current user's data from the database.
      */
     public void updateCurrentUser() {
-        final UserDetails updateDetails =
-                (UserDetails) userDetailsService.loadUserByUsername(getCurrentUser().getUsername());
+        final TermItUserDetails updateDetails =
+                (TermItUserDetails) userDetailsService.loadUserByUsername(getCurrentUser().getUsername());
         setCurrentUser(updateDetails);
     }
 

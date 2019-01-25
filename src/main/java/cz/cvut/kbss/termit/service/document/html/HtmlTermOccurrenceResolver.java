@@ -1,8 +1,11 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
-import cz.cvut.kbss.termit.model.*;
-import cz.cvut.kbss.termit.service.IdentifierResolver;
+import cz.cvut.kbss.termit.exception.TermItException;
+import cz.cvut.kbss.termit.model.OccurrenceTarget;
+import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -13,18 +16,17 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Resolves term occurrences from RDFa-annotated HTML document.
@@ -32,14 +34,12 @@ import java.util.stream.Collectors;
  * This class is not thread-safe and not re-entrant.
  */
 @Service("html")
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(HtmlTermOccurrenceResolver.class);
 
     private final HtmlSelectorGenerators selectorGenerators;
-
-    private final IdentifierResolver identifierResolver;
 
     private Document document;
     private File source;
@@ -49,11 +49,9 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private Map<String, List<Element>> annotatedElements;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
-                               IdentifierResolver identifierResolver) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
-        this.identifierResolver = identifierResolver;
     }
 
     @Override
@@ -71,7 +69,11 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     @Override
     public InputStream getContent() {
         assert document != null;
-        return new ByteArrayInputStream(document.toString().getBytes());
+        try {
+            return new ByteArrayInputStream(document.toString().getBytes(StandardCharsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException e) {
+            throw new TermItException("Fatal error, unable to find encoding UTF-8.", e);
+        }
     }
 
     private static Map<String, String> resolvePrefixes(Document document) {
@@ -87,32 +89,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             }
         });
         return map;
-    }
-
-    @Override
-    public List<Term> findNewTerms(Vocabulary vocabulary) {
-        assert document != null;
-        mapRDFaTermOccurrenceAnnotations();
-        final List<Term> newTerms = new ArrayList<>(annotatedElements.size());
-        for (List<Element> annotation : annotatedElements.values()) {
-            List<Element> parts = annotation.stream().filter(e -> !existingTerm(e)).collect(Collectors.toList());
-            if (parts.isEmpty()) {
-                continue;
-            }
-            final String label = parts.stream().map(elem -> {
-                final String content = elem.attr(Constants.RDFa.CONTENT).trim();
-                return content.isEmpty() ? elem.wholeText() : content;
-            }).collect(Collectors.joining(" "));
-            final Term newTerm = new Term();
-            newTerm.setLabel(label);
-            newTerm.setUri(identifierResolver
-                    .generateIdentifier(vocabulary.getUri().toString() + Constants.NEW_TERM_NAMESPACE_SEPARATOR,
-                            label));
-            LOG.trace("Generated new term with URI '{}' for suggested label '{}'.", newTerm.getUri(), label);
-            parts.forEach(elem -> elem.attr(Constants.RDFa.RESOURCE, newTerm.getUri().toString()));
-            newTerms.add(newTerm);
-        }
-        return newTerms;
     }
 
     private void mapRDFaTermOccurrenceAnnotations() {
@@ -157,10 +133,6 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         return prefixes.get(prefix) + localName;
     }
 
-    private static boolean existingTerm(Element rdfaElem) {
-        return rdfaElem.hasAttr(Constants.RDFa.RESOURCE);
-    }
-
     @Override
     public List<TermOccurrence> findTermOccurrences() {
         assert document != null;
@@ -183,21 +155,20 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         assert !rdfaElem.isEmpty();
         final String termId = fullIri(rdfaElem.get(0).attr(Constants.RDFa.RESOURCE));
         if (termId.isEmpty()) {
-            LOG.warn("Missing term identifier in RDFa element {}. Skipping it.", rdfaElem);
+            LOG.trace("No term identifier found in RDFa element {}. Skipping it.", rdfaElem);
             return Optional.empty();
         }
         final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
                 "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
         final TermOccurrence occurrence = createOccurrence(term);
-        final Target target = new Target();
-        target.setSource(source);
+        final OccurrenceTarget target = new OccurrenceTarget(source);
         target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
-        occurrence.addTarget(target);
+        occurrence.setTarget(target);
         return Optional.of(occurrence);
     }
 
     @Override
     public boolean supports(File source) {
-        return source.getFileName().endsWith("html") || source.getFileName().endsWith("htm");
+        return source.getLabel().endsWith("html") || source.getLabel().endsWith("htm");
     }
 }

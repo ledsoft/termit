@@ -1,20 +1,23 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.File;
-import cz.cvut.kbss.termit.model.Target;
+import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TermOccurrenceDaoTest extends BaseDaoTestRunner {
 
@@ -24,12 +27,20 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
     @Autowired
     private TermOccurrenceDao sut;
 
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        this.user = Generator.generateUserWithId();
+        Environment.setCurrentUser(user);
+        transactional(() -> em.persist(user));
+    }
+
     @Test
     void findAllFindsOccurrencesOfTerm() {
-        final Term term = new Term();
-        term.setLabel("Test term");
-        term.setUri(Generator.generateUri());
-        final List<TermOccurrence> occurrences = generateOccurrences(term);
+        final Map<Term, List<TermOccurrence>> map = generateOccurrences();
+        final Term term = map.keySet().iterator().next();
+        final List<TermOccurrence> occurrences = map.get(term);
 
         final List<TermOccurrence> result = sut.findAll(term);
         assertEquals(occurrences.size(), result.size());
@@ -38,38 +49,72 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         }
     }
 
-    private List<TermOccurrence> generateOccurrences(Term term) {
-        final File file = new File();
-        file.setFileName("test.html");
-        final List<TermOccurrence> occurrences = new ArrayList<>();
-        final List<TermOccurrence> matching = new ArrayList<>();
-        final Term other = new Term();
-        other.setUri(Generator.generateUri());
-        other.setLabel("Other term");
+    private Map<Term, List<TermOccurrence>> generateOccurrences(File... files) {
+        final File[] filesToProcess;
+        if (files.length == 0) {
+            final File file = new File();
+            file.setLabel("test.html");
+            filesToProcess = new File[]{file};
+        } else {
+            filesToProcess = files;
+        }
+        final Term tOne = new Term();
+        tOne.setUri(Generator.generateUri());
+        tOne.setLabel("Term one");
+        final Term tTwo = new Term();
+        tTwo.setUri(Generator.generateUri());
+        tTwo.setLabel("Term two");
+        final Map<Term, List<TermOccurrence>> map = new HashMap<>();
+        map.put(tOne, new ArrayList<>());
+        map.put(tTwo, new ArrayList<>());
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final TermOccurrence to = new TermOccurrence();
-            final Target target = new Target();
-            target.setSource(file);
-            final TextQuoteSelector selector = new TextQuoteSelector();
-            selector.setExactMatch("test");
+            final OccurrenceTarget target = new OccurrenceTarget(
+                    filesToProcess[Generator.randomInt(0, filesToProcess.length)]);
+            final TextQuoteSelector selector = new TextQuoteSelector("test");
             selector.setPrefix("this is a ");
             selector.setSuffix(".");
             target.setSelectors(Collections.singleton(selector));
-            to.setTargets(Collections.singleton(target));
+            to.setTarget(target);
             if (Generator.randomBoolean()) {
-                to.setTerm(term);
-                matching.add(to);
+                to.setTerm(tOne);
+                map.get(tOne).add(to);
             } else {
-                to.setTerm(other);
+                to.setTerm(tTwo);
+                map.get(tTwo).add(to);
             }
-            occurrences.add(to);
         }
         transactional(() -> {
-            em.persist(file);
-            em.persist(term);
-            em.persist(other);
-            occurrences.forEach(em::persist);
+            for (File f : filesToProcess) {
+                f.setUri(Generator.generateUri());
+                em.persist(f);
+            }
+            map.forEach((t, list) -> {
+                em.persist(t);
+                list.forEach(ta -> {
+                    em.persist(ta.getTarget());
+                    em.persist(ta);
+                });
+            });
         });
-        return matching;
+        return map;
+    }
+
+    @Test
+    void findAllInFileReturnsTermOccurrencesWithTargetFile() {
+        final File fOne = new File();
+        fOne.setLabel("fOne.html");
+        final File fTwo = new File();
+        fTwo.setLabel("fTwo.html");
+        final Map<Term, List<TermOccurrence>> allOccurrences = generateOccurrences(fOne, fTwo);
+        final List<TermOccurrence> matching = allOccurrences.values().stream().flatMap(
+                l -> l.stream().filter(to -> to.getTarget().getSource().getUri().equals(fOne.getUri())))
+                                                            .collect(Collectors.toList());
+
+        final List<TermOccurrence> result = sut.findAll(fOne);
+        assertEquals(matching.size(), result.size());
+        for (TermOccurrence to : result) {
+            assertTrue(matching.stream().anyMatch(p -> to.getUri().equals(p.getUri())));
+        }
     }
 }

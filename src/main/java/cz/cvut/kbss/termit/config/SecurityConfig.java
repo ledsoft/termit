@@ -3,7 +3,7 @@ package cz.cvut.kbss.termit.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.security.*;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final SecurityUtils securityUtils;
 
-    private final UserDetailsService userDetailsService;
+    private final TermItUserDetailsService userDetailsService;
 
     private final ObjectMapper objectMapper;
 
@@ -52,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                           AuthenticationSuccess authenticationSuccessHandler,
                           AuthenticationFailureHandler authenticationFailureHandler,
                           JwtUtils jwtUtils, SecurityUtils securityUtils,
-                          UserDetailsService userDetailsService,
+                          TermItUserDetailsService userDetailsService,
                           ObjectMapper objectMapper) {
         this.authenticationProvider = authenticationProvider;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -71,11 +71,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().permitAll().and()
-            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-            .and().cors().and().csrf().disable()
-            .addFilter(authenticationFilter())
-            .addFilter(
+        http.antMatcher("/rest/query")
+                .authorizeRequests().anyRequest().permitAll()
+                .and().cors().and().csrf().disable()
+            .antMatcher("/**")
+                .authorizeRequests().anyRequest().permitAll()
+                .and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+                .and().cors().and().csrf().disable()
+                .addFilter(authenticationFilter())
+                .addFilter(
                     new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService,
                             objectMapper))
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -101,6 +105,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         corsConfiguration.setAllowedOrigins(Collections.singletonList("*"));
         corsConfiguration.addExposedHeader(HttpHeaders.AUTHORIZATION);
         corsConfiguration.addExposedHeader(HttpHeaders.LOCATION);
+        corsConfiguration.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;

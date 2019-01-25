@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest.handler;
 
 import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
+import cz.cvut.kbss.jsonld.exception.JsonLdException;
 import cz.cvut.kbss.termit.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,5 +91,19 @@ public class RestExceptionHandler {
                                                      TermItException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(JsonLdException.class)
+    public ResponseEntity<ErrorInfo> jsonLdException(HttpServletRequest request, JsonLdException e) {
+        logException(e);
+        return new ResponseEntity<>(new ErrorInfo("Error when processing JSON-LD.", request.getRequestURI()),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(UnsupportedAssetOperationException.class)
+    public ResponseEntity<ErrorInfo> unsupportedAssetOperationException(HttpServletRequest request,
+                                                                        UnsupportedAssetOperationException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
 }

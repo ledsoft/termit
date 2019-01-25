@@ -1,12 +1,13 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestConfig;
 import cz.cvut.kbss.termit.environment.config.TestRestSecurityConfig;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.handler.RestExceptionHandler;
 import cz.cvut.kbss.termit.security.JwtUtils;
-import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
+import cz.cvut.kbss.termit.service.business.UserService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ import javax.servlet.Filter;
 import java.util.Collections;
 import java.util.List;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,15 +63,12 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     private WebApplicationContext context;
 
     @Autowired
-    private UserRepositoryService userService;
-
-    @Autowired
-    private SecurityUtils securityUtilsMock;
+    private UserService userService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        super.setupObjectMapper();
+        super.setupObjectMappers();
         // WebApplicationContext is required for proper security. Otherwise, standaloneSetup could be used
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity(springSecurityFilterChain))
                                       .build();
@@ -84,7 +81,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @Configuration
     public static class Config implements WebMvcConfigurer {
         @Mock
-        private UserRepositoryService userService;
+        private UserService userService;
 
         @Mock
         private SecurityUtils securityUtilsMock;
@@ -97,7 +94,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         }
 
         @Bean
-        public UserRepositoryService userService() {
+        public UserService userService() {
             return userService;
         }
 
@@ -131,7 +128,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
 
     @Test
     void findAllThrowsForbiddenForUnauthorizedUser() throws Exception {
-        Environment.setCurrentUser(generateAccount());
+        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
         when(userService.findAll()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/users")).andExpect(status().isForbidden());
@@ -140,8 +137,9 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
 
     @Test
     void getCurrentReturnsCurrentlyLoggedInUser() throws Exception {
-        final UserAccount user = generateAccount();
+        final UserAccount user = Generator.generateUserAccountWithPassword();
         Environment.setCurrentUser(user);
+        when(userService.getCurrent()).thenReturn(user);
         final MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/current").accept(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isOk()).andReturn();
         final UserAccount result = readValue(mvcResult, UserAccount.class);
@@ -151,8 +149,8 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @Test
     void unlockThrowsForbiddenForNonAdmin() throws Exception {
         // This one is not an admin
-        Environment.setCurrentUser(generateAccount());
-        final UserAccount toUnlock = generateAccount();
+        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
+        final UserAccount toUnlock = Generator.generateUserAccountWithPassword();
 
         mockMvc.perform(
                 delete(BASE_URL + "/" + extractIdentifierFragment(toUnlock.getUri()) + "/lock")
@@ -164,8 +162,8 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @Test
     void enableThrowsForbiddenForNonAdmin() throws Exception {
         // This one is not an admin
-        Environment.setCurrentUser(generateAccount());
-        final UserAccount toEnable = generateAccount();
+        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
+        final UserAccount toEnable = Generator.generateUserAccountWithPassword();
 
         mockMvc.perform(post(BASE_URL + "/" + extractIdentifierFragment(toEnable.getUri()) + "/status"))
                .andExpect(status().isForbidden());
@@ -175,8 +173,8 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     @Test
     void disableThrowsForbiddenForNonAdmin() throws Exception {
         // This one is not an admin
-        Environment.setCurrentUser(generateAccount());
-        final UserAccount toDisable = generateAccount();
+        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
+        final UserAccount toDisable = Generator.generateUserAccountWithPassword();
 
         mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(toDisable.getUri()) + "/status"))
                .andExpect(status().isForbidden());

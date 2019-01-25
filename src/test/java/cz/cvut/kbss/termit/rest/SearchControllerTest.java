@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import cz.cvut.kbss.termit.dto.LabelSearchResult;
+import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.service.SearchService;
+import cz.cvut.kbss.termit.service.business.SearchService;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +39,13 @@ class SearchControllerTest extends BaseControllerTestRunner {
 
     @Test
     void searchByLabelInvokesSearchOnService() throws Exception {
-        final List<LabelSearchResult> expected = Collections
-                .singletonList(new LabelSearchResult(Generator.generateUri(), "test", null, Vocabulary.s_c_term));
+        final List<FullTextSearchResult> expected = Collections
+                .singletonList(new FullTextSearchResult(Generator.generateUri(), "test", null, Vocabulary.s_c_term, "test", "test", 1.0));
         when(searchServiceMock.searchByLabel(any())).thenReturn(expected);
         final String searchString = "test";
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/label").param("searchString", searchString))
                                            .andExpect(status().isOk()).andReturn();
-        final List<LabelSearchResult> result = readValue(mvcResult, new TypeReference<List<LabelSearchResult>>() {
+        final List<FullTextSearchResult> result = readValue(mvcResult, new TypeReference<List<FullTextSearchResult>>() {
         });
         assertEquals(expected.size(), result.size());
         assertEquals(expected.get(0).getUri(), result.get(0).getUri());

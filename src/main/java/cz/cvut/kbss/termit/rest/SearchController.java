@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.termit.dto.LabelSearchResult;
+import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.SearchService;
+import cz.cvut.kbss.termit.service.business.SearchService;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ public class SearchController extends BaseController {
 
     @RequestMapping(value = "/label", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
             JsonLd.MEDIA_TYPE})
-    public List<LabelSearchResult> searchByLabel(@RequestParam(name = "searchString") String searchString) {
+    public List<FullTextSearchResult> searchByLabel(@RequestParam(name = "searchString") String searchString) {
         return searchService.searchByLabel(searchString);
     }
 }

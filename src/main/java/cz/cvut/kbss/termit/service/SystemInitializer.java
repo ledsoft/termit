@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Random;
@@ -62,9 +63,9 @@ public class SystemInitializer {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        final File credentialsFile = new File(
-                config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
         try {
+            final File credentialsFile = createHiddenFile();
+            LOG.debug("Writing admin credentials into file: {}", credentialsFile);
             Files.write(credentialsFile.toPath(),
                     Collections.singletonList(admin.getUsername() + "/" + passwordPlain),
                     StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -73,12 +74,21 @@ public class SystemInitializer {
         }
     }
 
+    private File createHiddenFile() throws IOException {
+        final File credentialsFile = new File(
+                config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
+        credentialsFile.createNewFile();
+        // Hidden attribute on Windows
+        Files.setAttribute(credentialsFile.toPath(), "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
+        return credentialsFile;
+    }
+
     private static UserAccount initAdminInstance() {
         final UserAccount admin = new UserAccount();
         admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user"));
         admin.setFirstName("System");
         admin.setLastName("Administrator");
-        admin.setUsername("admin@inbas.cz");
+        admin.setUsername("termit-admin@kbss.felk.cvut.cz");
         admin.addType(Vocabulary.s_c_administrator_termitu);
         return admin;
     }

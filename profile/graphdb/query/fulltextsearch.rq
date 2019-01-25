@@ -1,0 +1,26 @@
+##
+# Full text search query for GraphDB with a Lucene connector.
+##
+
+PREFIX : <http://www.ontotext.com/connectors/lucene#>
+PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?score {
+  ?search a inst:czech_index ;
+          :query ?searchString ;
+          :entities ?entity .
+  ?entity rdfs:label ?label ;
+          a ?type ;
+          :score ?score ;
+          :snippets _:s .
+  _:s :snippetText ?snippetText ;
+          :snippetField ?snippetField .
+    OPTIONAL {
+        ?entity ?inVocabulary ?vocabularyUri .
+    }
+    FILTER (?type = ?term || ?type = ?vocabulary)
+          
+}
+ORDER BY desc(?score)

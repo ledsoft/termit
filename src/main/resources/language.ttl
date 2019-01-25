@@ -1,0 +1,350 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix a-popis-dat: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+@prefix ufo: <http://onto.fel.cvut.cz/ontologies/ufo/> .
+@prefix ns5: <http://onto.fel.cvut.cz/ontologies/slovnik/veřejný-sektor/pojem/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wot: <http://xmlns.com/wot/0.1/> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ufo:object a a-popis-dat:term ;
+    rdfs:label "Objekt"@cs ;
+    rdfs:comment "Objektem (analogicky s UFO Object) rozumíme proměnný prvek, jehož existence není přímo závislá na existenci jiných entit. Objekt může existovat i jako součást jiného objektu, ale může být vyjmut a existovat i nadále."@cs ;
+    skos:narrower ns5:bezkontextový-dokument,
+        ns5:datová-sada,
+        ns5:dokument,
+        ns5:evidenční-systém,
+        ns5:fyzická-osoba,
+        ns5:glosář,
+        ns5:hlava,
+        ns5:informační-systém,
+        ns5:kontextový-dokument,
+        ns5:legislativní-znalostní-struktura,
+        ns5:model,
+        ns5:objekt-práva,
+        ns5:odstavec,
+        ns5:organizace,
+        ns5:orgán-veřejné-moci,
+        ns5:paragraf,
+        ns5:primární-objekt-práva,
+        ns5:právnická-osoba,
+        ns5:právní-předpis,
+        ns5:právní-předpis-ze-sbírky-zákonů,
+        ns5:písmeno,
+        ns5:sekundární-objekt-práva,
+        ns5:slovník,
+        ns5:stát,
+        ns5:subjekt-práva,
+        ns5:typ-evidenčního-systému,
+        ns5:typ-znalostní-struktury-dle-úrovně,
+        ns5:veřejnoprávní-korporace,
+        ns5:znalostní-struktura,
+        ns5:člověk,
+        ns5:část-právního-předpisu-ze-sbírky-zákonů .
+
+ufo:object-type a a-popis-dat:term ;
+    rdfs:label "Typ objektu"@cs ;
+    rdfs:comment "Typ objektu (typ[objekt]) popisuje kategorii která může být objektu přiřazena.  Příklady instancí: konkrétní typ letadla (Airbus 380), objekt/subjekt RPP (např. malé plavidlo),"@cs ;
+    skos:narrower ns5:typ-evidenčního-systému .
+
+ufo:event a a-popis-dat:term ;
+    rdfs:label "Událost"@cs ;
+    rdfs:comment "Událost (v UFO Event) představuje v čase neměnnou entitu, která nastala a která mění některý z objektů (v případech, kdy událost mění jiný proměnný prvek - vlastnost, nebo vztah - mění tím i jeden nebo více objektů, neboť tyto proměnné prvky jsou na objektech závislé a jejich okamžité stavy určují okamžitý stav daného objektu)"@cs ;
+    skos:narrower ns5:protiprávní-jednání,
+        ns5:protiprávní-stav,
+        ns5:právní-jednání,
+        ns5:právní-skutečnost,
+        ns5:právní-událost .
+
+ufo:intrinsic-trope a a-popis-dat:term ;
+    rdfs:label "Vlastnost"@cs ;
+    rdfs:comment "Oproti objektu vlastností (analogicky s UFO Intrinsic Trope) rozumíme proměnný prvek, jehož existence je přímo závislá na existenci jednoho jiného proměnného prvku."@cs ;
+    skos:narrower ns5:jméno,
+        ns5:křestní-jméno,
+        ns5:povinnost,
+        ns5:právo,
+        ns5:příjmení,
+        ns5:způsobilost-k-protiprávnímu-jednání,
+        ns5:způsobilost-k-právnímu-jednání,
+        ns5:způsobilost-k-právům-a-povinnostem .
+
+ufo:relator a a-popis-dat:term ;
+    rdfs:label "Vztah"@cs ;
+    rdfs:comment "Oproti objektu vztahem (analogicky s UFO Relation) rozumíme proměnný prvek, jehož existence je přímo závislá na existenci dvou a více jiných proměnných prvcích."@cs ;
+    skos:narrower ns5:eviduje,
+        ns5:je-evidencí-pro,
+        ns5:má-glosář,
+        ns5:má-kontext,
+        ns5:má-model,
+        ns5:má-zdrojový-předpis,
+        ns5:má-část-právního-předpisu,
+        ns5:právní-vztah,
+        ns5:výkon-svrchované-moci .
+
+ns5:bezkontextový-dokument a a-popis-dat:term ;
+    rdfs:label "Bezkontextový dokument"@cs ;
+    rdfs:comment "Bezkontextový dokument je dokument, který je samonosný a nevyžaduje ke své interpretaci kontext"@cs .
+
+ns5:datová-sada a a-popis-dat:term ;
+    rdfs:label "Datová sada"@cs ;
+    rdfs:comment "Datová sada označuje množinu souvisejících dat."@cs .
+
+ns5:dokument a a-popis-dat:term ;
+    rdfs:label "Dokument"@cs ;
+    rdfs:comment "Dokument je psaný, tištěný nebo elektronický materiál poskytujícího informace."@cs .
+
+ns5:evidenční-systém a a-popis-dat:term ;
+    rdfs:label "Evidenční systém"@cs ;
+    rdfs:comment "Evidenční systém je datová sada, která eviduje proměnné prvky."@cs .
+
+ns5:eviduje a a-popis-dat:term ;
+    rdfs:label "eviduje"@cs ;
+    rdfs:comment "'eviduje' označuje relator spojující evidenční systém s evidovaným endurantem."@cs .
+
+ns5:fyzická-osoba a a-popis-dat:term ;
+    rdfs:label "Fyzická osoba"@cs ;
+    rdfs:comment "Fyzická osoba je člověkem, který je subjektem práva."@cs .
+
+ns5:glosář a a-popis-dat:term ;
+    rdfs:label "Glosář"@cs ;
+    rdfs:comment "Glosář je znalostní strukturou obsahující pojmy a jejich definice."@cs .
+
+ns5:hlava a a-popis-dat:term ;
+    rdfs:label "Hlava"@cs ;
+    rdfs:comment "Hlava jako část právního předpisu ze sbírky zákonů"@cs .
+
+ns5:informační-systém a a-popis-dat:term ;
+    rdfs:label "Informační systém"@cs ;
+    rdfs:comment "Informační systém je systém vzájemně propojených prostředků a procesů, které slouží k ukládání, zpracovávání a poskytování informací."@cs .
+
+ns5:je-evidencí-pro a a-popis-dat:term ;
+    rdfs:label "je evidencí pro"@cs ;
+    rdfs:comment "'je evidencí pro'označuje relátor spojující typ evidenčního systému s typy proměnných prvků, které tento systém eviduje."@cs .
+
+ns5:jméno a a-popis-dat:term ;
+    rdfs:label "Jméno"@cs ;
+    rdfs:comment "Jméno právnické osoby"@cs .
+
+ns5:kontextový-dokument a a-popis-dat:term ;
+    rdfs:label "Kontextový dokument"@cs ;
+    rdfs:comment "Kontextový dokument je dokument, který je vyžaduje ke své interpretaci kontext"@cs .
+
+ns5:křestní-jméno a a-popis-dat:term ;
+    rdfs:label "Křestní jméno"@cs ;
+    rdfs:comment "Křestní jméno člověka"@cs .
+
+ns5:legislativní-znalostní-struktura a a-popis-dat:term ;
+    rdfs:label "Legislativní znalostní struktura"@cs ;
+    rdfs:comment "Legislativní znalostní struktura je znalostní struktura pro právní předpisy."@cs .
+
+ns5:model a a-popis-dat:term ;
+    rdfs:label "Model"@cs ;
+    rdfs:comment "Model je znalostní struktura označující ontologický model slovníku."@cs .
+
+ns5:má-glosář a a-popis-dat:term ;
+    rdfs:label "má glosář"@cs ;
+    rdfs:comment "'má glosář' označuje vztah mezi slovníkem a jeho glosářem."@cs .
+
+ns5:má-kontext a a-popis-dat:term ;
+    rdfs:label "má kontext"@cs ;
+    rdfs:comment "má kontext je vztah spojující kontextový dokument a dokument nutný k jeho interpretaci."@cs .
+
+ns5:má-model a a-popis-dat:term ;
+    rdfs:label "má model"@cs ;
+    rdfs:comment "'má model' označuje vztah mezi slovníkem a jeho modelem."@cs .
+
+ns5:má-zdrojový-předpis a a-popis-dat:term ;
+    rdfs:label "má zdrojový předpis"@cs ;
+    rdfs:comment "'má zdrojový předpis' označuje vztah mezi legislativní znalostní strukturou a právním předpisem."@cs .
+
+ns5:má-část-právního-předpisu a a-popis-dat:term ;
+    rdfs:label "má část právního předpisu"@cs ;
+    rdfs:comment "'má část právního předpisu' označuje vztah mezi právním předpisem ze sbírky zákonů a částí tohoto právního přepisu."@cs .
+
+ns5:objekt-práva a a-popis-dat:term ;
+    rdfs:label "Objekt práva"@cs ;
+    rdfs:comment "Objekt práva je příčinou vstupu subjektu do právního vztahu."@cs .
+
+ns5:odstavec a a-popis-dat:term ;
+    rdfs:label "Odstavec"@cs ;
+    rdfs:comment "Odstavec jako část právního předpisu ze sbírky zákonů"@cs .
+
+ns5:organizace a a-popis-dat:term ;
+    rdfs:label "Organizace"@cs ;
+    rdfs:comment "Organizace je uskupení lidí, které je agentem."@cs .
+
+ns5:orgán-veřejné-moci a a-popis-dat:term ;
+    rdfs:label "Orgán veřejné moci"@cs ;
+    rdfs:comment "Orgán veřejné moci  je organizace, která reprezentuje veřejnou moc a je ze zákona oprávněna autoritativně rozhodovat o právech a povinnostech osob."@cs .
+
+ns5:paragraf a a-popis-dat:term ;
+    rdfs:label "Paragraf"@cs ;
+    rdfs:comment "Paragraf jako část právního předpisu ze sbírky zákonů"@cs .
+
+ns5:povinnost a a-popis-dat:term ;
+    rdfs:label "Povinnost"@cs ;
+    rdfs:comment "Povinnost je závazek něco udělat, dát, nedělat, nebo strpět."@cs .
+
+ns5:primární-objekt-práva a a-popis-dat:term ;
+    rdfs:label "Primární objekt práva"@cs ;
+    rdfs:comment "Primární objekt práva je druh chování, které má vykonat jeden ze subjektů práva."@cs .
+
+ns5:protiprávní-jednání a a-popis-dat:term ;
+    rdfs:label "Protiprávní jednání"@cs ;
+    rdfs:comment "Protiprávní jednání je právní skutečnost, která je v rozporu s právem."@cs .
+
+ns5:protiprávní-stav a a-popis-dat:term ;
+    rdfs:label "Protiprávní stav"@cs ;
+    rdfs:comment "Protiprávní stav je právní skutečnost, která je v rozporu s právem a není úmyslná. "@cs .
+
+ns5:právnická-osoba a a-popis-dat:term ;
+    rdfs:label "Právnická osoba"@cs ;
+    rdfs:comment "Právnická osoba je organizací, která je subjektem práva."@cs .
+
+ns5:právní-jednání a a-popis-dat:term ;
+    rdfs:label "Právní jednání"@cs ;
+    rdfs:comment "Právní jednání je vědomé jednání člověka s právními následky."@cs .
+
+ns5:právní-předpis a a-popis-dat:term ;
+    rdfs:label "Právní předpis"@cs ;
+    rdfs:comment "Právní předpis je mandatorním pravidlem nebo jejich souborem vytvořených státem a popisujících společenské chování."@cs .
+
+ns5:právní-předpis-ze-sbírky-zákonů a a-popis-dat:term ;
+    rdfs:label "Právní předpis ze sbírky zákonů"@cs ;
+    rdfs:comment "Právní předpis ze sbírky zákonů označuje právní předpis vydaný ve Sbírce zákonů ČR."@cs .
+
+ns5:právní-skutečnost a a-popis-dat:term ;
+    rdfs:label "Právní skutečnost"@cs ;
+    rdfs:comment "Právní skutečnost je okolnost, se kterou právní norma spojuje vznik, změnu nebo zánik právního vztahu, tj. subjektivních práv a povinností"@cs .
+
+ns5:právní-událost a a-popis-dat:term ;
+    rdfs:label "Právní událost"@cs ;
+    rdfs:comment "Právní událost je je právní skutečnost, která vzniká nezávisle na vůli právních subjektů."@cs .
+
+ns5:právní-vztah a a-popis-dat:term ;
+    rdfs:label "Právní vztah"@cs ;
+    rdfs:comment "Právní vztah je společenský vztah dvou nebo více subjektů práva, které mají vzájemná práva a povinnosti"@cs .
+
+ns5:právo a a-popis-dat:term ;
+    rdfs:label "Právo"@cs ;
+    rdfs:comment "Právo je právní možnost právního subjektu se nějak chovat."@cs .
+
+ns5:písmeno a a-popis-dat:term ;
+    rdfs:label "Písmeno"@cs ;
+    rdfs:comment "Písmeno jako část právního předpisu ze sbírky zákonů"@cs .
+
+ns5:příjmení a a-popis-dat:term ;
+    rdfs:label "Příjmení"@cs ;
+    rdfs:comment "Příjmení člověka"@cs .
+
+ns5:sekundární-objekt-práva a a-popis-dat:term ;
+    rdfs:label "Sekundární objekt práva"@cs ;
+    rdfs:comment "Sekundární objekt práva je objektem, jehož se týká primární objekt práva."@cs .
+
+ns5:slovník a a-popis-dat:term ;
+    rdfs:label "Slovník"@cs ;
+    rdfs:comment "Slovník je znalostní struktura skládající se z glosáře a modelu."@cs .
+
+ns5:stát a a-popis-dat:term ;
+    rdfs:label "Stát"@cs ;
+    rdfs:comment "Stát je organizace seskupující lidi podle území a státní moci ."@cs .
+
+ns5:subjekt-práva a a-popis-dat:term ;
+    rdfs:label "Subjekt práva"@cs ;
+    rdfs:comment "Subjekt práva je osoba,  která se účastní právních vztahů."@cs .
+
+ns5:typ-znalostní-struktury-dle-úrovně a a-popis-dat:term ;
+    rdfs:label "Typ znalostní struktury dle úrovně"@cs ;
+    rdfs:comment "Typ znalostní struktury dle úrovně označuje typ, jehož instance jsou kategoriemi znalostních struktur."@cs .
+
+ns5:veřejnoprávní-korporace a a-popis-dat:term ;
+    rdfs:label "Veřejnoprávní korporace"@cs ;
+    rdfs:comment "Veřejnoprávní korporace je organizace, která je založena na základě zákona a které byla svěřena pravomoc plnit vymezené úkoly ve veřejné správě."@cs .
+
+ns5:výkon-svrchované-moci a a-popis-dat:term ;
+    rdfs:label "Výkon svrchované moci"@cs ;
+    rdfs:comment "Výkon svrchované moci označuje působení svrchované moci (státu) nad svým územím a obyvateli."@cs .
+
+ns5:znalostní-struktura a a-popis-dat:term ;
+    rdfs:label "Znalostní struktura"@cs ;
+    rdfs:comment "Znalostní struktura označuje datovou sadu, která je slouží ke sdílení významu odborných pojmů."@cs .
+
+ns5:způsobilost-k-protiprávnímu-jednání a a-popis-dat:term ;
+    rdfs:label "Způsobilost k protiprávnímu jednání"@cs ;
+    rdfs:comment "Způsobilost k protiprávnímu jednání označuje schopnost nést právní odpovědnost za vlastní protiprávní jednání"@cs .
+
+ns5:způsobilost-k-právnímu-jednání a a-popis-dat:term ;
+    rdfs:label "Způsobilost k právnímu jednání"@cs ;
+    rdfs:comment "Způsobilost k právnímu jednání označuje schopnost vlastním jednáním nabývat práv a plnit povinnosti."@cs .
+
+ns5:způsobilost-k-právům-a-povinnostem a a-popis-dat:term ;
+    rdfs:label "Způsobilost k právům a povinnostem"@cs ;
+    rdfs:comment "Způsobilost k právům a povinnostem označuje vlastnost subjektu práva mít práva a povinnosti, pokud nastanou právem předvídané okolnosti. "@cs .
+
+ns5:člověk a a-popis-dat:term ;
+    rdfs:label "Člověk"@cs ;
+    rdfs:comment "Člověk je rod živočichů."@cs .
+
+ns5:část-právního-předpisu-ze-sbírky-zákonů a a-popis-dat:term ;
+    rdfs:label "Část právního předpisu ze sbírky zákonů"@cs ;
+    rdfs:comment "Část právního předpisu ze sbírky zákonů označuje identifikovatelnou část právního předpisu ze Sbírku zákonů ČR."@cs .
+
+ns5:typ-evidenčního-systému a a-popis-dat:term ;
+    rdfs:label "Typ evidenčního systému"@cs ;
+    rdfs:comment "Typ evidenčního systému označuje typ jehož instance kategorizují evidenční systémy."@cs .
+
+
+ufo:individual a a-popis-dat:term ;
+    rdfs:label "Individuál"@cs,
+        "Individual"@en ;
+    skos:narrower ufo:event,
+        ufo:intrinsic-trope,
+        ufo:object,
+        ufo:relator .
+
+ufo:type a a-popis-dat:term ;
+    rdfs:label "Typ"@cs,
+        "Type"@en ;
+    skos:narrower ufo:event-type,
+        ufo:intrinsic-trope-type,
+        ufo:object-type,
+        ufo:relator-type .
+
+ufo:event a a-popis-dat:term ;
+    rdfs:label "Událost"@cs,
+        "Event"@en ;
+    rdfs:comment "An event, perdurant in the ontological sense. Events do not change its properties over time."@en .
+
+ufo:event-type a a-popis-dat:term ;
+    rdfs:label "Typ události"@cs,
+        "Event Type"@en .
+
+ufo:intrinsic-trope a a-popis-dat:term ;
+    rdfs:label "Vlastnost"@cs,
+        "Intrinsic Trope"@en .
+
+ufo:intrinsic-trope-type a a-popis-dat:term ;
+    rdfs:label "Typ vlastnosti"@cs,
+        "Intrinsic Trope Type"@en .
+
+ufo:object a a-popis-dat:term ;
+    rdfs:label "Objekt"@cs,
+        "Object"@en ;
+    rdfs:comment "Object is any identifiable endurant entity existence of which is not directly dependent on an existence of another entity."@en .
+
+ufo:object-type a a-popis-dat:term ;
+    rdfs:label "Typ objektu"@cs,
+        "Object Type"@en .
+
+ufo:relator a a-popis-dat:term ;
+    rdfs:label "Vztah"@cs,
+        "Relator"@en .
+
+ufo:relator-type a a-popis-dat:term ;
+    rdfs:label "Typ vztahu"@cs,
+        "Relator Type"@en .

@@ -4,7 +4,6 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -28,10 +27,8 @@ class RestUtilsTest {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
         final String id = "117";
 
-        final HttpHeaders result = RestUtils.createLocationHeaderFromCurrentUriWithPath("/{id}", id);
-        assertTrue(result.containsKey(HttpHeaders.LOCATION));
-        final String location = result.getLocation().toString();
-        assertThat(location, endsWith("/vocabularies/" + id));
+        final URI result = RestUtils.createLocationFromCurrentUriWithPath("/{id}", id);
+        assertThat(result.toString(), endsWith("/vocabularies/" + id));
     }
 
     @Test
@@ -41,10 +38,8 @@ class RestUtilsTest {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
         final URI id = Generator.generateUri();
 
-        final HttpHeaders result = RestUtils.createLocationHeaderFromCurrentUriWithQueryParam("id", id);
-        assertTrue(result.containsKey(HttpHeaders.LOCATION));
-        final String location = result.getLocation().toString();
-        assertThat(location, endsWith("/vocabularies?id=" + id));
+        final URI result = RestUtils.createLocationFromCurrentUriWithQueryParam("id", id);
+        assertThat(result.toString(), endsWith("/vocabularies?id=" + id));
     }
 
     @Test
@@ -82,9 +77,7 @@ class RestUtilsTest {
         final String name = "metropolitan-plan";
         final String param = "namespace";
         final String paramValue = "http://onto.fel.cvut.cz/ontologies/termit/vocabularies/";
-        final HttpHeaders result = RestUtils
-                .createLocationHeaderFromCurrentUriWithPathAndQuery("/{name}", param, paramValue, name);
-        final String location = result.getLocation().toString();
-        assertThat(location, endsWith("/" + name + "?" + param + "=" + paramValue));
+        final URI result = RestUtils.createLocationFromCurrentUriWithPathAndQuery("/{name}", param, paramValue, name);
+        assertThat(result.toString(), endsWith("/" + name + "?" + param + "=" + paramValue));
     }
 }

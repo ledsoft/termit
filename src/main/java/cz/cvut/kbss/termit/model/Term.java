@@ -1,58 +1,48 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
+import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.apache.poi.ss.usermodel.Row;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @OWLClass(iri = Vocabulary.s_c_term)
-public class Term implements Serializable, HasTypes {
+@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
+@EntityListeners(ProvenanceManager.class)
+public class Term extends Asset implements HasTypes, Serializable {
 
-    @Id
-    private URI uri;
-
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
-    private String label;
+    /**
+     * Names of columns used in term export.
+     */
+    public static final String[] EXPORT_COLUMNS = {"IRI", "Label", "Comment", "Types", "Sources", "SubTerms"};
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    @OWLDataProperty(iri = "http://purl.org/dc/elements/1.1/source")
+    @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
-    @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_vyskyt_termu, fetch = FetchType.EAGER)
-    private Set<TermOccurrence> occurrences;
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
+    private URI vocabulary;
+
+    @Properties(fetchType = FetchType.EAGER)
+    private Map<String, Set<String>> properties;
 
     @Types
     private Set<String> types;
-
-    public URI getUri() {
-        return uri;
-    }
-
-    public void setUri(URI uri) {
-        this.uri = uri;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
 
     public String getComment() {
         return comment;
@@ -70,20 +60,28 @@ public class Term implements Serializable, HasTypes {
         this.subTerms = subTerms;
     }
 
-    public Set<TermOccurrence> getOccurrences() {
-        return occurrences;
+    public boolean addSubTerm(URI childUri) {
+        Objects.requireNonNull(childUri);
+        if (subTerms == null) {
+            this.subTerms = new HashSet<>();
+        }
+        return subTerms.add(childUri);
     }
 
-    public void setOccurrences(Set<TermOccurrence> occurrences) {
-        this.occurrences = occurrences;
-    }
-
-    public Set<String> getSource() {
+    public Set<String> getSources() {
         return sources;
     }
 
-    public void setSource(Set<String> source) {
+    public void setSources(Set<String> source) {
         this.sources = source;
+    }
+
+    public URI getVocabulary() {
+        return vocabulary;
+    }
+
+    public void setVocabulary(URI vocabulary) {
+        this.vocabulary = vocabulary;
     }
 
     @Override
@@ -96,24 +94,92 @@ public class Term implements Serializable, HasTypes {
         this.types = types;
     }
 
+    public Map<String, Set<String>> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Set<String>> properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * Generates a CSV line representing this term.
+     * <p>
+     * The line contains columns specified in {@link #EXPORT_COLUMNS}
+     *
+     * @return CSV representation of this term
+     */
+    public String toCsv() {
+        final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
+        sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
+        sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
+        sb.append(',');
+        if (types != null && !types.isEmpty()) {
+            sb.append(exportCollection(types));
+        }
+        sb.append(',');
+        if (sources != null && !sources.isEmpty()) {
+            sb.append(exportCollection(sources));
+        }
+        sb.append(',');
+        if (subTerms != null && !subTerms.isEmpty()) {
+            sb.append(exportCollection(subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+        }
+        return sb.toString();
+    }
+
+    private static String exportCollection(Collection<String> col) {
+        return CsvUtils.sanitizeString(String.join(";", col));
+    }
+
+    /**
+     * Generates an Excel line (line with tab separated values) representing this term.
+     * <p>
+     * The line contains columns specified in {@link #EXPORT_COLUMNS}
+     *
+     * @param row The row into which data of this term will be generated
+     */
+    public void toExcel(Row row) {
+        Objects.requireNonNull(row);
+        row.createCell(0).setCellValue(getUri().toString());
+        row.createCell(1).setCellValue(getLabel());
+        if (comment != null) {
+            row.createCell(2).setCellValue(comment);
+        }
+        if (types != null) {
+            row.createCell(3).setCellValue(String.join(";", types));
+        }
+        if (sources != null) {
+            row.createCell(4).setCellValue(String.join(";", sources));
+        }
+        if (subTerms != null) {
+            row.createCell(5)
+               .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Term)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Term)) {
+            return false;
+        }
         Term term = (Term) o;
-        return Objects.equals(uri, term.uri);
+        return Objects.equals(getUri(), term.getUri());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(getUri());
     }
 
     @Override
     public String toString() {
         return "Term{" +
-                label +
-                " <" + uri + '>' +
+                getLabel() +
+                " <" + getUri() + '>' +
                 ", types=" + types +
                 '}';
     }

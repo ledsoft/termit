@@ -41,14 +41,21 @@ public class SecurityConstants {
     public static final String JWT_ROLE_DELIMITER = "-";
 
     /**
-     * Session timeout in milliseconds. 10 minutes.
+     * Session timeout in milliseconds. 24 hours.
      */
-    public static final int SESSION_TIMEOUT = 10 * 60 * 1000;
+    public static final int SESSION_TIMEOUT = 24 * 60 * 60 * 1000;
 
     /**
      * Maximum number of unsuccessful login attempts.
      */
     public static final int MAX_LOGIN_ATTEMPTS = 5;
+
+    /**
+     * User credentials for access to the JavaMelody monitoring page.
+     * <p>
+     * Using BASIC authentication.
+     */
+    public static final String MONITORING_USER_CREDENTIALS = "admin:kral0vnat3rm1t1st3";
 
     /**
      * System administrator role

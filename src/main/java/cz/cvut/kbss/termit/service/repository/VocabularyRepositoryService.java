@@ -1,53 +1,47 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Model;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.persistence.dao.GenericDao;
+import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Validator;
-import java.util.Date;
+import java.net.URI;
+import java.util.Objects;
 
 @Service
-public class VocabularyRepositoryService extends BaseRepositoryService<Vocabulary> {
-
-    private final SecurityUtils securityUtils;
+public class VocabularyRepositoryService extends BaseAssetRepositoryService<Vocabulary> implements VocabularyService {
 
     private final IdentifierResolver idResolver;
 
     private final VocabularyDao vocabularyDao;
 
     @Autowired
-    public VocabularyRepositoryService(VocabularyDao vocabularyDao, SecurityUtils securityUtils,
-                                       IdentifierResolver idResolver,
+    public VocabularyRepositoryService(VocabularyDao vocabularyDao, IdentifierResolver idResolver,
                                        Validator validator) {
         super(validator);
         this.vocabularyDao = vocabularyDao;
-        this.securityUtils = securityUtils;
         this.idResolver = idResolver;
     }
 
     @Override
-    protected GenericDao<Vocabulary> getPrimaryDao() {
+    protected AssetDao<Vocabulary> getPrimaryDao() {
         return vocabularyDao;
     }
 
     @Override
     protected void prePersist(Vocabulary instance) {
-        validate(instance);
+        super.prePersist(instance);
         if (instance.getUri() == null) {
-            instance.setUri(idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, instance.getName()));
+            instance.setUri(generateIdentifier(instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
-        instance.setDateCreated(new Date());
-        instance.setAuthor(securityUtils.getCurrentUser().toUser());
         if (instance.getGlossary() == null) {
             instance.setGlossary(new Glossary());
         }
@@ -56,9 +50,15 @@ public class VocabularyRepositoryService extends BaseRepositoryService<Vocabular
         }
     }
 
-    private void verifyIdentifierUnique(Vocabulary instance) {
-        if (exists(instance.getUri())) {
-            throw ResourceExistsException.create("Vocabulary", instance.getUri());
-        }
+    /**
+     * Generates a vocabulary identifier based on the specified label.
+     *
+     * @param label Vocabulary label
+     * @return Vocabulary identifier
+     */
+    @Override
+    public URI generateIdentifier(String label) {
+        Objects.requireNonNull(label);
+        return idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, label);
     }
 }

@@ -1,11 +1,14 @@
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
+import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -22,16 +25,16 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
+import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,15 +64,16 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private AnnotationGenerator sut;
 
     private DocumentVocabulary vocabulary;
-    private EntityDescriptor vocabDescriptor;
-    private cz.cvut.kbss.termit.model.Document document;
+    private Descriptor vocabDescriptor;
+    private cz.cvut.kbss.termit.model.resource.Document document;
     private File file;
+    private String fileLocation;
 
     private Term term;
     private Term termTwo;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.term = new Term();
         term.setUri(TERM_ID);
         term.setLabel("Územní plán");
@@ -78,31 +82,33 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         termTwo.setLabel("Územní plán hlavního města Prahy");
         final User author = Generator.generateUserWithId();
         this.vocabulary = new DocumentVocabulary();
-        vocabulary.setName("Test Vocabulary");
+        vocabulary.setLabel("Test Vocabulary");
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
         vocabulary.setUri(Generator.generateUri());
-        this.document = new cz.cvut.kbss.termit.model.Document();
+        this.document = new cz.cvut.kbss.termit.model.resource.Document();
         document.setAuthor(author);
-        document.setDateCreated(new Date());
-        document.setName("metropolitan-plan");
+        document.setCreated(new Date());
+        document.setLabel("metropolitan-plan");
         document.setUri(Generator.generateUri());
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
-        vocabulary.getGlossary().addTerm(term);
-        vocabulary.getGlossary().addTerm(termTwo);
-        this.vocabDescriptor = new EntityDescriptor(vocabulary.getUri());
-        vocabDescriptor.addAttributeContext(HasProvenanceData.class.getDeclaredField("author"), null);
+        vocabulary.getGlossary().addRootTerm(term);
+        vocabulary.getGlossary().addRootTerm(termTwo);
+        this.vocabDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         vocabulary.setAuthor(author);
-        vocabulary.setDateCreated(new Date());
+        vocabulary.setCreated(new Date());
         this.file = new File();
-        file.setFileName("rdfa-simple.html");
+        file.setUri(Generator.generateUri());
+        file.setLabel("rdfa-simple.html");
+        file.setDocument(document);
+        cz.cvut.kbss.termit.environment.Environment.setCurrentUser(author);
         document.addFile(file);
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary, vocabDescriptor);
-            em.persist(document, vocabDescriptor);
-            em.persist(file);
+            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.documentDescriptor(vocabulary));
         });
     }
 
@@ -115,30 +121,27 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         docDir.deleteOnExit();
         final java.io.File f = new java.io.File(
                 folder.getAbsolutePath() + java.io.File.separator + docFolderName + java.io.File.separator +
-                        file.getFileName());
+                        file.getLabel());
         f.createNewFile();
         f.deleteOnExit();
+        this.fileLocation = f.getAbsolutePath();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), folder.getAbsolutePath());
     }
 
     @Test
     void generateAnnotationsCreatesTermOccurrenceForTermFoundInContentDocument() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
+        final InputStream content = loadFile("data/rdfa-simple.html");
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         final List<TermOccurrence> result = termOccurrenceDao.findAll(term);
         assertEquals(1, result.size());
     }
 
-    private static InputStream loadRDFa(String file) {
-        return AnnotationGeneratorTest.class.getClassLoader().getResourceAsStream(file);
-    }
-
     @Test
     void generateAnnotationsSkipsElementsWithUnsupportedType() throws Exception {
-        final InputStream content = changeAnnotationType(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = changeAnnotationType(loadFile("data/rdfa-simple.html"));
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         assertTrue(termOccurrenceDao.findAll(term).isEmpty());
     }
 
@@ -148,33 +151,33 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assert element.size() == 1;
         element.attr(Constants.RDFa.TYPE, cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik);
 
-        return new ByteArrayInputStream(doc.toString().getBytes());
+        return new ByteArrayInputStream(doc.toString().getBytes(StandardCharsets.UTF_8.name()));
     }
 
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
-        file.setFileName("test.txt");
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        file.setLabel("test.txt");
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
-                () -> sut.generateAnnotations(content, file, document));
+                () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
     }
 
     @Test
     void generateAnnotationsResolvesOverlappingAnnotations() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setFileName("rdfa-overlapping.html");
+        final InputStream content = loadFile("data/rdfa-overlapping.html");
+        file.setLabel("rdfa-overlapping.html");
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         assertEquals(1, termOccurrenceDao.findAll(term).size());
         assertEquals(1, termOccurrenceDao.findAll(termTwo).size());
     }
 
     @Test
     void generateAnnotationsThrowsAnnotationGenerationExceptionForUnknownTermIdentifier() throws Exception {
-        final InputStream content = setUnknownTermIdentifier(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = setUnknownTermIdentifier(loadFile("data/rdfa-simple.html"));
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
-                () -> sut.generateAnnotations(content, file, document));
+                () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Term with id "));
         assertThat(ex.getMessage(), containsString("not found"));
     }
@@ -199,15 +202,20 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final Term area = new Term();
         area.setLabel("Území");
         area.setUri(URI.create("http://test.org/pojem/uzemi"));
-        vocabulary.getGlossary().addTerm(mp);
-        vocabulary.getGlossary().addTerm(ma);
-        vocabulary.getGlossary().addTerm(area);
-        transactional(() -> em.merge(vocabulary.getGlossary(), vocabDescriptor));
+        vocabulary.getGlossary().addRootTerm(mp);
+        vocabulary.getGlossary().addRootTerm(ma);
+        vocabulary.getGlossary().addRootTerm(area);
+        transactional(() -> {
+            em.persist(mp, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(ma, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(area, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
 
-        final InputStream content = loadRDFa("data/rdfa-large.html");
-        file.setFileName("rdfa-large.html");
+        final InputStream content = loadFile("data/rdfa-large.html");
+        file.setLabel("rdfa-large.html");
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         assertFalse(termOccurrenceDao.findAll(mp).isEmpty());
         assertFalse(termOccurrenceDao.findAll(ma).isEmpty());
         assertFalse(termOccurrenceDao.findAll(area).isEmpty());
@@ -215,10 +223,10 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsAddsThemSuggestedTypeToIndicateTheyShouldBeVerifiedByUser() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-overlapping.html");
-        file.setFileName("rdfa-overlapping.html");
+        final InputStream content = loadFile("data/rdfa-overlapping.html");
+        file.setLabel("rdfa-overlapping.html");
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         final List<TermOccurrence> result = termOccurrenceDao.findAll();
         result.forEach(to -> assertTrue(
                 to.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu)));
@@ -227,66 +235,54 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void generateAnnotationsPersistsNewTerms() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
-        file.setFileName("rdfa-new-terms.html");
+    void generateAnnotationsDoesNotAddTermsForSuggestedKeywords() throws Exception {
+        final InputStream content = loadFile("data/rdfa-new-terms.html");
+        file.setLabel("rdfa-new-terms.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         final List<Term> resultTerms = termDao.findAll();
-        assertEquals(origTerms.size() + 1, resultTerms.size());
-        resultTerms.removeAll(origTerms);
-        final Term newTerm = resultTerms.get(0);
-        assertEquals("město", newTerm.getLabel());
+        assertEquals(origTerms.size(), resultTerms.size());
     }
 
     @Test
-    void generateAnnotationsPersistsNewTermsWithTypeSuggestedToIndicateTheyShouldBeVerifiedByUser() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
-        file.setFileName("rdfa-new-terms.html");
+    void generateAnnotationsDoesNotModifyIncomingRdfWhenItContainsNewTermSuggestions() throws Exception {
+        final InputStream content = loadFile("data/rdfa-new-terms.html");
+        file.setLabel("rdfa-new-terms.html");
         generateFile();
-        final List<Term> origTerms = termDao.findAll();
-        sut.generateAnnotations(content, file, document);
-        final List<Term> resultTerms = termDao.findAll();
-        resultTerms.removeAll(origTerms);
-        final Term newTerm = resultTerms.get(0);
-        assertTrue(newTerm.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_term));
+        sut.generateAnnotations(content, file);
+        final Document originalDoc;
+        try (final BufferedReader oldIn = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fileLocation)))) {
+            final String originalContent = oldIn.lines().collect(Collectors.joining("\n"));
+            originalDoc = Jsoup.parse(originalContent);
+        }
+        try (final BufferedReader newIn = new BufferedReader(
+                new InputStreamReader(new FileInputStream(fileLocation)))) {
+            final String currentContent = newIn.lines().collect(Collectors.joining("\n"));
+            final Document currentDoc = Jsoup.parse(currentContent);
+            assertTrue(originalDoc.hasSameValue(currentDoc));
+        }
     }
 
     @Test
-    void generateAnnotationsCreatesTermOccurrencesForNewTerms() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms.html");
-        file.setFileName("rdfa-new-terms.html");
+    void generateAnnotationsResolvesTermOccurrenceWhenItOverlapsWithNewTermSuggestion() throws Exception {
+        final InputStream content = loadFile("data/rdfa-new-terms-overlapping.html");
+        file.setLabel("rdfa-new-terms-overlapping.html");
         generateFile();
         final List<Term> origTerms = termDao.findAll();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         final List<Term> resultTerms = termDao.findAll();
-        resultTerms.removeAll(origTerms);
-        final Term newTerm = resultTerms.get(0);
-        final List<TermOccurrence> result = termOccurrenceDao.findAll(newTerm);
-        assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void generateAnnotationsCreatesNewTermsFromOverlappingAnnotations() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-new-terms-overlapping.html");
-        file.setFileName("rdfa-new-terms-overlapping.html");
-        generateFile();
-        final List<Term> origTerms = termDao.findAll();
-        sut.generateAnnotations(content, file, document);
-        final List<Term> resultTerms = termDao.findAll();
-        resultTerms.removeAll(origTerms);
-        assertEquals(1, resultTerms.size());
-        final Term newTerm = resultTerms.get(0);
-        assertEquals("územní plán hlavní město praha", newTerm.getLabel());
-        assertFalse(termOccurrenceDao.findAll(newTerm).isEmpty());
+        assertEquals(origTerms.size(), resultTerms.size());
+        final List<TermOccurrence> to = termOccurrenceDao.findAll(term);
+        assertEquals(1, to.size());
     }
 
     @Test
     void generateAnnotationsSkipsRDFaAnnotationsWithoutResourceAndContent() throws Exception {
-        final InputStream content = removeResourceAndContent(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = removeResourceAndContent(loadFile("data/rdfa-simple.html"));
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         assertTrue(termOccurrenceDao.findAll().isEmpty());
     }
 
@@ -301,9 +297,9 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
 
     @Test
     void generateAnnotationsSkipsAnnotationsWithEmptyResource() throws Exception {
-        final InputStream content = setEmptyResource(loadRDFa("data/rdfa-simple.html"));
+        final InputStream content = setEmptyResource(loadFile("data/rdfa-simple.html"));
         generateFile();
-        sut.generateAnnotations(content, file, document);
+        sut.generateAnnotations(content, file);
         assertTrue(termOccurrenceDao.findAll().isEmpty());
     }
 
@@ -316,37 +312,41 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void generateAnnotationsUsesElementTextContentWhenContentAttributeIsEmptyForNewTerms() throws Exception {
-        final InputStream content = setEmptyContentOfNewTerm(loadRDFa("data/rdfa-new-terms.html"));
-        file.setFileName("rdfa-new-terms.html");
+    void generateAnnotationsSkipsTermOccurrencesWhichAlreadyExistBasedOnSelectors() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
         generateFile();
-        final List<Term> origTerms = termDao.findAll();
-        sut.generateAnnotations(content, file, document);
-        final List<Term> resultTerms = termDao.findAll();
-        resultTerms.removeAll(origTerms);
-        assertEquals(1, resultTerms.size());
-        final Term newTerm = resultTerms.get(0);
-        assertEquals("města", newTerm.getLabel());
-    }
-
-    private InputStream setEmptyContentOfNewTerm(InputStream input) throws IOException {
-        final Document doc = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
-        final Elements elements = doc.getElementsByAttribute(Constants.RDFa.CONTENT);
-        elements.attr(Constants.RDFa.CONTENT, "");
-
-        return new ByteArrayInputStream(doc.toString().getBytes());
+        sut.generateAnnotations(content, file);
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
+        final InputStream contentReloaded = loadFile("data/rdfa-simple.html");
+        sut.generateAnnotations(contentReloaded, file);
+        assertEquals(1, termOccurrenceDao.findAll(term).size());
     }
 
     @Test
-    void generateAnnotationsStoresAnnotatedContentInPlaceOfOriginalFile() throws Exception {
-        final InputStream content = loadRDFa("data/rdfa-simple.html");
+    void generateAnnotationsCreatesTermOccurrenceWhenItHasExistingSelectorButReferencesDifferentTerm()
+            throws Exception {
+        final Term otherTerm = new Term();
+        otherTerm.setUri(Generator.generateUri());
+        otherTerm.setLabel("Other term");
+        final TermOccurrence to = new TermOccurrence();
+        to.setTerm(otherTerm);
+        final TextQuoteSelector selector = new TextQuoteSelector("Územní plán");
+        selector.setPrefix("RDFa simple");
+        selector.setSuffix(" hlavního města Prahy.");
+        final OccurrenceTarget t = new OccurrenceTarget(file);
+        t.setSelectors(Collections.singleton(selector));
+        to.setTarget(t);
+        transactional(() -> {
+            em.persist(t);
+            em.persist(otherTerm);
+            em.persist(to);
+        });
+        final InputStream content = loadFile("data/rdfa-simple.html");
         generateFile();
-        sut.generateAnnotations(content, file, document);
-        final java.io.File contentFile = new java.io.File(
-                environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
-                        vocabulary.getDocument().getFileDirectoryName() + java.io.File.separator + file.getFileName());
-        final List<String> lines = Files.readAllLines(contentFile.toPath());
-        final String result = String.join("\n", lines);
-        assertFalse(result.isEmpty());
+        sut.generateAnnotations(content, file);
+        final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAll(file);
+        assertEquals(2, allOccurrences.size());
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
     }
 }

@@ -2,12 +2,13 @@ package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.config.TestConfig;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
-import cz.cvut.kbss.termit.security.model.UserDetails;
+import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
-import cz.cvut.kbss.termit.service.security.UserDetailsService;
+import cz.cvut.kbss.termit.service.security.TermItUserDetailsService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import io.jsonwebtoken.Jwts;
@@ -31,7 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.servlet.FilterChain;
 import java.util.Date;
 
-import static cz.cvut.kbss.termit.model.UserAccountTest.generateAccount;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +59,7 @@ class JwtAuthorizationFilterTest {
     private AuthenticationManager authManagerMock;
 
     @Mock
-    private UserDetailsService detailsServiceMock;
+    private TermItUserDetailsService detailsServiceMock;
 
     @Mock
     private SecurityUtils securityUtilsMock;
@@ -73,12 +73,12 @@ class JwtAuthorizationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        this.user = generateAccount();
+        this.user = Generator.generateUserAccount();
         this.jwtUtilsSpy = spy(new JwtUtils(config));
         this.objectMapper = Environment.getObjectMapper();
         this.sut = new JwtAuthorizationFilter(authManagerMock, jwtUtilsSpy, securityUtilsMock, detailsServiceMock,
                 objectMapper);
-        when(detailsServiceMock.loadUserByUsername(user.getUsername())).thenReturn(new UserDetails(user));
+        when(detailsServiceMock.loadUserByUsername(user.getUsername())).thenReturn(new TermItUserDetails(user));
     }
 
     @Test
@@ -86,9 +86,9 @@ class JwtAuthorizationFilterTest {
         generateJwtIntoRequest();
 
         sut.doFilterInternal(mockRequest, mockResponse, chainMock);
-        final ArgumentCaptor<UserDetails> captor = ArgumentCaptor.forClass(UserDetails.class);
+        final ArgumentCaptor<TermItUserDetails> captor = ArgumentCaptor.forClass(TermItUserDetails.class);
         verify(securityUtilsMock).setCurrentUser(captor.capture());
-        final UserDetails userDetails = captor.getValue();
+        final TermItUserDetails userDetails = captor.getValue();
         assertEquals(user, userDetails.getUser());
     }
 

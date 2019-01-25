@@ -1,9 +1,7 @@
 package cz.cvut.kbss.termit.environment;
 
-import cz.cvut.kbss.termit.model.Glossary;
-import cz.cvut.kbss.termit.model.Model;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
@@ -121,6 +119,34 @@ public class Generator {
     }
 
     /**
+     * Generates a random {@link UserAccount} instance, initialized with first name, last name, username and
+     * identifier.
+     *
+     * @return A new {@code UserAccount} instance
+     */
+    public static UserAccount generateUserAccount() {
+        final UserAccount account = new UserAccount();
+        account.setFirstName("FirstName" + randomInt());
+        account.setLastName("LastName" + randomInt());
+        account.setUsername("user" + randomInt() + "@kbss.felk.cvut.cz");
+        account.setUri(Generator.generateUri());
+        return account;
+    }
+
+    /**
+     * Generates a random {@link UserAccount} instance, initialized with first name, last name, username, password and
+     * identifier.
+     *
+     * @return A new {@code UserAccount} instance
+     * @see #generateUserAccount()
+     */
+    public static UserAccount generateUserAccountWithPassword() {
+        final UserAccount account = generateUserAccount();
+        account.setPassword("Pass" + randomInt(0, 10000));
+        return account;
+    }
+
+    /**
      * Generates a {@link cz.cvut.kbss.termit.model.Vocabulary} instance with a name, an empty glossary and a model.
      *
      * @return New {@code Vocabulary} instance
@@ -129,14 +155,51 @@ public class Generator {
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = new cz.cvut.kbss.termit.model.Vocabulary();
         vocabulary.setGlossary(new Glossary());
         vocabulary.setModel(new Model());
-        vocabulary.setName("Vocabulary" + randomInt());
+        vocabulary.setLabel("Vocabulary" + randomInt());
+        return vocabulary;
+    }
+
+    public static cz.cvut.kbss.termit.model.Vocabulary generateVocabularyWithId() {
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = generateVocabulary();
+        vocabulary.setUri(Generator.generateUri());
         return vocabulary;
     }
 
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
-        term.setComment("Comment"+ randomInt());
+        term.setComment("Comment" + randomInt());
         return term;
+    }
+
+    public static Term generateTermWithId() {
+        final Term term = generateTerm();
+        term.setUri(Generator.generateUri());
+        return term;
+    }
+
+    public static Resource generateResource() {
+        final Resource resource = new Resource();
+        resource.setLabel("Resource " + randomInt());
+        resource.setDescription("Resource description ");
+        return resource;
+    }
+
+    public static Resource generateResourceWithId() {
+        final Resource resource = generateResource();
+        resource.setUri(Generator.generateUri());
+        return resource;
+    }
+
+    public static Target generateTargetWithId() {
+        final Target target = new Target();
+        target.setUri(Generator.generateUri());
+        return target;
+    }
+
+    public static TermAssignment generateTermAssignmentWithId() {
+        final TermAssignment termAssignment = new TermAssignment();
+        termAssignment.setUri(Generator.generateUri());
+        return termAssignment;
     }
 }
