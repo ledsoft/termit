@@ -93,8 +93,8 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         document.setUri(Generator.generateUri());
         document.setVocabulary(vocabulary);
         vocabulary.setDocument(document);
-        vocabulary.getGlossary().addTerm(term);
-        vocabulary.getGlossary().addTerm(termTwo);
+        vocabulary.getGlossary().addRootTerm(term);
+        vocabulary.getGlossary().addRootTerm(termTwo);
         this.vocabDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         vocabulary.setAuthor(author);
         vocabulary.setCreated(new Date());
@@ -202,9 +202,9 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         final Term area = new Term();
         area.setLabel("Území");
         area.setUri(URI.create("http://test.org/pojem/uzemi"));
-        vocabulary.getGlossary().addTerm(mp);
-        vocabulary.getGlossary().addTerm(ma);
-        vocabulary.getGlossary().addTerm(area);
+        vocabulary.getGlossary().addRootTerm(mp);
+        vocabulary.getGlossary().addRootTerm(ma);
+        vocabulary.getGlossary().addRootTerm(area);
         transactional(() -> {
             em.persist(mp, DescriptorFactory.termDescriptor(vocabulary));
             em.persist(ma, DescriptorFactory.termDescriptor(vocabulary));

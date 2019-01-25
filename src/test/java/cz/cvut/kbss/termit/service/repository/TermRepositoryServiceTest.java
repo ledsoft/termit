@@ -65,20 +65,20 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTerm();
         term.setUri(Generator.generateUri());
 
-        transactional(() -> sut.addTermToVocabulary(term, vocabulary));
+        transactional(() -> sut.addRootTermToVocabulary(term, vocabulary));
 
         transactional(() -> {
             // Need to put in transaction, otherwise EM delegate is closed after find and lazy loading of glossary terms does not work
             final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
             assertNotNull(result);
-            assertTrue(result.getGlossary().getTerms().contains(term));
+            assertTrue(result.getGlossary().getRootTerms().contains(term));
         });
     }
 
     @Test
     void addTermToVocabularyGeneratesTermIdentifierWhenItIsNotSet() {
         final Term term = Generator.generateTerm();
-        transactional(() -> sut.addTermToVocabulary(term, vocabulary));
+        transactional(() -> sut.addRootTermToVocabulary(term, vocabulary));
 
         assertNotNull(term.getUri());
         final Term result = em.find(Term.class, term.getUri());
@@ -93,7 +93,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         final ValidationException exception =
                 assertThrows(
-                        ValidationException.class, () -> sut.addTermToVocabulary(term, vocabulary));
+                        ValidationException.class, () -> sut.addRootTermToVocabulary(term, vocabulary));
         assertThat(exception.getMessage(), containsString("label must not be blank"));
     }
 
@@ -102,12 +102,12 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term term1 = Generator.generateTerm();
         URI uri = Generator.generateUri();
         term1.setUri(uri);
-        sut.addTermToVocabulary(term1, vocabulary);
+        sut.addRootTermToVocabulary(term1, vocabulary);
 
         final Term term2 = Generator.generateTerm();
         term2.setUri(uri);
         assertThrows(
-                ResourceExistsException.class, () -> sut.addTermToVocabulary(term2, vocabulary));
+                ResourceExistsException.class, () -> sut.addRootTermToVocabulary(term2, vocabulary));
     }
 
     @Test
@@ -125,7 +125,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term parent = Generator.generateTermWithId();
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
-            vocabulary.getGlossary().addTerm(parent);
+            vocabulary.getGlossary().addRootTerm(parent);
             em.persist(parent);
             em.merge(vocabulary);
         });
@@ -143,7 +143,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term parent = Generator.generateTermWithId();
         final Term child = Generator.generateTerm();
         transactional(() -> {
-            vocabulary.getGlossary().addTerm(parent);
+            vocabulary.getGlossary().addRootTerm(parent);
             em.persist(parent);
             em.merge(vocabulary);
         });
@@ -161,16 +161,16 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term parent = Generator.generateTermWithId();
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
-            vocabulary.getGlossary().addTerm(parent);
+            vocabulary.getGlossary().addRootTerm(parent);
             em.persist(parent);
             em.merge(vocabulary.getGlossary());
         });
 
         sut.addChildTerm(child, parent);
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
-        assertEquals(1, result.getTerms().size());
-        assertTrue(result.getTerms().contains(parent));
-        assertFalse(result.getTerms().contains(child));
+        assertEquals(1, result.getRootTerms().size());
+        assertTrue(result.getRootTerms().contains(parent));
+        assertFalse(result.getRootTerms().contains(child));
         assertNotNull(em.find(Term.class, child.getUri()));
     }
 
@@ -181,7 +181,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTerm();
         child.setUri(existing.getUri());
         transactional(() -> {
-            vocabulary.getGlossary().addTerm(parent);
+            vocabulary.getGlossary().addRootTerm(parent);
             em.persist(existing);
             em.persist(parent);
             em.merge(vocabulary.getGlossary());
@@ -194,7 +194,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     void findAllRootsReturnsRootTermsOnMatchingPage() {
         final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
                 Collectors.toList());
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
         transactional(() -> {
             terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
@@ -227,7 +227,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         }
 
         final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setTerms(terms);
+        toPersist.getGlossary().setRootTerms(terms);
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));
@@ -245,7 +245,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyChecksForTermWithMatchingLabel() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addRootTerm(t);
         vrs.update(vocabulary);
 
         assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary));
@@ -260,11 +260,11 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateUpdatesTermWithSubTerms() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addRootTerm(t);
         final Term childOne = generateTermWithUri();
         t.addSubTerm(childOne.getUri());
         final Term termTwo = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(termTwo);
+        vocabulary.getGlossary().addRootTerm(termTwo);
         transactional(() -> {
             em.persist(childOne);
             em.persist(t);
@@ -286,8 +286,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateThrowsValidationExceptionForEmptyTermLabel() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(t);
-        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addRootTerm(t);
+        vocabulary.getGlossary().addRootTerm(t);
         transactional(() -> {
             em.persist(t);
             em.merge(vocabulary);
@@ -300,7 +300,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void getAssignmentsReturnsTermAssignments() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addTerm(t);
+        vocabulary.getGlossary().addRootTerm(t);
 
         final Resource resource = Generator.generateResourceWithId();
         resource.setAuthor(user.toUser());

@@ -35,7 +35,6 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
-    @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
 

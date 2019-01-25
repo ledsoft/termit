@@ -151,7 +151,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
-        vocabulary.getGlossary().addTerm(term);
+        vocabulary.getGlossary().addRootTerm(term);
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             em.persist(term, termDescriptor);
@@ -162,7 +162,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
             // does not work
             final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
-            assertTrue(result.getTerms().contains(term));
+            assertTrue(result.getRootTerms().contains(term));
         });
     }
 
@@ -173,7 +173,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
-        vocabulary.getGlossary().addTerm(term);
+        vocabulary.getGlossary().addRootTerm(term);
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             em.persist(term, termDescriptor);
@@ -186,7 +186,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor
                     .getAttributeDescriptor(
                             em.getMetamodel().entity(Vocabulary.class).getFieldSpecification("glossary")));
-            assertTrue(result.getTerms().contains(term));
+            assertTrue(result.getRootTerms().contains(term));
         });
     }
 

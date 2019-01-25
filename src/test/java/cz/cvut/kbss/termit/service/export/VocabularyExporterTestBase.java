@@ -45,7 +45,7 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
             }
             terms.add(term);
         }
-        vocabulary.getGlossary().setTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
         transactional(() -> {
             em.merge(vocabulary.getGlossary());
             terms.forEach(em::persist);
