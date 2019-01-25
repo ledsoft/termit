@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-RDF4J_ENDPOINT=http://onto.fel.cvut.cz:7200/repositories/termit-stage
+RDF4J_ENDPOINT=http://onto.fel.cvut.cz:7200/repositories/termit-dev-new
 DIR="/home/kremep1/fel/projects/17mvcr/semanticky-slovnik-pojmu/model/IPR Praha/"
 IFS=
 FILE=tmp.rq
