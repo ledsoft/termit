@@ -11,6 +11,9 @@ DELETE {
     ?x dc:created ?y .
 	?c dc:created ?y2 .
 	?d dc:created ?y3 .
+	?c dce:relation ?src ;
+	   skos:prefLabel ?l;
+	   dce:description ?cComment .
 }
 INSERT {
     GRAPH g: {
@@ -39,8 +42,10 @@ INSERT {
     ?g a popis-dat-pojem:glosar .
     ?c a popis-dat-pojem:term ;
        rdfs:label ?l ;
+       rdfs:comment ?cComment ;
        popis-dat-pojem:ma-autora ?a ;
        dc:created ?t ;
+       dce:source ?srcd ;
        popis-dat-pojem:je-pojmem-ze-slovniku ?x .
     ?g popis-dat-pojem:obsahuje-korenovy-pojem ?cTop .
     }
@@ -54,10 +59,17 @@ INSERT {
 	   skos:prefLabel ?l .
 	FILTER(lang(?vTitle)="cs")
     OPTIONAL {
+        ?c dce:description ?cComment .
+	}
+    OPTIONAL {
         ?x dc:created ?y .
 	}
     OPTIONAL {
         ?c dc:created ?y2 .
+	}
+    OPTIONAL {
+        ?c dce:relation ?src .
+        BIND (str(?src) as ?srcd)
 	}
     OPTIONAL {
         FILTER NOT EXISTS {
