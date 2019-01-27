@@ -203,6 +203,16 @@ public class TermService {
     }
 
     /**
+     * Removes the specified term.
+     *
+     * @param termUri Uri of the term
+     */
+    @Transactional
+    public void remove(URI termUri) {
+        repositoryService.remove(termUri);
+    }
+
+    /**
      * Generates identifier for a term with the specified label and in a vocabulary with the specified identifier.
      *
      * @param vocabularyUri Vocabulary identifier
