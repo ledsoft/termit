@@ -69,6 +69,12 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void normalizeRemovesParentheses() {
+        final String value = "Dokument pro Slovník zákona č. 183/2006 Sb. (Stavební zákon)";
+        assertEquals("dokument-pro-slovnik-zakona-c.-183-2006-sb.-stavebni-zakon", IdentifierResolver.normalize(value));
+    }
+
+    @Test
     void generateIdentifierAppendsNormalizedComponentsToSpecifiedNamespace() {
         final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/";
         final String compOne = "Catherine";
