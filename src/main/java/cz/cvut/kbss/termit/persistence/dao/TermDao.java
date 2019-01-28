@@ -2,8 +2,10 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,38 @@ public class TermDao extends AssetDao<Term> {
     public TermDao(EntityManager em, Configuration config) {
         super(Term.class, em);
         this.config = config;
+    }
+
+    /**
+     * Persists the specified term into the specified vocabulary's context.
+     * <p>
+     * Note that this is the preferred way of persisting terms.
+     *
+     * @param instance   The instance to persist
+     * @param vocabulary Vocabulary to which the instance belongs
+     */
+    public void persist(Term instance, Vocabulary vocabulary) {
+        Objects.requireNonNull(instance);
+        Objects.requireNonNull(vocabulary);
+        try {
+            em.persist(instance, DescriptorFactory.termDescriptor(vocabulary));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    @Override
+    public Term update(Term entity) {
+        Objects.requireNonNull(entity);
+        assert entity.getVocabulary() != null;
+
+        try {
+            // Evict possibly cached instance loaded from default context
+            em.getEntityManagerFactory().getCache().evict(Term.class, entity.getUri(), null);
+            return em.merge(entity, DescriptorFactory.termDescriptor(entity.getVocabulary()));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 
     /**
