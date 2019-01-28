@@ -19,7 +19,7 @@ public class Glossary extends AbstractEntity {
      * This attribute should contain only root terms. The term hierarchy is modelled by terms having sub-terms, so all
      * terms should be reachable.
      */
-    @OWLObjectProperty(iri = Vocabulary.s_p_obsahuje_korenovy_pojem, cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OWLObjectProperty(iri = Vocabulary.s_p_obsahuje_korenovy_pojem, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<Term> rootTerms;
 
     public Set<Term> getRootTerms() {
