@@ -155,6 +155,17 @@ public class TermController extends BaseController {
         return termService.findRequired(termUri);
     }
 
+    @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeById(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
+                        @PathVariable("termIdFragment") String termIdFragment,
+                        @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
+        termService.remove(termUri);
+        LOG.debug("Term {} removed.", termUri);
+    }
+
+
     private URI getTermUri(String vocabIdFragment, String termIdFragment, String namespace) {
         return idResolver.resolveIdentifier(idResolver
                 .buildNamespace(getVocabularyUri(namespace, vocabIdFragment).toString(),
