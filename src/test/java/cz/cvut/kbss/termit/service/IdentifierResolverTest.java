@@ -57,6 +57,18 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
     }
 
     @Test
+    void normalizeReplacesForwardSlashesWithDashes() {
+        final String value = "Slovník vyhlášky č. 500/2006 Sb.";
+        assertEquals("slovnik-vyhlasky-c.-500-2006-sb.", IdentifierResolver.normalize(value));
+    }
+
+    @Test
+    void normalizeReplacesBackwardSlashesWithDashes() {
+        final String value = "C:\\Users";
+        assertEquals("c:-users", IdentifierResolver.normalize(value));
+    }
+
+    @Test
     void generateIdentifierAppendsNormalizedComponentsToSpecifiedNamespace() {
         final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/";
         final String compOne = "Catherine";

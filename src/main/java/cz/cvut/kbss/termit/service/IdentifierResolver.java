@@ -38,7 +38,7 @@ public class IdentifierResolver {
      */
     public static String normalize(String value) {
         Objects.requireNonNull(value);
-        final String normalized = value.toLowerCase().trim().replace(' ', '-');
+        final String normalized = value.toLowerCase().trim().replaceAll("[\\s/\\\\]", "-");
         return Normalizer.normalize(normalized, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
     }
 
