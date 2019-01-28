@@ -152,6 +152,19 @@ public class Constants {
         }
     }
 
+    public static final class Turtle {
+
+        /**
+         * Media type for RDF serialized in Turtle.
+         */
+        public static final String MEDIA_TYPE = "text/turtle";
+
+        /**
+         * Turtle file extension.
+         */
+        public static final String FILE_EXTENSION = ".ttl";
+    }
+
     /**
      * Useful HTTP request query parameters used by the application REST API.
      */
