@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -62,7 +63,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         verifyIdentifierUnique(instance);
         vocabulary.getGlossary().addRootTerm(instance);
         instance.setVocabulary(vocabulary.getUri());
-        termDao.persist(instance);
+        termDao.persist(instance, vocabulary);
         // Explicitly merge glossary to save the reference to the term, as vocabulary (and thus glossary) are detached in this transaction
         vocabularyDao.updateGlossary(vocabulary);
     }
@@ -93,12 +94,13 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         verifyIdentifierUnique(instance);
         parentTerm.addSubTerm(instance.getUri());
 
-        if ( instance.getVocabulary() == null ) {
+        if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
 
-        termDao.persist(instance);
         termDao.update(parentTerm);
+        termDao.persist(instance, vocabularyDao.find(parentTerm.getVocabulary()).orElseThrow(
+                () -> NotFoundException.create(Vocabulary.class.getSimpleName(), parentTerm.getVocabulary())));
     }
 
     /**

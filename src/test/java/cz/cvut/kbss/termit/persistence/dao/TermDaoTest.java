@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Constants;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -42,7 +43,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         Environment.setCurrentUser(vocabulary.getAuthor());
         transactional(() -> {
             em.persist(vocabulary.getAuthor());
-            em.persist(vocabulary);
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
         });
     }
 
@@ -146,7 +147,8 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
+    @Disabled(
+            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueForLabelExistingInVocabulary() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
@@ -156,7 +158,8 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
+    @Disabled(
+            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsFalseForUnknownLabel() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
@@ -165,7 +168,8 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    @Disabled("Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
+    @Disabled(
+            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyReturnsTrueWhenLabelDiffersOnlyInCase() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
@@ -219,5 +223,37 @@ class TermDaoTest extends BaseDaoTestRunner {
         final List<Term> result = sut.findAll(vocabulary);
         terms.sort(Comparator.comparing(Term::getLabel));
         assertEquals(terms, result);
+    }
+
+    @Test
+    void persistSavesTermIntoVocabularyContext() {
+        final Term term = Generator.generateTermWithId();
+        transactional(() -> sut.persist(term, vocabulary));
+
+        final Term result = em.find(Term.class, term.getUri(), DescriptorFactory.termDescriptor(vocabulary));
+        assertNotNull(result);
+        assertEquals(term, result);
+    }
+
+    @Test
+    void updateUpdatesTermInVocabularyContext() {
+        final Term term = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(term);
+            term.setVocabulary(vocabulary.getUri());
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+            em.persist(term, DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        term.setVocabulary(vocabulary.getUri());
+        final String updatedLabel = "Updated label";
+        final String oldLabel = term.getLabel();
+        term.setLabel(updatedLabel);
+        transactional(() -> sut.update(term));
+
+        final Term result = em.find(Term.class, term.getUri(), DescriptorFactory.termDescriptor(vocabulary));
+        assertEquals(updatedLabel, result.getLabel());
+        assertFalse(em.createNativeQuery("ASK WHERE { ?x rdfs:label ?label }", Boolean.class)
+                      .setParameter("label", oldLabel, Constants.DEFAULT_LANGUAGE).getSingleResult());
     }
 }
