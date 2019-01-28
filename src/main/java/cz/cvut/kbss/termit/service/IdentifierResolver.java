@@ -28,7 +28,8 @@ public class IdentifierResolver {
      * <li>Transforming the value to lower case</li>
      * <li>Trimming the string</li>
      * <li>Replacing non-ASCII characters with ASCII, e.g., 'č' with 'c'</li>
-     * <li>Replacing white spaces with dashes</li>
+     * <li>Replacing white spaces and slashes with dashes</li>
+     * <li>Removing parentheses</li>
      * </ul>
      * <p>
      * Based on <a href="https://gist.github.com/rponte/893494">https://gist.github.com/rponte/893494</a>
@@ -39,7 +40,8 @@ public class IdentifierResolver {
     public static String normalize(String value) {
         Objects.requireNonNull(value);
         final String normalized = value.toLowerCase().trim().replaceAll("[\\s/\\\\]", "-");
-        return Normalizer.normalize(normalized, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        return Normalizer.normalize(normalized, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "")
+                         .replaceAll("[()]", "");
     }
 
     /**
