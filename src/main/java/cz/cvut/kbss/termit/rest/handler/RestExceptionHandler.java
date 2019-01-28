@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,6 +61,12 @@ public class RestExceptionHandler {
         // Not necessary to log NotFoundException, they may be quite frequent and do not represent an issue with the application
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorInfo> usernameNotFound(HttpServletRequest request, UsernameNotFoundException e) {
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.NOT_FOUND);
+    }
+
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ErrorInfo> authorizationException(HttpServletRequest request, AuthorizationException e) {

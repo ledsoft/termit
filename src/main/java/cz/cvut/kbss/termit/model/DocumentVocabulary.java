@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
@@ -10,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_dokumentovy_slovnik)
+@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class DocumentVocabulary extends Vocabulary {
 
