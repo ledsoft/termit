@@ -6,12 +6,23 @@ import cz.cvut.kbss.jopa.vocabulary.RDF;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.dto.RdfsResource;
 import cz.cvut.kbss.termit.exception.PersistenceException;
+import cz.cvut.kbss.termit.service.export.util.TypeAwareByteArrayResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants.Turtle;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.Rio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -108,6 +119,24 @@ public class DataDao {
                                  .setParameter("tag", config.get(ConfigParam.LANGUAGE), null).getSingleResult());
         } catch (NoResultException e) {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Exports the specified repository contexts as Turtle.
+     *
+     * @param contexts The contexts to export, possibly empty (in which case the default context is exported)
+     * @return Resource containing the exported data in Turtle
+     */
+    public TypeAwareResource exportDataAsTurtle(URI... contexts) {
+        final org.eclipse.rdf4j.repository.Repository repo = em.unwrap(org.eclipse.rdf4j.repository.Repository.class);
+        try (final RepositoryConnection con = repo.getConnection()) {
+            final ValueFactory vf = con.getValueFactory();
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            RDFHandler writer = Rio.createWriter(RDFFormat.TURTLE, bos);
+            con.export(writer,
+                    Arrays.stream(contexts).map(u -> vf.createIRI(u.toString())).toArray(Resource[]::new));
+            return new TypeAwareByteArrayResource(bos.toByteArray(), Turtle.MEDIA_TYPE, Turtle.FILE_EXTENSION);
         }
     }
 }

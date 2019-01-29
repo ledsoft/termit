@@ -7,16 +7,26 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.TypeAwareResource;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -131,5 +141,67 @@ class DataDaoTest extends BaseDaoTestRunner {
         assertNotNull(result);
         assertEquals(resource.getLabel(), result.getLabel());
         assertEquals(resource.getTypes(), result.getTypes());
+    }
+
+    @Test
+    void exportDataToTurtleReturnsResourceRepresentingTurtleData() {
+        generateProperties();
+        transactional(() -> {
+            final TypeAwareResource result = sut.exportDataAsTurtle();
+            assertNotNull(result);
+            assertTrue(result.getMediaType().isPresent());
+            assertEquals(Constants.Turtle.MEDIA_TYPE, result.getMediaType().get());
+            assertTrue(result.getFileExtension().isPresent());
+            assertEquals(Constants.Turtle.FILE_EXTENSION, result.getFileExtension().get());
+        });
+    }
+
+    @Test
+    void exportDataToTurtleExportsDefaultContextWhenNoArgumentsAreProvided() {
+        generateProperties();
+        final ValueFactory vf = SimpleValueFactory.getInstance();
+        transactional(() -> {
+            final TypeAwareResource result = sut.exportDataAsTurtle();
+            final Model model = parseExportToModel(result);
+            assertAll(() -> assertTrue(model.contains(vf.createIRI(Vocabulary.s_p_ma_krestni_jmeno), RDFS.LABEL,
+                    vf.createLiteral(FIRST_NAME_LABEL))),
+                    () -> assertTrue(model.contains(vf.createIRI(Vocabulary.s_p_ma_prijmeni), RDF.TYPE,
+                            vf.createIRI(OWL.DATATYPE_PROPERTY))),
+                    () -> assertTrue(model.contains(vf.createIRI(Vocabulary.s_p_ma_uzivatelske_jmeno), RDF.TYPE,
+                            vf.createIRI(OWL.DATATYPE_PROPERTY))));
+        });
+    }
+
+    @Test
+    void exportDataToTurtleExportsContextWhenProvided() {
+        final URI context = Generator.generateUri();
+        generateProperties();
+        final ValueFactory vf = SimpleValueFactory.getInstance();
+        transactional(() -> {
+            final Repository repo = em.unwrap(Repository.class);
+            try (final RepositoryConnection connection = repo.getConnection()) {
+                connection.add(vf.createIRI(Vocabulary.s_c_term), RDFS.LABEL, vf.createLiteral("Term"),
+                        vf.createIRI(context.toString()));
+                connection.commit();
+            }
+        });
+        transactional(() -> {
+            final TypeAwareResource result = sut.exportDataAsTurtle(context);
+            Model model = parseExportToModel(result);
+            assertTrue(model.contains(vf.createIRI(Vocabulary.s_c_term), RDFS.LABEL, vf.createLiteral("Term")));
+            assertFalse(model.contains(vf.createIRI(Vocabulary.s_p_ma_krestni_jmeno), null, null));
+        });
+    }
+
+    private static Model parseExportToModel(TypeAwareResource result) {
+        final RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+        Model model = new LinkedHashModel();
+        parser.setRDFHandler(new StatementCollector(model));
+        try {
+            parser.parse(result.getInputStream(), "");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return model;
     }
 }

@@ -11,6 +11,7 @@ import cz.cvut.kbss.termit.service.business.TermService;
 import cz.cvut.kbss.termit.util.*;
 import cz.cvut.kbss.termit.util.Constants.Excel;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
+import cz.cvut.kbss.termit.util.Constants.Turtle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,8 @@ public class TermController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     JsonLd.MEDIA_TYPE,
                     CsvUtils.MEDIA_TYPE,
-                    Excel.MEDIA_TYPE})
+                    Excel.MEDIA_TYPE,
+                    Turtle.MEDIA_TYPE})
     public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                  @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
@@ -158,8 +160,8 @@ public class TermController extends BaseController {
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeById(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
-                        @PathVariable("termIdFragment") String termIdFragment,
-                        @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+                           @PathVariable("termIdFragment") String termIdFragment,
+                           @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
         termService.remove(termUri);
         LOG.debug("Term {} removed.", termUri);
@@ -252,8 +254,8 @@ public class TermController extends BaseController {
     @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/identifier", method = RequestMethod.GET)
     public URI generateIdentifier(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
-                                     @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
-                                     @RequestParam("name") String name) {
+                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                                  @RequestParam("name") String name) {
         final URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
         return termService.generateIdentifier(vocabularyUri, name);
     }
