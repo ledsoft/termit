@@ -99,15 +99,15 @@ public class DescriptorFactory {
      */
     public static Descriptor termDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        addAuthorAndEditorDescriptors(descriptor);
-        return descriptor;
+        return termDescriptor(vocabulary.getUri());
     }
 
     /**
-     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in a vocabulary with the specified identifier.
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in a vocabulary with the
+     * specified identifier.
      * <p>
-     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary IRI.
+     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary
+     * IRI.
      * <p>
      * Note that default context is used for asset author.
      *
