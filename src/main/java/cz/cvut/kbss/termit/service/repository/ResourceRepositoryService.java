@@ -4,6 +4,8 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.*;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -140,6 +142,20 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
             assignments.forEach(termAssignmentDao::remove);
             targetDao.remove(t);
         });
+        removeFromParentDocumentIfFile(instance);
+    }
+
+    private void removeFromParentDocumentIfFile(Resource instance) {
+        if (!(instance instanceof File)) {
+            return;
+        }
+        final File file = (File) instance;
+        final Document parent = file.getDocument();
+        if (parent != null) {
+            LOG.trace("Removing file {} from its parent document {}.", instance, parent);
+            parent.removeFile(file);
+            resourceDao.update(parent);
+        }
     }
 
     /**

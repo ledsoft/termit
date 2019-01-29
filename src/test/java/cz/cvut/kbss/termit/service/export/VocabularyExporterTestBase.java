@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -26,13 +27,12 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
     Vocabulary vocabulary;
 
     void setUp() {
-        this.vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        this.vocabulary = Generator.generateVocabularyWithId();
         final User author = Generator.generateUserWithId();
         Environment.setCurrentUser(author);
         transactional(() -> {
             em.persist(author);
-            em.persist(vocabulary);
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
         });
     }
 
@@ -47,8 +47,8 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
         }
         vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
         transactional(() -> {
-            em.merge(vocabulary.getGlossary());
-            terms.forEach(em::persist);
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+            terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
             // Simulating inferred inverse property je_pojmem_ze_slovniku
             final Repository repo = em.unwrap(Repository.class);
             try (final RepositoryConnection conn = repo.getConnection()) {
