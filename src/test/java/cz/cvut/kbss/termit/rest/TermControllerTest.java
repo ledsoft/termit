@@ -14,6 +14,7 @@ import cz.cvut.kbss.termit.service.export.util.TypeAwareByteArrayResource;
 import cz.cvut.kbss.termit.util.*;
 import cz.cvut.kbss.termit.util.Constants.Excel;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
+import cz.cvut.kbss.termit.util.Constants.Turtle;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
@@ -479,5 +480,49 @@ class TermControllerTest extends BaseControllerTestRunner {
                                                                                                 MediaType.APPLICATION_JSON))
                                            .andExpect(status().isCreated()).andReturn();
         verifyLocationEquals(PATH + "/" + VOCABULARY_NAME + "/terms/" + name, mvcResult);
+    }
+
+    @Test
+    void getAllExportsTermsToTurtleWhenAcceptMediaTypeIsTurtle() throws Exception {
+        initNamespaceAndIdentifierResolution();
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(URI.create(VOCABULARY_URI));
+        when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
+        final TypeAwareByteArrayResource export = prepareTurtle();
+        when(termServiceMock.exportGlossary(vocabulary, Turtle.MEDIA_TYPE)).thenReturn(Optional.of(export));
+
+        mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(Turtle.MEDIA_TYPE)).andExpect(
+                status().isOk());
+        verify(termServiceMock).exportGlossary(vocabulary, Turtle.MEDIA_TYPE);
+    }
+
+    private TypeAwareByteArrayResource prepareTurtle() {
+        final String content = "@base <http://example.org/> .\n" +
+                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
+                "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n" +
+                "@prefix rel: <http://www.perceive.net/schemas/relationship/> .\n" +
+                "\n" +
+                "<#spiderman>\n" +
+                "    rel:enemyOf <#green-goblin> ;\n" +
+                "    a foaf:Person ;\n" +
+                "    foaf:name \"Spiderman\", .";
+        return new TypeAwareByteArrayResource(content.getBytes(), Turtle.MEDIA_TYPE, Turtle.FILE_EXTENSION);
+    }
+
+    @Test
+    void getAllReturnsTurtleAttachmentWhenAcceptMediaTypeIsTurtle() throws Exception {
+        initNamespaceAndIdentifierResolution();
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(URI.create(VOCABULARY_URI));
+        when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
+        final TypeAwareByteArrayResource export = prepareTurtle();
+        when(termServiceMock.exportGlossary(vocabulary, Turtle.MEDIA_TYPE)).thenReturn(Optional.of(export));
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms").accept(Turtle.MEDIA_TYPE)).andReturn();
+        assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION), containsString("attachment"));
+        assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION),
+                containsString("filename=\"" + VOCABULARY_NAME + Turtle.FILE_EXTENSION + "\""));
     }
 }
