@@ -44,6 +44,12 @@ public class Document extends Resource {
         files.add(file);
     }
 
+    public void removeFile(File file) {
+        if (files != null) {
+            files.remove(file);
+        }
+    }
+
     /**
      * Retrieves file with the specified filename from this document.
      *

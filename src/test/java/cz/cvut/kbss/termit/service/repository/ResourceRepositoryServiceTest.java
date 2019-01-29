@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
@@ -305,5 +307,27 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource toPersist = Generator.generateResource();
         toPersist.setUri(existing.getUri());
         assertThrows(ResourceExistsException.class, () -> sut.persist(toPersist));
+    }
+
+    @Test
+    void removeDeletesReferenceFromParentDocumentToRemovedFile() {
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("test.txt");
+        final Document parent = new Document();
+        parent.setUri(Generator.generateUri());
+        parent.setLabel("Parent document");
+        parent.addFile(file);
+        file.setDocument(parent);   // Manually set the inferred attribute
+        transactional(() -> {
+            em.persist(file);
+            em.persist(parent);
+        });
+
+        transactional(() -> sut.remove(file));
+
+        assertFalse(sut.exists(file.getUri()));
+        final Document result = em.find(Document.class, parent.getUri());
+        assertThat(result.getFiles(), anyOf(nullValue(), empty()));
     }
 }
