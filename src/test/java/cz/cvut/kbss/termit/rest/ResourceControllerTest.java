@@ -390,4 +390,17 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         assertEquals(uri.toString(), readValue(mvcResult, String.class));
         verify(resourceServiceMock).generateIdentifier(label);
     }
+
+    @Test
+    void getResourceSupportsUriWithFileExtension() throws Exception {
+        final String normLabel = "CZ-00025712-CUZK_RUIAN-CSV-ADR-OB_554782.xml";
+        final String namespace = "http://atom.cuzk.cz/RUIAN-CSV-ADR-OB/datasetFeeds/";
+        final URI uri = URI.create(namespace + normLabel);
+        final Resource resource = Generator.generateResource();
+        resource.setUri(uri);
+        when(identifierResolverMock.resolveIdentifier(namespace, normLabel)).thenReturn(uri);
+        when(resourceServiceMock.findRequired(uri)).thenReturn(resource);
+        mockMvc.perform(get(PATH + "/" + normLabel).param(QueryParams.NAMESPACE, namespace)).andExpect(status().isOk());
+        verify(resourceServiceMock).findRequired(uri);
+    }
 }
