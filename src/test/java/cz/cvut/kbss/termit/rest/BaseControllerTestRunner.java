@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.accept.ContentNegotiationManager;
 
 import static cz.cvut.kbss.termit.environment.Environment.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +32,7 @@ public class BaseControllerTestRunner {
                                               createDefaultMessageConverter(), createStringEncodingMessageConverter(),
                                               createResourceMessageConverter())
                                       .setUseSuffixPatternMatch(false)
+                                      .setContentNegotiationManager(new ContentNegotiationManager())
                                       .build();
     }
 
