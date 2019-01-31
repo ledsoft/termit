@@ -4,14 +4,14 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.*;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
+import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +36,8 @@ class SearchDaoTest extends BaseDaoTestRunner {
 
     private User user;
 
+    private Vocabulary vocabulary;
+
     @BeforeEach
     void setUp() {
         this.user = Generator.generateUserWithId();
@@ -45,14 +47,13 @@ class SearchDaoTest extends BaseDaoTestRunner {
 
     @Test
     void defaultFullTextSearchFindsTermsWithMatchingLabel() {
-        final Vocabulary vocabulary = generateTerms();
+        final List<Term> terms = generateTerms();
         transactional(() -> {
             em.persist(vocabulary);
-            insertInVocabularyStatements(vocabulary);
+            terms.forEach(em::persist);
         });
-        final Collection<Term> matching = vocabulary.getGlossary().getRootTerms().stream()
-                                                    .filter(t -> t.getLabel().contains("Matching")).collect(
-                        Collectors.toList());
+        final Collection<Term> matching = terms.stream().filter(t -> t.getLabel().contains("Matching"))
+                                               .collect(Collectors.toList());
 
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matching.size(), result.size());
@@ -62,30 +63,18 @@ class SearchDaoTest extends BaseDaoTestRunner {
         }
     }
 
-    private Vocabulary generateTerms() {
-        final Vocabulary vocabulary = new Vocabulary();
-        vocabulary.setLabel("test");
-        vocabulary.setUri(Generator.generateUri());
-        vocabulary.setGlossary(new Glossary());
-        vocabulary.setModel(new Model());
+    private List<Term> generateTerms() {
+        this.vocabulary = Generator.generateVocabularyWithId();
+        final List<Term> terms = new ArrayList<>(10);
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final Term term = new Term();
             term.setUri(Generator.generateUri());
             term.setLabel(Generator.randomBoolean() ? "Matching label " + i : "Unknown label " + i);
             vocabulary.getGlossary().addRootTerm(term);
+            term.setVocabulary(vocabulary.getUri());
+            terms.add(term);
         }
-        return vocabulary;
-    }
-
-    private void insertInVocabularyStatements(Vocabulary vocabulary) {
-        // This normally happens by using SPIN rules on repository level
-        final Repository repo = em.unwrap(Repository.class);
-        try (final RepositoryConnection con = repo.getConnection()) {
-            final ValueFactory vf = con.getValueFactory();
-            vocabulary.getGlossary().getRootTerms().forEach(t -> con.add(vf.createIRI(t.getUri().toString()),
-                    vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku),
-                    vf.createIRI(vocabulary.getUri().toString())));
-        }
+        return terms;
     }
 
     @Test
@@ -119,16 +108,15 @@ class SearchDaoTest extends BaseDaoTestRunner {
 
     @Test
     void defaultFullTextSearchFindsVocabulariesAndTermsWithMatchingLabel() {
-        final Vocabulary terms = generateTerms();
+        final List<Term> terms = generateTerms();
         final List<Vocabulary> vocabularies = generateVocabularies();
         transactional(() -> {
-            em.persist(terms);
-            insertInVocabularyStatements(terms);
+            em.persist(vocabulary);
+            terms.forEach(em::persist);
             vocabularies.forEach(em::persist);
         });
-        final Collection<Term> matchingTerms = terms.getGlossary().getRootTerms().stream()
-                                                    .filter(t -> t.getLabel().contains("Matching")).collect(
-                        Collectors.toList());
+        final Collection<Term> matchingTerms = terms.stream().filter(t -> t.getLabel().contains("Matching")).collect(
+                Collectors.toList());
         final Collection<Vocabulary> matchingVocabularies = vocabularies.stream()
                                                                         .filter(v -> v.getLabel().contains("Matching"))
                                                                         .collect(Collectors.toList());

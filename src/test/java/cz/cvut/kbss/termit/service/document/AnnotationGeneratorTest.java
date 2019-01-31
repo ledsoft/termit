@@ -109,6 +109,8 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
             em.persist(vocabulary, vocabDescriptor);
             em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
             em.persist(file, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(term, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(termTwo, DescriptorFactory.termDescriptor(vocabulary));
         });
     }
 
