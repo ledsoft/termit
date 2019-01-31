@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,8 +25,8 @@ public class Document extends Resource {
 
     @JsonIgnore
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik, fetch = FetchType.EAGER)
-    private DocumentVocabulary vocabulary;
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik)
+    private URI vocabulary;
 
     public Set<File> getFiles() {
         return files;
@@ -61,11 +61,11 @@ public class Document extends Resource {
                Optional.empty();
     }
 
-    public DocumentVocabulary getVocabulary() {
+    public URI getVocabulary() {
         return vocabulary;
     }
 
-    public void setVocabulary(DocumentVocabulary vocabulary) {
+    public void setVocabulary(URI vocabulary) {
         this.vocabulary = vocabulary;
     }
 

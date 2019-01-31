@@ -91,7 +91,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         document.setCreated(new Date());
         document.setLabel("metropolitan-plan");
         document.setUri(Generator.generateUri());
-        document.setVocabulary(vocabulary);
+        document.setVocabulary(vocabulary.getUri());
         vocabulary.setDocument(document);
         vocabulary.getGlossary().addRootTerm(term);
         vocabulary.getGlossary().addRootTerm(termTwo);

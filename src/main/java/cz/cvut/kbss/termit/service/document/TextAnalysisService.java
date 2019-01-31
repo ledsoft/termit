@@ -81,7 +81,7 @@ public class TextAnalysisService {
     private TextAnalysisInput createAnalysisInput(File file) {
         final TextAnalysisInput input = new TextAnalysisInput();
         input.setContent(documentManager.loadFileContent(file));
-        input.setVocabularyContext(file.getDocument().getVocabulary().getUri());
+        input.setVocabularyContext(file.getDocument().getVocabulary());
         input.setVocabularyRepository(URI.create(config.get(ConfigParam.REPOSITORY_URL)));
         return input;
     }
