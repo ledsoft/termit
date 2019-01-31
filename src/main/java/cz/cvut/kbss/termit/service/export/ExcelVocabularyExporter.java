@@ -55,8 +55,8 @@ public class ExcelVocabularyExporter implements VocabularyExporter {
 
     private static void generateHeaderRow(Sheet sheet) {
         final Row row = sheet.createRow(0);
-        for (int i = 0; i < Term.EXPORT_COLUMNS.length; i++) {
-            row.createCell(i).setCellValue(Term.EXPORT_COLUMNS[i]);
+        for (int i = 0; i < Term.EXPORT_COLUMNS.size(); i++) {
+            row.createCell(i).setCellValue(Term.EXPORT_COLUMNS.get(i));
         }
     }
 
