@@ -163,6 +163,10 @@ public class Constants {
          * Turtle file extension.
          */
         public static final String FILE_EXTENSION = ".ttl";
+
+        private Turtle() {
+            throw new AssertionError();
+        }
     }
 
     /**
