@@ -44,8 +44,8 @@ class ExcelVocabularyExporterTest extends VocabularyExporterTestBase {
         assertNotNull(sheet);
         final XSSFRow row = sheet.getRow(0);
         assertNotNull(row);
-        for (int i = 0; i < Term.EXPORT_COLUMNS.length; i++) {
-            assertEquals(Term.EXPORT_COLUMNS[i], row.getCell(i).getStringCellValue());
+        for (int i = 0; i < Term.EXPORT_COLUMNS.size(); i++) {
+            assertEquals(Term.EXPORT_COLUMNS.get(i), row.getCell(i).getStringCellValue());
         }
     }
 
