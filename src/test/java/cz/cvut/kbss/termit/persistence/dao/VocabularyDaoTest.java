@@ -162,7 +162,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
             // does not work
             final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
-            assertTrue(result.getRootTerms().contains(term));
+            assertTrue(result.getRootTerms().contains(term.getUri()));
         });
     }
 
@@ -180,14 +180,9 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             sut.updateGlossary(vocabulary);
         });
 
-        transactional(() -> {
-            // If we don't run this in transaction, the delegate em is closed right after find and lazy loading of terms
-            // does not work
-            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(), descriptor
-                    .getAttributeDescriptor(
-                            em.getMetamodel().entity(Vocabulary.class).getFieldSpecification("glossary")));
-            assertTrue(result.getRootTerms().contains(term));
-        });
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
+                DescriptorFactory.glossaryDescriptor(vocabulary));
+        assertTrue(result.getRootTerms().contains(term.getUri()));
     }
 
     @Test

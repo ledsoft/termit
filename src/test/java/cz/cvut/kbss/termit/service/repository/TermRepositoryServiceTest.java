@@ -70,7 +70,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             // Need to put in transaction, otherwise EM delegate is closed after find and lazy loading of glossary terms does not work
             final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
             assertNotNull(result);
-            assertTrue(result.getGlossary().getRootTerms().contains(term));
+            assertTrue(result.getGlossary().getRootTerms().contains(term.getUri()));
         });
     }
 
@@ -180,8 +180,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         sut.addChildTerm(child, parent);
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
         assertEquals(1, result.getRootTerms().size());
-        assertTrue(result.getRootTerms().contains(parent));
-        assertFalse(result.getRootTerms().contains(child));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertFalse(result.getRootTerms().contains(child.getUri()));
         assertNotNull(em.find(Term.class, child.getUri()));
     }
 
@@ -221,7 +221,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     void findAllRootsReturnsRootTermsOnMatchingPage() {
         final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
                 Collectors.toList());
-        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
@@ -254,7 +254,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         }
 
         final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setRootTerms(terms);
+        toPersist.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));

@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
@@ -58,7 +59,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     private void addTermsAndSave(Set<Term> terms) {
-        vocabulary.getGlossary().setRootTerms(terms);
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             em.merge(vocabulary.getGlossary());
             terms.forEach(em::persist);
@@ -89,7 +90,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         another.setUri(Generator.generateUri());
         another.setAuthor(vocabulary.getAuthor());
         another.setCreated(new Date());
-        another.getGlossary().setRootTerms(new HashSet<>(generateTerms(4)));
+        another.getGlossary().setRootTerms(generateTerms(4).stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> em.persist(another));
 
         final List<Term> result = sut.findAllRoots(vocabulary, PageRequest.of(0, terms.size() / 2));
@@ -181,7 +182,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllGetsAllTermsInVocabulary() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
@@ -213,7 +214,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsAllTermsFromVocabularyOrderedByLabel() {
         final List<Term> terms = generateTerms(10);
-        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             terms.forEach(em::merge);
             em.merge(vocabulary.getGlossary());
