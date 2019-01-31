@@ -94,7 +94,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.document = new Document();
         document.setLabel("text-analysis-test");
         document.setUri(DOC_URI);
-        document.setVocabulary(vocabulary);
+        document.setVocabulary(vocabulary.getUri());
         vocabulary.setDocument(document);
         this.file = new File();
         file.setLabel(FILE_NAME);
