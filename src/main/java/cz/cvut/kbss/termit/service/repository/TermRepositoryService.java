@@ -1,13 +1,11 @@
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
-import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.data.domain.Pageable;
@@ -28,16 +26,16 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
 
     private final TermAssignmentDao termAssignmentDao;
 
-    private final VocabularyDao vocabularyDao;
+    private final VocabularyRepositoryService vocabularyService;
 
     public TermRepositoryService(Validator validator, IdentifierResolver idResolver,
                                  TermDao termDao, TermAssignmentDao termAssignmentDao,
-                                 VocabularyDao vocabularyDao) {
+                                 VocabularyRepositoryService vocabularyService) {
         super(validator);
         this.idResolver = idResolver;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
-        this.vocabularyDao = vocabularyDao;
+        this.vocabularyService = vocabularyService;
     }
 
     @Override
@@ -60,12 +58,12 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
+        // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
+        final Vocabulary toUpdate = vocabularyService.findRequired(vocabulary.getUri());
         verifyIdentifierUnique(instance);
-        vocabulary.getGlossary().addRootTerm(instance);
-        instance.setVocabulary(vocabulary.getUri());
-        termDao.persist(instance, vocabulary);
-        // Explicitly merge glossary to save the reference to the term, as vocabulary (and thus glossary) are detached in this transaction
-        vocabularyDao.updateGlossary(vocabulary);
+        toUpdate.getGlossary().addRootTerm(instance);
+        instance.setVocabulary(toUpdate.getUri());
+        termDao.persist(instance, toUpdate);
     }
 
     /**
@@ -99,8 +97,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         }
 
         termDao.update(parentTerm);
-        termDao.persist(instance, vocabularyDao.find(parentTerm.getVocabulary()).orElseThrow(
-                () -> NotFoundException.create(Vocabulary.class.getSimpleName(), parentTerm.getVocabulary())));
+        termDao.persist(instance, vocabularyService.findRequired(parentTerm.getVocabulary()));
     }
 
     /**

@@ -8,9 +8,11 @@ import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class VocabularyDao extends AssetDao<Vocabulary> {
@@ -25,6 +27,16 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
         final List<Vocabulary> result = super.findAll();
         result.sort(Comparator.comparing(Vocabulary::getLabel));
         return result;
+    }
+
+    @Override
+    public Optional<Vocabulary> find(URI id) {
+        Objects.requireNonNull(id);
+        try {
+            return Optional.ofNullable(em.find(type, id, DescriptorFactory.vocabularyDescriptor(id)));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 
     @Override

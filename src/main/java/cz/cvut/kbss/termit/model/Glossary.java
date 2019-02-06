@@ -36,7 +36,7 @@ public class Glossary extends AbstractEntity {
      */
     public boolean addRootTerm(Term rootTerm) {
         Objects.requireNonNull(rootTerm);
-        if (rootTerms == null) {
+        if (getRootTerms() == null) {   // Use getter to trigger lazy loading if necessary
             this.rootTerms = new HashSet<>();
         }
         return rootTerms.add(rootTerm.getUri());
