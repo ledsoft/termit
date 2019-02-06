@@ -13,7 +13,6 @@ import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -117,6 +116,30 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         term2.setUri(uri);
         assertThrows(
                 ResourceExistsException.class, () -> sut.addRootTermToVocabulary(term2, vocabulary));
+    }
+
+    @Test
+    void addRootTermDoesNotRewriteExistingTermsInGlossary() {
+        final Term existing = Generator.generateTermWithId();
+        final Term newOne = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(existing);
+            em.persist(existing, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        // Simulate lazily loaded detached root terms
+        vocabulary.getGlossary().setRootTerms(null);
+
+        transactional(() -> sut.addRootTermToVocabulary(newOne, vocabulary));
+
+        // Run in transaction to allow lazy fetch of root terms
+        transactional(() -> {
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+            assertNotNull(result);
+            assertTrue(result.getRootTerms().contains(existing.getUri()));
+            assertTrue(result.getRootTerms().contains(newOne.getUri()));
+        });
     }
 
     @Test
@@ -268,12 +291,14 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    @Disabled(
-            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyChecksForTermWithMatchingLabel() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addRootTerm(t);
-        vrs.update(vocabulary);
+        transactional(() -> {
+            t.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(t);
+            em.persist(t, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
 
         assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary));
     }
