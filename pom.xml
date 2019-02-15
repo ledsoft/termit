@@ -7,7 +7,7 @@
     <parent>
         <groupId>cz.cvut.kbss</groupId>
         <artifactId>kbss-project-parent</artifactId>
-        <version>0.0.5</version>
+        <version>0.0.6</version>
     </parent>
 
     <artifactId>termit</artifactId>
@@ -21,7 +21,6 @@
         <repository>
             <id>kbss</id>
             <url>http://kbss.felk.cvut.cz/m2repo</url>
-
         </repository>
     </repositories>
 
@@ -34,9 +33,6 @@
         <cz.cvut.kbss.jopa.version>0.11.0</cz.cvut.kbss.jopa.version>
         <cz.cvut.kbss.jsonld.version>0.3.7</cz.cvut.kbss.jsonld.version>
         <org.aspectj.version>1.9.2</org.aspectj.version>
-
-        <org.junit.jupiter.version>5.2.0</org.junit.jupiter.version>
-        <org.mockito.version>2.19.1</org.mockito.version>
 
         <!-- Default value for deployment type property which should otherwise specified on command line -->
         <deployment>DEV</deployment>
@@ -139,6 +135,12 @@
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -213,21 +215,23 @@
 
         <!-- Test dependencies -->
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${org.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${org.junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${org.mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -240,12 +244,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <version>${org.springframework.security.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -366,7 +364,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -451,7 +448,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
             </plugin>
             <!-- Code coverage plugin -->
             <plugin>
