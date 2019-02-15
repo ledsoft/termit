@@ -24,8 +24,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
