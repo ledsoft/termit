@@ -40,8 +40,6 @@ ns3:objekt a ns1:term ;
         ns5:slovník,
         ns5:stát,
         ns5:subjekt-práva,
-        ns5:typ-evidenčního-systému,
-        ns5:typ-znalostní-struktury-dle-úrovně,
         ns5:veřejnoprávní-korporace,
         ns5:znalostní-struktura,
         ns5:člověk,
@@ -50,7 +48,8 @@ ns3:objekt a ns1:term ;
 ns3:typ-objektu a ns1:term ;
     rdfs:label "Typ objektu"@cs ;
     rdfs:comment "Typ objektu (typ[objekt]) popisuje kategorii která může být objektu přiřazena.  Příklady instancí: konkrétní typ letadla (Airbus 380), objekt/subjekt RPP (např. malé plavidlo),"@cs ;
-    skos:narrower ns5:typ-evidenčního-systému .
+    skos:narrower ns5:typ-evidenčního-systému,
+        ns5:typ-znalostní-struktury-dle-úrovně .
 
 ns3:událost a ns1:term ;
     rdfs:label "Událost"@cs ;
