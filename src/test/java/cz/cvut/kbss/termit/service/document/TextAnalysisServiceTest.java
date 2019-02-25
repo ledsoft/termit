@@ -122,7 +122,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
         final java.io.File docDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
-                document.getFileDirectoryName());
+                document.getDirectoryName());
         docDir.mkdir();
         docDir.deleteOnExit();
         final java.io.File content = new java.io.File(

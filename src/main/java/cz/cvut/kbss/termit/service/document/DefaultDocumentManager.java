@@ -42,14 +42,13 @@ public class DefaultDocumentManager implements DocumentManager {
 
     private java.io.File resolveFile(File file, boolean verifyExists) {
         Objects.requireNonNull(file);
-        final Document document = file.getDocument();
         final String path =
-                config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + document.getFileDirectoryName() +
+                config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + file.getDirectoryName() +
                         java.io.File.separator + file.getLabel();
         final java.io.File result = new java.io.File(path);
         if (verifyExists && !result.exists()) {
             LOG.error("File {} not found at location {}.", file, path);
-            throw new NotFoundException("File " + file + " from document " + document + " not found on file system.");
+            throw new NotFoundException("File " + file + " not found on file system.");
         }
         return result;
     }
