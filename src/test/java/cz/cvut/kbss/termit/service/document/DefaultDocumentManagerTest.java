@@ -54,7 +54,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
         final java.io.File docDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
-                document.getFileDirectoryName());
+                document.getDirectoryName());
         docDir.mkdir();
         docDir.deleteOnExit();
         final java.io.File content = Files.createTempFile(docDir.toPath(), "test", ".html").toFile();
@@ -82,6 +82,26 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
+        final String result = sut.loadFileContent(file);
+        assertEquals(CONTENT, result);
+    }
+
+    @Test
+    void loadFileContentSupportsFileWithoutParentDocument() throws Exception {
+        final File file = new File();
+        file.setLabel("test-file.html");
+        file.setUri(Generator.generateUri());
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final java.io.File fileDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
+                file.getDirectoryName());
+        fileDir.mkdir();
+        fileDir.deleteOnExit();
+        final java.io.File content = new java.io.File(fileDir + java.io.File.separator + file.getLabel());
+        content.deleteOnExit();
+        Files.write(content.toPath(), Collections.singletonList(CONTENT));
+
         final String result = sut.loadFileContent(file);
         assertEquals(CONTENT, result);
     }
@@ -134,7 +154,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         sut.saveFileContent(file, content);
         final java.io.File contentFile = new java.io.File(
                 environment.getProperty(FILE_STORAGE.toString()) + java.io.File.separator +
-                        document.getFileDirectoryName() + java.io.File.separator + file.getLabel());
+                        document.getDirectoryName() + java.io.File.separator + file.getLabel());
         final List<String> lines = Files.readAllLines(contentFile.toPath());
         final String result = String.join("\n", lines);
         assertFalse(result.isEmpty());

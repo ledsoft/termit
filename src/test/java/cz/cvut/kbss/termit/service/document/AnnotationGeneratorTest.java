@@ -117,7 +117,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private void generateFile() throws Exception {
         final java.io.File folder = Files.createTempDirectory("termit").toFile();
         folder.deleteOnExit();
-        final String docFolderName = vocabulary.getDocument().getFileDirectoryName();
+        final String docFolderName = vocabulary.getDocument().getDirectoryName();
         final java.io.File docDir = new java.io.File(folder.getAbsolutePath() + java.io.File.separator + docFolderName);
         docDir.mkdirs();
         docDir.deleteOnExit();
