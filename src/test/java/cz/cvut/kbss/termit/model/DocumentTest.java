@@ -19,7 +19,7 @@ class DocumentTest {
         final Document document = new Document();
         document.setLabel("Metropolitan plan");
         document.setUri(URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan"));
-        final String result = document.getFileDirectoryName();
+        final String result = document.getDirectoryName();
         assertNotNull(result);
         assertThat(result, startsWith(IdentifierResolver.normalize(document.getLabel())));
     }
@@ -28,14 +28,14 @@ class DocumentTest {
     void getFileDirectoryNameThrowsIllegalStateWhenNameIsMissing() {
         final Document document = new Document();
         document.setUri(URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan"));
-        assertThrows(IllegalStateException.class, document::getFileDirectoryName);
+        assertThrows(IllegalStateException.class, document::getDirectoryName);
     }
 
     @Test
     void getFileDirectoryNameThrowsIllegalStateWhenUriIsMissing() {
         final Document document = new Document();
         document.setLabel("Metropolitan plan");
-        assertThrows(IllegalStateException.class, document::getFileDirectoryName);
+        assertThrows(IllegalStateException.class, document::getDirectoryName);
     }
 
     @Test

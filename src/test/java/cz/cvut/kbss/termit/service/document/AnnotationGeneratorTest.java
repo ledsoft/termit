@@ -91,7 +91,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         document.setCreated(new Date());
         document.setLabel("metropolitan-plan");
         document.setUri(Generator.generateUri());
-        document.setVocabulary(vocabulary);
+        document.setVocabulary(vocabulary.getUri());
         vocabulary.setDocument(document);
         vocabulary.getGlossary().addRootTerm(term);
         vocabulary.getGlossary().addRootTerm(termTwo);
@@ -109,13 +109,15 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
             em.persist(vocabulary, vocabDescriptor);
             em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
             em.persist(file, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(term, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(termTwo, DescriptorFactory.termDescriptor(vocabulary));
         });
     }
 
     private void generateFile() throws Exception {
         final java.io.File folder = Files.createTempDirectory("termit").toFile();
         folder.deleteOnExit();
-        final String docFolderName = vocabulary.getDocument().getFileDirectoryName();
+        final String docFolderName = vocabulary.getDocument().getDirectoryName();
         final java.io.File docDir = new java.io.File(folder.getAbsolutePath() + java.io.File.separator + docFolderName);
         docDir.mkdirs();
         docDir.deleteOnExit();

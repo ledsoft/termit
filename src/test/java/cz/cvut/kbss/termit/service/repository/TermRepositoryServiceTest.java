@@ -13,7 +13,6 @@ import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +69,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             // Need to put in transaction, otherwise EM delegate is closed after find and lazy loading of glossary terms does not work
             final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
             assertNotNull(result);
-            assertTrue(result.getGlossary().getRootTerms().contains(term));
+            assertTrue(result.getGlossary().getRootTerms().contains(term.getUri()));
         });
     }
 
@@ -117,6 +116,30 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         term2.setUri(uri);
         assertThrows(
                 ResourceExistsException.class, () -> sut.addRootTermToVocabulary(term2, vocabulary));
+    }
+
+    @Test
+    void addRootTermDoesNotRewriteExistingTermsInGlossary() {
+        final Term existing = Generator.generateTermWithId();
+        final Term newOne = Generator.generateTermWithId();
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(existing);
+            em.persist(existing, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        // Simulate lazily loaded detached root terms
+        vocabulary.getGlossary().setRootTerms(null);
+
+        transactional(() -> sut.addRootTermToVocabulary(newOne, vocabulary));
+
+        // Run in transaction to allow lazy fetch of root terms
+        transactional(() -> {
+            final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
+            assertNotNull(result);
+            assertTrue(result.getRootTerms().contains(existing.getUri()));
+            assertTrue(result.getRootTerms().contains(newOne.getUri()));
+        });
     }
 
     @Test
@@ -180,8 +203,8 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         sut.addChildTerm(child, parent);
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri());
         assertEquals(1, result.getRootTerms().size());
-        assertTrue(result.getRootTerms().contains(parent));
-        assertFalse(result.getRootTerms().contains(child));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertFalse(result.getRootTerms().contains(child.getUri()));
         assertNotNull(em.find(Term.class, child.getUri()));
     }
 
@@ -221,7 +244,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     void findAllRootsReturnsRootTermsOnMatchingPage() {
         final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
                 Collectors.toList());
-        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             terms.forEach(em::persist);
             em.merge(vocabulary.getGlossary());
@@ -254,7 +277,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         }
 
         final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setRootTerms(terms);
+        toPersist.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));
@@ -268,12 +291,14 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    @Disabled(
-            "Implementation of SUT depends on inference. Thus, this test can be reenabled once the backed RDF4J storage can load the inference rules.")
     void existsInVocabularyChecksForTermWithMatchingLabel() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addRootTerm(t);
-        vrs.update(vocabulary);
+        transactional(() -> {
+            t.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(t);
+            em.persist(t, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
 
         assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary));
     }

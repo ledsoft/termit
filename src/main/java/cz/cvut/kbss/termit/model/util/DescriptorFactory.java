@@ -40,6 +40,26 @@ public class DescriptorFactory {
         return descriptor;
     }
 
+    /**
+     * Creates a JOPA descriptor for a vocabulary with the specified identifier.
+     * <p>
+     * The descriptor specifies that the instance context will correspond to the given IRI. It also initializes other
+     * required attribute descriptors.
+     * <p>
+     * Note that default context is used for asset author.
+     *
+     * @param vocabularyUri Vocabulary identifier for which the descriptor should be created
+     * @return Vocabulary descriptor
+     */
+    public static Descriptor vocabularyDescriptor(URI vocabularyUri) {
+        Objects.requireNonNull(vocabularyUri);
+        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
+        addAuthorAndEditorDescriptors(descriptor);
+        descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabularyUri));
+        descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabularyUri));
+        return descriptor;
+    }
+
     private static void addAuthorAndEditorDescriptors(EntityDescriptor targetDescriptor) {
         targetDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
         targetDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
@@ -59,9 +79,25 @@ public class DescriptorFactory {
      */
     public static Descriptor documentDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
+        return documentDescriptor(vocabulary.getUri());
+    }
+
+    /**
+     * Creates a JOPA descriptor for a {@link Document} related to a vocabulary with the specified identifier
+     * (presumably of a {@link DocumentVocabulary}).
+     * <p>
+     * This means that the context of the document (and all its relevant attributes) is given by the specified IRI.
+     * <p>
+     * Note that default context is used for asset author.
+     *
+     * @param vocabularyUri Vocabulary identifier on which the descriptor should be based
+     * @return Document descriptor
+     */
+    public static Descriptor documentDescriptor(URI vocabularyUri) {
+        Objects.requireNonNull(vocabularyUri);
+        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
         addAuthorAndEditorDescriptors(descriptor);
-        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabulary.getUri());
+        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabularyUri);
         addAuthorAndEditorDescriptors(fileDescriptor);
         descriptor.addAttributeDescriptor(Document.getFilesField(), fileDescriptor);
         return descriptor;
@@ -80,9 +116,25 @@ public class DescriptorFactory {
      */
     public static Descriptor glossaryDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
+        return glossaryDescriptor(vocabulary.getUri());
+    }
+
+    /**
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Glossary} related to a vocabulary with the
+     * specified identifier.
+     * <p>
+     * This means that the context of the glossary (and all its relevant attributes) is given by the specified IRI.
+     * <p>
+     * Note that default context is used for asset author.
+     *
+     * @param vocabularyUri Vocabulary identifier on which the descriptor should be based
+     * @return Glossary descriptor
+     */
+    public static Descriptor glossaryDescriptor(URI vocabularyUri) {
+        Objects.requireNonNull(vocabularyUri);
+        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
         addAuthorAndEditorDescriptors(descriptor);
-        descriptor.addAttributeDescriptor(Glossary.getTermsField(), termDescriptor(vocabulary));
+        descriptor.addAttributeDescriptor(Glossary.getTermsField(), termDescriptor(vocabularyUri));
         return descriptor;
     }
 

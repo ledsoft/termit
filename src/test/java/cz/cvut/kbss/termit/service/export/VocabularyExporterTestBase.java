@@ -3,21 +3,18 @@ package cz.cvut.kbss.termit.service.export;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
 
@@ -44,23 +41,12 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
                 term.setSources(Collections.singleton("PSP/c-1/p-2/b-c"));
             }
             terms.add(term);
+            term.setVocabulary(vocabulary.getUri());
         }
-        vocabulary.getGlossary().setRootTerms(new HashSet<>(terms));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
             terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
-            // Simulating inferred inverse property je_pojmem_ze_slovniku
-            final Repository repo = em.unwrap(Repository.class);
-            try (final RepositoryConnection conn = repo.getConnection()) {
-                final ValueFactory vf = repo.getValueFactory();
-                final IRI vocabIri = vf.createIRI(vocabulary.getUri().toString());
-                final IRI inVocab = vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku);
-                conn.begin();
-                for (Term t : terms) {
-                    conn.add(vf.createIRI(t.getUri().toString()), inVocab, vocabIri);
-                }
-                conn.commit();
-            }
         });
         return terms;
     }

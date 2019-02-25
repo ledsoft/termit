@@ -94,7 +94,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         this.document = new Document();
         document.setLabel("text-analysis-test");
         document.setUri(DOC_URI);
-        document.setVocabulary(vocabulary);
+        document.setVocabulary(vocabulary.getUri());
         vocabulary.setDocument(document);
         this.file = new File();
         file.setLabel(FILE_NAME);
@@ -122,7 +122,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
         final java.io.File docDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
-                document.getFileDirectoryName());
+                document.getDirectoryName());
         docDir.mkdir();
         docDir.deleteOnExit();
         final java.io.File content = new java.io.File(

@@ -24,7 +24,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     /**
      * Names of columns used in term export.
      */
-    public static final String[] EXPORT_COLUMNS = {"IRI", "Label", "Comment", "Types", "Sources", "SubTerms"};
+    public static final List<String> EXPORT_COLUMNS = Collections
+            .unmodifiableList(Arrays.asList("IRI", "Label", "Comment", "Types", "Sources", "SubTerms"));
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;

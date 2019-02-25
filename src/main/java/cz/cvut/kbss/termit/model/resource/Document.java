@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
+import cz.cvut.kbss.termit.model.util.SupportsStorage;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,15 +19,15 @@ import java.util.Set;
 @OWLClass(iri = Vocabulary.s_c_dokument)
 @EntityListeners(ProvenanceManager.class)
 @JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
-public class Document extends Resource {
+public class Document extends Resource implements SupportsStorage {
 
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<File> files;
 
     @JsonIgnore
     @Inferred
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik, fetch = FetchType.EAGER)
-    private DocumentVocabulary vocabulary;
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_dokumentovy_slovnik)
+    private URI vocabulary;
 
     public Set<File> getFiles() {
         return files;
@@ -61,25 +62,16 @@ public class Document extends Resource {
                Optional.empty();
     }
 
-    public DocumentVocabulary getVocabulary() {
+    public URI getVocabulary() {
         return vocabulary;
     }
 
-    public void setVocabulary(DocumentVocabulary vocabulary) {
+    public void setVocabulary(URI vocabulary) {
         this.vocabulary = vocabulary;
     }
 
-    /**
-     * Gets name of the directory where files comprising this document are stored.
-     * <p>
-     * The name consists of normalized name of this document, appended with hash code of this document's URI.
-     * <p>
-     * Note that the full directory path consists of the configured storage directory ({@link
-     * cz.cvut.kbss.termit.util.ConfigParam#FILE_STORAGE}) to which the document-specific directory name is appended.
-     *
-     * @return Document-specific directory name
-     */
-    public String getFileDirectoryName() {
+    @Override
+    public String getDirectoryName() {
         if (getLabel() == null || getUri() == null) {
             throw new IllegalStateException("Missing document name or URI required for directory name resolution.");
         }
