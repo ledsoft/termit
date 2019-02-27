@@ -144,7 +144,8 @@ public class ResourceController extends BaseController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeResource(@PathVariable("normalizedName") String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final Resource toRemove = getResource(normalizedName, namespace);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final Resource toRemove = resourceService.getRequiredReference(identifier);
         resourceService.remove(toRemove);
         LOG.debug("Resource {} removed.", toRemove);
     }
@@ -170,7 +171,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "/resource/terms", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
             JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@RequestParam(name = "iri") URI resourceId) {
-        return resourceService.findTags(resourceService.findRequired(resourceId));
+        return resourceService.findTags(resourceService.getRequiredReference(resourceId));
     }
 
     @PreAuthorize("permitAll()")
@@ -178,6 +179,6 @@ public class ResourceController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE,
                     JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@RequestParam(name = "iri") URI resourceId) {
-        return resourceService.findRelated(resourceService.findRequired(resourceId));
+        return resourceService.findRelated(resourceService.getRequiredReference(resourceId));
     }
 }

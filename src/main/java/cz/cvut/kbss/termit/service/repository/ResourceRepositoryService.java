@@ -117,7 +117,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
 
         // create term assignments for each input term to the target
         toAdd.forEach(iTerm -> {
-            final Term term = termDao.find(iTerm).orElseThrow(
+            final Term term = termDao.getReference(iTerm).orElseThrow(
                     () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
 
             final TermAssignment termAssignment = new TermAssignment(term, target);

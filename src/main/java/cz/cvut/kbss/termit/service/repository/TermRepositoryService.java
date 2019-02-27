@@ -59,7 +59,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
         // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
-        final Vocabulary toUpdate = vocabularyService.findRequired(vocabulary.getUri());
+        final Vocabulary toUpdate = vocabularyService.getRequiredReference(vocabulary.getUri());
         verifyIdentifierUnique(instance);
         toUpdate.getGlossary().addRootTerm(instance);
         instance.setVocabulary(toUpdate.getUri());
@@ -97,7 +97,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         }
 
         termDao.update(parentTerm);
-        termDao.persist(instance, vocabularyService.findRequired(parentTerm.getVocabulary()));
+        termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
     }
 
     /**
