@@ -19,7 +19,7 @@ public interface CrudService<T> {
     List<T> findAll();
 
     /**
-     * Gets items with the specified identifier.
+     * Gets an item with the specified identifier.
      *
      * @param id Item identifier
      * @return Matching item wrapped in an {@code Optional}
@@ -34,6 +34,23 @@ public interface CrudService<T> {
      * @throws cz.cvut.kbss.termit.exception.NotFoundException When no matching item is found
      */
     T findRequired(URI id);
+
+    /**
+     * Gets a reference to an item with the specified identifier (with empty attribute values).
+     *
+     * @param id Item identifier
+     * @return Matching item reference wrapped in an {@code Optional}
+     */
+    Optional<T> getReference(URI id);
+
+    /**
+     * Gets a reference to an item with the specified identifier (with empty attribute values).
+     *
+     * @param id Item identifier
+     * @return Matching item reference
+     * @throws cz.cvut.kbss.termit.exception.NotFoundException When no matching item is found
+     */
+    T getRequiredReference(URI id);
 
     /**
      * Checks if an item with the specified identifier exists.

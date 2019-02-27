@@ -25,9 +25,23 @@ public interface GenericDao<T extends HasIdentifier> {
      * Finds entity instance with the specified identifier.
      *
      * @param id Identifier
-     * @return Entity instance or {@code null} if no such instance exists
+     * @return {@code Optional} containing the matching entity instance or an empty {@code Optional }if no such instance
+     * exists
      */
     Optional<T> find(URI id);
+
+    /**
+     * Gets a reference to an instance with the specified identifier.
+     * <p>
+     * Note that the reference is initially an empty object wth all attributes loaded lazily and the corresponding
+     * persistence context has to be available for the loading. This method should be useful for removal and update
+     * operations.
+     *
+     * @param id Identifier
+     * @return {@code Optional} containing a reference to a matching instance or an empty {@code Optional }if no such
+     * instance exists
+     */
+    Optional<T> getReference(URI id);
 
     /**
      * Persists the specified entity.

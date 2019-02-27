@@ -69,10 +69,26 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     }
 
     /**
+     * Gets a reference to an object wih the specified identifier.
+     * <p>
+     * Note that all attributes of the reference are loaded lazily and the corresponding persistence context must be
+     * still open to load them.
+     * <p>
+     * Also note that, in contrast to {@link #find(URI)}, this method does not invoke {@link #postLoad(HasIdentifier)}
+     * for the loaded instance.
+     *
+     * @param id Identifier of the object to load
+     * @return {@link Optional} with the loaded reference or an empty one
+     */
+    public Optional<T> getReference(URI id) {
+        return getPrimaryDao().getReference(id);
+    }
+
+    /**
      * Finds an object with the specified id and returns it.
      * <p>
-     * In comparison to {@link #find(URI)}, this method guarantees to return a matching instance. If no such object is found,
-     * a {@link NotFoundException} is thrown.
+     * In comparison to {@link #find(URI)}, this method guarantees to return a matching instance. If no such object is
+     * found, a {@link NotFoundException} is thrown.
      *
      * @param id Identifier of the object to load
      * @return The matching object
@@ -81,6 +97,25 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
      */
     public T findRequired(URI id) {
         return find(id).orElseThrow(() -> NotFoundException.create(resolveGenericType().getSimpleName(), id));
+    }
+
+    /**
+     * Gets a reference to an object wih the specified identifier.
+     * <p>
+     * In comparison to {@link #getReference(URI)}, this method guarantees to return a matching instance. If no such
+     * object is found, a {@link NotFoundException} is thrown.
+     * <p>
+     * Note that all attributes of the reference are loaded lazily and the corresponding persistence context must be
+     * still open to load them.
+     * <p>
+     * Also note that, in contrast to {@link #find(URI)}, this method does not invoke {@link #postLoad(HasIdentifier)}
+     * for the loaded instance.
+     *
+     * @param id Identifier of the object to load
+     * @return {@link Optional} with the loaded reference or an empty one
+     */
+    public T getRequiredReference(URI id) {
+        return getReference(id).orElseThrow(() -> NotFoundException.create(resolveGenericType().getSimpleName(), id));
     }
 
     /**
@@ -162,7 +197,8 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     /**
      * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      *
-     * @param instance The updated instance which will be returned by {@link #update(HasIdentifier)} )}, not {@code null}
+     * @param instance The updated instance which will be returned by {@link #update(HasIdentifier)} )}, not {@code
+     *                 null}
      */
     protected void postUpdate(@NonNull T instance) {
         // Do nothing

@@ -155,6 +155,16 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     @Override
+    public Optional<Resource> getReference(URI id) {
+        return repositoryService.getReference(id);
+    }
+
+    @Override
+    public Resource getRequiredReference(URI id) {
+        return repositoryService.getRequiredReference(id);
+    }
+
+    @Override
     public boolean exists(URI id) {
         return repositoryService.exists(id);
     }

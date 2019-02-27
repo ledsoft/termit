@@ -90,7 +90,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getTermsForNKODReturnsTermsAssignedToResourceWithSpecifiedIri() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
+        when(resourceServiceMock.getRequiredReference(resource.getUri())).thenReturn(resource);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
                                           .collect(Collectors.toList());
         when(resourceServiceMock.findTags(resource)).thenReturn(terms);
@@ -127,7 +127,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getRelatedResourcesReturnsResourcesRelatedToResourceWithSpecifiedIri() throws Exception {
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
+        when(resourceServiceMock.getRequiredReference(resource.getUri())).thenReturn(resource);
         final List<Resource> related = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId()).collect(
                 Collectors.toList());
         when(resourceServiceMock.findRelated(resource)).thenReturn(related);
@@ -143,7 +143,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     void getRelatedResourcesReturnsResourcesWithAuthorInformationWhenUserIsAuthenticated() throws Exception {
         final User author = Generator.generateUserWithId();
         final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
+        when(resourceServiceMock.getRequiredReference(resource.getUri())).thenReturn(resource);
         final List<Resource> related = generateRelatedResources(author);
         when(resourceServiceMock.findRelated(resource)).thenReturn(related);
         when(securityUtilsMock.isAuthenticated()).thenReturn(true);
@@ -299,9 +299,9 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setLabel(RESOURCE_NAME);
         resource.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
         when(identifierResolverMock.resolveIdentifier(NAMESPACE_RESOURCE, RESOURCE_NAME)).thenReturn(resource.getUri());
-        when(resourceServiceMock.findRequired(resource.getUri())).thenReturn(resource);
+        when(resourceServiceMock.getRequiredReference(resource.getUri())).thenReturn(resource);
         mockMvc.perform(delete(PATH + "/" + RESOURCE_NAME)).andExpect(status().isNoContent());
-        verify(resourceServiceMock).findRequired(resource.getUri());
+        verify(resourceServiceMock).getRequiredReference(resource.getUri());
         verify(resourceServiceMock).remove(resource);
     }
 

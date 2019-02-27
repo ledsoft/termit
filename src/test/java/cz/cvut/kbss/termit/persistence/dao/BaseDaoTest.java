@@ -143,6 +143,22 @@ class BaseDaoTest extends BaseDaoTestRunner {
         assertThat(e.getCause(), is(instanceOf(OWLPersistenceException.class)));
     }
 
+    @Test
+    void getReferenceRetrievesReferenceToMatchingInstance() {
+        final User user = Generator.generateUserWithId();
+        transactional(() -> sut.persist(user));
+        final Optional<User> result = sut.getReference(user.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(user.getUri(), result.get().getUri());
+    }
+
+    @Test
+    void getReferenceReturnsEmptyOptionalWhenNoMatchingInstanceExists() {
+        final Optional<User> result = sut.getReference(Generator.generateUri());
+        assertNotNull(result);
+        assertFalse(result.isPresent());
+    }
+
     private static class BaseDaoImpl extends BaseDao<User> {
 
         BaseDaoImpl(EntityManager em) {
