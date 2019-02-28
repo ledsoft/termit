@@ -7,7 +7,14 @@ import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.util.Vocabulary;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceDaoTest extends BaseDaoTestRunner {
 
@@ -110,5 +117,43 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             em.persist(ta.getTarget());
             em.persist(ta);
         }));
+    }
+
+    @Test
+    void findAllDoesNotReturnFilesContainedInDocuments() {
+        final Resource rOne = Generator.generateResourceWithId();
+        final Document doc = new Document();
+        doc.setUri(Generator.generateUri());
+        doc.setLabel("document");
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("mpp.html");
+        doc.addFile(file);
+        transactional(() -> {
+            insertSubclassInfo();
+            em.persist(rOne);
+            em.persist(doc);
+            em.persist(file);
+        });
+
+        final List<Resource> result = sut.findAll();
+        assertEquals(2, result.size());
+        assertFalse(result.contains(file));
+        assertTrue(result.contains(doc));
+        final Optional<Resource> docResult = result.stream().filter(r -> r.getUri().equals(doc.getUri())).findAny();
+        assertTrue(docResult.isPresent());
+        assertTrue(((Document) docResult.get()).getFile(file.getLabel()).isPresent());
+    }
+
+    private void insertSubclassInfo() {
+        final Repository repo = em.unwrap(Repository.class);
+        final ValueFactory vf = repo.getValueFactory();
+        try (final RepositoryConnection conn = repo.getConnection()) {
+            conn.begin();
+            conn.add(vf.createIRI(Vocabulary.s_c_dokument), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
+            conn.add(vf.createIRI(Vocabulary.s_c_soubor), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
+            conn.add(vf.createIRI(Vocabulary.s_c_dataset), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
+            conn.commit();
+        }
     }
 }

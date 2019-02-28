@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -18,6 +19,21 @@ public class ResourceDao extends AssetDao<Resource> {
         super(Resource.class, em);
     }
 
+    @Override
+    public List<Resource> findAll() {
+        try {
+            return em.createNativeQuery("SELECT ?x WHERE {" +
+                    "?x a ?type ." +
+                    "FILTER NOT EXISTS {" +
+                    "?y ?hasFile ?x ." +
+                    "} }", Resource.class)
+                     .setParameter("type", typeUri)
+                     .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor)).getResultList();
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
     /**
      * Gets terms the specified resource is annotated with.
      * <p>
@@ -28,18 +44,22 @@ public class ResourceDao extends AssetDao<Resource> {
      */
     public List<Term> findTerms(Resource resource) {
         Objects.requireNonNull(resource);
-        return em.createNativeQuery("SELECT ?x WHERE {" +
-                "?x a ?term ;" +
-                "?has-label ?label ." +
-                "?assignment ?is-assignment-of ?x ;" +
-                "?has-target/?has-source ?resource ." +
-                "} ORDER BY ?label", Term.class)
-                 .setParameter("term", URI.create(Vocabulary.s_c_term))
-                 .setParameter("has-label", URI.create(RDFS.LABEL))
-                 .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
-                 .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
-                 .setParameter("has-source", URI.create(Vocabulary.s_p_ma_zdroj))
-                 .setParameter("resource", resource.getUri()).getResultList();
+        try {
+            return em.createNativeQuery("SELECT ?x WHERE {" +
+                    "?x a ?term ;" +
+                    "?has-label ?label ." +
+                    "?assignment ?is-assignment-of ?x ;" +
+                    "?has-target/?has-source ?resource ." +
+                    "} ORDER BY ?label", Term.class)
+                     .setParameter("term", URI.create(Vocabulary.s_c_term))
+                     .setParameter("has-label", URI.create(RDFS.LABEL))
+                     .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
+                     .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
+                     .setParameter("has-source", URI.create(Vocabulary.s_p_ma_zdroj))
+                     .setParameter("resource", resource.getUri()).getResultList();
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 
     /**
@@ -54,20 +74,24 @@ public class ResourceDao extends AssetDao<Resource> {
      */
     public List<Resource> findRelated(Resource resource) {
         Objects.requireNonNull(resource);
-        return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
-                "?x a ?type ;" +
-                "?has-label ?label ." +
-                "?assignment ?is-assignment-of ?term ;" +
-                "?has-target/?has-source ?x ." +
-                "?assignment2 ?is-assignment-of ?term ;" +
-                "?has-target/?has-source ?resource ." +
-                "FILTER (?x != ?resource)" +
-                "} ORDER BY ?label", Resource.class)
-                 .setParameter("type", typeUri)
-                 .setParameter("has-label", URI.create(RDFS.LABEL))
-                 .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
-                 .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
-                 .setParameter("has-source", URI.create(Vocabulary.s_p_ma_zdroj))
-                 .setParameter("resource", resource.getUri()).getResultList();
+        try {
+            return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
+                    "?x a ?type ;" +
+                    "?has-label ?label ." +
+                    "?assignment ?is-assignment-of ?term ;" +
+                    "?has-target/?has-source ?x ." +
+                    "?assignment2 ?is-assignment-of ?term ;" +
+                    "?has-target/?has-source ?resource ." +
+                    "FILTER (?x != ?resource)" +
+                    "} ORDER BY ?label", Resource.class)
+                     .setParameter("type", typeUri)
+                     .setParameter("has-label", URI.create(RDFS.LABEL))
+                     .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
+                     .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
+                     .setParameter("has-source", URI.create(Vocabulary.s_p_ma_zdroj))
+                     .setParameter("resource", resource.getUri()).getResultList();
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 }
