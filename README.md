@@ -100,6 +100,13 @@ Each implementation has its own search query which is loaded and used by `Search
 for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
 artifact during build. If none of the profiles is selected, the default search is used.
 
+### RDFS Inference in Tests
+
+The test in-memory repository is configured to be a SPIN SAIL with RDFS inferencing engine. Thus, basically all the inference features available
+in production are available in tests as well. However, the repository is by default left empty (without the model or SPIN rules) to facilitate test
+performance (inference in RDF4J is really slow). To load the TermIt model into the repository and thus enable RDFS inference, call the `enableRdfsInference`
+method available on both `BaseDaoTestRunner` and `BaseServiceTestRunner`. SPIN rules are currently not loaded as they don't seem to be used by any tests.
+
 ## Monitoring
 
 We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available

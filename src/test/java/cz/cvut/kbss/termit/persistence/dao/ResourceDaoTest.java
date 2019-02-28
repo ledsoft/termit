@@ -10,11 +10,6 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.util.Vocabulary;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +116,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findAllDoesNotReturnFilesContainedInDocuments() {
+        enableRdfsInference(em);
         final Resource rOne = Generator.generateResourceWithId();
         final Document doc = new Document();
         doc.setUri(Generator.generateUri());
@@ -130,7 +126,6 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         file.setLabel("mpp.html");
         doc.addFile(file);
         transactional(() -> {
-            insertSubclassInfo();
             em.persist(rOne);
             em.persist(doc);
             em.persist(file);
@@ -143,17 +138,5 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final Optional<Resource> docResult = result.stream().filter(r -> r.getUri().equals(doc.getUri())).findAny();
         assertTrue(docResult.isPresent());
         assertTrue(((Document) docResult.get()).getFile(file.getLabel()).isPresent());
-    }
-
-    private void insertSubclassInfo() {
-        final Repository repo = em.unwrap(Repository.class);
-        final ValueFactory vf = repo.getValueFactory();
-        try (final RepositoryConnection conn = repo.getConnection()) {
-            conn.begin();
-            conn.add(vf.createIRI(Vocabulary.s_c_dokument), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
-            conn.add(vf.createIRI(Vocabulary.s_c_soubor), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
-            conn.add(vf.createIRI(Vocabulary.s_c_dataset), RDFS.SUBCLASSOF, vf.createIRI(Vocabulary.s_c_zdroj));
-            conn.commit();
-        }
     }
 }
