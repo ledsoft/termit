@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.rest;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.ResourceService;
@@ -127,7 +128,8 @@ public class ResourceController extends BaseController {
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@PathVariable("normalizedName") String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        return resourceService.findTags(getResource(normalizedName, namespace));
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        return resourceService.findTags(resourceService.getRequiredReference(identifier));
     }
 
     @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT,
@@ -138,6 +140,15 @@ public class ResourceController extends BaseController {
                          @RequestBody List<URI> termIds) {
         final Resource resource = getResource(normalizedName, namespace);
         resourceService.setTags(resource, termIds);
+    }
+
+    @RequestMapping(value = "/{normalizedName}/assignments", method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<TermAssignment> getAssignments(@PathVariable("normalizedName") String normalizedName,
+                                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final Resource resource = resourceService.getRequiredReference(identifier);
+        return resourceService.findAssignments(resource);
     }
 
     @RequestMapping(value = "/{normalizedName}", method = RequestMethod.DELETE)

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -76,6 +77,18 @@ public class ResourceService implements CrudService<Resource> {
      */
     public List<Term> findTags(Resource resource) {
         return repositoryService.findTags(resource);
+    }
+
+    /**
+     * Gets term assignments related to the specified resource.
+     * <p>
+     * This includes both assignments and occurrences.
+     *
+     * @param resource Target resource
+     * @return List of term assignments and occurrences
+     */
+    public List<TermAssignment> findAssignments(Resource resource) {
+        return repositoryService.findAssignments(resource);
     }
 
     /**
