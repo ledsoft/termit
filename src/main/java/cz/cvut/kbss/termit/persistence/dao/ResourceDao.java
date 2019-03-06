@@ -45,7 +45,7 @@ public class ResourceDao extends AssetDao<Resource> {
     public List<Term> findTerms(Resource resource) {
         Objects.requireNonNull(resource);
         try {
-            return em.createNativeQuery("SELECT ?x WHERE {" +
+            return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
                     "?x a ?term ;" +
                     "?has-label ?label ." +
                     "?assignment ?is-assignment-of ?x ;" +

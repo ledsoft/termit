@@ -332,4 +332,23 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Document result = em.find(Document.class, parent.getUri());
         assertThat(result.getFiles(), anyOf(nullValue(), empty()));
     }
+
+    @Test
+    void findAssignmentsReturnsAssignmentsRelatedToSpecifiedResource() {
+        final Resource resource = Generator.generateResourceWithId();
+        final Target target = new Target(resource);
+        final Term term = Generator.generateTermWithId();
+        final TermAssignment ta = new TermAssignment(term, target);
+        transactional(() -> {
+            em.persist(target);
+            em.persist(resource);
+            em.persist(term);
+            em.persist(ta);
+        });
+
+        final List<TermAssignment> result = sut.findAssignments(resource);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ta.getUri(), result.get(0).getUri());
+    }
 }
