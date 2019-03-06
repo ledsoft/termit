@@ -173,4 +173,25 @@ class ResourceServiceTest {
         assertThrows(UnsupportedAssetOperationException.class, () -> sut.runTextAnalysis(resource));
         verify(textAnalysisService, never()).analyzeFile(any());
     }
+
+    @Test
+    void findAssignmentsDelegatesCallToRepositoryService() {
+        final Resource resource = Generator.generateResourceWithId();
+        sut.findAssignments(resource);
+        verify(resourceRepositoryService).findAssignments(resource);
+    }
+
+    @Test
+    void getReferenceDelegatesCallToRepositoryService() {
+        final URI uri = Generator.generateUri();
+        sut.getReference(uri);
+        verify(resourceRepositoryService).getReference(uri);
+    }
+
+    @Test
+    void getRequiredReferenceDelegatesCallToRepositoryService() {
+        final URI uri = Generator.generateUri();
+        sut.getRequiredReference(uri);
+        verify(resourceRepositoryService).getRequiredReference(uri);
+    }
 }
