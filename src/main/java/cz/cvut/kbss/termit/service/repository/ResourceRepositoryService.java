@@ -72,6 +72,18 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     }
 
     /**
+     * Gets term assignments related to the specified resource.
+     * <p>
+     * This includes both assignments and occurrences.
+     *
+     * @param resource Target resource
+     * @return List of term assignments and occurrences
+     */
+    public List<TermAssignment> findAssignments(Resource resource) {
+        return termAssignmentDao.findAll(resource);
+    }
+
+    /**
      * Finds resources which are related to the specified one.
      * <p>
      * Two resources are related in this scenario if they have at least one common term assigned to them.

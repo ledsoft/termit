@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
@@ -12,6 +13,10 @@ import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.Vocabulary;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -21,6 +26,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.Principal;
@@ -143,5 +150,25 @@ public class Environment {
 
     public static InputStream loadFile(String file) {
         return Environment.class.getClassLoader().getResourceAsStream(file);
+    }
+
+    /**
+     * Loads TermIt ontological model into the underlying repository, so that RDFS inference (mainly class and property
+     * hierarchy) can be exploited.
+     * <p>
+     * Note that the specified {@code em} has to be transactional, so that a connection to the underlying repository is
+     * open.
+     *
+     * @param em Transactional {@code EntityManager} used to unwrap the underlying repository
+     */
+    public static void addModelStructureForRdfsInference(EntityManager em) {
+        final Repository repo = em.unwrap(Repository.class);
+        try (final RepositoryConnection conn = repo.getConnection()) {
+            conn.begin();
+            conn.add(new File("termit.ttl"), Vocabulary.ONTOLOGY_IRI_termit, RDFFormat.TURTLE);
+            conn.commit();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to load TermIt model for import.", e);
+        }
     }
 }

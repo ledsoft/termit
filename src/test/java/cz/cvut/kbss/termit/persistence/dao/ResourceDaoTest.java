@@ -3,23 +3,20 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.Target;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.model.selector.XPathSelector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceDaoTest extends BaseDaoTestRunner {
 
@@ -60,6 +57,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final List<Term> terms = new ArrayList<>();
         final List<Term> matching = new ArrayList<>();
         final List<TermAssignment> assignments = new ArrayList<>();
+        final Target target = new Target(resource);
         for (int i = 0; i < Generator.randomInt(2, 10); i++) {
             final Term t = Generator.generateTermWithId();
             terms.add(t);
@@ -67,14 +65,14 @@ class ResourceDaoTest extends BaseDaoTestRunner {
                 matching.add(t);
                 final TermAssignment ta = new TermAssignment();
                 ta.setTerm(t);
-                ta.setTarget(new Target(resource));
+                ta.setTarget(target);
                 assignments.add(ta);
             }
         }
         transactional(() -> {
             terms.forEach(em::persist);
             assignments.forEach(ta -> {
-                em.persist(ta.getTarget());
+                em.persist(target);
                 em.persist(ta);
             });
         });
@@ -109,6 +107,59 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         transactional(() -> assignments.forEach(ta -> {
             em.persist(ta.getTarget());
             em.persist(ta);
+        }));
+    }
+
+    @Test
+    void findAllDoesNotReturnFilesContainedInDocuments() {
+        enableRdfsInference(em);
+        final Resource rOne = Generator.generateResourceWithId();
+        final Document doc = new Document();
+        doc.setUri(Generator.generateUri());
+        doc.setLabel("document");
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("mpp.html");
+        doc.addFile(file);
+        transactional(() -> {
+            em.persist(rOne);
+            em.persist(doc);
+            em.persist(file);
+        });
+
+        final List<Resource> result = sut.findAll();
+        assertEquals(2, result.size());
+        assertFalse(result.contains(file));
+        assertTrue(result.contains(doc));
+        final Optional<Resource> docResult = result.stream().filter(r -> r.getUri().equals(doc.getUri())).findAny();
+        assertTrue(docResult.isPresent());
+        assertTrue(((Document) docResult.get()).getFile(file.getLabel()).isPresent());
+    }
+
+    @Test
+    void findTermsReturnsDistinctTermsInCaseSomeOccurMultipleTimesInResource() {
+        final File resource = new File();
+        resource.setLabel("test.html");
+        resource.setUri(Generator.generateUri());
+        transactional(() -> em.persist(resource));
+        final List<Term> terms = generateTerms(resource);
+        generateOccurrences(resource, terms);
+        final List<Term> result = sut.findTerms(resource);
+        final Set<Term> resultSet = new HashSet<>(result);
+        assertEquals(result.size(), resultSet.size());
+    }
+
+    private void generateOccurrences(File resource, List<Term> terms) {
+        final List<TermOccurrence> occurrences = new ArrayList<>();
+        for (Term t : terms) {
+            final TermOccurrence occurrence = new TermOccurrence(t, new OccurrenceTarget(resource));
+            // Dummy selector
+            occurrence.getTarget().setSelectors(Collections.singleton(new XPathSelector("//div")));
+            occurrences.add(occurrence);
+        }
+        transactional(() -> occurrences.forEach(occ -> {
+            em.persist(occ);
+            em.persist(occ.getTarget());
         }));
     }
 }

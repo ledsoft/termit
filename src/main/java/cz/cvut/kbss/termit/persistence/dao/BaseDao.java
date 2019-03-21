@@ -48,6 +48,16 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
     }
 
     @Override
+    public Optional<T> getReference(URI id) {
+        Objects.requireNonNull(id);
+        try {
+            return Optional.ofNullable(em.getReference(type, id));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    @Override
     public void persist(T entity) {
         Objects.requireNonNull(entity);
         try {

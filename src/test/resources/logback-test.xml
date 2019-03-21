@@ -18,6 +18,11 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <!-- JOPA Spring transaction logger -->
+    <logger name="com.github.ledsoft" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
     <!-- Logger for our app -->
     <logger name="cz.cvut.kbss.termit" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>

@@ -3,16 +3,16 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.Target;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.model.selector.XPathSelector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -95,9 +95,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findByTargetReturnsCorrectAssignments() {
-        final Term term = new Term();
-        term.setLabel("TestTerm");
-        term.setUri(Generator.generateUri());
+        final Term term = Generator.generateTermWithId();
         transactional(() -> em.persist(term));
 
         final Target target = new Target();
@@ -120,5 +118,42 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.persist(target));
 
         assertTrue(sut.findByTarget(target).isEmpty());
+    }
+
+    @Test
+    void findAllByResourceReturnsAllAssignmentsAndOccurrencesRelatedToSpecifiedResource() {
+        final Term term = Generator.generateTermWithId();
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+
+        final Target target = new Target();
+        target.setSource(file);
+        transactional(() -> {
+            enableRdfsInference(em);
+            em.persist(term);
+            em.persist(target);
+            em.persist(file);
+        });
+        final List<TermAssignment> assignments = generateAssignmentsForTarget(term, target);
+        final List<TermOccurrence> occurrences = generateTermOccurrences(term, file);
+
+        final List<TermAssignment> result = sut.findAll(file);
+        assertEquals(assignments.size() + occurrences.size(), result.size());
+    }
+
+    private List<TermOccurrence> generateTermOccurrences(Term term, File file) {
+        final List<TermOccurrence> occurrences = new ArrayList<>();
+        for (int i = 0; i < Generator.randomInt(5, 10); i++) {
+            final TermOccurrence occurrence = new TermOccurrence(term, new OccurrenceTarget(file));
+            // Dummy selector
+            occurrence.getTarget().setSelectors(Collections.singleton(new XPathSelector("//div")));
+            occurrences.add(occurrence);
+        }
+        transactional(() -> occurrences.forEach(to -> {
+            em.persist(to);
+            em.persist(to.getTarget());
+        }));
+        return occurrences;
     }
 }

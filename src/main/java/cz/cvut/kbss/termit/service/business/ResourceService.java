@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -79,6 +80,18 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
+     * Gets term assignments related to the specified resource.
+     * <p>
+     * This includes both assignments and occurrences.
+     *
+     * @param resource Target resource
+     * @return List of term assignments and occurrences
+     */
+    public List<TermAssignment> findAssignments(Resource resource) {
+        return repositoryService.findAssignments(resource);
+    }
+
+    /**
      * Finds resources which are related to the specified one.
      * <p>
      * Two resources are related in this scenario if they have at least one common term assigned to them.
@@ -152,6 +165,16 @@ public class ResourceService implements CrudService<Resource> {
     @Override
     public Resource findRequired(URI id) {
         return repositoryService.findRequired(id);
+    }
+
+    @Override
+    public Optional<Resource> getReference(URI id) {
+        return repositoryService.getReference(id);
+    }
+
+    @Override
+    public Resource getRequiredReference(URI id) {
+        return repositoryService.getRequiredReference(id);
     }
 
     @Override
