@@ -29,9 +29,6 @@ public class Vocabulary extends Asset implements Serializable {
             fetch = FetchType.EAGER)
     private Model model;
 
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_informaci_o_verzi, fetch = FetchType.EAGER)
-    private VersionInfo versionInfo;
-
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
 
@@ -57,14 +54,6 @@ public class Vocabulary extends Asset implements Serializable {
 
     public void setModel(Model model) {
         this.model = model;
-    }
-
-    public VersionInfo getVersionInfo() {
-        return versionInfo;
-    }
-
-    public void setVersionInfo(VersionInfo versionInfo) {
-        this.versionInfo = versionInfo;
     }
 
     public Map<String, Set<String>> getProperties() {
@@ -98,7 +87,6 @@ public class Vocabulary extends Asset implements Serializable {
                 getLabel() +
                 " <" + getUri() + '>' +
                 ", glossary=" + glossary +
-                ", version=" + versionInfo +
                 '}';
     }
 
