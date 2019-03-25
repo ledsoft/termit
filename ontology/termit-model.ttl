@@ -11,6 +11,9 @@
 <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term>
         a       owl:Class .
 
+<http://www.w3.org/2004/02/skos/core#narrower>
+        a       owl:ObjectProperty .
+
 termit-pojem:má-cíl-výskytu
         a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
         rdfs:range          termit-pojem:cíl-výskytu ;
@@ -39,14 +42,14 @@ termit:model  a         owl:Ontology , <https://slovník.gov.cz/veřejný-sektor
         <http://purl.org/dc/elements/1.1/title>
                 "Slovník systému TermIt - model"@cs , "Vocabulary of system TermIt - model"@en ;
         <http://purl.org/dc/terms/created>
-                "07.03.2019" ;
+                "25.03.2019" ;
         <http://purl.org/ontology/bibo/status>
                 "Specifikace"@cs , "Specification"@en ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> , termit:glosář ;
+        owl:imports     termit:glosář , <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/model/verze/1.1.1> .
 
 termit-pojem:uzamčený-uživatel-termitu

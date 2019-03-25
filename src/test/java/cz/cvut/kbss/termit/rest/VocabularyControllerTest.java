@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -58,8 +59,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
         this.user = Generator.generateUserWithId();
-        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY))
-                .thenReturn(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/");
+        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(Environment.BASE_URI + "/");
     }
 
     @Test
@@ -145,8 +145,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     @Test
     void generateIdentifierReturnsIdentifierGeneratedForSpecifiedName() throws Exception {
         final String name = "Metropolitní plán";
-        final URI uri = URI.create(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit + "/" +
-                IdentifierResolver.normalize(name));
+        final URI uri = URI.create(Environment.BASE_URI + "/" + IdentifierResolver.normalize(name));
         when(serviceMock.generateIdentifier(name)).thenReturn(uri);
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/identifier").param("name", name)).andReturn();
         assertEquals(uri.toString(), readValue(mvcResult, String.class));

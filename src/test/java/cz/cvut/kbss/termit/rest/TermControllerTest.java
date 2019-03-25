@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
@@ -56,7 +57,7 @@ class TermControllerTest extends BaseControllerTestRunner {
     private static final String PATH = "/vocabularies";
     private static final String VOCABULARY_NAME = "metropolitan-plan";
     private static final String TERM_NAME = "locality";
-    private static final String VOCABULARY_URI = Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME;
+    private static final String VOCABULARY_URI = Environment.BASE_URI + "/" + VOCABULARY_NAME;
     private static final String NAMESPACE = VOCABULARY_URI + Constants.TERM_NAMESPACE_SEPARATOR + "/";
 
     @Mock
@@ -78,7 +79,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         MockitoAnnotations.initMocks(this);
         super.setUp(sut);
         this.vocabulary = Generator.generateVocabulary();
-        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(Vocabulary.ONTOLOGY_IRI_termit + "/");
+        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(Environment.BASE_URI + "/");
         vocabulary.setLabel(VOCABULARY_NAME);
         vocabulary.setUri(URI.create(VOCABULARY_URI));
     }
@@ -134,7 +135,7 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     private URI initTermUriResolution() {
-        final URI termUri = URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME +
+        final URI termUri = URI.create(Environment.BASE_URI + "/" + VOCABULARY_NAME +
                 Constants.TERM_NAMESPACE_SEPARATOR + "/" + TERM_NAME);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
@@ -179,7 +180,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
     @Test
     void generateIdentifierGeneratesTermIdentifierDerivedFromVocabularyId() throws Exception {
-        final URI termUri = URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/" + VOCABULARY_NAME +
+        final URI termUri = URI.create(Environment.BASE_URI + "/" + VOCABULARY_NAME +
                 Constants.TERM_NAMESPACE_SEPARATOR + "/" + TERM_NAME);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
@@ -211,7 +212,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getAllReturnsAllTermsFromVocabulary() throws Exception {
-        when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
+        when(idResolverMock.resolveIdentifier(Environment.BASE_URI, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         final List<Term> terms = IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId())
@@ -221,7 +222,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
         final MvcResult mvcResult = mockMvc.perform(
                 get(PATH + "/" + VOCABULARY_NAME + "/terms")
-                        .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit))
+                        .param(QueryParams.NAMESPACE, Environment.BASE_URI))
                                            .andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
@@ -231,7 +232,7 @@ class TermControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getAllRootsUsesSearchStringToFindMatchingTerms() throws Exception {
-        when(idResolverMock.resolveIdentifier(Vocabulary.ONTOLOGY_IRI_termit, VOCABULARY_NAME))
+        when(idResolverMock.resolveIdentifier(Environment.BASE_URI, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
@@ -241,7 +242,7 @@ class TermControllerTest extends BaseControllerTestRunner {
         final String searchString = "test";
 
         final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/roots")
-                .param(QueryParams.NAMESPACE, Vocabulary.ONTOLOGY_IRI_termit)
+                .param(QueryParams.NAMESPACE, Environment.BASE_URI)
                 .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });

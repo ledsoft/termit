@@ -32,8 +32,8 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
                 "BIND (IF (BOUND(?modified), ?modified, ?created) AS ?lastEdited)" +
                 "} ORDER BY DESC(?lastEdited) LIMIT ?limit", type)
                  .setParameter("type", typeUri)
-                 .setParameter("dateCreated", URI.create(Vocabulary.s_p_created))
-                 .setParameter("lastModified", URI.create(Vocabulary.s_p_ma_posledni_modifikaci))
+                 .setParameter("dateCreated", URI.create(Vocabulary.s_p_ma_datum_a_cas_vytvoreni))
+                 .setParameter("lastModified", URI.create(Vocabulary.s_p_ma_datum_a_cas_posledni_modifikace))
                  .setUntypedParameter("limit", limit).getResultList();
     }
 }

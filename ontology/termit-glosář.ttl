@@ -12,7 +12,7 @@ termit-pojem:má-cíl-výskytu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má cíl výskytu"@cs .
+                "Has occurence target"@en , "Má cíl výskytu"@cs .
 
 termit-pojem:zablokovaný-uživatel-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -21,7 +21,7 @@ termit-pojem:zablokovaný-uživatel-termitu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Zablokovaný uživatel TermItu"@cs .
+                "Blocked TermIt user"@en , "Zablokovaný uživatel TermItu"@cs .
 
 termit-pojem:má-prefix-text-quote
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -30,7 +30,7 @@ termit-pojem:má-prefix-text-quote
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má prefix text quote"@cs .
+                "Has text quote prefix"@en , "Má prefix text quote"@cs .
 
 termit-pojem:má-suffix-text-quote
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -39,7 +39,7 @@ termit-pojem:má-suffix-text-quote
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má suffix text quote"@cs .
+                "Has text quote suffix"@en , "Má suffix text quote"@cs .
 
 termit-pojem:cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#broader>
@@ -47,7 +47,7 @@ termit-pojem:cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Cíl"@cs .
+                "Target"@en , "Cíl"@cs .
 
 termit-pojem:uzamčený-uživatel-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -56,7 +56,7 @@ termit-pojem:uzamčený-uživatel-termitu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Uzamčený uživatel TermItu"@cs .
+                "Locked TermIt user"@en , "Uzamčený uživatel TermItu"@cs .
 
 termit-pojem:má-startovní-pozici
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -65,7 +65,7 @@ termit-pojem:má-startovní-pozici
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má startovní pozici"@cs .
+                "Has start position"@en , "Má startovní pozici"@cs .
 
 termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> ;
         rdfs:label      "Slovník systému TermIt - glosář"@cs , "Vocabulary of system TermIt - glossary"@en ;
@@ -74,14 +74,14 @@ termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sekt
         <http://purl.org/dc/elements/1.1/title>
                 "Vocabulary of system TermIt - glossary"@en , "Slovník systému TermIt - glosář"@cs ;
         <http://purl.org/dc/terms/created>
-                "07.03.2019" ;
+                "25.03.2019" ;
         <http://purl.org/ontology/bibo/status>
                 "Specification"@en , "Specifikace"@cs ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosář> ;
+        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/glosář/verze/1.1.1> .
 
 termit-pojem:je-přiřazením-termu
@@ -91,7 +91,7 @@ termit-pojem:je-přiřazením-termu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Je přiřazením termu"@cs .
+                "Is assignment of a term"@en , "Je přiřazením termu"@cs .
 
 termit-pojem:selektor-xpath
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -100,7 +100,7 @@ termit-pojem:selektor-xpath
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor XPath"@cs .
+                "XPath selector"@en , "Selektor XPath"@cs .
 
 termit-pojem:uživatel-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -109,7 +109,7 @@ termit-pojem:uživatel-termitu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Uživatel TermItu"@cs .
+                "TermIt user"@en , "Uživatel TermItu"@cs .
 
 <http://www.w3.org/2004/02/skos/core#prefLabel>
         rdfs:subPropertyOf  rdfs:label .
@@ -130,7 +130,7 @@ termit-pojem:selektor-css
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor CSS"@cs .
+                "CSS selector"@en , "Selektor CSS"@cs .
 
 termit-pojem:navržený-výskyt-termu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -139,7 +139,7 @@ termit-pojem:navržený-výskyt-termu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Navržený výskyt termu"@cs .
+                "Designed term occurence"@en , "Navržený výskyt termu"@cs .
 
 termit-pojem:omezený-uživatel-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -148,7 +148,7 @@ termit-pojem:omezený-uživatel-termitu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Omezený uživatel TermItu"@cs .
+                "Limited TermIt user"@en , "Omezený uživatel TermItu"@cs .
 
 termit-pojem:má-koncovou-pozici
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -157,7 +157,7 @@ termit-pojem:má-koncovou-pozici
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má koncovou pozici"@cs .
+                "Has end position"@en , "Má koncovou pozici"@cs .
 
 termit-pojem:administrátor-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -166,7 +166,7 @@ termit-pojem:administrátor-termitu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Administrátor TermItu"@cs .
+                "TermIt administrator"@en , "Administrátor TermItu"@cs .
 
 termit-pojem:přiřazení-termu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -175,7 +175,7 @@ termit-pojem:přiřazení-termu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Přiřazení termu"@cs .
+                "Term assignment"@en , "Přiřazení termu"@cs .
 
 termit-pojem:výskyt-termu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -184,7 +184,7 @@ termit-pojem:výskyt-termu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Výskyt termu"@cs .
+                "Term occurence"@en , "Výskyt termu"@cs .
 
 termit-pojem:má-cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#broader>
@@ -192,7 +192,7 @@ termit-pojem:má-cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má cíl"@cs .
+                ", \"Has target"@en , "Má cíl"@cs .
 
 termit-pojem:selektor-fragmentem
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -201,7 +201,7 @@ termit-pojem:selektor-fragmentem
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor fragmentem"@cs .
+                "Selector by fragment"@en , "Selektor fragmentem"@cs .
 
 termit-pojem:selektor-pozici-v-textu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -210,7 +210,7 @@ termit-pojem:selektor-pozici-v-textu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor pozicí v textu"@cs .
+                "Selector by text position"@en , "Selektor pozicí v textu"@cs .
 
 termit-pojem:selektor-termu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -219,7 +219,7 @@ termit-pojem:selektor-termu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor termu"@cs .
+                "Term selector"@en , "Selektor termu"@cs .
 
 termit-pojem:má-selektor-termu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -237,7 +237,7 @@ termit-pojem:cíl-výskytu
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Cíl výskytu"@cs .
+                "Occurence target"@en , "Cíl výskytu"@cs .
 
 termit-pojem:má-přesný-text-quote
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -246,7 +246,7 @@ termit-pojem:má-přesný-text-quote
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Má přesný text quote"@cs .
+                "Has exact text quote"@en , "Má přesný text quote"@cs .
 
 termit-pojem:selektor-text-quote
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -255,4 +255,4 @@ termit-pojem:selektor-text-quote
         <http://www.w3.org/2004/02/skos/core#inScheme>
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Selektor text quote"@cs .
+                "Selector by text quote"@en , "Selektor text quote"@cs .
