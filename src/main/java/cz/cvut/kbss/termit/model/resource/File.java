@@ -8,7 +8,6 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
-import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,14 +16,6 @@ import java.util.Set;
 @JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class File extends Resource implements SupportsStorage {
 
-    /**
-     * File origin.
-     * <p>
-     * Can be used e.g. as baseURI for HTML files.
-     */
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_puvod)
-    private URI origin;
-
     @JsonIgnore
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu, fetch = FetchType.EAGER)
@@ -32,14 +23,6 @@ public class File extends Resource implements SupportsStorage {
 
     @Types
     private Set<String> types;
-
-    public URI getOrigin() {
-        return origin;
-    }
-
-    public void setOrigin(URI origin) {
-        this.origin = origin;
-    }
 
     public Document getDocument() {
         return document;

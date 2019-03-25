@@ -58,8 +58,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     public void parseContent(InputStream input, File source) {
         try {
             this.source = source;
-            this.document = Jsoup.parse(input, StandardCharsets.UTF_8.name(),
-                    source.getOrigin() != null ? source.getOrigin().toString() : "");
+            this.document = Jsoup.parse(input, StandardCharsets.UTF_8.name(), "");
             this.prefixes = resolvePrefixes(document);
         } catch (IOException e) {
             throw new AnnotationGenerationException("Unable to read RDFa document.", e);
