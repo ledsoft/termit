@@ -85,7 +85,7 @@ public class SystemInitializer {
 
     private static UserAccount initAdminInstance() {
         final UserAccount admin = new UserAccount();
-        admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user"));
+        admin.setUri(URI.create(Vocabulary.ONTOLOGY_IRI_slovnik + "/system-admin-user"));
         admin.setFirstName("System");
         admin.setLastName("Administrator");
         admin.setUsername("termit-admin@kbss.felk.cvut.cz");

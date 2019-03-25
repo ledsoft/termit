@@ -58,7 +58,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     private static final String IRI_PARAM = "iri";
 
     private static final String RESOURCE_NAME = "test-resource";
-    private static final String RESOURCE_NAMESPACE = Vocabulary.ONTOLOGY_IRI_termit + "/";
+    private static final String RESOURCE_NAMESPACE = Environment.BASE_URI + "/";
     private static final String HTML_CONTENT = "<html><head><title>Test</title></head><body>test</body></html>";
 
     @Mock

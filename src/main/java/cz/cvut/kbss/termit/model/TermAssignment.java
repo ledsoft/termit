@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
@@ -18,7 +19,7 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     Target target;
 
-    @OWLDataProperty(iri = Vocabulary.s_p_description)
+    @OWLDataProperty(iri = DC.Terms.DESCRIPTION)
     private String description;
 
     @Types

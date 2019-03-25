@@ -12,7 +12,6 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -50,7 +49,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
 class TextAnalysisServiceTest extends BaseServiceTestRunner {
 
-    private static final URI DOC_URI = URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/text-analysis-test");
+    private static final URI DOC_URI = URI.create(
+            cz.cvut.kbss.termit.environment.Environment.BASE_URI + "/text-analysis-test");
     private static final String FILE_NAME = "tas-test.html";
 
     private static final String CONTENT =
