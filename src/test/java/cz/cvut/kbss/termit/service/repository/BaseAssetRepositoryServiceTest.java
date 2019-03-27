@@ -82,9 +82,9 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
             for (int i = 0; i < vocabularies.size(); i++) {
                 final Vocabulary r = vocabularies.get(i);
                 con.remove(vf.createIRI(r.getUri().toString()),
-                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_created), null);
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_datum_a_cas_vytvoreni), null);
                 con.add(vf.createIRI(r.getUri().toString()),
-                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_created),
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_datum_a_cas_vytvoreni),
                         vf.createLiteral(new Date(System.currentTimeMillis() - i * 1000 * 60)));
             }
             con.commit();
