@@ -7,6 +7,7 @@ Prefices
     skos :  http://www.w3.org/2004/02/skos/core#
     pdp  :  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/
     psys :  http://proton.semanticweb.org/protonsys#
+    termit : http://onto.fel.cvut.cz/ontologies/application/termit/pojem/
 }
 
 Axioms
@@ -53,17 +54,18 @@ Rules
 
     vocabulary <pdp:popisuje-dokument> this   
     -------------------------------
-    this <pdp:ma-dokumentovy-slovnik> vocabulary
+    this <pdp:má-dokumentový-slovník> vocabulary
 
   Id: pdp_term_1
 
-    occurrence <pdp:je-vyskytem-termu> this 
+    occurrence <termit:je-přiřazením-termu> this
+    occurrence <rdf:type> <termit:výskyt-termu>
     -------------------------------
-    this <pdp:ma-vyskyt-termu> occurrence
+    this <termit:má-výskyt-termu> occurrence
 
   Id: pdp_term_2_5
-    vocabulary <pdp:ma-glosar> glossary
-    this <pdp:je-pojmem-ze-slovniku> vocabulary
+    vocabulary <pdp:má-glosář> glossary
+    this <pdp:je-pojmem-ze-slovníku> vocabulary
     -------------------------------
     glossary <pdp:obsahuje-pojem> this
     this <skos:inScheme> glossary
@@ -76,15 +78,15 @@ Rules
 
   Id: pdp_term_4
 
-    this <rdf:type> <pdp:dokumentovy-slovnik>
+    this <rdf:type> <pdp:dokumentový-slovník>
     -------------------------------
-    this <rdf:type> <pdp:slovnik>
+    this <rdf:type> <pdp:slovník>
 
   Id: pdp_term_5
 
-    doc <pdp:ma-soubor> this
+    doc <pdp:má-soubor> this
     -------------------------------
-    this <pdp:je-casti-dokumentu> doc
+    this <pdp:je-částí-dokumentu> doc
 
 }
 
