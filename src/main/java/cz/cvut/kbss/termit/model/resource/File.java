@@ -75,6 +75,7 @@ public class File extends Resource implements SupportsStorage {
      *
      * @return Name of the directory storing this file
      */
+    @JsonIgnore
     @Override
     public String getDirectoryName() {
         if (document != null) {
