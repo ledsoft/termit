@@ -19,7 +19,6 @@ import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
-import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -431,5 +430,26 @@ class ResourceControllerTest extends BaseControllerTestRunner {
             assertTrue(result.stream().anyMatch(a -> a.getUri().equals(ta.getUri())));
         }
         verify(resourceServiceMock).findAssignments(resource);
+    }
+
+    @Test
+    void getRelatedResourcesRetrievesResourcesRelatedToResource() throws Exception {
+        final User author = Generator.generateUserWithId();
+        final URI resourceUri = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
+        final Resource resource = Generator.generateResource();
+        resource.setUri(resourceUri);
+        resource.setLabel(RESOURCE_NAME);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
+        when(resourceServiceMock.getRequiredReference(resourceUri)).thenReturn(resource);
+        final List<Resource> related = generateRelatedResources(author);
+        when(resourceServiceMock.findRelated(resource)).thenReturn(related);
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + RESOURCE_NAME + "/related").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+                .andExpect(status().isOk()).andReturn();
+        final List<Resource> result = readValue(mvcResult, new TypeReference<List<Resource>>() {
+        });
+        assertEquals(related, result);
+        verify(resourceServiceMock).findRelated(resource);
     }
 }
