@@ -23,10 +23,11 @@ public class ResourceDao extends AssetDao<Resource> {
     public List<Resource> findAll() {
         try {
             return em.createNativeQuery("SELECT ?x WHERE {" +
-                    "?x a ?type ." +
+                    "?x a ?type ;" +
+                    "rdfs:label ?label ." +
                     "FILTER NOT EXISTS {" +
                     "?y ?hasFile ?x ." +
-                    "} }", Resource.class)
+                    "} } ORDER BY ?label", Resource.class)
                      .setParameter("type", typeUri)
                      .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor)).getResultList();
         } catch (RuntimeException e) {
