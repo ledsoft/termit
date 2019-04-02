@@ -129,3 +129,7 @@ used by TermIt.
 
 We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
 on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.
+
+## License
+
+Licensed under GPL v3.0.
