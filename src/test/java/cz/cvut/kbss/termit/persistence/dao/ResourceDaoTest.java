@@ -162,4 +162,14 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             em.persist(occ.getTarget());
         }));
     }
+
+    @Test
+    void findAllReturnsResourcesOrderedByLabel() {
+        final List<Resource> resources = IntStream.range(0, 10).mapToObj(i -> generateResource())
+                                                  .collect(Collectors.toList());
+
+        final List<Resource> result = sut.findAll();
+        resources.sort(Comparator.comparing(Resource::getLabel));
+        assertEquals(resources, result);
+    }
 }

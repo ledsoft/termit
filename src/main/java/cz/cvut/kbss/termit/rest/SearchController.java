@@ -26,9 +26,9 @@ public class SearchController extends BaseController {
         this.searchService = searchService;
     }
 
-    @RequestMapping(value = "/label", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/fts", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
             JsonLd.MEDIA_TYPE})
-    public List<FullTextSearchResult> searchByLabel(@RequestParam(name = "searchString") String searchString) {
-        return searchService.searchByLabel(searchString);
+    public List<FullTextSearchResult> fullTextSearch(@RequestParam(name = "searchString") String searchString) {
+        return searchService.fullTextSearch(searchString);
     }
 }

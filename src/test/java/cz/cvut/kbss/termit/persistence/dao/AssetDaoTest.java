@@ -82,8 +82,8 @@ class AssetDaoTest extends BaseDaoTestRunner {
         try (final RepositoryConnection con = repo.getConnection()) {
             con.begin();
             old.forEach(r -> {
-                con.remove(vf.createIRI(r.getUri().toString()), vf.createIRI(Vocabulary.s_p_created), null);
-                con.add(vf.createIRI(r.getUri().toString()), vf.createIRI(Vocabulary.s_p_created),
+                con.remove(vf.createIRI(r.getUri().toString()), vf.createIRI(Vocabulary.s_p_ma_datum_a_cas_vytvoreni), null);
+                con.add(vf.createIRI(r.getUri().toString()), vf.createIRI(Vocabulary.s_p_ma_datum_a_cas_vytvoreni),
                         vf.createLiteral(new Date(System.currentTimeMillis() - 24 * 3600 * 1000)));
             });
             con.commit();

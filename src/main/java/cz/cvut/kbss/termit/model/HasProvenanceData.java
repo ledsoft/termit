@@ -16,13 +16,13 @@ public abstract class HasProvenanceData {
     private User author;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLDataProperty(iri = Vocabulary.s_p_created)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_datum_a_cas_vytvoreni)
     private Date created;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_posledniho_editora, fetch = FetchType.EAGER)
     private User lastEditor;
 
-    @OWLDataProperty(iri = Vocabulary.s_p_ma_posledni_modifikaci)
+    @OWLDataProperty(iri = Vocabulary.s_p_ma_datum_a_cas_posledni_modifikace)
     private Date lastModified;
 
     public User getAuthor() {

@@ -38,12 +38,12 @@ class SearchControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void searchByLabelInvokesSearchOnService() throws Exception {
+    void fullTextSearchExecutesSearchOnService() throws Exception {
         final List<FullTextSearchResult> expected = Collections
                 .singletonList(new FullTextSearchResult(Generator.generateUri(), "test", null, Vocabulary.s_c_term, "test", "test", 1.0));
-        when(searchServiceMock.searchByLabel(any())).thenReturn(expected);
+        when(searchServiceMock.fullTextSearch(any())).thenReturn(expected);
         final String searchString = "test";
-        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/label").param("searchString", searchString))
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/fts").param("searchString", searchString))
                                            .andExpect(status().isOk()).andReturn();
         final List<FullTextSearchResult> result = readValue(mvcResult, new TypeReference<List<FullTextSearchResult>>() {
         });

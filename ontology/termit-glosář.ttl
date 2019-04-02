@@ -1,0 +1,258 @@
+@prefix termit: <http://onto.fel.cvut.cz/ontologies/application/termit/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+termit-pojem:má-cíl-výskytu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:má-cíl , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has occurence target"@en , "Má cíl výskytu"@cs .
+
+termit-pojem:zablokovaný-uživatel-termitu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:uživatel-termitu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Blocked TermIt user"@en , "Zablokovaný uživatel TermItu"@cs .
+
+termit-pojem:má-prefix-text-quote
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vlastnost> , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has text quote prefix"@en , "Má prefix text quote"@cs .
+
+termit-pojem:má-suffix-text-quote
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vlastnost> , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has text quote suffix"@en , "Má suffix text quote"@cs .
+
+termit-pojem:cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <http://onto.fel.cvut.cz/ontologies/ufo/pojem/object> , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Target"@en , "Cíl"@cs .
+
+termit-pojem:uzamčený-uživatel-termitu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:uživatel-termitu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Locked TermIt user"@en , "Uzamčený uživatel TermItu"@cs .
+
+termit-pojem:má-startovní-pozici
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vlastnost> , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has start position"@en , "Má startovní pozici"@cs .
+
+termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> ;
+        rdfs:label      "Slovník systému TermIt - glosář"@cs , "Vocabulary of system TermIt - glossary"@en ;
+        <http://purl.org/dc/elements/1.1/creator>
+                " Martin Ledvinka" , "Michal Med" ;
+        <http://purl.org/dc/elements/1.1/title>
+                "Vocabulary of system TermIt - glossary"@en , "Slovník systému TermIt - glosář"@cs ;
+        <http://purl.org/dc/terms/created>
+                "25.03.2019" ;
+        <http://purl.org/ontology/bibo/status>
+                "Specification"@en , "Specifikace"@cs ;
+        <http://purl.org/vocab/vann/preferredNamespacePrefix>
+                "termit-pojem" ;
+        <http://purl.org/vocab/vann/preferredNamespaceUri>
+                "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
+        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> ;
+        owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/glosář/verze/1.1.1> .
+
+termit-pojem:je-přiřazením-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Is assignment of a term"@en , "Je přiřazením termu"@cs .
+
+termit-pojem:selektor-xpath
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:selektor-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "XPath selector"@en , "Selektor XPath"@cs .
+
+termit-pojem:uživatel-termitu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/uživatel> , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "TermIt user"@en , "Uživatel TermItu"@cs .
+
+<http://www.w3.org/2004/02/skos/core#prefLabel>
+        rdfs:subPropertyOf  rdfs:label .
+
+termit-pojem:má-výskyt-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Má výskyt termu"@cs .
+
+termit-pojem:selektor-css
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:selektor-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "CSS selector"@en , "Selektor CSS"@cs .
+
+termit-pojem:navržený-výskyt-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:výskyt-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Designed term occurence"@en , "Navržený výskyt termu"@cs .
+
+termit-pojem:omezený-uživatel-termitu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:uživatel-termitu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Limited TermIt user"@en , "Omezený uživatel TermItu"@cs .
+
+termit-pojem:má-koncovou-pozici
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vlastnost> , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has end position"@en , "Má koncovou pozici"@cs .
+
+termit-pojem:administrátor-termitu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:uživatel-termitu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "TermIt administrator"@en , "Administrátor TermItu"@cs .
+
+termit-pojem:přiřazení-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/objekt> , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Term assignment"@en , "Přiřazení termu"@cs .
+
+termit-pojem:výskyt-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:přiřazení-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Term occurence"@en , "Výskyt termu"@cs .
+
+termit-pojem:má-cíl  a  <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                ", \"Has target"@en , "Má cíl"@cs .
+
+termit-pojem:selektor-fragmentem
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:selektor-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Selector by fragment"@en , "Selektor fragmentem"@cs .
+
+termit-pojem:selektor-pozici-v-textu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:selektor-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Selector by text position"@en , "Selektor pozicí v textu"@cs .
+
+termit-pojem:selektor-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/objekt> , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Term selector"@en , "Selektor termu"@cs .
+
+termit-pojem:má-selektor-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Má selektor termu"@cs .
+
+termit-pojem:cíl-výskytu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:cíl , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Occurence target"@en , "Cíl výskytu"@cs .
+
+termit-pojem:má-přesný-text-quote
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vlastnost> , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has exact text quote"@en , "Má přesný text quote"@cs .
+
+termit-pojem:selektor-text-quote
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:selektor-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Selector by text quote"@en , "Selektor text quote"@cs .

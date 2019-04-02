@@ -22,7 +22,7 @@ public class Generator {
      * @return Random URI
      */
     public static URI generateUri() {
-        return URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/randomInstance" + randomInt());
+        return URI.create(Environment.BASE_URI + "/randomInstance" + randomInt());
     }
 
     /**

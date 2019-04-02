@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>termit</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>TermIt</name>
     <description>Terminology manager based on Semantic Web technologies.</description>
     <packaging>war</packaging>
@@ -30,7 +30,7 @@
         <org.springframework.data.version>2.0.8.RELEASE</org.springframework.data.version>
         <com.fasterxml.jackson.version>2.9.6</com.fasterxml.jackson.version>
         <org.hibernate.validator.version>6.0.11.Final</org.hibernate.validator.version>
-        <cz.cvut.kbss.jopa.version>0.12.0</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jopa.version>0.12.1</cz.cvut.kbss.jopa.version>
         <cz.cvut.kbss.jsonld.version>0.3.7</cz.cvut.kbss.jsonld.version>
         <org.aspectj.version>1.9.2</org.aspectj.version>
 
@@ -431,7 +431,6 @@
                     <ontology-iri>http://onto.fel.cvut.cz/ontologies/application/termit</ontology-iri>
                     <mapping-file>${project.basedir}/src/main/resources/mapping</mapping-file>
                     <whole-ontology-as-ics>true</whole-ontology-as-ics>
-                    <!--<context-name>termit</context-name>-->
                     <vocabulary-only>true</vocabulary-only>
                     <ignore-failed-imports>true</ignore-failed-imports>
                 </configuration>

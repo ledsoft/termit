@@ -46,7 +46,7 @@ public class VocabularyController extends BaseController {
         return ResponseEntity.created(generateLocation(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY)).build();
     }
 
-    @RequestMapping(value = "/{fragment}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Vocabulary getById(@PathVariable("fragment") String fragment,
                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI id = resolveVocabularyUri(fragment, namespace);

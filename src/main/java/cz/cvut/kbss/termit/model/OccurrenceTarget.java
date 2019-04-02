@@ -11,7 +11,7 @@ import java.util.Set;
 public class OccurrenceTarget extends Target {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_selektor, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_selektor_termu, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<TermSelector> selectors;
 
     public OccurrenceTarget() {

@@ -124,6 +124,24 @@ public class ResourceController extends BaseController {
         LOG.debug("Text analysis invoked for resource {}.", resource);
     }
 
+    /**
+     * Gets Resources related to the specified one.
+     * <p>
+     * Related resources mean they have at least one common assigned term
+     *
+     * @param normalizedName Normalized Resource name
+     * @param namespace      Namespace used for resource identifier resolution. Optional, if not specified, the
+     *                       configured namespace is used
+     * @return List of related resources
+     */
+    @RequestMapping(value = "/{normalizedName}/related", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
+    public List<Resource> getRelatedResources(@PathVariable("normalizedName") String normalizedName,
+                                              @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        return resourceService.findRelated(resourceService.getRequiredReference(identifier));
+    }
+
     @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@PathVariable("normalizedName") String normalizedName,

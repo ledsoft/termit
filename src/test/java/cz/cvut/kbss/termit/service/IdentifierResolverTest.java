@@ -1,10 +1,10 @@
 package cz.cvut.kbss.termit.service;
 
+import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
-import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.env.MockEnvironment;
@@ -104,7 +104,7 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
     @Test
     void generateIdentifierThrowsIllegalArgumentWhenNoComponentsAreProvided() {
         final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> sut.generateIdentifier(Vocabulary.ONTOLOGY_IRI_termit));
+                () -> sut.generateIdentifier(Environment.BASE_URI));
         assertEquals("Must provide at least one component for identifier generation.", ex.getMessage());
     }
 

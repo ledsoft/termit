@@ -29,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collections;
@@ -36,6 +37,8 @@ import java.util.HashSet;
 import java.util.Optional;
 
 public class Environment {
+
+    public static final String BASE_URI = Vocabulary.ONTOLOGY_IRI_slovnik;
 
     private static UserAccount currentUser;
 
@@ -165,7 +168,8 @@ public class Environment {
         final Repository repo = em.unwrap(Repository.class);
         try (final RepositoryConnection conn = repo.getConnection()) {
             conn.begin();
-            conn.add(new File("termit.ttl"), Vocabulary.ONTOLOGY_IRI_termit, RDFFormat.TURTLE);
+            conn.add(new URL(Vocabulary.ONTOLOGY_IRI_model), BASE_URI, RDFFormat.TURTLE);
+            conn.add(new File("ontology/termit-model.ttl"), BASE_URI, RDFFormat.TURTLE);
             conn.commit();
         } catch (IOException e) {
             throw new RuntimeException("Unable to load TermIt model for import.", e);
