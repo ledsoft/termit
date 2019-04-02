@@ -18,14 +18,12 @@ public class SearchService {
     }
 
     /**
-     * Searches resources by label.
-     * <p>
-     * Returns resources whose label matches the specified string.
+     * Executes full text search in assets.
      *
      * @param searchString String to search by
-     * @return General representation of matching resources
+     * @return Matching assets
      */
-    public List<FullTextSearchResult> searchByLabel(String searchString) {
+    public List<FullTextSearchResult> fullTextSearch(String searchString) {
         return searchDao.fullTextSearch(searchString);
     }
 }
