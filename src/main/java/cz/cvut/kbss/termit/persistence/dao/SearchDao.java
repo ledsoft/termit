@@ -52,9 +52,10 @@ public class SearchDao {
     }
 
     /**
-     * Finds terms and vocabularies whose label (name) matches the specified search string.
+     * Finds terms and vocabularies which match the specified search string.
      * <p>
-     * Note that currently the match is done using simple contains on lower case strings.
+     * The search functionality depends on the underlying repository and the index it uses. But basically the search
+     * looks for match in asset label, comment and SKOS definition.
      *
      * @param searchString The string to search by
      * @return List of matching results
