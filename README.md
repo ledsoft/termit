@@ -60,14 +60,24 @@ Use it to verify input data. See `User` and its validation in `BaseRepositorySer
 
 ### Storage
 
-TermIt is preconfigured to run against a local RDF4J repository at `http://locahost:18188/rdf4j-server/repositories/termit`.
+TermIt is preconfigured to run against a local GraphDB repository at `http://locahost:7200/repositories/termit`.
 This can be changed by updating `config.properties`.
 
-### SPIN Rules
+### GraphDB Ruleset
+
+_Applies when running against a GraphDB repository._
+
+In order to support inference used by the application, a custom ruleset has to be specified for the TermIt repository. This
+ruleset is available in `rulesets/rulest-termit-graphdb.pie`.
+
+### RDF4J SPIN Rules
+
+_Applies when running against an RDF4J repository._
 
 In order to support the inference used by the application, new rules need to be added to RDF4J because its own RDFS rule engine does not
 support OWL stuff like inverse properties (which are used in the model). Thus, when creating a new repository, a store 
-with **RDFS+SPIN support** should be selected. Then, rules contained in `rdf4j-spin-rules.ttl` should be added to the repository, 
+with **RDFS+SPIN support** should be selected (if proper search should be supported as well, a **RDFS+SPIN with Lucene support** should be selected). 
+Then, rules contained in `rulesets/rules-termit-spin.ttl` should be added to the repository, 
 as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
 
 Note that JOPA currently does not support creating in-memory repository with SPIN rules, so SPIN inference is not supported in
@@ -100,12 +110,20 @@ Each implementation has its own search query which is loaded and used by `Search
 for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
 artifact during build. If none of the profiles is selected, the default search is used.
 
+Note that in case of GraphDB, a corresponding Lucene connector has to be created as well.
+
 ### RDFS Inference in Tests
 
 The test in-memory repository is configured to be a SPIN SAIL with RDFS inferencing engine. Thus, basically all the inference features available
 in production are available in tests as well. However, the repository is by default left empty (without the model or SPIN rules) to facilitate test
 performance (inference in RDF4J is really slow). To load the TermIt model into the repository and thus enable RDFS inference, call the `enableRdfsInference`
 method available on both `BaseDaoTestRunner` and `BaseServiceTestRunner`. SPIN rules are currently not loaded as they don't seem to be used by any tests.
+
+## Ontology
+
+The ontology on which TermIt is based can be found in the `ontology` folder. For proper inference functionality, `termit-model.ttl` and the 
+_popis-dat_ ontology model (http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model) need to be loaded into the repository 
+used by TermIt.
 
 ## Monitoring
 
