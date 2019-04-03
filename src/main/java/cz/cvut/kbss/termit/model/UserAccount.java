@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
@@ -39,6 +40,7 @@ public class UserAccount extends AbstractUser {
      *
      * @return Locked status
      */
+    @JsonIgnore
     public boolean isLocked() {
         return types != null && types.contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_uzamceny_uzivatel_termitu);
     }
@@ -75,6 +77,7 @@ public class UserAccount extends AbstractUser {
     /**
      * Checks whether the account represented by this instance is enabled.
      */
+    @JsonIgnore
     public boolean isEnabled() {
         return types == null || !types.contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_zablokovany_uzivatel_termitu);
     }
