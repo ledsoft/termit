@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -109,5 +108,10 @@ public class DefaultDocumentManager implements DocumentManager {
         final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
         final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
         return name + "~" + dateFormat.format(new Date()) + extension;
+    }
+
+    @Override
+    public boolean exists(File file) {
+        return resolveFile(file, false).exists();
     }
 }

@@ -19,8 +19,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class ResourceServiceTest {
 
@@ -152,10 +151,23 @@ class ResourceServiceTest {
         final File file = new File();
         file.setLabel("Test");
         file.setUri(Generator.generateUri());
+        when(documentManager.exists(file)).thenReturn(true);
         sut.saveContent(file, bis);
         final InOrder inOrder = Mockito.inOrder(documentManager);
         inOrder.verify(documentManager).createBackup(file);
         inOrder.verify(documentManager).saveFileContent(file, bis);
+    }
+
+    @Test
+    void saveContentDoesNotCreateBackupWhenFileDoesNotYetExist() {
+        final ByteArrayInputStream bis = new ByteArrayInputStream("test".getBytes());
+        final File file = new File();
+        file.setLabel("Test");
+        file.setUri(Generator.generateUri());
+        when(documentManager.exists(file)).thenReturn(false);
+        sut.saveContent(file, bis);
+        verify(documentManager, never()).createBackup(file);
+        verify(documentManager).saveFileContent(file, bis);
     }
 
     @Test

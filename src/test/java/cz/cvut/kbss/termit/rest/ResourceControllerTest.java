@@ -27,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
@@ -363,7 +364,12 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final MockMultipartFile upload = new MockMultipartFile("file", file.getLabel(), MediaType.TEXT_HTML_VALUE,
                 Files.readAllBytes(attachment.toPath())
         );
-        mockMvc.perform(multipart(PATH + "/" + fileName + "/content").file(upload)).andExpect(status().isNoContent());
+        mockMvc.perform(multipart(PATH + "/" + fileName + "/content").file(upload)
+                                                                     .with(req -> {
+                                                                         req.setMethod(HttpMethod.PUT.toString());
+                                                                         return req;
+                                                                     }))
+               .andExpect(status().isNoContent());
         verify(resourceServiceMock).saveContent(eq(file), any(InputStream.class));
     }
 
