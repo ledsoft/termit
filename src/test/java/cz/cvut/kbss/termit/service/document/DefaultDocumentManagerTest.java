@@ -199,4 +199,23 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
             assertEquals(CONTENT, String.join("\n", Files.readAllLines(f.toPath())));
         }
     }
+
+    @Test
+    void existsReturnsTrueForExistingFile() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+        assertTrue(sut.exists(file));
+    }
+
+    @Test
+    void existsReturnsFalseForNonExistentFile() {
+        final File file = new File();
+        file.setLabel("test.html");
+        document.addFile(file);
+        file.setDocument(document);
+        assertFalse(sut.exists(file));
+    }
 }

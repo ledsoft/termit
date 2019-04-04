@@ -89,7 +89,7 @@ public class ResourceController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.POST)
+    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void saveContent(@PathVariable("normalizedName") String normalizedName,
                             @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,

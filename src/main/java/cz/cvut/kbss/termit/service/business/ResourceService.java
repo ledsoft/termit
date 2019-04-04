@@ -133,8 +133,11 @@ public class ResourceService implements CrudService<Resource> {
             throw new UnsupportedAssetOperationException("Content saving is not supported for resource " + resource);
         }
         LOG.trace("Saving new content of resource {}.", resource);
-        documentManager.createBackup((File) resource);
-        documentManager.saveFileContent((File) resource, content);
+        final File file = (File) resource;
+        if (documentManager.exists(file)) {
+            documentManager.createBackup(file);
+        }
+        documentManager.saveFileContent(file, content);
     }
 
     /**

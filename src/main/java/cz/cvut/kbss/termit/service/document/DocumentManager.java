@@ -59,4 +59,12 @@ public interface DocumentManager {
      * @throws NotFoundException If the file cannot be found
      */
     void createBackup(File file);
+
+    /**
+     * Checks whether content for the specified file exists.
+     *
+     * @param file File to check
+     * @return Whether file content is stored
+     */
+    boolean exists(File file);
 }
