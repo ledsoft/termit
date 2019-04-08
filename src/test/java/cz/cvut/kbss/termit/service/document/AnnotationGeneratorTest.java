@@ -157,12 +157,24 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
-        final InputStream content = loadFile("data/rdfa-simple.html");
-        file.setLabel("test.txt");
+    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() throws Exception {
+        final InputStream content = loadFile("config.properties");
+        file.setLabel(generateIncompatibleFile());
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
+    }
+
+    private String generateIncompatibleFile() throws Exception {
+        final String tempDir = System.getProperty("java.io.tmpdir");
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), tempDir);
+        final java.io.File docDir = new java.io.File(tempDir + java.io.File.separator +
+                document.getDirectoryName());
+        docDir.mkdir();
+        docDir.deleteOnExit();
+        final java.io.File content = Files.createTempFile(docDir.toPath(), "test", ".txt").toFile();
+        content.deleteOnExit();
+        return content.getName();
     }
 
     @Test

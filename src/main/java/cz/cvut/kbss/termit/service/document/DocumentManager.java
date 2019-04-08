@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * Manages the physical aspect of documents supported by the system, i.e., mainly the files stored for each document.
@@ -67,4 +68,14 @@ public interface DocumentManager {
      * @return Whether file content is stored
      */
     boolean exists(File file);
+
+    /**
+     * Determines content type of the specified file.
+     *
+     * @param file File whose content type is to be resolved
+     * @return Resolved content type. If the system was unable to determine file content type, an empty optional is
+     * returned
+     * @throws NotFoundException If a corresponding physical file cannot be found
+     */
+    Optional<String> getContentType(File file);
 }

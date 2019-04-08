@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Default document manager uses files on filesystem to store content.
@@ -113,5 +114,16 @@ public class DefaultDocumentManager implements DocumentManager {
     @Override
     public boolean exists(File file) {
         return resolveFile(file, false).exists();
+    }
+
+    @Override
+    public Optional<String> getContentType(File file) {
+        final java.io.File physicalFile = resolveFile(file, true);
+        try {
+            return Optional.ofNullable(Files.probeContentType(physicalFile.toPath()));
+        } catch (IOException e) {
+            LOG.error("Exception caught when determining content type of file {}.", file, e);
+            return Optional.empty();
+        }
     }
 }

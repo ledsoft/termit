@@ -16,12 +16,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
@@ -217,5 +219,26 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         document.addFile(file);
         file.setDocument(document);
         assertFalse(sut.exists(file));
+    }
+
+    @Test
+    void getContentTypeResolvesContentTypeOfSpecifiedFileFromDisk() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+        final Optional<String> result = sut.getContentType(file);
+        assertTrue(result.isPresent());
+        assertEquals(MimeTypeUtils.TEXT_HTML_VALUE, result.get());
+    }
+
+    @Test
+    void getContentTypeThrowsNotFoundExceptionWhenFileDoesNotExist() {
+        final File file = new File();
+        file.setLabel("test.html");
+        document.addFile(file);
+        file.setDocument(document);
+        assertThrows(NotFoundException.class, () -> sut.getContentType(file));
     }
 }

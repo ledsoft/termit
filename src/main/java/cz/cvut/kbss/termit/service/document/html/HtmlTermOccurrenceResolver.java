@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.model.OccurrenceTarget;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private static final Logger LOG = LoggerFactory.getLogger(HtmlTermOccurrenceResolver.class);
 
     private final HtmlSelectorGenerators selectorGenerators;
+    private final DocumentManager documentManager;
 
     private Document document;
     private File source;
@@ -49,9 +52,11 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private Map<String, List<Element>> annotatedElements;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
+                               DocumentManager documentManager) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
+        this.documentManager = documentManager;
     }
 
     @Override
@@ -143,7 +148,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             LOG.trace("Processing RDFa annotated elements {}.", elements);
             final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
             occurrence.ifPresent(to -> {
-                LOG.trace("Found term occurrence {}.", to, source);
+                LOG.trace("Found term occurrence {}.", to);
                 result.add(to);
             });
         }
@@ -168,6 +173,10 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
 
     @Override
     public boolean supports(File source) {
-        return source.getLabel().endsWith("html") || source.getLabel().endsWith("htm");
+        if (source.getLabel().endsWith("html") || source.getLabel().endsWith("htm")) {
+            return true;
+        }
+        final Optional<String> probedContentType = documentManager.getContentType(source);
+        return probedContentType.isPresent() && probedContentType.get().equals(MimeTypeUtils.TEXT_HTML_VALUE);
     }
 }
