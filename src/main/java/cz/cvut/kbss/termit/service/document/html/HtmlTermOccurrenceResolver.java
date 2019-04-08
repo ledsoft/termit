@@ -168,6 +168,15 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
         final OccurrenceTarget target = new OccurrenceTarget(source);
         target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
         occurrence.setTarget(target);
+        final String strScore = rdfaElem.get(0).attr("score");
+        if (!strScore.isEmpty()) {
+            try {
+                final Double score = Double.parseDouble(strScore);
+                occurrence.setScore(score);
+            } catch (NumberFormatException e) {
+                LOG.error("Unable to parse score.", e);
+            }
+        }
         return Optional.of(occurrence);
     }
 

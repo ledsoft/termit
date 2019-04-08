@@ -1,11 +1,16 @@
 package cz.cvut.kbss.termit.service.document.html;
 
+import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitializer;
+import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.TermOccurrence;
+import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -13,10 +18,15 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
 class HtmlTermOccurrenceResolverTest extends BaseServiceTestRunner {
@@ -25,7 +35,17 @@ class HtmlTermOccurrenceResolverTest extends BaseServiceTestRunner {
     private Environment environment;
 
     @Autowired
+    private EntityManager em;
+
+    @Autowired
     private HtmlTermOccurrenceResolver sut;
+
+    @BeforeEach
+    void setUp() {
+        final User user = Generator.generateUserWithId();
+        transactional(() -> em.persist(user));
+        cz.cvut.kbss.termit.environment.Environment.setCurrentUser(user);
+    }
 
     @Test
     void supportsReturnsTrueForFileWithHtmlLabelExtension() {
@@ -67,5 +87,49 @@ class HtmlTermOccurrenceResolverTest extends BaseServiceTestRunner {
         file.setDocument(document);
         document.addFile(file);
         return file;
+    }
+
+    @Test
+    void findTermOccurrencesExtractsAlsoScoreFromRdfa() {
+        createTerm();
+        final File file = new File();
+        file.setLabel("rdfa-simple.html");
+        final InputStream is = cz.cvut.kbss.termit.environment.Environment.loadFile("data/rdfa-simple.html");
+        sut.parseContent(is, file);
+        final List<TermOccurrence> result = sut.findTermOccurrences();
+        result.forEach(to -> {
+            assertNotNull(to.getScore());
+            assertThat(to.getScore(), greaterThan(0.0));
+        });
+    }
+
+    private void createTerm() {
+        final Term term = new Term();
+        term.setUri(URI.create("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan"));
+        term.setLabel("Test term");
+        transactional(() -> em.persist(term));
+    }
+
+    @Test
+    void findTermOccurrencesHandlesRdfaWithoutScore() {
+        createTerm();
+        final File file = new File();
+        file.setLabel("rdfa-simple.html");
+        final InputStream is = cz.cvut.kbss.termit.environment.Environment.loadFile("data/rdfa-simple-no-score.html");
+        sut.parseContent(is, file);
+        final List<TermOccurrence> result = sut.findTermOccurrences();
+        result.forEach(to -> assertNull(to.getScore()));
+    }
+
+    @Test
+    void findTermOccurrencesHandlesInvalidScoreInRdfa() {
+        createTerm();
+        final File file = new File();
+        file.setLabel("rdfa-simple.html");
+        final InputStream is = cz.cvut.kbss.termit.environment.Environment
+                .loadFile("data/rdfa-simple-invalid-score.html");
+        sut.parseContent(is, file);
+        final List<TermOccurrence> result = sut.findTermOccurrences();
+        result.forEach(to -> assertNull(to.getScore()));
     }
 }
