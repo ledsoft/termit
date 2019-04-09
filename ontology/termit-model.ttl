@@ -111,6 +111,10 @@ termit-pojem:přiřazení-termu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
         rdfs:subClassOf  <https://slovník.gov.cz/základní/pojem/objekt> .
 
+termit-pojem:navržené-přiřazení-termu
+        a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
+        rdfs:subClassOf  termit-pojem:přiřazení-termu .
+
 termit-pojem:výskyt-termu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
         rdfs:subClassOf  termit-pojem:přiřazení-termu .

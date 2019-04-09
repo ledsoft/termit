@@ -207,4 +207,20 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         sut.addToResource(resource, Collections.emptySet());
         verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
     }
+
+    @Test
+    void addToResourceSuggestedCreatesAssignmentsWithSuggestedType() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.addToResourceSuggested(resource, tags));
+        final List<TermAssignment> result = sut.findAll(resource);
+        assertEquals(tags.size(), result.size());
+        result.forEach(ta -> assertTrue(ta.getTypes().contains(Vocabulary.s_c_navrzene_prirazeni_termu)));
+    }
 }

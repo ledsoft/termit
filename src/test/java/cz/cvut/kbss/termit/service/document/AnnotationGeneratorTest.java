@@ -406,4 +406,17 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
                 result.get(0).getTerm().getUri().toString());
     }
+
+    @Test
+    void generateAnnotationsCreatesAssignmentsWithTypeSuggestedForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertFalse(result.isEmpty());
+        result.forEach(ta -> assertTrue(ta.getTypes().contains(Vocabulary.s_c_navrzene_prirazeni_termu)));
+    }
 }

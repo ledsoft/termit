@@ -135,7 +135,7 @@ public class AnnotationGenerator {
                                                   .filter(o -> o.getScore() != null && o.getScore() >= minScore)
                                                   .map(o -> o.getTerm().getUri()).collect(
                         Collectors.toSet());
-        assignmentService.addToResource(source, termsToAssign);
+        assignmentService.addToResourceSuggested(source, termsToAssign);
     }
 
     private void saveAnnotatedContent(File file, InputStream input) {

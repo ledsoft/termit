@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.TargetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,12 +81,13 @@ public class TermAssignmentRepositoryService {
         Objects.requireNonNull(termUris);
         LOG.trace("Setting tags {} on resource {}.", termUris, resource);
 
-        mergeAssignments(resource, termUris, true);
+        mergeAssignments(resource, termUris, true, false);
 
         LOG.trace("Finished setting tags on resource {}.", resource);
     }
 
-    private void mergeAssignments(Resource resource, Collection<URI> termUris, boolean removeObsolete) {
+    private void mergeAssignments(Resource resource, Collection<URI> termUris, boolean removeObsolete,
+                                  boolean suggested) {
         if (termUris.isEmpty()) {
             return;
         }
@@ -108,7 +110,7 @@ public class TermAssignmentRepositoryService {
         }
 
         // create term assignments for each input term to the target
-        createAssignments(target, toAdd);
+        createAssignments(target, toAdd, suggested);
     }
 
     private Target targetForResource(Resource resource) {
@@ -119,12 +121,15 @@ public class TermAssignmentRepositoryService {
         });
     }
 
-    private void createAssignments(Target target, Collection<URI> termUris) {
+    private void createAssignments(Target target, Collection<URI> termUris, boolean suggested) {
         termUris.forEach(iTerm -> {
             final Term term = termDao.find(iTerm).orElseThrow(
                     () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
 
             final TermAssignment termAssignment = new TermAssignment(term, target);
+            if (suggested) {
+                termAssignment.addType(Vocabulary.s_c_navrzene_prirazeni_termu);
+            }
             termAssignmentDao.persist(termAssignment);
         });
     }
@@ -145,8 +150,33 @@ public class TermAssignmentRepositoryService {
         Objects.requireNonNull(termUris);
         LOG.trace("Adding tags {} to resource {}.", termUris, resource);
 
-        mergeAssignments(resource, termUris, false);
+        mergeAssignments(resource, termUris, false, false);
 
         LOG.trace("Finished adding tags to resource {}.", resource);
+    }
+
+    /**
+     * Creates assignments for terms with the specified identifiers and adds them to the specified Resource as
+     * "suggested".
+     * <p>
+     * Suggested terms may be treated differently by the application because they are usually created by an automated
+     * service, without the user's intervention.
+     * <p>
+     * This method does not remove any existing assignments. It only adds new ones for Terms which are not yet assigned
+     * to the Resource.
+     *
+     * @param resource Target Resource
+     * @param termUris Identifiers of Terms to assign
+     * @see #addToResource(Resource, Collection)
+     */
+    @Transactional
+    public void addToResourceSuggested(Resource resource, Collection<URI> termUris) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(termUris);
+        LOG.trace("Adding suggested tags {} to resource {}.", termUris, resource);
+
+        mergeAssignments(resource, termUris, false, true);
+
+        LOG.trace("Finished adding suggested tags to resource {}.", resource);
     }
 }
