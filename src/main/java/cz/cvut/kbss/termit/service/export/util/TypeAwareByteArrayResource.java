@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.export.util;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.core.io.ByteArrayResource;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -27,5 +28,26 @@ public class TypeAwareByteArrayResource extends ByteArrayResource implements Typ
     @Override
     public Optional<String> getFileExtension() {
         return Optional.ofNullable(fileExtension);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TypeAwareByteArrayResource)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        TypeAwareByteArrayResource that = (TypeAwareByteArrayResource) o;
+        return Objects.equals(mediaType, that.mediaType) &&
+                Objects.equals(fileExtension, that.fileExtension);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), mediaType, fileExtension);
     }
 }
