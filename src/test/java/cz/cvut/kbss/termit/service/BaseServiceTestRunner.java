@@ -24,7 +24,7 @@ public class BaseServiceTestRunner extends TransactionalTestRunner {
 
     private static final String EXISTENCE_CHECK_QUERY = "ASK { ?x a ?type . }";
 
-    protected void verifyInstancesRemoved(String type, EntityManager em) {
+    protected void verifyInstancesDoNotExist(String type, EntityManager em) {
         Assertions.assertFalse(
                 em.createNativeQuery(EXISTENCE_CHECK_QUERY, Boolean.class).setParameter("type", URI.create(type))
                   .getSingleResult());

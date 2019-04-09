@@ -107,8 +107,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(resource);
         assertNull(em.find(Resource.class, resource.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_cil, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
     }
 
     @Test
@@ -129,9 +129,9 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(file);
         assertNull(em.find(File.class, file.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test
@@ -156,11 +156,11 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         sut.remove(file);
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_cil, em);
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test

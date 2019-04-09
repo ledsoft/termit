@@ -80,12 +80,17 @@ public class TermAssignmentRepositoryService {
         Objects.requireNonNull(termUris);
         LOG.trace("Setting tags {} on resource {}.", termUris, resource);
 
+        mergeAssignments(resource, termUris, true);
+
+        LOG.trace("Finished setting tags on resource {}.", resource);
+    }
+
+    private void mergeAssignments(Resource resource, Collection<URI> termUris, boolean removeObsolete) {
+        if (termUris.isEmpty()) {
+            return;
+        }
         // get the whole-resource target
-        final Target target = targetDao.findByWholeResource(resource).orElseGet(() -> {
-            final Target target2 = new Target(resource);
-            targetDao.persist(target2);
-            return target2;
-        });
+        final Target target = targetForResource(resource);
 
         // remove obsolete existing term assignments and determine new assignments to add
         final List<TermAssignment> termAssignments = termAssignmentDao.findByTarget(target);
@@ -98,18 +103,30 @@ public class TermAssignmentRepositoryService {
                 toAdd.remove(existing.getTerm().getUri());
             }
         }
-        toRemove.forEach(termAssignmentDao::remove);
+        if (removeObsolete) {
+            toRemove.forEach(termAssignmentDao::remove);
+        }
 
         // create term assignments for each input term to the target
-        toAdd.forEach(iTerm -> {
+        createAssignments(target, toAdd);
+    }
+
+    private Target targetForResource(Resource resource) {
+        return targetDao.findByWholeResource(resource).orElseGet(() -> {
+            final Target target2 = new Target(resource);
+            targetDao.persist(target2);
+            return target2;
+        });
+    }
+
+    private void createAssignments(Target target, Collection<URI> termUris) {
+        termUris.forEach(iTerm -> {
             final Term term = termDao.find(iTerm).orElseThrow(
                     () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
 
             final TermAssignment termAssignment = new TermAssignment(term, target);
             termAssignmentDao.persist(termAssignment);
         });
-
-        LOG.trace("Finished setting tags on resource {}.", resource);
     }
 
     /**
@@ -124,6 +141,12 @@ public class TermAssignmentRepositoryService {
      */
     @Transactional
     public void addToResource(Resource resource, Collection<URI> termUris) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(termUris);
+        LOG.trace("Adding tags {} to resource {}.", termUris, resource);
 
+        mergeAssignments(resource, termUris, false);
+
+        LOG.trace("Finished adding tags to resource {}.", resource);
     }
 }

@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,12 +71,12 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         sut.removeAll(resource);
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu, em);
-        verifyInstancesRemoved(Vocabulary.s_c_cil, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
     }
 
     @Test
-    void setInvalidTagsForValidResource() {
+    void setOnResourceThrowsNotFoundForUnknownTermIdentifiers() {
         assertThrows(NotFoundException.class, () -> {
             final Resource resource = generateResource();
             final Set<URI> terms = new HashSet<>();
@@ -95,7 +93,7 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void addTagsToUntaggedResource() {
+    void setOnResourceAddsAssignmentsToUnTaggedResource() {
         final Resource resource = generateResource();
 
         final Set<URI> tags = new HashSet<>();
@@ -106,9 +104,7 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.setOnResource(resource, tags));
 
-        final List<TermAssignment> result = sut.findAll(resource);
-        assertEquals(2, result.size());
-        assertEquals(tags, result.stream().map(ta -> ta.getTerm().getUri()).collect(Collectors.toSet()));
+        verifyAssignments(resource, tags);
     }
 
     private Term generateTermWithUriAndPersist() {
@@ -118,8 +114,14 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         return t;
     }
 
+    private void verifyAssignments(Resource resource, Collection<URI> expectedTerms) {
+        final List<TermAssignment> result = sut.findAll(resource);
+        assertEquals(expectedTerms.size(), result.size());
+        assertEquals(expectedTerms, result.stream().map(ta -> ta.getTerm().getUri()).collect(Collectors.toSet()));
+    }
+
     @Test
-    void replaceTagsOfTaggedResource() {
+    void setOnResourceReplacesExistingObsoleteAssignments() {
         final Resource resource = generateResource();
 
         final Set<URI> tags = new HashSet<>();
@@ -137,13 +139,11 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         tags2.add(term3);
         transactional(() -> sut.setOnResource(resource, tags2));
 
-        final List<TermAssignment> result = sut.findAll(resource);
-        assertEquals(2, result.size());
-        assertEquals(tags2, result.stream().map(ta -> ta.getTerm().getUri()).collect(Collectors.toSet()));
+        verifyAssignments(resource, tags2);
     }
 
     @Test
-    void setTagsMergesExistingTagsAndNewlySpecifiedTags() {
+    void setOnResourceMergesExistingAssignmentsAndNewlySpecifiedTags() {
         final Resource resource = generateResource();
 
         final Set<URI> tags = new HashSet<>();
@@ -160,8 +160,51 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.setOnResource(resource, tags2));
 
-        final List<TermAssignment> result = sut.findAll(resource);
-        assertEquals(2, result.size());
-        assertEquals(tags2, result.stream().map(ta -> ta.getTerm().getUri()).collect(Collectors.toSet()));
+        verifyAssignments(resource, tags2);
+    }
+
+    @Test
+    void addToResourceAddsAssignmentsToUntaggedResource() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.addToResource(resource, tags));
+
+        verifyAssignments(resource, tags);
+    }
+
+    @Test
+    void addToResourceAddsAssignmentsForNewTermsButKeepsExisting() {
+        final Resource resource = generateResource();
+
+        final Set<URI> tags = new HashSet<>();
+        final URI term0 = generateTermWithUriAndPersist().getUri();
+        final URI term1 = generateTermWithUriAndPersist().getUri();
+        tags.add(term0);
+        tags.add(term1);
+
+        transactional(() -> sut.setOnResource(resource, tags));
+        final Set<URI> tags2 = new HashSet<>();
+        final URI term2 = generateTermWithUriAndPersist().getUri();
+        tags2.add(term0);
+        tags2.add(term2);
+        sut.addToResource(resource, tags2);
+
+        final Set<URI> expected = new HashSet<>(tags);
+        expected.addAll(tags2);
+        verifyAssignments(resource, expected);
+    }
+
+    @Test
+    void addToResourceDoesNothingWhenSpecifiedTermCollectionIsEmpty() {
+        final Resource resource = generateResource();
+
+        sut.addToResource(resource, Collections.emptySet());
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
     }
 }

@@ -19,7 +19,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -366,10 +365,37 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
     }
 
-    @Disabled
     @Test
     void generateAnnotationsCreatesTermAssignmentsForOccurrencesWithSufficientScore() throws Exception {
         final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().getUri().toString());
+    }
+
+    @Test
+    void generateAnnotationsDoesNotCreateAssignmentsForOccurrencesWithInsufficientScore() throws Exception {
+        ((MockEnvironment) environment)
+                .setProperty(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE.toString(), Double.toString(Double.MAX_VALUE));
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsCreatesSingleAssignmentForMultipleOccurrencesOfTerm() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple-multiple-occurrences.html");
         generateFile();
         sut.generateAnnotations(content, file);
         final List<TermAssignment> result = em
