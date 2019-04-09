@@ -14,10 +14,12 @@ import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -362,5 +364,20 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertEquals(2, allOccurrences.size());
         assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
         assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
+    }
+
+    @Disabled
+    @Test
+    void generateAnnotationsCreatesTermAssignmentsForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().getUri().toString());
     }
 }

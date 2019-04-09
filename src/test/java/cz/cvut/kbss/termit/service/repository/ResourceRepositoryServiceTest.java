@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.service.repository;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.*;
@@ -25,12 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
@@ -39,8 +34,6 @@ import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
-
-    private static final String EXISTENCE_CHECK_QUERY = "ASK { ?x a ?type . }";
 
     @Autowired
     private Configuration config;
@@ -92,78 +85,6 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void setInvalidTagsForValidResource() {
-        assertThrows(NotFoundException.class, () -> {
-            final Resource resource = generateResource();
-            final Set<URI> terms = new HashSet<>();
-            terms.add(URI.create("http://unknown.uri/term1"));
-            terms.add(URI.create("http://unknown.uri/term2"));
-            transactional(() -> sut.setTags(resource, terms));
-        });
-    }
-
-    @Test
-    void addTagsToUntaggedResource() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
-    void replaceTagsOfTaggedResource() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-
-        final Set<URI> tags2 = new HashSet<>();
-        final URI term2 = generateTermWithUriAndPersist().getUri();
-        final URI term3 = generateTermWithUriAndPersist().getUri();
-        tags2.add(term2);
-        tags2.add(term3);
-        transactional(() -> sut.setTags(resource, tags2));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
-    void setTagsMergesExistingTagsAndNewlySpecifiedTags() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-        final Set<URI> tags2 = new HashSet<>();
-        final URI term2 = generateTermWithUriAndPersist().getUri();
-        tags2.add(term0);
-        tags2.add(term2);
-
-        transactional(() -> sut.setTags(resource, tags2));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
     void persistThrowsValidationExceptionWhenResourceLabelIsMissing() {
         final Resource resource = Generator.generateResourceWithId();
         resource.setLabel(null);
@@ -186,13 +107,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(resource);
         assertNull(em.find(Resource.class, resource.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil);
-    }
-
-    private void verifyInstancesRemoved(String type) {
-        assertFalse(em.createNativeQuery(EXISTENCE_CHECK_QUERY, Boolean.class).setParameter("type", URI.create(type))
-                      .getSingleResult());
+        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_cil, em);
     }
 
     @Test
@@ -213,9 +129,9 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(file);
         assertNull(em.find(File.class, file.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test
@@ -240,11 +156,11 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         sut.remove(file);
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil);
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_cil, em);
+        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test

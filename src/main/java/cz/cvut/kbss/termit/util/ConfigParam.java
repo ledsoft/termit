@@ -71,7 +71,15 @@ public enum ConfigParam {
     /**
      * Specifies root directory in which document files are stored.
      */
-    FILE_STORAGE("file.storage");
+    FILE_STORAGE("file.storage"),
+
+    /**
+     * Minimal match score of a term occurrence for which a term assignment should be automatically generated.
+     * <p>
+     * More specifically, when annotated file content is being processed, term occurrences with sufficient score will
+     * cause creation of corresponding term assignments to the file.
+     */
+    TERM_ASSIGNMENT_MIN_SCORE("term.assignment.minScore");
 
     private final String parameter;
 
