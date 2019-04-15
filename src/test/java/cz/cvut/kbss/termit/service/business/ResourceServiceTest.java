@@ -93,8 +93,8 @@ class ResourceServiceTest {
     @Test
     void removeRemovesResourceViaRepositoryService() {
         final Resource resource = Generator.generateResourceWithId();
-        sut.remove(resource);
-        verify(resourceRepositoryService).remove(resource);
+        sut.remove(resource.getUri());
+        verify(resourceRepositoryService).remove(resource.getUri());
     }
 
     @Test

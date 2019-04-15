@@ -175,7 +175,7 @@ public class ResourceController extends BaseController {
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         final Resource toRemove = resourceService.getRequiredReference(identifier);
-        resourceService.remove(toRemove);
+        resourceService.remove(identifier);
         LOG.debug("Resource {} removed.", toRemove);
     }
 

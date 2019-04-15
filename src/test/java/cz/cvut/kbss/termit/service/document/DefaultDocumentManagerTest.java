@@ -241,4 +241,22 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         file.setDocument(document);
         assertThrows(NotFoundException.class, () -> sut.getContentType(file));
     }
+
+    @Test
+    void saveFileContentCreatesParentDirectoryWhenItDoesNotExist() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("test.html");
+        sut.saveFileContent(file, content);
+        final java.io.File physicalFile = new java.io.File(
+                dir.getAbsolutePath() + java.io.File.separator + file.getDirectoryName() + java.io.File.separator +
+                        file.getLabel());
+        assertTrue(physicalFile.exists());
+        physicalFile.getParentFile().deleteOnExit();
+        physicalFile.deleteOnExit();
+    }
 }

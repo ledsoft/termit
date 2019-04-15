@@ -56,17 +56,17 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
-     * Removes the specified resource.
+     * Removes resource with the specified identifier.
      * <p>
      * Resource removal also involves cleanup of annotations and term occurrences associated with it.
      * <p>
      * TODO: Pull remove method up into AssetService once removal is supported by other types of assets as well
      *
-     * @param resource Resource to remove
+     * @param identifier Identifier of a resource to remove
      */
     @Transactional
-    public void remove(Resource resource) {
-        repositoryService.remove(resource);
+    public void remove(URI identifier) {
+        repositoryService.remove(identifier);
     }
 
     /**
