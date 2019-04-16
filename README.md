@@ -136,3 +136,7 @@ used by TermIt.
 
 We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
 on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.
+
+## Documentation
+
+TermIt REST API is documented on [SwaggerHub](https://app.swaggerhub.com/apis/ledvima1/TermIt/) under the appropriate version.
