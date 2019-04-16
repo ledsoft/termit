@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -17,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Interface of business logic concerning resources.
@@ -138,6 +136,47 @@ public class ResourceService implements CrudService<Resource> {
             documentManager.createBackup(file);
         }
         documentManager.saveFileContent(file, content);
+    }
+
+    /**
+     * Retrieves files contained in the specified document.
+     * <p>
+     * The files are sorted by their label (ascending).
+     *
+     * @param document Document resource
+     * @return Files in the document
+     * @throws UnsupportedAssetOperationException If the specified instance is not a Document
+     */
+    public List<File> getFiles(Resource document) {
+        Objects.requireNonNull(document);
+        final Resource instance = findRequired(document.getUri());
+        if (!(instance instanceof Document)) {
+            throw new UnsupportedAssetOperationException("Cannot get files from resource which is not a document.");
+        }
+        final Document doc = (Document) instance;
+        final List<File> list = doc.getFiles() != null ? new ArrayList<>(doc.getFiles()) : Collections.emptyList();
+        list.sort(Comparator.comparing(File::getLabel));
+        return list;
+    }
+
+    /**
+     * Adds the specified file to the specified document and persists it.
+     *
+     * @param document Document into which the file should be added
+     * @param file     The file to add and save
+     * @throws UnsupportedAssetOperationException If the specified resource is not a Document
+     */
+    @Transactional
+    public void addFileToDocument(Resource document, File file) {
+        Objects.requireNonNull(document);
+        Objects.requireNonNull(file);
+        if (!(document instanceof Document)) {
+            throw new UnsupportedAssetOperationException("Cannot add file to the specified resource " + document);
+        }
+        final Document doc = (Document) document;
+        doc.addFile(file);
+        persist(file);
+        update(doc);
     }
 
     /**

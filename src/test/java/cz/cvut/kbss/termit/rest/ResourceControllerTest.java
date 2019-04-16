@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -35,6 +36,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -47,8 +49,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -457,5 +458,95 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         });
         assertEquals(related, result);
         verify(resourceServiceMock).findRelated(resource);
+    }
+
+    @Test
+    void getFilesLoadsFilesFromDocumentWithSpecifiedIdentifier() throws Exception {
+        final Document document = new Document();
+        document.setLabel(RESOURCE_NAME);
+        document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        document.addFile(fOne);
+        when(resourceServiceMock.getRequiredReference(document.getUri())).thenReturn(document);
+        when(resourceServiceMock.getFiles(document)).thenReturn(new ArrayList<>(document.getFiles()));
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(document.getUri());
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + RESOURCE_NAME + "/files").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+                .andExpect(status().isOk()).andReturn();
+        final List<File> result = readValue(mvcResult, new TypeReference<List<File>>() {
+        });
+        assertEquals(new ArrayList<>(document.getFiles()), result);
+        verify(resourceServiceMock).getFiles(document);
+    }
+
+    @Test
+    void getFilesReturnsConflictWhenRequestedResourceIsNotDocument() throws Exception {
+        final URI resourceUri = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
+        final Resource resource = Generator.generateResource();
+        resource.setUri(resourceUri);
+        resource.setLabel(RESOURCE_NAME);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
+        when(resourceServiceMock.getRequiredReference(resourceUri)).thenReturn(resource);
+        when(resourceServiceMock.getFiles(resource)).thenThrow(UnsupportedAssetOperationException.class);
+        mockMvc.perform(get(PATH + "/" + RESOURCE_NAME + "/files").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+               .andExpect(status().isConflict());
+    }
+
+    @Test
+    void addFileToDocumentSavesFileToDocumentWithSpecifiedIdentifier() throws Exception {
+        final Document document = new Document();
+        document.setLabel(RESOURCE_NAME);
+        document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        when(resourceServiceMock.findRequired(document.getUri())).thenReturn(document);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(document.getUri());
+
+        mockMvc.perform(post(PATH + "/" + RESOURCE_NAME + "/files").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
+                                                                   .content(toJson(fOne))
+                                                                   .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isCreated());
+        verify(resourceServiceMock).addFileToDocument(document, fOne);
+    }
+
+    @Test
+    void addFileToDocumentReturnsLocationHeaderForNewFile() throws Exception {
+        final Document document = new Document();
+        document.setLabel(RESOURCE_NAME);
+        document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
+        final File fOne = new File();
+        fOne.setLabel("test.html");
+        fOne.setUri(URI.create(RESOURCE_NAMESPACE + fOne.getLabel()));
+        when(resourceServiceMock.findRequired(document.getUri())).thenReturn(document);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(document.getUri());
+
+        final MvcResult mvcResult = mockMvc
+                .perform(post(PATH + "/" + RESOURCE_NAME + "/files").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
+                                                                    .content(toJson(fOne))
+                                                                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated()).andReturn();
+        verifyLocationEquals(PATH + "/" + fOne.getLabel(), mvcResult);
+    }
+
+    @Test
+    void addFileToDocumentReturnsConflictWhenRequestedResourceIsNotDocument() throws Exception {
+        final URI resourceUri = URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME);
+        final Resource resource = Generator.generateResource();
+        resource.setUri(resourceUri);
+        resource.setLabel(RESOURCE_NAME);
+        final File fOne = new File();
+        fOne.setLabel("test.html");
+        fOne.setUri(URI.create(RESOURCE_NAMESPACE + fOne.getLabel()));
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
+        when(resourceServiceMock.findRequired(resourceUri)).thenReturn(resource);
+        doThrow(UnsupportedAssetOperationException.class).when(resourceServiceMock).addFileToDocument(resource, fOne);
+        mockMvc.perform(post(PATH + "/" + RESOURCE_NAME + "/files").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
+                                                                   .content(toJson(fOne))
+                                                                   .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isConflict());
     }
 }

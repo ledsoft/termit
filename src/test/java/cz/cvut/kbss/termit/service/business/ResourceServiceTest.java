@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -13,11 +14,13 @@ import org.mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -205,5 +208,79 @@ class ResourceServiceTest {
         final URI uri = Generator.generateUri();
         sut.getRequiredReference(uri);
         verify(resourceRepositoryService).getRequiredReference(uri);
+    }
+
+    @Test
+    void getFilesReturnsFilesFromDocument() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        doc.addFile(fOne);
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertEquals(doc.getFiles().size(), result.size());
+        assertTrue(doc.getFiles().containsAll(result));
+        verify(resourceRepositoryService).findRequired(doc.getUri());
+    }
+
+    @Test
+    void getFilesReturnsFilesSortedByLabel() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        doc.addFile(fOne);
+        final File fTwo = new File();
+        fTwo.setUri(Generator.generateUri());
+        fTwo.setLabel("act.html");
+        doc.addFile(fTwo);
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertEquals(Arrays.asList(fTwo, fOne), result);
+    }
+
+    @Test
+    void getFilesReturnsEmptyListWhenDocumentHasNoFiles() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getFilesThrowsUnsupportedAssetOperationExceptionWhenSpecifiedResourceIsNotDocument() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(resourceRepositoryService.findRequired(resource.getUri())).thenReturn(resource);
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.getFiles(resource));
+    }
+
+    @Test
+    void addFileToDocumentPersistsFileAndUpdatesDocumentWithAddedFile() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).persist(fOne);
+        verify(resourceRepositoryService).update(doc);
+    }
+
+    @Test
+    void addFileToDocumentThrowsUnsupportedAssetOperationExceptionWhenSpecifiedResourceIsNotDocument() {
+        final Resource resource = Generator.generateResourceWithId();
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.addFileToDocument(resource, fOne));
     }
 }
