@@ -7,6 +7,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,7 +34,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
+    // TODO Replace with a reference to JOPA SKOS, which will be available in the next version
+    @OWLObjectProperty(iri = Constants.SKOS_NARROWER, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)

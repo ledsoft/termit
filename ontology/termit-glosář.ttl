@@ -74,14 +74,14 @@ termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sekt
         <http://purl.org/dc/elements/1.1/title>
                 "Vocabulary of system TermIt - glossary"@en , "Slovník systému TermIt - glosář"@cs ;
         <http://purl.org/dc/terms/created>
-                "25.03.2019" ;
+                "16.04.2019" ;
         <http://purl.org/ontology/bibo/status>
                 "Specification"@en , "Specifikace"@cs ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/glosar> ;
+        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/glosář> ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/glosář/verze/1.1.1> .
 
 termit-pojem:je-přiřazením-termu
@@ -92,15 +92,6 @@ termit-pojem:je-přiřazením-termu
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Is assignment of a term"@en , "Je přiřazením termu"@cs .
-
-termit-pojem:navržené-přiřazení-termu
-        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
-        <http://www.w3.org/2004/02/skos/core#broader>
-                termit-pojem:přiřazení-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
-        <http://www.w3.org/2004/02/skos/core#inScheme>
-                termit:glosář ;
-        <http://www.w3.org/2004/02/skos/core#prefLabel>
-                "Suggested term assignment"@en , "Navržené přiřazení termu"@cs .
 
 termit-pojem:selektor-xpath
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -247,6 +238,15 @@ termit-pojem:cíl-výskytu
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Occurence target"@en , "Cíl výskytu"@cs .
+
+termit-pojem:navržené-přiřazení-termu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                termit-pojem:přiřazení-termu , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Suggested term assignment"@en , "Navržené přiřazení termu"@cs .
 
 termit-pojem:má-přesný-text-quote
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
