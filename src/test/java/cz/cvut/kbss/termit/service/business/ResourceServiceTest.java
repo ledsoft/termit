@@ -14,9 +14,7 @@ import org.mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -178,15 +176,26 @@ class ResourceServiceTest {
         final File file = new File();
         file.setLabel("Test");
         file.setUri(Generator.generateUri());
-        sut.runTextAnalysis(file);
+        sut.runTextAnalysis(file, Collections.emptySet());
         verify(textAnalysisService).analyzeFile(file);
     }
 
     @Test
     void runTextAnalysisThrowsUnsupportedAssetOperationWhenResourceIsNotFile() {
         final Resource resource = Generator.generateResourceWithId();
-        assertThrows(UnsupportedAssetOperationException.class, () -> sut.runTextAnalysis(resource));
+        assertThrows(UnsupportedAssetOperationException.class,
+                () -> sut.runTextAnalysis(resource, Collections.emptySet()));
         verify(textAnalysisService, never()).analyzeFile(any());
+    }
+
+    @Test
+    void runTextAnalysisInvokesAnalysisWithCustomVocabulariesWhenSpecified() {
+        final File file = new File();
+        file.setLabel("Test");
+        file.setUri(Generator.generateUri());
+        final Set<URI> vocabularies = new HashSet<>(Arrays.asList(Generator.generateUri(), Generator.generateUri()));
+        sut.runTextAnalysis(file, vocabularies);
+        verify(textAnalysisService).analyzeFile(file, vocabularies);
     }
 
     @Test

@@ -181,17 +181,26 @@ public class ResourceService implements CrudService<Resource> {
 
     /**
      * Executes text analysis on the specified resource's content.
+     * <p>
+     * The specified vocabulary identifiers represent sources of Terms for the text analysis. If not provided, it is
+     * assumed the file belongs to a Document associated with a Vocabulary which will be used as the Term source.
      *
-     * @param resource Resource to analyze
+     * @param resource     Resource to analyze
+     * @param vocabularies Set of identifiers of vocabularies to use as Term sources for the analysis. Possibly empty
      * @throws UnsupportedAssetOperationException If text analysis is not supported for the specified resource
      */
-    public void runTextAnalysis(Resource resource) {
+    public void runTextAnalysis(Resource resource, Set<URI> vocabularies) {
         Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabularies);
         if (!(resource instanceof File)) {
             throw new UnsupportedAssetOperationException("Text analysis is not supported for resource " + resource);
         }
         LOG.trace("Invoking text analysis on resource {}.", resource);
-        textAnalysisService.analyzeFile((File) resource);
+        if (vocabularies.isEmpty()) {
+            textAnalysisService.analyzeFile((File) resource);
+        } else {
+            textAnalysisService.analyzeFile((File) resource, vocabularies);
+        }
     }
 
     @Override

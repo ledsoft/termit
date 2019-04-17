@@ -36,10 +36,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -384,7 +381,25 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
         mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isAccepted());
-        verify(resourceServiceMock).runTextAnalysis(file);
+        verify(resourceServiceMock).runTextAnalysis(file, Collections.emptySet());
+    }
+
+    @Test
+    void runTextAnalysisInvokesTextAnalysisWithSpecifiedVocabulariesAsTermSources() throws Exception {
+        final File file = new File();
+        final String fileName = "mpp-3.3.html";
+        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
+        file.setLabel(fileName);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        final Set<String> vocabularies = IntStream.range(0, 3).mapToObj(i -> Generator.generateUri().toString())
+                                                  .collect(Collectors.toSet());
+        mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
+                                                                     .param("vocabulary",
+                                                                             vocabularies.toArray(new String[0])))
+               .andExpect(status().isAccepted());
+        verify(resourceServiceMock)
+                .runTextAnalysis(file, vocabularies.stream().map(URI::create).collect(Collectors.toSet()));
     }
 
     @Test

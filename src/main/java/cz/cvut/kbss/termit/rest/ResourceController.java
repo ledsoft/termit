@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/resources")
@@ -139,14 +140,15 @@ public class ResourceController extends BaseController {
      * @param normalizedName Normalized name used to identify the resource
      * @param namespace      Namespace used for resource identifier resolution. Optional, if not specified, the
      *                       configured namespace is used
+     * @param vocabularies   Identifiers of vocabularies to be used as sources of Terms for the text analysis
      */
-    // TODO We need to support explicit vocabulary specification for files not connected to any particular vocabulary
     @RequestMapping(value = "/{normalizedName}/text-analysis", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void runTextAnalysis(@PathVariable String normalizedName,
-                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                                @RequestParam(name = "vocabulary", required = false, defaultValue = "") Set<URI> vocabularies) {
         final Resource resource = getResource(normalizedName, namespace);
-        resourceService.runTextAnalysis(resource);
+        resourceService.runTextAnalysis(resource, vocabularies);
         LOG.debug("Text analysis invoked for resource {}.", resource);
     }
 

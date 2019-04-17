@@ -1,11 +1,13 @@
 package cz.cvut.kbss.termit.dto;
 
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents input passed to the text analysis service.
  * <p>
- * Mainly contains the content to analyze and identification of the vocabulary whose terms will be used in the text
+ * Mainly contains the content to analyze and identification of the vocabularies whose terms will be used in the text
  * analysis.
  */
 public class TextAnalysisInput {
@@ -16,16 +18,16 @@ public class TextAnalysisInput {
     private String content;
 
     /**
-     * URI of the repository containing vocabulary whose terms are used in the text analysis.
+     * URI of the repository containing vocabularies whose terms are used in the text analysis.
      */
     private URI vocabularyRepository;
 
     /**
-     * URI of the context containing vocabulary whose terms are used in the text analysis. Optional.
+     * URIes of contexts containing vocabularies whose terms are used in the text analysis. Optional.
      * <p>
      * If not specified, the whole {@link #vocabularyRepository} is searched for terms.
      */
-    private URI vocabularyContext;
+    private Set<URI> vocabularyContexts;
 
     public String getContent() {
         return content;
@@ -43,12 +45,19 @@ public class TextAnalysisInput {
         this.vocabularyRepository = vocabularyRepository;
     }
 
-    public URI getVocabularyContext() {
-        return vocabularyContext;
+    public Set<URI> vocabularyContexts() {
+        return vocabularyContexts;
     }
 
-    public void setVocabularyContext(URI vocabularyContext) {
-        this.vocabularyContext = vocabularyContext;
+    public void setVocabularyContexts(Set<URI> vocabularyContexts) {
+        this.vocabularyContexts = vocabularyContexts;
+    }
+
+    public void addVocabularyContext(URI vocabularyContext) {
+        if (vocabularyContexts == null) {
+            this.vocabularyContexts = new HashSet<>();
+        }
+        vocabularyContexts.add(vocabularyContext);
     }
 
     @Override
@@ -56,7 +65,7 @@ public class TextAnalysisInput {
         return "TextAnalysisInput{" +
                 "content='" + (content.length() > 50 ? content.substring(0, 50) + "..." : content) + '\'' +
                 ", vocabularyRepository=" + vocabularyRepository +
-                ", vocabularyContext=" + vocabularyContext +
+                ", vocabularyContexts=" + vocabularyContexts +
                 '}';
     }
 }
