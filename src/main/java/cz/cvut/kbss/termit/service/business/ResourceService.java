@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
@@ -30,16 +31,20 @@ public class ResourceService implements CrudService<Resource> {
 
     private final ResourceRepositoryService repositoryService;
 
+
     private final DocumentManager documentManager;
 
     private final TextAnalysisService textAnalysisService;
 
+    private final VocabularyService vocabularyService;
+
     @Autowired
     public ResourceService(ResourceRepositoryService repositoryService, DocumentManager documentManager,
-                           TextAnalysisService textAnalysisService) {
+                           TextAnalysisService textAnalysisService, VocabularyService vocabularyService) {
         this.repositoryService = repositoryService;
         this.documentManager = documentManager;
         this.textAnalysisService = textAnalysisService;
+        this.vocabularyService = vocabularyService;
     }
 
     /**
@@ -175,8 +180,14 @@ public class ResourceService implements CrudService<Resource> {
         }
         final Document doc = (Document) document;
         doc.addFile(file);
-        persist(file);
-        update(doc);
+        if (doc.getVocabulary() != null) {
+            final Vocabulary vocabulary = vocabularyService.getRequiredReference(doc.getVocabulary());
+            repositoryService.persist(file, vocabulary);
+            repositoryService.update(doc, vocabulary);
+        } else {
+            persist(file);
+            update(doc);
+        }
     }
 
     /**

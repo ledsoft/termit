@@ -173,9 +173,6 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     @Transactional
     public T update(T instance) {
         Objects.requireNonNull(instance);
-        if (!exists(instance.getUri())) {
-            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
-        }
         preUpdate(instance);
         final T result = getPrimaryDao().update(instance);
         assert result != null;
@@ -186,11 +183,14 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     /**
      * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      * <p>
-     * The default behavior is to validate the specified instance.
+     * The default behavior is to validate the specified instance and ensure its existence in the repository.
      *
      * @param instance The instance to be updated, not {@code null}
      */
     protected void preUpdate(@NonNull T instance) {
+        if (!exists(instance.getUri())) {
+            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
+        }
         validate(instance);
     }
 

@@ -11,6 +11,7 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -266,5 +267,37 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(ta.getUri(), result.get(0).getUri());
+    }
+
+    @Test
+    void persistWithVocabularyPersistsInstanceIntoVocabularyContext() {
+        final Document document = Generator.generateDocumentWithId();
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
+
+        sut.persist(document, vocabulary);
+
+        final Document result = em
+                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
+        assertNotNull(result);
+        assertEquals(document, result);
+    }
+
+    @Test
+    void updateWithVocabularyUpdatesInstanceInVocabularyContext() {
+        enableRdfsInference(em);
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+
+        final String newLabel = "updated-test.html";
+        file.setLabel(newLabel);
+
+        sut.update(file, vocabulary);
+
+        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
+        assertNotNull(result);
+        assertEquals(newLabel, result.getLabel());
     }
 }

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
@@ -26,6 +27,9 @@ class ResourceServiceTest {
 
     @Mock
     private ResourceRepositoryService resourceRepositoryService;
+
+    @Mock
+    private VocabularyService vocabularyService;
 
     @Mock
     private DocumentManager documentManager;
@@ -273,9 +277,7 @@ class ResourceServiceTest {
 
     @Test
     void addFileToDocumentPersistsFileAndUpdatesDocumentWithAddedFile() {
-        final Document doc = new Document();
-        doc.setLabel("test document");
-        doc.setUri(Generator.generateUri());
+        final Document doc = Generator.generateDocumentWithId();
         final File fOne = new File();
         fOne.setUri(Generator.generateUri());
         fOne.setLabel("test.html");
@@ -291,5 +293,35 @@ class ResourceServiceTest {
         fOne.setUri(Generator.generateUri());
         fOne.setLabel("test.html");
         assertThrows(UnsupportedAssetOperationException.class, () -> sut.addFileToDocument(resource, fOne));
+    }
+
+    @Test
+    void addFileToDocumentPersistsFileIntoVocabularyContextForDocumentWithVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+        doc.setVocabulary(vocabulary.getUri());
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
+
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).persist(fOne, vocabulary);
+        verify(vocabularyService).getRequiredReference(vocabulary.getUri());
+    }
+
+    @Test
+    void addFileToDocumentUpdatesDocumentInVocabularyContextForDocumentWithVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+        doc.setVocabulary(vocabulary.getUri());
+        final File fOne = new File();
+        fOne.setUri(Generator.generateUri());
+        fOne.setLabel("test.html");
+        when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
+
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).update(doc, vocabulary);
+        verify(vocabularyService).getRequiredReference(vocabulary.getUri());
     }
 }

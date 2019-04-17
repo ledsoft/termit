@@ -1,10 +1,14 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +21,55 @@ public class ResourceDao extends AssetDao<Resource> {
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
+    }
+
+    /**
+     * Persists the specified Resource into the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to persist
+     * @param vocabulary Vocabulary providing context
+     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
+     */
+    public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        try {
+            em.persist(resource, descriptor);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    private Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        final Descriptor descriptor;
+        if (resource instanceof Document) {
+            descriptor = DescriptorFactory.documentDescriptor(vocabulary);
+        } else if (resource instanceof File) {
+            descriptor = DescriptorFactory.fileDescriptor(vocabulary);
+        } else {
+            throw new IllegalArgumentException(
+                    "Resource " + resource + " cannot be persisted into vocabulary context.");
+        }
+        return descriptor;
+    }
+
+    /**
+     * Updates the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to update
+     * @param vocabulary Vocabulary providing context
+     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
+     */
+    public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        try {
+            return em.merge(resource, descriptor);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 
     @Override
@@ -36,7 +89,7 @@ public class ResourceDao extends AssetDao<Resource> {
     }
 
     /**
-     * Gets terms the specified resource is annotated with.
+     * Gets Terms the specified Resource is annotated with.
      * <p>
      * The terms are ordered by their name (ascending).
      *

@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
@@ -62,6 +63,39 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
             instance.setUri(generateIdentifier(instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
+    }
+
+    /**
+     * Persists the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to persist
+     * @param vocabulary Vocabulary context
+     * @throws IllegalArgumentException If the specified Resource is neither a {@code Document} nor a {@code File}
+     */
+    @Transactional
+    public void persist(Resource resource, Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        prePersist(resource);
+        resourceDao.persist(resource, vocabulary);
+    }
+
+    /**
+     * Updates the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to update
+     * @param vocabulary Vocabulary context
+     * @throws IllegalArgumentException If the specified Resource is neither a {@code Document} nor a {@code File}
+     */
+    @Transactional
+    public Resource update(Resource resource, Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        preUpdate(resource);
+        final Resource result = resourceDao.update(resource, vocabulary);
+        assert result != null;
+        postUpdate(resource);
+        return result;
     }
 
     /**

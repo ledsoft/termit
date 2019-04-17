@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.XPathSelector;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,5 +172,78 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final List<Resource> result = sut.findAll();
         resources.sort(Comparator.comparing(Resource::getLabel));
         assertEquals(resources, result);
+    }
+
+    @Test
+    void persistDocumentWithVocabularyPersistsToVocabularyContext() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+
+        transactional(() -> sut.persist(doc, vocabulary));
+        final Document result = em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+        assertNotNull(result);
+        assertEquals(doc, result);
+    }
+
+    @Test
+    void persistFileWithVocabularyPersistToVocabularyContext() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+
+        transactional(() -> sut.persist(file, vocabulary));
+        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary.getUri()));
+        assertNotNull(result);
+        assertEquals(file, result);
+    }
+
+    @Test
+    void persistWithVocabularyThrowsIllegalArgumentForGenericResource() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Resource resource = Generator.generateResourceWithId();
+        assertThrows(IllegalArgumentException.class, () -> sut.persist(resource, vocabulary));
+    }
+
+    @Test
+    void updateDocumentWithVocabularyUpdatesDocumentInVocabularyContext() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+
+        transactional(() -> em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary)));
+
+        final String newLabel = "new label";
+        doc.setLabel(newLabel);
+
+        transactional(() -> sut.update(doc, vocabulary));
+        final Document result = em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+        assertNotNull(result);
+        assertEquals(newLabel, result.getLabel());
+    }
+
+    @Test
+    void updateFileWithVocabularyUpdatesFileInVocabularyContext() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+
+        final String newLabel = "new-test.html";
+        file.setLabel(newLabel);
+
+        transactional(() -> sut.update(file, vocabulary));
+        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary.getUri()));
+        assertNotNull(result);
+        assertEquals(newLabel, result.getLabel());
+    }
+
+    @Test
+    void updateWithVocabularyThrowsIllegalArgumentForGenericResource() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Resource resource = Generator.generateResourceWithId();
+        transactional(() -> em.persist(resource, DescriptorFactory.fileDescriptor(vocabulary)));
+
+        assertThrows(IllegalArgumentException.class, () -> sut.update(resource, vocabulary));
     }
 }
