@@ -23,7 +23,7 @@ public class TextAnalysisInput {
     private URI vocabularyRepository;
 
     /**
-     * URIes of contexts containing vocabularies whose terms are used in the text analysis. Optional.
+     * URIs of contexts containing vocabularies whose terms are used in the text analysis. Optional.
      * <p>
      * If not specified, the whole {@link #vocabularyRepository} is searched for terms.
      */
@@ -45,7 +45,7 @@ public class TextAnalysisInput {
         this.vocabularyRepository = vocabularyRepository;
     }
 
-    public Set<URI> vocabularyContexts() {
+    public Set<URI> getVocabularyContexts() {
         return vocabularyContexts;
     }
 
