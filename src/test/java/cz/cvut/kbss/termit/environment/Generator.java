@@ -168,6 +168,7 @@ public class Generator {
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
+        term.setDefinition("Normative definition of term " + term.getLabel());
         term.setComment("Comment" + randomInt());
         return term;
     }

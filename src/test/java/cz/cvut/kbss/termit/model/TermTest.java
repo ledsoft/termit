@@ -33,18 +33,19 @@ class TermTest {
                 count++;
             }
         }
-        assertEquals(5, count);
+        assertEquals(6, count);
     }
 
     @Test
-    void toCsvGeneratesStringContainingIriLabelComment() {
+    void toCsvGeneratesStringContainingIriLabelDefinitionAndComment() {
         final Term term = Generator.generateTermWithId();
         final String result = term.toCsv();
         final String[] items = result.split(",");
-        assertThat(items.length, greaterThanOrEqualTo(3));
+        assertThat(items.length, greaterThanOrEqualTo(4));
         assertEquals(term.getUri().toString(), items[0]);
         assertEquals(term.getLabel(), items[1]);
-        assertEquals(term.getComment(), items[2]);
+        assertEquals(term.getDefinition(), items[2]);
+        assertEquals(term.getComment(), items[3]);
     }
 
     @Test
@@ -61,8 +62,8 @@ class TermTest {
         term.setTypes(new LinkedHashSet<>(Arrays.asList(Vocabulary.s_c_object, Vocabulary.s_c_entity)));
         final String result = term.toCsv();
         final String[] items = result.split(",");
-        assertThat(items.length, greaterThanOrEqualTo(4));
-        final String types = items[3];
+        assertThat(items.length, greaterThanOrEqualTo(5));
+        final String types = items[4];
         assertTrue(types.matches(".+;.+"));
         term.getTypes().forEach(t -> assertTrue(types.contains(t)));
     }
@@ -74,8 +75,8 @@ class TermTest {
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
         final String result = term.toCsv();
         final String[] items = result.split(",");
-        assertThat(items.length, greaterThanOrEqualTo(5));
-        final String sources = items[4];
+        assertThat(items.length, greaterThanOrEqualTo(6));
+        final String sources = items[5];
         assertTrue(sources.matches(".+;.+"));
         term.getSources().forEach(t -> assertTrue(sources.contains(t)));
     }
@@ -86,8 +87,8 @@ class TermTest {
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final String result = term.toCsv();
         final String[] items = result.split(",");
-        assertThat(items.length, greaterThanOrEqualTo(6));
-        final String subTerms = items[5];
+        assertThat(items.length, greaterThanOrEqualTo(7));
+        final String subTerms = items[6];
         assertTrue(subTerms.matches(".+;.+"));
         term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
     }
@@ -105,18 +106,20 @@ class TermTest {
         term.toExcel(row);
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
-        assertEquals(term.getComment(), row.getCell(2).getStringCellValue());
-        assertEquals(term.getTypes().iterator().next(), row.getCell(3).getStringCellValue());
-        assertTrue(row.getCell(4).getStringCellValue().matches(".+;.+"));
-        term.getSources().forEach(s -> assertTrue(row.getCell(4).getStringCellValue().contains(s)));
+        assertEquals(term.getDefinition(), row.getCell(2).getStringCellValue());
+        assertEquals(term.getComment(), row.getCell(3).getStringCellValue());
+        assertEquals(term.getTypes().iterator().next(), row.getCell(4).getStringCellValue());
         assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
-        term.getSubTerms().forEach(st -> assertTrue(row.getCell(5).getStringCellValue().contains(st.toString())));
+        term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
+        assertTrue(row.getCell(6).getStringCellValue().matches(".+;.+"));
+        term.getSubTerms().forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.toString())));
     }
 
     @Test
     void toExcelHandlesEmptyOptionalAttributeValues() {
         final Term term = Generator.generateTermWithId();
         term.setComment(null);
+        term.setDefinition(null);
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");
         final XSSFRow row = sheet.createRow(0);
@@ -138,8 +141,8 @@ class TermTest {
         term.toExcel(row);
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
-        assertTrue(row.getCell(4).getStringCellValue().matches(".+;.+"));
-        term.getSources().forEach(s -> assertTrue(row.getCell(4).getStringCellValue().contains(s)));
+        assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
+        term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
     }
 
     @Test
