@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
+import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -21,6 +22,15 @@ public class ResourceDao extends AssetDao<Resource> {
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
+    }
+
+    /**
+     * Ensures that the specified instance is detached from the current persistence context.
+     *
+     * @param resource Instance to detach
+     */
+    public void detach(Resource resource) {
+        em.detach(resource);
     }
 
     /**
@@ -66,10 +76,23 @@ public class ResourceDao extends AssetDao<Resource> {
         Objects.requireNonNull(vocabulary);
         final Descriptor descriptor = createDescriptor(resource, vocabulary);
         try {
+            em.getEntityManagerFactory().getCache()
+              .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
             return em.merge(resource, descriptor);
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    @Override
+    public Resource update(Resource entity) {
+        if (entity instanceof Document) {
+            final Document doc = (Document) entity;
+            if (doc.getVocabulary() != null) {
+                em.getEntityManagerFactory().getCache().evict(doc.getVocabulary());
+            }
+        }
+        return super.update(entity);
     }
 
     @Override

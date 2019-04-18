@@ -69,7 +69,7 @@ public class ResourceService implements CrudService<Resource> {
      */
     @Transactional
     public void remove(URI identifier) {
-        repositoryService.remove(identifier);
+        repositoryService.remove(getRequiredReference(identifier));
     }
 
     /**

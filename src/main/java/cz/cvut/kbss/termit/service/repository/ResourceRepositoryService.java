@@ -34,6 +34,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     private final TermOccurrenceDao termOccurrenceDao;
 
     private final TermAssignmentRepositoryService assignmentService;
+    private final VocabularyRepositoryService vocabularyService;
 
     private final IdentifierResolver idResolver;
 
@@ -42,11 +43,13 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
                                      TargetDao targetDao,
                                      TermOccurrenceDao termOccurrenceDao,
                                      TermAssignmentRepositoryService assignmentService,
+                                     VocabularyRepositoryService vocabularyService,
                                      IdentifierResolver idResolver) {
         super(validator);
         this.resourceDao = resourceDao;
         this.targetDao = targetDao;
         this.termOccurrenceDao = termOccurrenceDao;
+        this.vocabularyService = vocabularyService;
         this.assignmentService = assignmentService;
         this.idResolver = idResolver;
     }
@@ -162,8 +165,15 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
         final Document parent = file.getDocument();
         if (parent != null) {
             LOG.trace("Removing file {} from its parent document {}.", instance, parent);
+            // Need to detach the parent because we may want to merge it into a vocabulary context,
+            // which would cause issues because it was originally loaded from the default context
+            resourceDao.detach(parent);
             parent.removeFile(file);
-            resourceDao.update(parent);
+            if (parent.getVocabulary() != null) {
+                resourceDao.update(parent, vocabularyService.getRequiredReference(parent.getVocabulary()));
+            } else {
+                resourceDao.update(parent);
+            }
         }
     }
 

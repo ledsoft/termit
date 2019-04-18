@@ -60,8 +60,7 @@ public class File extends Resource implements SupportsStorage {
     @Override
     public String toString() {
         return "File{" +
-                (document != null ? "document=<" + document.getUri() + '>' : "") +
-                super.toString() + '}';
+                super.toString() + (document != null ? "document=<" + document.getUri() + ">" : "") + '}';
     }
 
     /**

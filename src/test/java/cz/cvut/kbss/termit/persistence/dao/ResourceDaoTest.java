@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceDaoTest extends BaseDaoTestRunner {
@@ -180,7 +182,8 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final Document doc = Generator.generateDocumentWithId();
 
         transactional(() -> sut.persist(doc, vocabulary));
-        final Document result = em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+        final Document result = em
+                .find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(doc, result);
     }
@@ -216,7 +219,8 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         doc.setLabel(newLabel);
 
         transactional(() -> sut.update(doc, vocabulary));
-        final Document result = em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+        final Document result = em
+                .find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
@@ -245,5 +249,64 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.persist(resource, DescriptorFactory.fileDescriptor(vocabulary)));
 
         assertThrows(IllegalArgumentException.class, () -> sut.update(resource, vocabulary));
+    }
+
+    @Test
+    void updateEvictsCachedVocabularyToPreventIssuesWithStaleReferencesBetweenContexts() {
+        final DocumentVocabulary vocabulary = new DocumentVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setLabel("vocabulary");
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        final Document document = Generator.generateDocumentWithId();
+        vocabulary.setDocument(document);
+        document.setVocabulary(vocabulary.getUri());
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        file.setDocument(document);
+        document.addFile(file);
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+        });
+
+        transactional(() -> {
+            final File toRemove = em.getReference(File.class, file.getUri());
+            sut.remove(toRemove);
+            file.getDocument().removeFile(file);
+            sut.update(file.getDocument());
+        });
+
+        transactional(() -> {
+            final DocumentVocabulary result = em.find(DocumentVocabulary.class, vocabulary.getUri(),
+                    DescriptorFactory.vocabularyDescriptor(vocabulary));
+            assertThat(result.getDocument().getFiles(), anyOf(nullValue(), empty()));
+        });
+    }
+
+    @Test
+    void detachDetachesInstanceFromPersistenceContext() {
+        final Resource resource = Generator.generateResourceWithId();
+        transactional(() -> em.persist(resource));
+
+        transactional(() -> {
+            final Resource toDetach = sut.find(resource.getUri()).get();
+            assertTrue(sut.em.contains(toDetach));
+            sut.detach(toDetach);
+            assertFalse(sut.em.contains(toDetach));
+        });
+    }
+
+    @Test
+    void detachDoesNothingForNonManagedInstance() {
+        final Resource resource = Generator.generateResourceWithId();
+
+        transactional(() -> {
+            assertFalse(sut.em.contains(resource));
+            sut.detach(resource);
+            assertFalse(sut.em.contains(resource));
+        });
     }
 }

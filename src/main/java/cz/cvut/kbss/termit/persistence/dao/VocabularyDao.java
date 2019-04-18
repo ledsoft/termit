@@ -40,6 +40,16 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
     }
 
     @Override
+    public Optional<Vocabulary> getReference(URI id) {
+        Objects.requireNonNull(id);
+        try {
+            return Optional.ofNullable(em.getReference(type, id, DescriptorFactory.vocabularyDescriptor(id)));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    @Override
     public void persist(Vocabulary entity) {
         Objects.requireNonNull(entity);
         try {

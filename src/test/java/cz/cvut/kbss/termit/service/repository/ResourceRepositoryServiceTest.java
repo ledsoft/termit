@@ -300,4 +300,41 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
+
+    @Test
+    void removeFileUpdatesParentDocumentInVocabularyContext() {
+        final Document document = Generator.generateDocumentWithId();
+        final DocumentVocabulary vocabulary = new DocumentVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setLabel("Vocabulary");
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        vocabulary.setDocument(document);
+        document.setVocabulary(vocabulary.getUri());
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        file.setDocument(document);
+        final File fileTwo = new File();
+        fileTwo.setLabel("test-two.html");
+        fileTwo.setUri(Generator.generateUri());
+        fileTwo.setDocument(document);
+        document.addFile(fileTwo);
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+            em.persist(fileTwo, DescriptorFactory.fileDescriptor(vocabulary));
+        });
+
+        transactional(() -> {
+            final Resource toRemove = sut.getRequiredReference(file.getUri());
+            sut.remove(toRemove);
+        });
+
+        final DocumentVocabulary result = em.find(DocumentVocabulary.class, vocabulary.getUri(),
+                DescriptorFactory.vocabularyDescriptor(vocabulary));
+        assertEquals(1, result.getDocument().getFiles().size());
+        assertTrue(result.getDocument().getFiles().contains(fileTwo));
+    }
 }
