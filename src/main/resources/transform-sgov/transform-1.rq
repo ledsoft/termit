@@ -22,21 +22,21 @@ INSERT {
        popis-dat-pojem:má-model ?m ;
        popis-dat-pojem:popisuje-dokument ?d ;
        popis-dat-pojem:má-autora ?a ;
-       dc:created ?t ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        rdfs:label ?vTitle .
         
     ?d a popis-dat-pojem:dokument ;
        rdfs:label ?dTitle ;
-       dce:description ""@cs ;
+       dc:description ""@cs ;
        popis-dat-pojem:má-autora ?a ;
-       dc:created ?t ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        popis-dat-pojem:má-soubor ?s .
 
     ?s a popis-dat-pojem:soubor ;
        rdfs:label ?sTitle ;
-       dce:description ""@cs ;
+       dc:description ""@cs ;
        popis-dat-pojem:má-autora ?a ;
-       dc:created ?t .
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t .
         
     ?m a popis-dat-pojem:model .
     ?g a popis-dat-pojem:glosář .
@@ -44,7 +44,7 @@ INSERT {
        rdfs:label ?l ;
        rdfs:comment ?cComment ;
        popis-dat-pojem:má-autora ?a ;
-       dc:created ?t ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        dce:source ?srcd ;
        popis-dat-pojem:je-pojmem-ze-slovníku ?x .
     ?g popis-dat-pojem:obsahuje-kořenový-pojem ?cTop .
