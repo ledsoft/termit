@@ -133,9 +133,6 @@ public class ResourceController extends BaseController {
 
     /**
      * Runs text analysis on the specified resource.
-     * <p>
-     * Note that the text analysis invocation is asynchronous, so this method returns immediately after invoking the
-     * text analysis with status {@link HttpStatus#ACCEPTED}.
      *
      * @param normalizedName Normalized name used to identify the resource
      * @param namespace      Namespace used for resource identifier resolution. Optional, if not specified, the
@@ -143,13 +140,13 @@ public class ResourceController extends BaseController {
      * @param vocabularies   Identifiers of vocabularies to be used as sources of Terms for the text analysis
      */
     @RequestMapping(value = "/{normalizedName}/text-analysis", method = RequestMethod.PUT)
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void runTextAnalysis(@PathVariable String normalizedName,
                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                 @RequestParam(name = "vocabulary", required = false, defaultValue = "") Set<URI> vocabularies) {
         final Resource resource = getResource(normalizedName, namespace);
         resourceService.runTextAnalysis(resource, vocabularies);
-        LOG.debug("Text analysis invoked for resource {}.", resource);
+        LOG.debug("Text analysis finished for resource {}.", resource);
     }
 
     /**

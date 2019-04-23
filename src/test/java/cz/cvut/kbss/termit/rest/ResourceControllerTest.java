@@ -380,7 +380,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
         mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
-               .andExpect(status().isAccepted());
+               .andExpect(status().isNoContent());
         verify(resourceServiceMock).runTextAnalysis(file, Collections.emptySet());
     }
 
@@ -397,7 +397,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
                                                                      .param("vocabulary",
                                                                              vocabularies.toArray(new String[0])))
-               .andExpect(status().isAccepted());
+               .andExpect(status().isNoContent());
         verify(resourceServiceMock)
                 .runTextAnalysis(file, vocabularies.stream().map(URI::create).collect(Collectors.toSet()));
     }
