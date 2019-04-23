@@ -5,6 +5,8 @@ import cz.cvut.kbss.jopa.model.annotations.PrePersist;
 import cz.cvut.kbss.jopa.model.annotations.PreUpdate;
 import cz.cvut.kbss.termit.model.HasProvenanceData;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -12,6 +14,8 @@ import java.util.Date;
  * Entity listener used to manage provenance data.
  */
 public class ProvenanceManager {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProvenanceManager.class);
 
     /**
      * Sets provenance data (author, datetime of creation) of the specified instance.
@@ -46,7 +50,9 @@ public class ProvenanceManager {
         assert instance != null;
 
         if (!SecurityUtils.authenticated()) {
+            LOG.trace("Removing provenance data of instance {} for anonymous access.", instance);
             instance.setAuthor(null);
+            instance.setLastEditor(null);
         }
     }
 }

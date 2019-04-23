@@ -79,11 +79,26 @@ class ProvenanceManagerTest {
         final Resource entity = Generator.generateResourceWithId();
         final UserAccount ua = Generator.generateUserAccount();
         entity.setAuthor(ua.toUser());
+        entity.setLastEditor(ua.toUser());
         entity.setCreated(new Date());
         Environment.setCurrentUser(Generator.generateUserAccount());
 
         sut.clearForAnonymousOnLoad(entity);
         assertNotNull(entity.getAuthor());
         assertNotNull(entity.getCreated());
+        assertNotNull(entity.getLastEditor());
+    }
+    
+    @Test
+    void postLoadClearsLastEditorDataForAnonymousAccess() {
+        final Resource entity = Generator.generateResourceWithId();
+        final UserAccount ua = Generator.generateUserAccount();
+        entity.setAuthor(ua.toUser());
+        entity.setLastEditor(ua.toUser());
+        entity.setCreated(new Date());
+
+        sut.clearForAnonymousOnLoad(entity);
+        assertNull(entity.getAuthor());
+        assertNull(entity.getLastEditor());
     }
 }

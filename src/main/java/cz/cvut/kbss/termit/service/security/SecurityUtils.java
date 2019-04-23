@@ -31,6 +31,8 @@ public class SecurityUtils {
     public SecurityUtils(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        // Ensures security context is propagated to additionally spun threads, e.g., used by @Async methods
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
     /**

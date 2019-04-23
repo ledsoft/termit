@@ -75,6 +75,7 @@ public class AnnotationGenerator {
         saveOccurrences(occurrences, source);
         generateAssignments(occurrences, source);
         saveAnnotatedContent(source, occurrenceResolver.getContent());
+        LOG.trace("Finished generating annotations for file {}.", source);
     }
 
     private TermOccurrenceResolver findResolverFor(File file) {
