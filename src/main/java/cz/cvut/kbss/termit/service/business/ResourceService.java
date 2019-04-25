@@ -1,8 +1,10 @@
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -212,6 +214,18 @@ public class ResourceService implements CrudService<Resource> {
         } else {
             textAnalysisService.analyzeFile((File) resource, vocabularies);
         }
+    }
+
+    /**
+     * Gets the latest {@link TextAnalysisRecord} for the specified Resource.
+     *
+     * @param resource Analyzed Resource
+     * @return Latest text analysis record
+     * @throws NotFoundException When no text analysis record exists for the specified resource
+     */
+    public TextAnalysisRecord findLatestTextAnalysisRecord(Resource resource) {
+        return textAnalysisService.findLatestAnalysisRecord(resource).orElseThrow(
+                () -> new NotFoundException("No text analysis record exists for " + resource));
     }
 
     @Override

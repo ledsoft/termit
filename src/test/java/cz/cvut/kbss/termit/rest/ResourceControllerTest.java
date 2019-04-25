@@ -5,10 +5,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
-import cz.cvut.kbss.termit.model.Target;
-import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
-import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
@@ -563,5 +560,25 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                                                                    .content(toJson(fOne))
                                                                    .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void getLatestTextAnalysisRecordRetrievesAnalysisRecordFromService() throws Exception {
+        final File file = new File();
+        final String fileName = "mpp-3.3.html";
+        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
+        file.setLabel(fileName);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        final TextAnalysisRecord record = new TextAnalysisRecord(new Date((System.currentTimeMillis() / 1000) * 1000), file);
+        record.setVocabularies(Collections.singleton(Generator.generateUri()));
+        when(resourceServiceMock.findLatestTextAnalysisRecord(file)).thenReturn(record);
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + fileName + "/text-analysis/records/latest")
+                .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)).andExpect(status().isOk()).andReturn();
+        final TextAnalysisRecord result = readValue(mvcResult, TextAnalysisRecord.class);
+        assertNotNull(result);
+        assertEquals(record.getAnalyzedResource().getUri(), result.getAnalyzedResource().getUri());
+        assertEquals(record.getVocabularies(), result.getVocabularies());
+        verify(resourceServiceMock).findLatestTextAnalysisRecord(file);
     }
 }

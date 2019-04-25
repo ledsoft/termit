@@ -3,7 +3,9 @@ package cz.cvut.kbss.termit.service.document;
 import cz.cvut.kbss.termit.dto.TextAnalysisInput;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.exception.WebServiceIntegrationException;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.persistence.dao.TextAnalysisRecordDao;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.slf4j.Logger;
@@ -11,15 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TextAnalysisService {
@@ -34,13 +35,16 @@ public class TextAnalysisService {
 
     private final AnnotationGenerator annotationGenerator;
 
+    private final TextAnalysisRecordDao recordDao;
+
     @Autowired
     public TextAnalysisService(RestTemplate restClient, Configuration config, DocumentManager documentManager,
-                               AnnotationGenerator annotationGenerator) {
+                               AnnotationGenerator annotationGenerator, TextAnalysisRecordDao recordDao) {
         this.restClient = restClient;
         this.config = config;
         this.documentManager = documentManager;
         this.annotationGenerator = annotationGenerator;
+        this.recordDao = recordDao;
     }
 
     /**
@@ -52,6 +56,7 @@ public class TextAnalysisService {
      * @param file File whose content shall be analyzed
      * @see #analyzeFile(File, Set)
      */
+    @Transactional
     public void analyzeFile(File file) {
         Objects.requireNonNull(file);
         final TextAnalysisInput input = createAnalysisInput(file);
@@ -86,6 +91,7 @@ public class TextAnalysisService {
             try (final InputStream is = resource.getInputStream()) {
                 annotationGenerator.generateAnnotations(is, file);
             }
+            storeTextAnalysisRecord(file, input);
         } catch (WebServiceIntegrationException e) {
             throw e;
         } catch (RuntimeException e) {
@@ -93,6 +99,15 @@ public class TextAnalysisService {
         } catch (IOException e) {
             throw new WebServiceIntegrationException("Unable to read text analysis result from response.", e);
         }
+    }
+
+    private void storeTextAnalysisRecord(File file, TextAnalysisInput config) {
+        LOG.trace("Creating record of text analysis event for file {}.", file);
+        assert config.getVocabularyContexts() != null;
+
+        final TextAnalysisRecord record = new TextAnalysisRecord(new Date(), file);
+        record.setVocabularies(new HashSet<>(config.getVocabularyContexts()));
+        recordDao.persist(record);
     }
 
     /**
@@ -105,10 +120,21 @@ public class TextAnalysisService {
      * @param vocabularyContexts Identifiers of repository contexts containing vocabularies intended for text analysis
      * @see #analyzeFile(File)
      */
+    @Transactional
     public void analyzeFile(File file, Set<URI> vocabularyContexts) {
         Objects.requireNonNull(file);
         final TextAnalysisInput input = createAnalysisInput(file);
         input.setVocabularyContexts(vocabularyContexts);
         invokeTextAnalysisService(file, input);
+    }
+
+    /**
+     * Gets the latest {@link TextAnalysisRecord} for the specified Resource.
+     *
+     * @param resource Analyzed Resource
+     * @return Latest analysis record, if it exists
+     */
+    public Optional<TextAnalysisRecord> findLatestAnalysisRecord(cz.cvut.kbss.termit.model.resource.Resource resource) {
+        return recordDao.findLatest(resource);
     }
 }

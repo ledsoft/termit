@@ -14,6 +14,15 @@ termit-pojem:má-cíl-výskytu
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Has occurence target"@en , "Má cíl výskytu"@cs .
 
+termit-pojem:má-analyzovaný-zdroj
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has analyzed resource"@en , "Má analyzovaný zdroj"@cs .
+
 termit-pojem:zablokovaný-uživatel-termitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#broader>
@@ -74,7 +83,7 @@ termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sekt
         <http://purl.org/dc/elements/1.1/title>
                 "Vocabulary of system TermIt - glossary"@en , "Slovník systému TermIt - glosář"@cs ;
         <http://purl.org/dc/terms/created>
-                "16.04.2019" ;
+                "25.04.2019" ;
         <http://purl.org/ontology/bibo/status>
                 "Specification"@en , "Specifikace"@cs ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
@@ -92,6 +101,15 @@ termit-pojem:je-přiřazením-termu
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Is assignment of a term"@en , "Je přiřazením termu"@cs .
+
+termit-pojem:má-slovník-pro-analýzu
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/vztah> , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Has analysis vocabulary"@en , "Má slovník pro analýzu"@cs .
 
 termit-pojem:selektor-xpath
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
@@ -149,6 +167,15 @@ termit-pojem:omezený-uživatel-termitu
                 termit:glosář ;
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                 "Limited TermIt user"@en , "Omezený uživatel TermItu"@cs .
+
+termit-pojem:záznam-o-textové-analýze
+        a       <http://www.w3.org/2004/02/skos/core#Concept> ;
+        <http://www.w3.org/2004/02/skos/core#broader>
+                <https://slovník.gov.cz/základní/pojem/objekt> , <https://slovník.gov.cz/základní/pojem/typ-objektu> ;
+        <http://www.w3.org/2004/02/skos/core#inScheme>
+                termit:glosář ;
+        <http://www.w3.org/2004/02/skos/core#prefLabel>
+                "Text analysis record"@en , "Záznam o textové analýze"@cs .
 
 termit-pojem:má-koncovou-pozici
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;

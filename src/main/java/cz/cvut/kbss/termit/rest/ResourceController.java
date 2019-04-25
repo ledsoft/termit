@@ -4,6 +4,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -147,6 +148,22 @@ public class ResourceController extends BaseController {
         final Resource resource = getResource(normalizedName, namespace);
         resourceService.runTextAnalysis(resource, vocabularies);
         LOG.debug("Text analysis finished for resource {}.", resource);
+    }
+
+    /**
+     * Gets the latest text analysis record for the specified resource.
+     *
+     * @param normalizedName Normalized name used to identify the resource
+     * @param namespace      Namespace used for resource identifier resolution. Optional, if not specified, the *
+     *                       configured namespace is used
+     * @return Text analysis record
+     */
+    @RequestMapping(value = "/{normalizedName}/text-analysis/records/latest", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public TextAnalysisRecord getLatestTextAnalysisRecord(@PathVariable String normalizedName,
+                                                          @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final Resource resource = getResource(normalizedName, namespace);
+        return resourceService.findLatestTextAnalysisRecord(resource);
     }
 
     /**

@@ -1,7 +1,9 @@
 package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -324,5 +326,26 @@ class ResourceServiceTest {
         sut.addFileToDocument(doc, fOne);
         verify(resourceRepositoryService).update(doc, vocabulary);
         verify(vocabularyService).getRequiredReference(vocabulary.getUri());
+    }
+
+    @Test
+    void findLatestTextAnalysisRecordRetrievesLatestTextAnalysisRecordForResource() {
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("test.html");
+        final TextAnalysisRecord record = new TextAnalysisRecord(new Date(), file);
+        when(textAnalysisService.findLatestAnalysisRecord(file)).thenReturn(Optional.of(record));
+
+        final TextAnalysisRecord result = sut.findLatestTextAnalysisRecord(file);
+        assertEquals(record, result);
+        verify(textAnalysisService).findLatestAnalysisRecord(file);
+    }
+
+    @Test
+    void findLatestTextAnalysisRecordThrowsNotFoundExceptionWhenNoRecordExists() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(textAnalysisService.findLatestAnalysisRecord(any())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> sut.findLatestTextAnalysisRecord(resource));
+        verify(textAnalysisService).findLatestAnalysisRecord(resource);
     }
 }
