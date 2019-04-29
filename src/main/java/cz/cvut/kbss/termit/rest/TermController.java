@@ -260,6 +260,7 @@ public class TermController extends BaseController {
         return termService.generateIdentifier(vocabularyUri, name);
     }
 
+    @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/name", method = RequestMethod.GET)
     public Boolean doesNameExist(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
