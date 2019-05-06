@@ -109,6 +109,20 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
+     * Checks whether content is stored for the specified resource.
+     * <p>
+     * Note that content is typically stored only for {@link File}s, so this method will return false for any other type
+     * of {@link Resource}.
+     *
+     * @param resource Resource whose content existence is to be verified
+     * @return Whether content is stored
+     */
+    public boolean hasContent(Resource resource) {
+        Objects.requireNonNull(resource);
+        return (resource instanceof File) && documentManager.exists((File) resource);
+    }
+
+    /**
      * Gets content of the specified resource.
      *
      * @param resource Resource whose content should be retrieved

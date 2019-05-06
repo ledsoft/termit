@@ -54,6 +54,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     private static final String RESOURCE_NAME = "test-resource";
     private static final String RESOURCE_NAMESPACE = Environment.BASE_URI + "/";
+    private static final String FILE_NAME = "test.html";
     private static final String HTML_CONTENT = "<html><head><title>Test</title></head><body>test</body></html>";
 
     @Mock
@@ -306,9 +307,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Document doc = new Document();
         doc.setLabel(RESOURCE_NAME);
         doc.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        final File file = new File();
-        file.setLabel("test-file.html");
-        file.setUri(URI.create(RESOURCE_NAMESPACE + file.getLabel()));
+        final File file = generateFile();
         doc.setFiles(Collections.singleton(file));
         mockMvc.perform(post(PATH).content(toJsonLd(doc)).contentType(JsonLd.MEDIA_TYPE))
                .andExpect(status().isCreated());
@@ -318,20 +317,24 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         assertEquals(doc.getFiles(), captor.getValue().getFiles());
     }
 
+    private static File generateFile() {
+        final File file = new File();
+        file.setLabel(FILE_NAME);
+        file.setUri(URI.create(RESOURCE_NAMESPACE + FILE_NAME));
+        return file;
+    }
+
     @Test
     void getContentReturnsContentOfRequestedFile() throws Exception {
-        final File file = new File();
-        final String fileName = "mpp-3.3.html";
-        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setLabel(fileName);
-        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(FILE_NAME)))
                 .thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
         final java.io.File content = createTemporaryHtmlFile();
         when(resourceServiceMock.getContent(file))
                 .thenReturn(new TypeAwareFileSystemResource(content, MediaType.TEXT_HTML_VALUE));
         final MvcResult mvcResult = mockMvc
-                .perform(get(PATH + "/" + fileName + "/content"))
+                .perform(get(PATH + "/" + FILE_NAME + "/content"))
                 .andExpect(status().isOk()).andReturn();
         final String resultContent = mvcResult.getResponse().getContentAsString();
         assertEquals(HTML_CONTENT, resultContent);
@@ -347,11 +350,8 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     @Test
     void saveContentSavesContentViaServiceAndReturnsNoContentStatus() throws Exception {
-        final File file = new File();
-        final String fileName = "mpp-3.3.html";
-        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setLabel(fileName);
-        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(fileName)))
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(FILE_NAME)))
                 .thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
 
@@ -359,41 +359,35 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final MockMultipartFile upload = new MockMultipartFile("file", file.getLabel(), MediaType.TEXT_HTML_VALUE,
                 Files.readAllBytes(attachment.toPath())
         );
-        mockMvc.perform(multipart(PATH + "/" + fileName + "/content").file(upload)
-                                                                     .with(req -> {
-                                                                         req.setMethod(HttpMethod.PUT.toString());
-                                                                         return req;
-                                                                     }))
+        mockMvc.perform(multipart(PATH + "/" + FILE_NAME + "/content").file(upload)
+                                                                      .with(req -> {
+                                                                          req.setMethod(HttpMethod.PUT.toString());
+                                                                          return req;
+                                                                      }))
                .andExpect(status().isNoContent());
         verify(resourceServiceMock).saveContent(eq(file), any(InputStream.class));
     }
 
     @Test
     void runTextAnalysisInvokesTextAnalysisOnSpecifiedResource() throws Exception {
-        final File file = new File();
-        final String fileName = "mpp-3.3.html";
-        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setLabel(fileName);
-        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, FILE_NAME)).thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
-        mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+        mockMvc.perform(put(PATH + "/" + FILE_NAME + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                .andExpect(status().isNoContent());
         verify(resourceServiceMock).runTextAnalysis(file, Collections.emptySet());
     }
 
     @Test
     void runTextAnalysisInvokesTextAnalysisWithSpecifiedVocabulariesAsTermSources() throws Exception {
-        final File file = new File();
-        final String fileName = "mpp-3.3.html";
-        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setLabel(fileName);
-        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, FILE_NAME)).thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
         final Set<String> vocabularies = IntStream.range(0, 3).mapToObj(i -> Generator.generateUri().toString())
                                                   .collect(Collectors.toSet());
-        mockMvc.perform(put(PATH + "/" + fileName + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
-                                                                     .param("vocabulary",
-                                                                             vocabularies.toArray(new String[0])))
+        mockMvc.perform(put(PATH + "/" + FILE_NAME + "/text-analysis").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)
+                                                                      .param("vocabulary",
+                                                                              vocabularies.toArray(new String[0])))
                .andExpect(status().isNoContent());
         verify(resourceServiceMock)
                 .runTextAnalysis(file, vocabularies.stream().map(URI::create).collect(Collectors.toSet()));
@@ -477,9 +471,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Document document = new Document();
         document.setLabel(RESOURCE_NAME);
         document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        final File fOne = new File();
-        fOne.setUri(Generator.generateUri());
-        fOne.setLabel("test.html");
+        final File fOne = generateFile();
         document.addFile(fOne);
         when(resourceServiceMock.getRequiredReference(document.getUri())).thenReturn(document);
         when(resourceServiceMock.getFiles(document)).thenReturn(new ArrayList<>(document.getFiles()));
@@ -512,9 +504,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Document document = new Document();
         document.setLabel(RESOURCE_NAME);
         document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        final File fOne = new File();
-        fOne.setUri(Generator.generateUri());
-        fOne.setLabel("test.html");
+        final File fOne = generateFile();
         when(resourceServiceMock.findRequired(document.getUri())).thenReturn(document);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(document.getUri());
 
@@ -530,9 +520,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Document document = new Document();
         document.setLabel(RESOURCE_NAME);
         document.setUri(URI.create(RESOURCE_NAMESPACE + RESOURCE_NAME));
-        final File fOne = new File();
-        fOne.setLabel("test.html");
-        fOne.setUri(URI.create(RESOURCE_NAMESPACE + fOne.getLabel()));
+        final File fOne = generateFile();
         when(resourceServiceMock.findRequired(document.getUri())).thenReturn(document);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(document.getUri());
 
@@ -550,9 +538,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final Resource resource = Generator.generateResource();
         resource.setUri(resourceUri);
         resource.setLabel(RESOURCE_NAME);
-        final File fOne = new File();
-        fOne.setLabel("test.html");
-        fOne.setUri(URI.create(RESOURCE_NAMESPACE + fOne.getLabel()));
+        final File fOne = generateFile();
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resourceUri);
         when(resourceServiceMock.findRequired(resourceUri)).thenReturn(resource);
         doThrow(UnsupportedAssetOperationException.class).when(resourceServiceMock).addFileToDocument(resource, fOne);
@@ -564,21 +550,30 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getLatestTextAnalysisRecordRetrievesAnalysisRecordFromService() throws Exception {
-        final File file = new File();
-        final String fileName = "mpp-3.3.html";
-        file.setUri(URI.create(RESOURCE_NAMESPACE + fileName));
-        file.setLabel(fileName);
-        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, fileName)).thenReturn(file.getUri());
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, FILE_NAME)).thenReturn(file.getUri());
         when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
-        final TextAnalysisRecord record = new TextAnalysisRecord(new Date((System.currentTimeMillis() / 1000) * 1000), file);
+        final TextAnalysisRecord record = new TextAnalysisRecord(new Date((System.currentTimeMillis() / 1000) * 1000),
+                file);
         record.setVocabularies(Collections.singleton(Generator.generateUri()));
         when(resourceServiceMock.findLatestTextAnalysisRecord(file)).thenReturn(record);
-        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + fileName + "/text-analysis/records/latest")
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + FILE_NAME + "/text-analysis/records/latest")
                 .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE)).andExpect(status().isOk()).andReturn();
         final TextAnalysisRecord result = readValue(mvcResult, TextAnalysisRecord.class);
         assertNotNull(result);
         assertEquals(record.getAnalyzedResource().getUri(), result.getAnalyzedResource().getUri());
         assertEquals(record.getVocabularies(), result.getVocabularies());
         verify(resourceServiceMock).findLatestTextAnalysisRecord(file);
+    }
+
+    @Test
+    void hasContentChecksForContentExistenceInService() throws Exception {
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, FILE_NAME)).thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        when(resourceServiceMock.hasContent(file)).thenReturn(true);
+        mockMvc.perform(head(PATH + "/" + FILE_NAME + "/content").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+               .andExpect(status().isNoContent());
+        verify(resourceServiceMock).hasContent(file);
     }
 }

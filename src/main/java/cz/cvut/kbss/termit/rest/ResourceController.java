@@ -108,6 +108,13 @@ public class ResourceController extends BaseController {
         LOG.debug("Content saved for resource {}.", resource);
     }
 
+    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> hasContent(@PathVariable String normalizedName,
+                                           @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        return resourceService.hasContent(getResource(normalizedName, namespace)) ? ResponseEntity.noContent().build() :
+               ResponseEntity.notFound().build();
+    }
+
     @RequestMapping(value = "/{normalizedName}/files", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
             JsonLd.MEDIA_TYPE})
     public List<File> getFiles(@PathVariable String normalizedName,
