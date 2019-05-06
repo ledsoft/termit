@@ -83,7 +83,8 @@ public class File extends Resource implements SupportsStorage {
             if (getLabel() == null || getUri() == null) {
                 throw new IllegalStateException("Missing file name or URI required for directory name resolution.");
             }
-            final String labelPart = getLabel().substring(0, getLabel().indexOf('.'));
+            final int dotIndex = getLabel().indexOf('.');
+            final String labelPart = dotIndex > 0 ? getLabel().substring(0, getLabel().indexOf('.')) : getLabel();
             return IdentifierResolver.normalize(labelPart) + '_' + getUri().hashCode();
         }
     }
