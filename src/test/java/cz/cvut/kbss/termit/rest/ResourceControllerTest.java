@@ -427,7 +427,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(resourceServiceMock.getRequiredReference(resourceUri)).thenReturn(resource);
         final List<TermAssignment> assignments = IntStream.range(0, 5).mapToObj(
                 i -> {
-                    final TermAssignment ta = new TermAssignment(Generator.generateTermWithId(), new Target(resource));
+                    final TermAssignment ta = new TermAssignment(Generator.generateUri(), new Target(resource));
                     ta.setUri(Generator.generateUri());
                     return ta;
                 }).collect(Collectors.toList());

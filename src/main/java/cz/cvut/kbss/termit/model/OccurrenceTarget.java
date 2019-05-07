@@ -30,16 +30,6 @@ public class OccurrenceTarget extends Target {
     }
 
     @Override
-    public File getSource() {
-        assert source == null || source instanceof File;
-        return (File) source;
-    }
-
-    public void setSource(File file) {
-        this.source = file;
-    }
-
-    @Override
     public String toString() {
         return "OccurrenceTarget{" +
                 "selectors=" + selectors +

@@ -359,7 +359,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         resource.setAuthor(user.toUser());
         resource.setCreated(new Date());
         final TermAssignment ta = new TermAssignment();
-        ta.setTerm(t);
+        ta.setTerm(t.getUri());
         ta.setTarget(new Target(resource));
         transactional(() -> {
             em.persist(t);

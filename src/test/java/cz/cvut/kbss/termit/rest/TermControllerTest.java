@@ -284,7 +284,7 @@ class TermControllerTest extends BaseControllerTestRunner {
                 .thenReturn(VOCABULARY_URI);
         when(termServiceMock.findRequired(any())).thenReturn(term);
         final TermAssignment ta = new TermAssignment();
-        ta.setTerm(term);
+        ta.setTerm(term.getUri());
         ta.setTarget(new Target(Generator.generateResourceWithId()));
         when(termServiceMock.getAssignments(term)).thenReturn(Collections.singletonList(ta));
 

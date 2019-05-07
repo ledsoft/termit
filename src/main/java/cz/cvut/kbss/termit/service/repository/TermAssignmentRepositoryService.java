@@ -99,10 +99,10 @@ public class TermAssignmentRepositoryService {
         final Collection<URI> toAdd = new HashSet<>(termUris);
         final List<TermAssignment> toRemove = new ArrayList<>(termAssignments.size());
         for (TermAssignment existing : termAssignments) {
-            if (!termUris.contains(existing.getTerm().getUri())) {
+            if (!termUris.contains(existing.getTerm())) {
                 toRemove.add(existing);
             } else {
-                toAdd.remove(existing.getTerm().getUri());
+                toAdd.remove(existing.getTerm());
             }
         }
         if (removeObsolete) {
@@ -123,10 +123,11 @@ public class TermAssignmentRepositoryService {
 
     private void createAssignments(Target target, Collection<URI> termUris, boolean suggested) {
         termUris.forEach(iTerm -> {
-            final Term term = termDao.find(iTerm).orElseThrow(
-                    () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
+            if (!termDao.exists(iTerm)) {
+                throw NotFoundException.create(Term.class.getSimpleName(), iTerm);
+            }
 
-            final TermAssignment termAssignment = new TermAssignment(term, target);
+            final TermAssignment termAssignment = new TermAssignment(iTerm, target);
             if (suggested) {
                 termAssignment.addType(Vocabulary.s_c_navrzene_prirazeni_termu);
             }

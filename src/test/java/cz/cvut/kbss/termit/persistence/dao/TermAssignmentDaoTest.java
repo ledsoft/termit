@@ -60,7 +60,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         final List<TermAssignment> assignments = new ArrayList<>();
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final TermAssignment ta = new TermAssignment();
-            ta.setTerm(term);
+            ta.setTerm(term.getUri());
             ta.setTarget(new Target(resource));
             assignments.add(ta);
         }
@@ -85,7 +85,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         final List<TermAssignment> assignments = new ArrayList<>();
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
             final TermAssignment ta = new TermAssignment();
-            ta.setTerm(term);
+            ta.setTerm(term.getUri());
             ta.setTarget(target);
             assignments.add(ta);
         }
@@ -99,7 +99,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         transactional(() -> em.persist(term));
 
         final Target target = new Target();
-        target.setSource(resource);
+        target.setSource(resource.getUri());
         transactional(() -> em.persist(target));
 
         final List<TermAssignment> expected = generateAssignmentsForTarget(term, target);
@@ -113,7 +113,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllByTargetReturnsNoAssignmentsForTargetWithoutAssignment() {
         final Target target = new Target();
-        target.setSource(resource);
+        target.setSource(resource.getUri());
         target.setUri(Generator.generateUri());
         transactional(() -> em.persist(target));
 
@@ -128,7 +128,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         file.setUri(Generator.generateUri());
 
         final Target target = new Target();
-        target.setSource(file);
+        target.setSource(file.getUri());
         transactional(() -> {
             enableRdfsInference(em);
             em.persist(term);
@@ -145,7 +145,7 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
     private List<TermOccurrence> generateTermOccurrences(Term term, File file) {
         final List<TermOccurrence> occurrences = new ArrayList<>();
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {
-            final TermOccurrence occurrence = new TermOccurrence(term, new OccurrenceTarget(file));
+            final TermOccurrence occurrence = new TermOccurrence(term.getUri(), new OccurrenceTarget(file));
             // Dummy selector
             occurrence.getTarget().setSelectors(Collections.singleton(new XPathSelector("//div")));
             occurrences.add(occurrence);

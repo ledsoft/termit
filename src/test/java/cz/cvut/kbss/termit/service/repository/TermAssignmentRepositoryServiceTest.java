@@ -43,7 +43,7 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         final Target target = new Target(resource);
         final Term term = Generator.generateTermWithId();
-        final TermAssignment ta = new TermAssignment(term, target);
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(resource);
@@ -62,7 +62,7 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         final Target target = new Target(resource);
         final Term term = Generator.generateTermWithId();
-        final TermAssignment ta = new TermAssignment(term, target);
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(resource);
@@ -117,7 +117,7 @@ class TermAssignmentRepositoryServiceTest extends BaseServiceTestRunner {
     private void verifyAssignments(Resource resource, Collection<URI> expectedTerms) {
         final List<TermAssignment> result = sut.findAll(resource);
         assertEquals(expectedTerms.size(), result.size());
-        assertEquals(expectedTerms, result.stream().map(ta -> ta.getTerm().getUri()).collect(Collectors.toSet()));
+        assertEquals(expectedTerms, result.stream().map(TermAssignment::getTerm).collect(Collectors.toSet()));
     }
 
     @Test

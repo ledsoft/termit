@@ -5,6 +5,7 @@ import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu, fetch = FetchType.EAGER)
-    private Term term;
+    private URI term;
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -28,16 +29,16 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     public TermAssignment() {
     }
 
-    public TermAssignment(Term term, Target target) {
-        this.term = Objects.requireNonNull(term);
+    public TermAssignment(URI termUri, Target target) {
+        this.term = Objects.requireNonNull(termUri);
         this.target = Objects.requireNonNull(target);
     }
 
-    public Term getTerm() {
+    public URI getTerm() {
         return term;
     }
 
-    public void setTerm(Term term) {
+    public void setTerm(URI term) {
         this.term = term;
     }
 
@@ -70,7 +71,7 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     @Override
     public String toString() {
         return "TermAssignment{" +
-                "term=" + term +
+                "term=<" + term + ">" +
                 ", target=" + target +
                 ", description='" + description + '\'' +
                 ", types=" + types +

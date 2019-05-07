@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
+import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
@@ -134,8 +135,7 @@ public class AnnotationGenerator {
         final double minScore = Double.parseDouble(configuration.get(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE));
         final Set<URI> termsToAssign = occurrences.stream()
                                                   .filter(o -> o.getScore() != null && o.getScore() >= minScore)
-                                                  .map(o -> o.getTerm().getUri()).collect(
-                        Collectors.toSet());
+                                                  .map(TermAssignment::getTerm).collect(Collectors.toSet());
         assignmentService.addToResourceSuggested(source, termsToAssign);
     }
 

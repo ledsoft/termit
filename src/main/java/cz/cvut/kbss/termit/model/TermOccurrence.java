@@ -3,6 +3,8 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.net.URI;
+
 @OWLClass(iri = Vocabulary.s_c_vyskyt_termu)
 public class TermOccurrence extends TermAssignment {
 
@@ -11,7 +13,7 @@ public class TermOccurrence extends TermAssignment {
     public TermOccurrence() {
     }
 
-    public TermOccurrence(Term term, OccurrenceTarget target) {
+    public TermOccurrence(URI term, OccurrenceTarget target) {
         super(term, target);
     }
 

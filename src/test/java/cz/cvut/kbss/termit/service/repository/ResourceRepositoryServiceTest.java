@@ -98,8 +98,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Term tOne = generateTermWithUriAndPersist();
         final Term tTwo = generateTermWithUriAndPersist();
         final Target target = new Target(resource);
-        final TermAssignment assignmentOne = new TermAssignment(tOne, target);
-        final TermAssignment assignmentTwo = new TermAssignment(tTwo, target);
+        final TermAssignment assignmentOne = new TermAssignment(tOne.getUri(), target);
+        final TermAssignment assignmentTwo = new TermAssignment(tTwo.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(assignmentOne);
@@ -122,7 +122,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final OccurrenceTarget target = new OccurrenceTarget(file);
         final TermSelector selector = new TextQuoteSelector("test");
         target.setSelectors(Collections.singleton(selector));
-        final TermOccurrence occurrence = new TermOccurrence(tOne, target);
+        final TermOccurrence occurrence = new TermOccurrence(tOne.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(occurrence);
@@ -145,10 +145,10 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final OccurrenceTarget occurrenceTarget = new OccurrenceTarget(file);
         final TermSelector selector = new TextQuoteSelector("test");
         occurrenceTarget.setSelectors(Collections.singleton(selector));
-        final TermOccurrence occurrence = new TermOccurrence(tOne, occurrenceTarget);
+        final TermOccurrence occurrence = new TermOccurrence(tOne.getUri(), occurrenceTarget);
         final Term tTwo = generateTermWithUriAndPersist();
         final Target target = new Target(file);
-        final TermAssignment assignmentOne = new TermAssignment(tTwo, target);
+        final TermAssignment assignmentOne = new TermAssignment(tTwo.getUri(), target);
         transactional(() -> {
             em.persist(occurrenceTarget);
             em.persist(assignmentOne);
@@ -255,7 +255,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         final Target target = new Target(resource);
         final Term term = Generator.generateTermWithId();
-        final TermAssignment ta = new TermAssignment(term, target);
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(resource);

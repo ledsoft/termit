@@ -67,7 +67,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             if (Generator.randomBoolean() || matching.isEmpty()) {
                 matching.add(t);
                 final TermAssignment ta = new TermAssignment();
-                ta.setTerm(t);
+                ta.setTerm(t.getUri());
                 ta.setTarget(target);
                 assignments.add(ta);
             }
@@ -103,7 +103,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         for (Resource res : related) {
             final Term common = terms.get(Generator.randomIndex(terms));
             final TermAssignment ta = new TermAssignment();
-            ta.setTerm(common);
+            ta.setTerm(common.getUri());
             ta.setTarget(new Target(res));
             assignments.add(ta);
         }
@@ -155,7 +155,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
     private void generateOccurrences(File resource, List<Term> terms) {
         final List<TermOccurrence> occurrences = new ArrayList<>();
         for (Term t : terms) {
-            final TermOccurrence occurrence = new TermOccurrence(t, new OccurrenceTarget(resource));
+            final TermOccurrence occurrence = new TermOccurrence(t.getUri(), new OccurrenceTarget(resource));
             // Dummy selector
             occurrence.getTarget().setSelectors(Collections.singleton(new XPathSelector("//div")));
             occurrences.add(occurrence);

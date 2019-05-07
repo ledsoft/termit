@@ -3,7 +3,6 @@ package cz.cvut.kbss.termit.service.document.html;
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
-import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -162,9 +161,12 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             LOG.trace("No term identifier found in RDFa element {}. Skipping it.", rdfaElem);
             return Optional.empty();
         }
-        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
-                "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
-        final TermOccurrence occurrence = createOccurrence(term);
+        final URI termUri = URI.create(termId);
+        if (!termService.exists(termUri)) {
+            throw new AnnotationGenerationException(
+                    "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found.");
+        }
+        final TermOccurrence occurrence = createOccurrence(termUri);
         final OccurrenceTarget target = new OccurrenceTarget(source);
         target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
         occurrence.setTarget(target);

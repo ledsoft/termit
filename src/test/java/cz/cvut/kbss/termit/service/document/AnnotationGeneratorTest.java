@@ -344,7 +344,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         otherTerm.setUri(Generator.generateUri());
         otherTerm.setLabel("Other term");
         final TermOccurrence to = new TermOccurrence();
-        to.setTerm(otherTerm);
+        to.setTerm(otherTerm.getUri());
         final TextQuoteSelector selector = new TextQuoteSelector("Územní plán");
         selector.setPrefix("RDFa simple");
         selector.setSuffix(" hlavního města Prahy.");
@@ -361,8 +361,8 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         sut.generateAnnotations(content, file);
         final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAll(file);
         assertEquals(2, allOccurrences.size());
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm.getUri())));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term.getUri())));
     }
 
     @Test
@@ -376,7 +376,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
                         Vocabulary.s_c_prirazeni_termu)).getResultList();
         assertEquals(1, result.size());
         assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
-                result.get(0).getTerm().getUri().toString());
+                result.get(0).getTerm().toString());
     }
 
     @Test
@@ -404,7 +404,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
                         Vocabulary.s_c_prirazeni_termu)).getResultList();
         assertEquals(1, result.size());
         assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
-                result.get(0).getTerm().getUri().toString());
+                result.get(0).getTerm().toString());
     }
 
     @Test
