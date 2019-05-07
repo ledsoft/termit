@@ -177,7 +177,7 @@ class JwtAuthorizationFilterTest {
     }
 
     @Test
-    void doFilterInternalReturnsBadRequestOnIncompleteJwtToken() throws Exception {
+    void doFilterInternalReturnsUnauthorizedOnIncompleteJwtToken() throws Exception {
         // Missing id
         final String token = Jwts.builder().setSubject(user.getUsername())
                                  .setIssuedAt(new Date())
@@ -185,14 +185,14 @@ class JwtAuthorizationFilterTest {
                                  .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
         mockRequest.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstants.JWT_TOKEN_PREFIX + token);
         sut.doFilterInternal(mockRequest, mockResponse, chainMock);
-        assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), mockResponse.getStatus());
         final ErrorInfo errorInfo = objectMapper.readValue(mockResponse.getContentAsString(), ErrorInfo.class);
         assertNotNull(errorInfo);
         assertThat(errorInfo.getMessage(), containsString("missing"));
     }
 
     @Test
-    void doFilterInternalReturnsBadRequestOnUnparseableUserInfoInJwtToken() throws Exception {
+    void doFilterInternalReturnsUnauthorizedOnUnparseableUserInfoInJwtToken() throws Exception {
         // Missing id
         final String token = Jwts.builder().setSubject(user.getUsername())
                                  .setId(":1235")    // Not valid URI
@@ -201,7 +201,7 @@ class JwtAuthorizationFilterTest {
                                  .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
         mockRequest.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstants.JWT_TOKEN_PREFIX + token);
         sut.doFilterInternal(mockRequest, mockResponse, chainMock);
-        assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), mockResponse.getStatus());
         final ErrorInfo errorInfo = objectMapper.readValue(mockResponse.getContentAsString(), ErrorInfo.class);
         assertNotNull(errorInfo);
     }

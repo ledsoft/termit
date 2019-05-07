@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.exception.JwtException;
-import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
@@ -59,12 +58,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             SecurityUtils.verifyAccountStatus(existingDetails.getUser());
             securityUtils.setCurrentUser(existingDetails);
             refreshToken(authToken, response);
-        } catch (DisabledException | LockedException | TokenExpiredException e) {
+        } catch (DisabledException | LockedException | JwtException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
-            return;
-        } catch (JwtException e) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
             objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
             return;
         }
