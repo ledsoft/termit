@@ -231,7 +231,7 @@ class ResourceServiceTest {
         final Document doc = new Document();
         doc.setLabel("test document");
         doc.setUri(Generator.generateUri());
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         doc.addFile(fOne);
         when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
         final List<File> result = sut.getFiles(doc);
@@ -245,9 +245,9 @@ class ResourceServiceTest {
         final Document doc = new Document();
         doc.setLabel("test document");
         doc.setUri(Generator.generateUri());
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         doc.addFile(fOne);
-        final File fTwo = generateFile("act.html");
+        final File fTwo = Generator.generateFileWithId("act.html");
         doc.addFile(fTwo);
         when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
         final List<File> result = sut.getFiles(doc);
@@ -275,7 +275,7 @@ class ResourceServiceTest {
     @Test
     void addFileToDocumentPersistsFileAndUpdatesDocumentWithAddedFile() {
         final Document doc = Generator.generateDocumentWithId();
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         sut.addFileToDocument(doc, fOne);
         verify(resourceRepositoryService).persist(fOne);
         verify(resourceRepositoryService).update(doc);
@@ -284,7 +284,7 @@ class ResourceServiceTest {
     @Test
     void addFileToDocumentThrowsUnsupportedAssetOperationExceptionWhenSpecifiedResourceIsNotDocument() {
         final Resource resource = Generator.generateResourceWithId();
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         assertThrows(UnsupportedAssetOperationException.class, () -> sut.addFileToDocument(resource, fOne));
     }
 
@@ -293,7 +293,7 @@ class ResourceServiceTest {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Document doc = Generator.generateDocumentWithId();
         doc.setVocabulary(vocabulary.getUri());
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
 
         sut.addFileToDocument(doc, fOne);
@@ -306,7 +306,7 @@ class ResourceServiceTest {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Document doc = Generator.generateDocumentWithId();
         doc.setVocabulary(vocabulary.getUri());
-        final File fOne = generateFile("test.html");
+        final File fOne = Generator.generateFileWithId("test.html");
         when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
 
         sut.addFileToDocument(doc, fOne);
@@ -316,20 +316,13 @@ class ResourceServiceTest {
 
     @Test
     void findLatestTextAnalysisRecordRetrievesLatestTextAnalysisRecordForResource() {
-        final File file = generateFile("test.html");
+        final File file = Generator.generateFileWithId("test.html");
         final TextAnalysisRecord record = new TextAnalysisRecord(new Date(), file);
         when(textAnalysisService.findLatestAnalysisRecord(file)).thenReturn(Optional.of(record));
 
         final TextAnalysisRecord result = sut.findLatestTextAnalysisRecord(file);
         assertEquals(record, result);
         verify(textAnalysisService).findLatestAnalysisRecord(file);
-    }
-
-    private static File generateFile(String s) {
-        final File file = new File();
-        file.setUri(Generator.generateUri());
-        file.setLabel(s);
-        return file;
     }
 
     @Test
@@ -342,7 +335,7 @@ class ResourceServiceTest {
 
     @Test
     void hasContentChecksForContentExistenceInDocumentManager() {
-        final File file = generateFile("test.html");
+        final File file = Generator.generateFileWithId("test.html");
         sut.hasContent(file);
         verify(documentManager).exists(file);
     }

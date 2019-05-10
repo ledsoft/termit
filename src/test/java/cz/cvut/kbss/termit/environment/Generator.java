@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.environment;
 
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 
 import java.net.URI;
@@ -210,5 +211,12 @@ public class Generator {
         document.setDescription("Document description");
         document.setUri(generateUri());
         return document;
+    }
+
+    public static File generateFileWithId(String fileName) {
+        final File file = new File();
+        file.setLabel(fileName);
+        file.setUri(Generator.generateUri());
+        return file;
     }
 }
