@@ -7,6 +7,7 @@ import cz.cvut.kbss.jopa.model.annotations.VariableResult;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * Represents aggregated information about a Term occurring in a Resource.
@@ -49,6 +50,26 @@ public class ResourceTermOccurrences extends ResourceTermAssignments {
 
     public void setCount(Integer count) {
         this.count = count;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResourceTermOccurrences)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ResourceTermOccurrences that = (ResourceTermOccurrences) o;
+        return Objects.equals(count, that.count);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), count);
     }
 
     @Override

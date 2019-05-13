@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
@@ -97,6 +98,16 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
+     * Gets aggregate information about Term assignments/occurrences for the specified Resource.
+     *
+     * @param resource Resource to get assignments for
+     * @return Aggregate assignment data
+     */
+    public List<ResourceTermAssignments> getAssignmentInfo(Resource resource) {
+        return repositoryService.getAssignmentInfo(resource);
+    }
+
+    /**
      * Finds resources which are related to the specified one.
      * <p>
      * Two resources are related in this scenario if they have at least one common term assigned to them.
@@ -175,9 +186,13 @@ public class ResourceService implements CrudService<Resource> {
             throw new UnsupportedAssetOperationException("Cannot get files from resource which is not a document.");
         }
         final Document doc = (Document) instance;
-        final List<File> list = doc.getFiles() != null ? new ArrayList<>(doc.getFiles()) : Collections.emptyList();
-        list.sort(Comparator.comparing(File::getLabel));
-        return list;
+        if (doc.getFiles() != null) {
+            final List<File> list = new ArrayList<>(doc.getFiles());
+            list.sort(Comparator.comparing(File::getLabel));
+            return list;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**

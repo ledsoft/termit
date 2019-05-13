@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -336,5 +337,26 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
                 DescriptorFactory.vocabularyDescriptor(vocabulary));
         assertEquals(1, result.getDocument().getFiles().size());
         assertTrue(result.getDocument().getFiles().contains(fileTwo));
+    }
+
+    @Test
+    void getAssignmentInfoRetrievesAggregatedAssignmentDataForResource() {
+        final Resource resource = Generator.generateResourceWithId();
+        final Target target = new Target(resource);
+        final Term term = Generator.generateTermWithId();
+        term.setVocabulary(Generator.generateUri());
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
+        transactional(() -> {
+            em.persist(target);
+            em.persist(resource);
+            em.persist(term);
+            em.persist(ta);
+        });
+
+        final List<ResourceTermAssignments> result = sut.getAssignmentInfo(resource);
+        assertEquals(1, result.size());
+        assertEquals(term.getUri(), result.get(0).getTerm());
+        assertEquals(term.getLabel(), result.get(0).getTermLabel());
+        assertEquals(resource.getUri(), result.get(0).getResource());
     }
 }

@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -43,28 +44,26 @@ public class ResourceController extends BaseController {
         this.resourceService = resourceService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Resource> getAll() {
         return resourceService.findAll();
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createResource(@RequestBody Resource resource) {
         resourceService.persist(resource);
         LOG.debug("Resource {} created.", resource);
         return ResponseEntity.created(generateLocation(resource.getUri(), ConfigParam.NAMESPACE_RESOURCE)).build();
     }
 
-    @RequestMapping(value = "/{normalizedName}", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Resource getResource(@PathVariable String normalizedName,
                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return resourceService.findRequired(identifier);
     }
 
-    @RequestMapping(value = "/{normalizedName}", method = RequestMethod.PUT,
-            consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @PutMapping(value = "/{normalizedName}", consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateResource(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -75,7 +74,7 @@ public class ResourceController extends BaseController {
         LOG.debug("Resource {} updated.", resource);
     }
 
-    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.GET)
+    @GetMapping(value = "/{normalizedName}/content")
     public ResponseEntity<org.springframework.core.io.Resource> getContent(
             @PathVariable String normalizedName,
             @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
@@ -92,7 +91,7 @@ public class ResourceController extends BaseController {
         }
     }
 
-    @RequestMapping(value = "/{normalizedName}/content", method = RequestMethod.PUT)
+    @PutMapping(value = "/{normalizedName}/content")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void saveContent(@PathVariable String normalizedName,
                             @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -115,16 +114,14 @@ public class ResourceController extends BaseController {
                ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "/{normalizedName}/files", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}/files", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<File> getFiles(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return resourceService.getFiles(resourceService.getRequiredReference(identifier));
     }
 
-    @RequestMapping(value = "/{normalizedName}/files", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @PostMapping(value = "/{normalizedName}/files", consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> addFileToDocument(@PathVariable String normalizedName,
                                                   @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                                   @RequestBody File file) {
@@ -147,7 +144,7 @@ public class ResourceController extends BaseController {
      *                       configured namespace is used
      * @param vocabularies   Identifiers of vocabularies to be used as sources of Terms for the text analysis
      */
-    @RequestMapping(value = "/{normalizedName}/text-analysis", method = RequestMethod.PUT)
+    @PutMapping(value = "/{normalizedName}/text-analysis")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void runTextAnalysis(@PathVariable String normalizedName,
                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -165,8 +162,8 @@ public class ResourceController extends BaseController {
      *                       configured namespace is used
      * @return Text analysis record
      */
-    @RequestMapping(value = "/{normalizedName}/text-analysis/records/latest", method = RequestMethod.GET, produces = {
-            MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}/text-analysis/records/latest", produces = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
     public TextAnalysisRecord getLatestTextAnalysisRecord(@PathVariable String normalizedName,
                                                           @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final Resource resource = getResource(normalizedName, namespace);
@@ -183,24 +180,21 @@ public class ResourceController extends BaseController {
      *                       configured namespace is used
      * @return List of related resources
      */
-    @RequestMapping(value = "/{normalizedName}/related", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}/related", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@PathVariable String normalizedName,
                                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return resourceService.findRelated(resourceService.getRequiredReference(identifier));
     }
 
-    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}/terms", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
         return resourceService.findTags(resourceService.getRequiredReference(identifier));
     }
 
-    @RequestMapping(value = "/{normalizedName}/terms", method = RequestMethod.PUT,
-            consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping(value = "/{normalizedName}/terms", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setTerms(@PathVariable String normalizedName,
                          @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
@@ -209,8 +203,8 @@ public class ResourceController extends BaseController {
         resourceService.setTags(resource, termIds);
     }
 
-    @RequestMapping(value = "/{normalizedName}/assignments", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/{normalizedName}/assignments", produces = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
     public List<TermAssignment> getAssignments(@PathVariable String normalizedName,
                                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
@@ -218,7 +212,16 @@ public class ResourceController extends BaseController {
         return resourceService.findAssignments(resource);
     }
 
-    @RequestMapping(value = "/{normalizedName}", method = RequestMethod.DELETE)
+    @GetMapping(value = "/{normalizedName}/assignments/aggregated", produces = {MediaType.APPLICATION_JSON_VALUE,
+            JsonLd.MEDIA_TYPE})
+    public List<ResourceTermAssignments> getAssignmentInfo(@PathVariable String normalizedName,
+                                                           @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final Resource resource = resourceService.getRequiredReference(identifier);
+        return resourceService.getAssignmentInfo(resource);
+    }
+
+    @DeleteMapping(value = "/{normalizedName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeResource(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
@@ -236,7 +239,7 @@ public class ResourceController extends BaseController {
      * @return Generated resource identifier
      */
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/identifier", method = RequestMethod.GET)
+    @GetMapping(value = "/identifier")
     public URI generateIdentifier(@RequestParam("name") String label) {
         return resourceService.generateIdentifier(label);
     }
@@ -246,16 +249,13 @@ public class ResourceController extends BaseController {
     //
 
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/resource/terms", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/resource/terms", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@RequestParam(name = "iri") URI resourceId) {
         return resourceService.findTags(resourceService.getRequiredReference(resourceId));
     }
 
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/resource/related", method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_JSON_VALUE,
-                    JsonLd.MEDIA_TYPE})
+    @GetMapping(value = "/resource/related", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@RequestParam(name = "iri") URI resourceId) {
         return resourceService.findRelated(resourceService.getRequiredReference(resourceId));
     }

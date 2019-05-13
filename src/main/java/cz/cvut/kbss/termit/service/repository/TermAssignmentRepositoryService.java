@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
@@ -35,6 +36,17 @@ public class TermAssignmentRepositoryService {
         this.termAssignmentDao = termAssignmentDao;
         this.targetDao = targetDao;
         this.termDao = termDao;
+    }
+
+    /**
+     * Gets aggregated information about Term assignments/occurrences for the specified Resource.
+     *
+     * @param resource Resource to get data for
+     * @return List of aggregate term assignment data
+     */
+    public List<ResourceTermAssignments> getResourceAssignmentInfo(Resource resource) {
+        Objects.requireNonNull(resource);
+        return termAssignmentDao.getAssignmentsInfo(resource);
     }
 
     /**

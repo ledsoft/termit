@@ -6,7 +6,7 @@ import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -96,6 +96,27 @@ public class ResourceTermAssignments implements HasTypes {
 
     public void setResource(URI resource) {
         this.resource = resource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResourceTermAssignments)) {
+            return false;
+        }
+        ResourceTermAssignments that = (ResourceTermAssignments) o;
+        return Objects.equals(term, that.term) &&
+                Objects.equals(termLabel, that.termLabel) &&
+                Objects.equals(vocabulary, that.vocabulary) &&
+                Objects.equals(resource, that.resource) &&
+                Objects.equals(types, that.types);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(term, termLabel, vocabulary, resource, types);
     }
 
     @Override
