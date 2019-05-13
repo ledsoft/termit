@@ -93,7 +93,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                 "  ?term rdfs:label ?label ;" +
                 "  ?inVocabulary ?vocabulary ." +
                 "BIND (?resource AS ?res)" +
-                "}", "ResourceTermAssignments")
+                "} ORDER BY ?label", "ResourceTermAssignments")
                  .setParameter("suggestedAssignment", URI.create(Vocabulary.s_c_navrzene_prirazeni_termu))
                  .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
@@ -120,7 +120,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                 "  ?term rdfs:label ?label ;" +
                 "    ?inVocabulary ?vocabulary ." +
                 "BIND (?resource AS ?res)" +
-                "} GROUP BY ?term ?label ?vocabulary ?res ?suggested HAVING (?cnt > 0)", "ResourceTermOccurrences")
+                "} GROUP BY ?term ?label ?vocabulary ?res ?suggested HAVING (?cnt > 0) ORDER BY ?label", "ResourceTermOccurrences")
                  .setParameter("suggestedOccurrence", URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu))
                  .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
