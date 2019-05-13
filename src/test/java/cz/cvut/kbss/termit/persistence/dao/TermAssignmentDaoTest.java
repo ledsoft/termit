@@ -262,4 +262,32 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         assertEquals(term.getUri(), result.get(0).getTerm());
         assertEquals(term.getLabel(), result.get(0).getTermLabel());
     }
+
+    @Test
+    void getAssignmentsInfoRetrievesSeparateInstancesForSuggestedAndAssertedOccurrencesOfSameTerm() {
+        final Term term = Generator.generateTermWithId();
+        term.setVocabulary(Generator.generateUri());
+        final File file = Generator.generateFileWithId("test.html");
+        transactional(() -> {
+            enableRdfsInference(em);
+            em.persist(term);
+            em.persist(file);
+        });
+        final List<TermOccurrence> suggested = generateTermOccurrences(term, file, true);
+        final List<TermOccurrence> asserted = generateTermOccurrences(term, file, false);
+
+        final List<ResourceTermAssignments> result = sut.getAssignmentsInfo(file);
+        assertEquals(2, result.size());
+        for (ResourceTermAssignments rta : result) {
+            if (rta.getTypes().contains(Vocabulary.s_c_navrzeny_vyskyt_termu)) {
+                assertEquals(suggested.size(), ((ResourceTermOccurrences) rta).getCount().intValue());
+            } else {
+                assertEquals(asserted.size(), ((ResourceTermOccurrences) rta).getCount().intValue());
+            }
+            assertEquals(term.getUri(), rta.getTerm());
+            assertEquals(term.getLabel(), rta.getTermLabel());
+            assertEquals(file.getUri(), rta.getResource());
+            assertEquals(term.getVocabulary(), rta.getVocabulary());
+        }
+    }
 }
