@@ -2,12 +2,10 @@ package cz.cvut.kbss.termit.dto.assignment;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
-import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Represents information about Term assignment to a Resource.
@@ -25,10 +23,7 @@ import java.util.Set;
                 @VariableResult(name = "suggested", type = Boolean.class)
         }
 ))
-public class ResourceTermAssignments implements HasTypes {
-
-    @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu)
-    private URI term;
+public class ResourceTermAssignments extends AbstractAssignmentsInfo {
 
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String termLabel;
@@ -36,32 +31,17 @@ public class ResourceTermAssignments implements HasTypes {
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdroj)
-    private URI resource;
-
-    @Types
-    private Set<String> types;
-
     public ResourceTermAssignments() {
     }
 
     public ResourceTermAssignments(URI term, String termLabel, URI vocabulary, URI resource, Boolean suggested) {
-        this.term = term;
+        super(term, resource);
         this.termLabel = termLabel;
         this.vocabulary = vocabulary;
-        this.resource = resource;
         addType(Vocabulary.s_c_prirazeni_termu);
         if (suggested) {
             addType(Vocabulary.s_c_navrzene_prirazeni_termu);
         }
-    }
-
-    public URI getTerm() {
-        return term;
-    }
-
-    public void setTerm(URI term) {
-        this.term = term;
     }
 
     public String getTermLabel() {
@@ -81,24 +61,6 @@ public class ResourceTermAssignments implements HasTypes {
     }
 
     @Override
-    public Set<String> getTypes() {
-        return types;
-    }
-
-    @Override
-    public void setTypes(Set<String> types) {
-        this.types = types;
-    }
-
-    public URI getResource() {
-        return resource;
-    }
-
-    public void setResource(URI resource) {
-        this.resource = resource;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -106,27 +68,25 @@ public class ResourceTermAssignments implements HasTypes {
         if (!(o instanceof ResourceTermAssignments)) {
             return false;
         }
+        if (!super.equals(o)) {
+            return false;
+        }
         ResourceTermAssignments that = (ResourceTermAssignments) o;
-        return Objects.equals(term, that.term) &&
-                Objects.equals(termLabel, that.termLabel) &&
-                Objects.equals(vocabulary, that.vocabulary) &&
-                Objects.equals(resource, that.resource) &&
-                Objects.equals(types, that.types);
+        return Objects.equals(termLabel, that.termLabel) &&
+                Objects.equals(vocabulary, that.vocabulary);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(term, termLabel, vocabulary, resource, types);
+        return Objects.hash(super.hashCode(), termLabel, vocabulary);
     }
 
     @Override
     public String toString() {
         return "ResourceTermAssignments{" +
-                "term=" + term +
+                super.toString() +
                 ", termLabel='" + termLabel + '\'' +
                 ", vocabulary=" + vocabulary +
-                ", resource=" + resource +
-                ", types=" + types +
                 '}';
     }
 }

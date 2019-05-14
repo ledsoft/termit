@@ -10,16 +10,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class ResourceTermAssignmentsTest {
+class TermAssignmentsTest {
 
     @Test
     void constructorAddsAssignmentType() {
         final URI termUri = Generator.generateUri();
-        final URI vocabularyUri = Generator.generateUri();
         final URI resourceUri = Generator.generateUri();
         final String label = "Test term";
-        final ResourceTermAssignments result = new ResourceTermAssignments(termUri, label, vocabularyUri, resourceUri,
-                false);
+        final TermAssignments result = new TermAssignments(termUri, resourceUri, label, false);
         assertNotNull(result);
         assertThat(result.getTypes(), hasItem(Vocabulary.s_c_prirazeni_termu));
     }
@@ -27,11 +25,9 @@ class ResourceTermAssignmentsTest {
     @Test
     void constructorAddsSuggestedTypeWhenSuggestedIsTrue() {
         final URI termUri = Generator.generateUri();
-        final URI vocabularyUri = Generator.generateUri();
         final URI resourceUri = Generator.generateUri();
         final String label = "Test term";
-        final ResourceTermAssignments result = new ResourceTermAssignments(termUri, label, vocabularyUri, resourceUri,
-                true);
+        final TermAssignments result = new TermAssignments(termUri, resourceUri, label, true);
         assertThat(result.getTypes(), hasItem(Vocabulary.s_c_prirazeni_termu));
         assertThat(result.getTypes(), hasItem(Vocabulary.s_c_navrzene_prirazeni_termu));
     }

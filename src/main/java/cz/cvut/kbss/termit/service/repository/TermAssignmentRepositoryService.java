@@ -46,7 +46,7 @@ public class TermAssignmentRepositoryService {
      */
     public List<ResourceTermAssignments> getResourceAssignmentInfo(Resource resource) {
         Objects.requireNonNull(resource);
-        return termAssignmentDao.getAssignmentsInfo(resource);
+        return termAssignmentDao.getAssignmentInfo(resource);
     }
 
     /**
