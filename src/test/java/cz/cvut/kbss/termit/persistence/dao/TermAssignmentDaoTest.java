@@ -133,16 +133,6 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
         result.forEach(tai -> assertEquals(term.getUri(), tai.getTerm()));
     }
 
-    @Test
-    void findAllByTermReturnsEmptyCollectionForTermWithoutAssignments() {
-        final Term term = new Term();
-        term.setLabel("TestTerm");
-        term.setUri(Generator.generateUri());
-        transactional(() -> em.persist(term));
-
-        assertTrue(sut.findAll(term).isEmpty());
-    }
-
     private List<TermAssignment> generateAssignmentsForTarget(Term term, Target target) {
         final List<TermAssignment> assignments = new ArrayList<>();
         for (int i = 0; i < Generator.randomInt(5, 10); i++) {

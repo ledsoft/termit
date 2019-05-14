@@ -10,6 +10,11 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import java.net.URI;
 import java.util.Objects;
 
+/**
+ * Represents Term assignment to a Resource.
+ * <p>
+ * It provides only basic data about the Resource to which a Term is assigned.
+ */
 @SparqlResultSetMapping(name = "TermAssignments", classes = @ConstructorResult(
         targetClass = TermAssignments.class,
         variables = {

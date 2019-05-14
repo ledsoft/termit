@@ -88,10 +88,10 @@ class TermServiceTest {
     }
 
     @Test
-    void getAssignmentsRetrievesTermAssignmentsFromRepositoryService() {
+    void getAssignmentInfoRetrievesTermAssignmentInfoFromRepositoryService() {
         final Term term = Generator.generateTermWithId();
-        sut.getAssignments(term);
-        verify(termRepositoryService).getAssignments(term);
+        sut.getAssignmentInfo(term);
+        verify(termRepositoryService).getAssignmentsInfo(term);
     }
 
     @Test
@@ -149,5 +149,19 @@ class TermServiceTest {
     void findAllRetrievesAllTermsFromVocabularyUsingRepositoryService() {
         sut.findAll(vocabulary);
         verify(termRepositoryService).findAll(vocabulary);
+    }
+
+    @Test
+    void getReferenceRetrievesTermReferenceFromRepositoryService() {
+        final URI iri = Generator.generateUri();
+        sut.getReference(iri);
+        verify(termRepositoryService).getReference(iri);
+    }
+
+    @Test
+    void getRequiredReferenceRetrievesTermReferenceFromRepositoryService() {
+        final URI iri = Generator.generateUri();
+        sut.getRequiredReference(iri);
+        verify(termRepositoryService).getRequiredReference(iri);
     }
 }

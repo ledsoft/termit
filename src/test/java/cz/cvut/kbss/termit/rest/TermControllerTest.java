@@ -3,11 +3,10 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.jsonldjava.utils.JsonUtils;
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.TermService;
@@ -275,27 +274,25 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getAssignmentsReturnsGetsTermAssignmentsFromService() throws Exception {
+    void getAssignmentInfoGetsTermAssignmentInfoFromService() throws Exception {
         final Term term = Generator.generateTermWithId();
         term.setLabel(TERM_NAME);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(VOCABULARY_URI, Constants.TERM_NAMESPACE_SEPARATOR))
                 .thenReturn(VOCABULARY_URI);
-        when(termServiceMock.findRequired(any())).thenReturn(term);
-        final TermAssignment ta = new TermAssignment();
-        ta.setTerm(term.getUri());
-        ta.setTarget(new Target(Generator.generateResourceWithId()));
-        when(termServiceMock.getAssignments(term)).thenReturn(Collections.singletonList(ta));
+        when(termServiceMock.getRequiredReference(any())).thenReturn(term);
+        final TermAssignments tai = new TermAssignments(term.getUri(), Generator.generateUri(), "Test", false);
+        when(termServiceMock.getAssignmentInfo(term)).thenReturn(Collections.singletonList(tai));
 
         final MvcResult mvcResult =
                 mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME + "/assignments")).andExpect(
                         status().isOk()).andReturn();
-        final List<TermAssignment> result = readValue(mvcResult, new TypeReference<List<TermAssignment>>() {
+        final List<TermAssignments> result = readValue(mvcResult, new TypeReference<List<TermAssignments>>() {
         });
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(ta.getTarget().getSource(), result.get(0).getTarget().getSource());
+        assertEquals(tai, result.get(0));
     }
 
     @Test

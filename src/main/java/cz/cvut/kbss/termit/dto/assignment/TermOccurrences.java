@@ -10,6 +10,11 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import java.net.URI;
 import java.util.Objects;
 
+/**
+ * Represents aggregated information about a Term occurring in a Resource.
+ * <p>
+ * It contains info about the Resource - identifier and label - and how many times the Term occurs in it.
+ */
 @SparqlResultSetMapping(name = "TermOccurrences", classes = @ConstructorResult(
         targetClass = TermOccurrences.class,
         variables = {

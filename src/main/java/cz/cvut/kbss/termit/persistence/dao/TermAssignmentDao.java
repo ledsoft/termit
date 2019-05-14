@@ -52,20 +52,6 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
     }
 
     /**
-     * Finds all assignments of the specified terms.
-     *
-     * @param term Term whose assignments should be returned
-     * @return List of matching assignments
-     */
-    public List<TermAssignment> findAll(Term term) {
-        Objects.requireNonNull(term);
-        return em.createNativeQuery("SELECT ?x WHERE { ?x a ?type ; ?hasTerm ?term . }",
-                TermAssignment.class).setParameter("type", typeUri)
-                 .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
-                 .setParameter("term", term.getUri()).getResultList();
-    }
-
-    /**
      * Gets information about assignments and occurrences of the specified {@link Term}.
      *
      * @param term Term whose assignments and occurrences to retrieve
