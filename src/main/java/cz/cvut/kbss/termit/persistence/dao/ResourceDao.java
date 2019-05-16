@@ -51,7 +51,7 @@ public class ResourceDao extends AssetDao<Resource> {
         }
     }
 
-    private Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+    private static Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         final Descriptor descriptor;
         if (resource instanceof Document) {
             descriptor = DescriptorFactory.documentDescriptor(vocabulary);
