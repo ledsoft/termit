@@ -60,4 +60,16 @@ class TextPositionSelectorGeneratorTest {
         assertEquals(prefix.length(), result.getStart().intValue());
         assertEquals(prefix.length() + match.length(), result.getEnd().intValue());
     }
+
+    @Test
+    void generateSelectorSkipsComments() {
+        final String prefix = "Prefix before the matching element ";
+        final String suffix = " and suffix after the matching element.";
+        document.html("<div>" + prefix + "<!-- Comment --><span id=\"elem\">" + MATCH + "</span>" + suffix + "</div>");
+        final Element element = document.getElementById("elem");
+        final TextPositionSelector result = sut.generateSelector(element);
+        assertNotNull(result);
+        assertEquals(prefix.length(), result.getStart().intValue());
+        assertEquals(prefix.length() + MATCH.length(), result.getEnd().intValue());
+    }
 }

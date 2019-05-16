@@ -47,6 +47,11 @@ _* Technology not used in INBAS RT_
 We are using `basePackageClasses` instead of `basePackages` in `ComponentScan`. This is more resilient to refactoring errors 
 because it uses classes instead of String-based package info. Thus, any errors are discovered during compilation.
 
+### REST Method Annotations
+
+Started to switch to HTTP method-specific annotation shortcuts, e.g., instead of `@RequestMapping(method=RequestMethod.GET)`,
+we should use `@GetMapping`. It should make the REST controller code a bit more concise.
+
 ### jsoup
 
 Had to switch from standard Java DOM implementation to **jsoup** because DOM had sometimes trouble parsing HTML documents (`meta` tags in header).
@@ -80,12 +85,19 @@ with **RDFS+SPIN support** should be selected (if proper search should be suppor
 Then, rules contained in `rulesets/rules-termit-spin.ttl` should be added to the repository, 
 as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
 
-Note that JOPA currently does not support creating in-memory repository with SPIN rules, so SPIN inference is not supported in
-tests, yet.
+### Loading Ontologies into Repository
+
+TermIt needs the repository to provide some inference. Besides loading the appropriate rulesets (see above), it is also
+necessary to load the ontological models into the repository.
+
+First model to load is the TermIt model itself. It can be found in `ontology/termit-model.ttl`. The other necessary model
+is the _popis dat_ model. It is available online at 
+[http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model](http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model).
+With these two models loaded, the repository should provide the inference services required by TermIt.
 
 
 ### User vs UserAccount
-`User` is a domain class used for domain functions, mostly for resource provenance (author). It does not support password.
+`User` is a domain class used for domain functions, mostly for resource provenance (author, last editor). It does not support password.
  `UserAccount` is used for security-related functions and supports password. Most parts of the application **should** use
  `User`.
 
@@ -129,3 +141,7 @@ used by TermIt.
 
 We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
 on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.
+
+## Documentation
+
+TermIt REST API is documented on [SwaggerHub](https://app.swaggerhub.com/apis/ledvima1/TermIt/) under the appropriate version.

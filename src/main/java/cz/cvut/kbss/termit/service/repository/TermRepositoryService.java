@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
@@ -142,13 +142,13 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     }
 
     /**
-     * Retrieves all assignments of the specified term.
+     * Retrieves aggregated information about the specified Term's assignments to and occurrences in {@link
+     * cz.cvut.kbss.termit.model.resource.Resource}s.
      *
-     * @param instance Term whose assignments should be retrieved
-     * @return List of term assignments (including term occurrences)
+     * @param instance Term whose assignment/occurrence data should be retrieved
+     * @return Aggregated Term assignment/occurrence data
      */
-    public List<TermAssignment> getAssignments(Term instance) {
-        Objects.requireNonNull(instance);
-        return termAssignmentDao.findAll(instance);
+    public List<TermAssignments> getAssignmentsInfo(Term instance) {
+        return termAssignmentDao.getAssignmentInfo(instance);
     }
 }

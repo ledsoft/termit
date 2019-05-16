@@ -1,9 +1,9 @@
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
-import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.*;
@@ -12,6 +12,7 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -25,12 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.URI;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
@@ -39,8 +36,6 @@ import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
-
-    private static final String EXISTENCE_CHECK_QUERY = "ASK { ?x a ?type . }";
 
     @Autowired
     private Configuration config;
@@ -92,78 +87,6 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void setInvalidTagsForValidResource() {
-        assertThrows(NotFoundException.class, () -> {
-            final Resource resource = generateResource();
-            final Set<URI> terms = new HashSet<>();
-            terms.add(URI.create("http://unknown.uri/term1"));
-            terms.add(URI.create("http://unknown.uri/term2"));
-            transactional(() -> sut.setTags(resource, terms));
-        });
-    }
-
-    @Test
-    void addTagsToUntaggedResource() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
-    void replaceTagsOfTaggedResource() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-
-        final Set<URI> tags2 = new HashSet<>();
-        final URI term2 = generateTermWithUriAndPersist().getUri();
-        final URI term3 = generateTermWithUriAndPersist().getUri();
-        tags2.add(term2);
-        tags2.add(term3);
-        transactional(() -> sut.setTags(resource, tags2));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
-    void setTagsMergesExistingTagsAndNewlySpecifiedTags() {
-        final Resource resource = generateResource();
-
-        final Set<URI> tags = new HashSet<>();
-        final URI term0 = generateTermWithUriAndPersist().getUri();
-        final URI term1 = generateTermWithUriAndPersist().getUri();
-        tags.add(term0);
-        tags.add(term1);
-
-        transactional(() -> sut.setTags(resource, tags));
-        final Set<URI> tags2 = new HashSet<>();
-        final URI term2 = generateTermWithUriAndPersist().getUri();
-        tags2.add(term0);
-        tags2.add(term2);
-
-        transactional(() -> sut.setTags(resource, tags2));
-
-        assertEquals(2, sut.findTags(resource).size());
-        assertEquals(tags2, sut.findTags(resource).stream().map(Term::getUri).collect(Collectors.toSet()));
-    }
-
-    @Test
     void persistThrowsValidationExceptionWhenResourceLabelIsMissing() {
         final Resource resource = Generator.generateResourceWithId();
         resource.setLabel(null);
@@ -176,8 +99,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Term tOne = generateTermWithUriAndPersist();
         final Term tTwo = generateTermWithUriAndPersist();
         final Target target = new Target(resource);
-        final TermAssignment assignmentOne = new TermAssignment(tOne, target);
-        final TermAssignment assignmentTwo = new TermAssignment(tTwo, target);
+        final TermAssignment assignmentOne = new TermAssignment(tOne.getUri(), target);
+        final TermAssignment assignmentTwo = new TermAssignment(tTwo.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(assignmentOne);
@@ -186,13 +109,8 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(resource);
         assertNull(em.find(Resource.class, resource.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil);
-    }
-
-    private void verifyInstancesRemoved(String type) {
-        assertFalse(em.createNativeQuery(EXISTENCE_CHECK_QUERY, Boolean.class).setParameter("type", URI.create(type))
-                      .getSingleResult());
+        verifyInstancesDoNotExist(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
     }
 
     @Test
@@ -205,7 +123,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final OccurrenceTarget target = new OccurrenceTarget(file);
         final TermSelector selector = new TextQuoteSelector("test");
         target.setSelectors(Collections.singleton(selector));
-        final TermOccurrence occurrence = new TermOccurrence(tOne, target);
+        final TermOccurrence occurrence = new TermOccurrence(tOne.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(occurrence);
@@ -213,9 +131,9 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
         sut.remove(file);
         assertNull(em.find(File.class, file.getUri()));
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+        verifyInstancesDoNotExist(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test
@@ -228,10 +146,10 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final OccurrenceTarget occurrenceTarget = new OccurrenceTarget(file);
         final TermSelector selector = new TextQuoteSelector("test");
         occurrenceTarget.setSelectors(Collections.singleton(selector));
-        final TermOccurrence occurrence = new TermOccurrence(tOne, occurrenceTarget);
+        final TermOccurrence occurrence = new TermOccurrence(tOne.getUri(), occurrenceTarget);
         final Term tTwo = generateTermWithUriAndPersist();
         final Target target = new Target(file);
-        final TermAssignment assignmentOne = new TermAssignment(tTwo, target);
+        final TermAssignment assignmentOne = new TermAssignment(tTwo.getUri(), target);
         transactional(() -> {
             em.persist(occurrenceTarget);
             em.persist(assignmentOne);
@@ -240,11 +158,11 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         sut.remove(file);
-        verifyInstancesRemoved(Vocabulary.s_c_prirazeni_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil);
-        verifyInstancesRemoved(Vocabulary.s_c_vyskyt_termu);
-        verifyInstancesRemoved(Vocabulary.s_c_cil_vyskytu);
-        verifyInstancesRemoved(Vocabulary.s_c_selektor_text_quote);
+        verifyInstancesDoNotExist(Vocabulary.s_c_prirazeni_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_vyskyt_termu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_cil_vyskytu, em);
+        verifyInstancesDoNotExist(Vocabulary.s_c_selektor_text_quote, em);
     }
 
     @Test
@@ -338,7 +256,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Resource resource = Generator.generateResourceWithId();
         final Target target = new Target(resource);
         final Term term = Generator.generateTermWithId();
-        final TermAssignment ta = new TermAssignment(term, target);
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
         transactional(() -> {
             em.persist(target);
             em.persist(resource);
@@ -350,5 +268,95 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(ta.getUri(), result.get(0).getUri());
+    }
+
+    @Test
+    void persistWithVocabularyPersistsInstanceIntoVocabularyContext() {
+        final Document document = Generator.generateDocumentWithId();
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
+
+        sut.persist(document, vocabulary);
+
+        final Document result = em
+                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
+        assertNotNull(result);
+        assertEquals(document, result);
+    }
+
+    @Test
+    void updateWithVocabularyUpdatesInstanceInVocabularyContext() {
+        enableRdfsInference(em);
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+
+        final String newLabel = "updated-test.html";
+        file.setLabel(newLabel);
+
+        sut.update(file, vocabulary);
+
+        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
+        assertNotNull(result);
+        assertEquals(newLabel, result.getLabel());
+    }
+
+    @Test
+    void removeFileUpdatesParentDocumentInVocabularyContext() {
+        final Document document = Generator.generateDocumentWithId();
+        final DocumentVocabulary vocabulary = new DocumentVocabulary();
+        vocabulary.setUri(Generator.generateUri());
+        vocabulary.setLabel("Vocabulary");
+        vocabulary.setGlossary(new Glossary());
+        vocabulary.setModel(new Model());
+        vocabulary.setDocument(document);
+        document.setVocabulary(vocabulary.getUri());
+        final File file = new File();
+        file.setLabel("test.html");
+        file.setUri(Generator.generateUri());
+        file.setDocument(document);
+        final File fileTwo = new File();
+        fileTwo.setLabel("test-two.html");
+        fileTwo.setUri(Generator.generateUri());
+        fileTwo.setDocument(document);
+        document.addFile(fileTwo);
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+            em.persist(fileTwo, DescriptorFactory.fileDescriptor(vocabulary));
+        });
+
+        transactional(() -> {
+            final Resource toRemove = sut.getRequiredReference(file.getUri());
+            sut.remove(toRemove);
+        });
+
+        final DocumentVocabulary result = em.find(DocumentVocabulary.class, vocabulary.getUri(),
+                DescriptorFactory.vocabularyDescriptor(vocabulary));
+        assertEquals(1, result.getDocument().getFiles().size());
+        assertTrue(result.getDocument().getFiles().contains(fileTwo));
+    }
+
+    @Test
+    void getAssignmentInfoRetrievesAggregatedAssignmentDataForResource() {
+        final Resource resource = Generator.generateResourceWithId();
+        final Target target = new Target(resource);
+        final Term term = Generator.generateTermWithId();
+        term.setVocabulary(Generator.generateUri());
+        final TermAssignment ta = new TermAssignment(term.getUri(), target);
+        transactional(() -> {
+            em.persist(target);
+            em.persist(resource);
+            em.persist(term);
+            em.persist(ta);
+        });
+
+        final List<ResourceTermAssignments> result = sut.getAssignmentInfo(resource);
+        assertEquals(1, result.size());
+        assertEquals(term.getUri(), result.get(0).getTerm());
+        assertEquals(term.getLabel(), result.get(0).getTermLabel());
+        assertEquals(resource.getUri(), result.get(0).getResource());
     }
 }

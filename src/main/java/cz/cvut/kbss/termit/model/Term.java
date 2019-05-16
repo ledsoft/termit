@@ -7,6 +7,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
@@ -25,15 +26,20 @@ public class Term extends Asset implements HasTypes, Serializable {
      * Names of columns used in term export.
      */
     public static final List<String> EXPORT_COLUMNS = Collections
-            .unmodifiableList(Arrays.asList("IRI", "Label", "Comment", "Types", "Sources", "SubTerms"));
+            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "SubTerms"));
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
+    // TODO Can be replaced by JOPA SKOS.DEFINITION constant, available in the next eversion
+    @OWLAnnotationProperty(iri = Vocabulary.s_p_definition)
+    private String definition;
+
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_narrower, fetch = FetchType.EAGER)
+    // TODO Replace with a reference to JOPA SKOS, which will be available in the next version
+    @OWLObjectProperty(iri = Constants.SKOS_NARROWER, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
@@ -51,6 +57,14 @@ public class Term extends Asset implements HasTypes, Serializable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
 
     public Set<URI> getSubTerms() {
@@ -113,6 +127,7 @@ public class Term extends Asset implements HasTypes, Serializable {
     public String toCsv() {
         final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
         sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
+        sb.append(',').append(definition != null ? CsvUtils.sanitizeString(definition) : "");
         sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
         sb.append(',');
         if (types != null && !types.isEmpty()) {
@@ -144,17 +159,20 @@ public class Term extends Asset implements HasTypes, Serializable {
         Objects.requireNonNull(row);
         row.createCell(0).setCellValue(getUri().toString());
         row.createCell(1).setCellValue(getLabel());
+        if (definition != null) {
+            row.createCell(2).setCellValue(definition);
+        }
         if (comment != null) {
-            row.createCell(2).setCellValue(comment);
+            row.createCell(3).setCellValue(comment);
         }
         if (types != null) {
-            row.createCell(3).setCellValue(String.join(";", types));
+            row.createCell(4).setCellValue(String.join(";", types));
         }
         if (sources != null) {
-            row.createCell(4).setCellValue(String.join(";", sources));
+            row.createCell(5).setCellValue(String.join(";", sources));
         }
         if (subTerms != null) {
-            row.createCell(5)
+            row.createCell(6)
                .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
         }
     }

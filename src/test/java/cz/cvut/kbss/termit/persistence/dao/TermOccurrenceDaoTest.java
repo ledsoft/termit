@@ -58,6 +58,9 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         } else {
             filesToProcess = files;
         }
+        for (File f : filesToProcess) {
+            f.setUri(Generator.generateUri());
+        }
         final Term tOne = new Term();
         tOne.setUri(Generator.generateUri());
         tOne.setLabel("Term one");
@@ -77,16 +80,15 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
             target.setSelectors(Collections.singleton(selector));
             to.setTarget(target);
             if (Generator.randomBoolean()) {
-                to.setTerm(tOne);
+                to.setTerm(tOne.getUri());
                 map.get(tOne).add(to);
             } else {
-                to.setTerm(tTwo);
+                to.setTerm(tTwo.getUri());
                 map.get(tTwo).add(to);
             }
         }
         transactional(() -> {
             for (File f : filesToProcess) {
-                f.setUri(Generator.generateUri());
                 em.persist(f);
             }
             map.forEach((t, list) -> {
@@ -108,7 +110,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         fTwo.setLabel("fTwo.html");
         final Map<Term, List<TermOccurrence>> allOccurrences = generateOccurrences(fOne, fTwo);
         final List<TermOccurrence> matching = allOccurrences.values().stream().flatMap(
-                l -> l.stream().filter(to -> to.getTarget().getSource().getUri().equals(fOne.getUri())))
+                l -> l.stream().filter(to -> to.getTarget().getSource().equals(fOne.getUri())))
                                                             .collect(Collectors.toList());
 
         final List<TermOccurrence> result = sut.findAll(fOne);

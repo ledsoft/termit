@@ -1,10 +1,10 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.TermService;
@@ -234,12 +234,12 @@ public class TermController extends BaseController {
 
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/{termIdFragment}/assignments", method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<TermAssignment> getAssignments(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
-                                               @PathVariable("termIdFragment") String termIdFragment,
-                                               @RequestParam(name = QueryParams.NAMESPACE, required = false)
-                                                       String namespace) {
-        final Term term = getById(vocabularyIdFragment, termIdFragment, namespace);
-        return termService.getAssignments(term);
+    public List<TermAssignments> getAssignmentInfo(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
+                                                   @PathVariable("termIdFragment") String termIdFragment,
+                                                   @RequestParam(name = QueryParams.NAMESPACE, required = false)
+                                                           String namespace) {
+        final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
+        return termService.getAssignmentInfo(termService.getRequiredReference(termUri));
     }
 
     /**
@@ -260,6 +260,7 @@ public class TermController extends BaseController {
         return termService.generateIdentifier(vocabularyUri, name);
     }
 
+    @PreAuthorize("permitAll()")
     @RequestMapping(value = "/{vocabularyIdFragment}/terms/name", method = RequestMethod.GET)
     public Boolean doesNameExist(@PathVariable("vocabularyIdFragment") String vocabularyIdFragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,

@@ -14,6 +14,7 @@ import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -157,12 +158,24 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
-        final InputStream content = loadFile("data/rdfa-simple.html");
-        file.setLabel("test.txt");
+    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() throws Exception {
+        final InputStream content = loadFile("config.properties");
+        file.setLabel(generateIncompatibleFile());
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
+    }
+
+    private String generateIncompatibleFile() throws Exception {
+        final String tempDir = System.getProperty("java.io.tmpdir");
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), tempDir);
+        final java.io.File docDir = new java.io.File(tempDir + java.io.File.separator +
+                document.getDirectoryName());
+        docDir.mkdir();
+        docDir.deleteOnExit();
+        final java.io.File content = Files.createTempFile(docDir.toPath(), "test", ".txt").toFile();
+        content.deleteOnExit();
+        return content.getName();
     }
 
     @Test
@@ -331,7 +344,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         otherTerm.setUri(Generator.generateUri());
         otherTerm.setLabel("Other term");
         final TermOccurrence to = new TermOccurrence();
-        to.setTerm(otherTerm);
+        to.setTerm(otherTerm.getUri());
         final TextQuoteSelector selector = new TextQuoteSelector("Územní plán");
         selector.setPrefix("RDFa simple");
         selector.setSuffix(" hlavního města Prahy.");
@@ -348,7 +361,62 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         sut.generateAnnotations(content, file);
         final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAll(file);
         assertEquals(2, allOccurrences.size());
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm.getUri())));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term.getUri())));
+    }
+
+    @Test
+    void generateAnnotationsCreatesTermAssignmentsForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().toString());
+    }
+
+    @Test
+    void generateAnnotationsDoesNotCreateAssignmentsForOccurrencesWithInsufficientScore() throws Exception {
+        ((MockEnvironment) environment)
+                .setProperty(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE.toString(), Double.toString(Double.MAX_VALUE));
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsCreatesSingleAssignmentForMultipleOccurrencesOfTerm() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple-multiple-occurrences.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().toString());
+    }
+
+    @Test
+    void generateAnnotationsCreatesAssignmentsWithTypeSuggestedForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertFalse(result.isEmpty());
+        result.forEach(ta -> assertTrue(ta.getTypes().contains(Vocabulary.s_c_navrzene_prirazeni_termu)));
     }
 }

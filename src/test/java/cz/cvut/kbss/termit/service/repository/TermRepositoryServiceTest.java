@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -351,27 +351,25 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void getAssignmentsReturnsTermAssignments() {
+    void getAssignmentsInfoRetrievesAssignmentData() {
         final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addRootTerm(t);
+        t.setVocabulary(vocabulary.getUri());
 
         final Resource resource = Generator.generateResourceWithId();
-        resource.setAuthor(user.toUser());
-        resource.setCreated(new Date());
         final TermAssignment ta = new TermAssignment();
-        ta.setTerm(t);
+        ta.setTerm(t.getUri());
         ta.setTarget(new Target(resource));
         transactional(() -> {
             em.persist(t);
-            em.merge(vocabulary);
             em.persist(resource);
             em.persist(ta.getTarget());
             em.persist(ta);
         });
 
-        final List<TermAssignment> result = sut.getAssignments(t);
+        final List<TermAssignments> result = sut.getAssignmentsInfo(t);
         assertEquals(1, result.size());
-        assertEquals(ta.getTerm(), result.get(0).getTerm());
-        assertEquals(ta.getUri(), result.get(0).getUri());
+        assertEquals(t.getUri(), result.get(0).getTerm());
+        assertEquals(resource.getUri(), result.get(0).getResource());
+        assertEquals(resource.getLabel(), result.get(0).getResourceLabel());
     }
 }

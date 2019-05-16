@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -22,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Default document manager uses files on filesystem to store content.
@@ -84,6 +84,7 @@ public class DefaultDocumentManager implements DocumentManager {
         try {
             final java.io.File target = resolveFile(file, false);
             LOG.debug("Saving file content to {}.", target);
+            target.getParentFile().mkdirs();
             Files.copy(content, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new TermItException("Unable to write out file content.", e);
@@ -109,5 +110,21 @@ public class DefaultDocumentManager implements DocumentManager {
         final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
         final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
         return name + "~" + dateFormat.format(new Date()) + extension;
+    }
+
+    @Override
+    public boolean exists(File file) {
+        return resolveFile(file, false).exists();
+    }
+
+    @Override
+    public Optional<String> getContentType(File file) {
+        final java.io.File physicalFile = resolveFile(file, true);
+        try {
+            return Optional.ofNullable(Files.probeContentType(physicalFile.toPath()));
+        } catch (IOException e) {
+            LOG.error("Exception caught when determining content type of file {}.", file, e);
+            return Optional.empty();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.model.selector.TermSelector;
+import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
@@ -40,6 +41,9 @@ interface SelectorGenerator {
     default StringBuilder extractNodeText(Iterable<Node> nodes) {
         final StringBuilder sb = new StringBuilder();
         for (Node node : nodes) {
+            if (node instanceof Comment) {
+                continue;
+            }
             sb.append(node instanceof TextNode ? ((TextNode) node).getWholeText() : ((Element) node).wholeText());
         }
         return sb;

@@ -1,8 +1,9 @@
 package cz.cvut.kbss.termit.environment;
 
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
 import java.util.Collection;
@@ -168,6 +169,7 @@ public class Generator {
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
+        term.setDefinition("Normative definition of term " + term.getLabel());
         term.setComment("Comment" + randomInt());
         return term;
     }
@@ -201,5 +203,20 @@ public class Generator {
         final TermAssignment termAssignment = new TermAssignment();
         termAssignment.setUri(Generator.generateUri());
         return termAssignment;
+    }
+
+    public static Document generateDocumentWithId() {
+        final Document document = new Document();
+        document.setLabel("Document " + randomInt());
+        document.setDescription("Document description");
+        document.setUri(generateUri());
+        return document;
+    }
+
+    public static File generateFileWithId(String fileName) {
+        final File file = new File();
+        file.setLabel(fileName);
+        file.setUri(Generator.generateUri());
+        return file;
     }
 }

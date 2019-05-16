@@ -1,8 +1,8 @@
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -128,6 +128,27 @@ public class TermService {
     }
 
     /**
+     * Gets a reference to a Term with the specified identifier.
+     *
+     * @param id Term identifier
+     * @return Matching Term reference wrapped in an {@code Optional}
+     */
+    public Optional<Term> getReference(URI id) {
+        return repositoryService.getReference(id);
+    }
+
+    /**
+     * Gets a reference to a Term with the specified identifier.
+     *
+     * @param id Term identifier
+     * @return Matching term reference
+     * @throws NotFoundException When no matching term is found
+     */
+    public Term getRequiredReference(URI id) {
+        return repositoryService.getRequiredReference(id);
+    }
+
+    /**
      * Gets child terms of the specified parent term.
      *
      * @param parent Parent term whose children should be loaded
@@ -142,14 +163,13 @@ public class TermService {
     }
 
     /**
-     * Gets assignments of the specified term.
+     * Gets aggregated info about assignments and occurrences of the specified Term.
      *
-     * @param term Term whose assignments to retrieve
-     * @return Term assignments
+     * @param term Term whose assignments and occurrences to retrieve
+     * @return List of term assignment describing instances
      */
-    public List<TermAssignment> getAssignments(Term term) {
-        Objects.requireNonNull(term);
-        return repositoryService.getAssignments(term);
+    public List<TermAssignments> getAssignmentInfo(Term term) {
+        return repositoryService.getAssignmentsInfo(term);
     }
 
     /**

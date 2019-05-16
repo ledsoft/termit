@@ -1,11 +1,11 @@
 package cz.cvut.kbss.termit.service.document;
 
-import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -58,9 +58,9 @@ public abstract class TermOccurrenceResolver {
      */
     public abstract boolean supports(File source);
 
-    protected TermOccurrence createOccurrence(Term term) {
+    protected TermOccurrence createOccurrence(URI termUri) {
         final TermOccurrence occurrence = new TermOccurrence();
-        occurrence.setTerm(term);
+        occurrence.setTerm(termUri);
         return occurrence;
     }
 }

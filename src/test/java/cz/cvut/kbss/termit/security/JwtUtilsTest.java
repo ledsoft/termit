@@ -206,4 +206,16 @@ class JwtUtilsTest {
                                   .getBody();
         assertTrue(claims.getExpiration().after(oldExpiration));
     }
+
+    @Test
+    void extractUserInfoThrowsJwtExceptionWhenTokenIsSignedWithInvalidSecret() {
+        final String token = Jwts.builder().setSubject(user.getUsername())
+                                 .setId(user.getUri().toString())
+                                 .setIssuedAt(new Date())
+                                 .setExpiration(
+                                         new Date(System.currentTimeMillis() + SecurityConstants.SESSION_TIMEOUT))
+                                 .signWith(SignatureAlgorithm.HS512, "differentSecret").compact();
+
+        assertThrows(JwtException.class, () -> sut.extractUserInfo(token));
+    }
 }

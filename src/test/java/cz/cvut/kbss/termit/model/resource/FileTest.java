@@ -56,4 +56,14 @@ class FileTest {
         sut.setLabel("text-mpp.html");
         assertThrows(IllegalStateException.class, sut::getDirectoryName);
     }
+
+    @Test
+    void getDirectoryNameSupportsFileLabelWithoutExtension() {
+        final File sut = new File();
+        sut.setLabel("text-mpp");
+        sut.setUri(Generator.generateUri());
+        final String result = sut.getDirectoryName();
+        assertThat(result, containsString(sut.getLabel()));
+        assertThat(result, containsString(Integer.toString(sut.getUri().hashCode())));
+    }
 }

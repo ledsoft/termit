@@ -78,6 +78,8 @@ public class JwtUtils {
                        .parseClaimsJws(token).getBody();
         } catch (MalformedJwtException e) {
             throw new JwtException("Unable to parse the specified JWT.", e);
+        } catch (SignatureException e) {
+            throw new JwtException("Invalid signature of the specified JWT.", e);
         } catch (ExpiredJwtException e) {
             throw new TokenExpiredException(e.getMessage());
         }

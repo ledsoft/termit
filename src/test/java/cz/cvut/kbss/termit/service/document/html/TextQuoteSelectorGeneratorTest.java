@@ -170,4 +170,18 @@ class TextQuoteSelectorGeneratorTest {
         assertEquals(prefix.substring(Math.max(0, prefix.length() - CONTEXT_LENGTH)), result.getPrefix());
         assertEquals(suffix.substring(0, Math.min(suffix.length(), CONTEXT_LENGTH)), result.getSuffix());
     }
+
+    @Test
+    void generateSelectorSkipsComments() {
+        final String prefix = "Prefix";
+        final String suffix = ". Suffix.";
+        final String exact = "EXACT";
+        document.html("<div>" + prefix + "<!-- comment --><span id=\"elem\">" + exact + "</span>" + suffix + "</div>");
+        final Element element = document.getElementById("elem");
+        final TextQuoteSelector result = sut.generateSelector(element);
+        assertNotNull(result);
+        assertEquals(exact, result.getExactMatch());
+        assertEquals(prefix.substring(Math.max(0, prefix.length() - CONTEXT_LENGTH)), result.getPrefix());
+        assertEquals(suffix.substring(0, Math.min(suffix.length(), CONTEXT_LENGTH)), result.getSuffix());
+    }
 }

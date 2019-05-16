@@ -33,10 +33,17 @@ public class DescriptorFactory {
      */
     public static Descriptor vocabularyDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabulary.getUri());
         descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabulary));
         descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabulary));
+        return descriptor;
+    }
+
+    private static EntityDescriptor assetDescriptor(URI vocabularyUri) {
+        Objects.requireNonNull(vocabularyUri);
+        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
+        descriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+        descriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
         return descriptor;
     }
 
@@ -53,23 +60,17 @@ public class DescriptorFactory {
      */
     public static Descriptor vocabularyDescriptor(URI vocabularyUri) {
         Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabularyUri));
         descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabularyUri));
         return descriptor;
-    }
-
-    private static void addAuthorAndEditorDescriptors(EntityDescriptor targetDescriptor) {
-        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
-        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
     }
 
     /**
      * Creates a JOPA descriptor for a {@link Document} related to the specified vocabulary (presumably a {@link
      * DocumentVocabulary}).
      * <p>
-     * This means that the context of the document (and all its relevant attributes) is given by the specified
+     * This means that the context of the Document (and all its relevant attributes) is given by the specified
      * vocabulary's IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -86,7 +87,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link Document} related to a vocabulary with the specified identifier
      * (presumably of a {@link DocumentVocabulary}).
      * <p>
-     * This means that the context of the document (and all its relevant attributes) is given by the specified IRI.
+     * This means that the context of the Document (and all its relevant attributes) is given by the specified IRI.
      * <p>
      * Note that default context is used for asset author.
      *
@@ -94,19 +95,48 @@ public class DescriptorFactory {
      * @return Document descriptor
      */
     public static Descriptor documentDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
-        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(fileDescriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
+        final Descriptor fileDescriptor = fileDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Document.getFilesField(), fileDescriptor);
         return descriptor;
     }
 
     /**
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.resource.File} related to the specified
+     * vocabulary.
+     * <p>
+     * This means that the context of the File (and all its relevant attributes) is given by the specified vocabulary's
+     * IRI.
+     * <p>
+     * Note that default context is used for asset author and last editor.
+     *
+     * @param vocabulary Vocabulary identifier on which the descriptor should be based
+     * @return File descriptor
+     */
+    public static Descriptor fileDescriptor(Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        return fileDescriptor(vocabulary.getUri());
+    }
+
+    /**
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.resource.File} related to a vocabulary with the
+     * specified identifier.
+     * <p>
+     * This means that the context of the File (and all its relevant attributes) is given by the specified IRI.
+     * <p>
+     * Note that default context is used for asset author.
+     *
+     * @param vocabularyUri Vocabulary identifier on which the descriptor should be based
+     * @return File descriptor
+     */
+    public static Descriptor fileDescriptor(URI vocabularyUri) {
+        return assetDescriptor(vocabularyUri);
+    }
+
+    /**
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Glossary} related to the specified vocabulary.
      * <p>
-     * This means that the context of the glossary (and all its relevant attributes) is given by the specified
+     * This means that the context of the Glossary (and all its relevant attributes) is given by the specified
      * vocabulary's IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -123,7 +153,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Glossary} related to a vocabulary with the
      * specified identifier.
      * <p>
-     * This means that the context of the glossary (and all its relevant attributes) is given by the specified IRI.
+     * This means that the context of the Glossary (and all its relevant attributes) is given by the specified IRI.
      * <p>
      * Note that default context is used for asset author.
      *
@@ -131,9 +161,7 @@ public class DescriptorFactory {
      * @return Glossary descriptor
      */
     public static Descriptor glossaryDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Glossary.getTermsField(), termDescriptor(vocabularyUri));
         return descriptor;
     }
@@ -141,7 +169,7 @@ public class DescriptorFactory {
     /**
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in the specified vocabulary.
      * <p>
-     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary's
+     * This means that the context of the Term (and all its relevant attributes) is given by the specified vocabulary's
      * IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -158,7 +186,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in a vocabulary with the
      * specified identifier.
      * <p>
-     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary
+     * This means that the context of the Term (and all its relevant attributes) is given by the specified vocabulary
      * IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -167,9 +195,6 @@ public class DescriptorFactory {
      * @return Term descriptor
      */
     public static Descriptor termDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
-        return descriptor;
+        return assetDescriptor(vocabularyUri);
     }
 }
