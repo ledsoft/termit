@@ -17,6 +17,7 @@ import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,15 +78,20 @@ public class ResourceController extends BaseController {
     @GetMapping(value = "/{normalizedName}/content")
     public ResponseEntity<org.springframework.core.io.Resource> getContent(
             @PathVariable String normalizedName,
-            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+            @RequestParam(name = "attachment", required = false) boolean asAttachment) {
         final Resource resource = getResource(normalizedName, namespace);
         try {
             final TypeAwareResource content = resourceService.getContent(resource);
-            return ResponseEntity.ok()
-                                 .contentLength(content.contentLength())
-                                 .contentType(MediaType.parseMediaType(
-                                         content.getMediaType().orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)))
-                                 .body(content);
+            final ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
+                                                                     .contentLength(content.contentLength())
+                                                                     .contentType(MediaType.parseMediaType(
+                                                                             content.getMediaType()
+                                                                                    .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)));
+            if (asAttachment) {
+                builder.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + normalizedName + "\"");
+            }
+            return builder.body(content);
         } catch (IOException e) {
             throw new TermItException("Unable to load content of resource " + resource, e);
         }
