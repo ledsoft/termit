@@ -2,13 +2,13 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -129,7 +129,7 @@ public class TermDao extends AssetDao<Term> {
                  .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
                  .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_korenovy_pojem))
                  .setParameter("vocabulary", vocabulary.getUri())
-                 .setParameter("hasChild", URI.create(Constants.SKOS_NARROWER))
+                 .setParameter("hasChild", URI.create(SKOS.NARROWER))
                  .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE))
                  .getResultList();
     }

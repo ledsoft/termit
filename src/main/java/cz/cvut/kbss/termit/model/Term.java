@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
@@ -31,15 +32,13 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    // TODO Can be replaced by JOPA SKOS.DEFINITION constant, available in the next eversion
-    @OWLAnnotationProperty(iri = Vocabulary.s_p_definition)
+    @OWLAnnotationProperty(iri = SKOS.DEFINITION)
     private String definition;
 
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    // TODO Replace with a reference to JOPA SKOS, which will be available in the next version
-    @OWLObjectProperty(iri = Constants.SKOS_NARROWER, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = SKOS.NARROWER, fetch = FetchType.EAGER)
     private Set<URI> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)

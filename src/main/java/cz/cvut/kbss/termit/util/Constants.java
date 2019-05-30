@@ -90,8 +90,6 @@ public class Constants {
      */
     public static final String QUERY_DIRECTORY = "query";
 
-    public static final String SKOS_NARROWER = "http://www.w3.org/2004/02/skos/core#narrower";
-
     private Constants() {
         throw new AssertionError();
     }
