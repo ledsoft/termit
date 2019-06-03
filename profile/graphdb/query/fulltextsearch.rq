@@ -28,6 +28,7 @@ SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?
         ?entity ?inVocabulary ?vocabularyUri .
     }
     FILTER (?type = ?term || ?type = ?vocabulary)
+    FILTER (lang(?label) = 'cs')
     BIND(IF(lcase(str(?snippetText)) = lcase(str(concat("<em>", ?searchString, "</em>"))), ?initScore * 2, IF(CONTAINS(lcase(str(?snippetText)), ?searchString), IF(?snippetField = "label", ?initScore * 1.5, ?initScore), ?initScore)) as ?exactMatchScore)
     BIND(IF(?snippetField = "label", ?exactMatchScore * 2, IF(?snippetField = "definition", ?exactMatchScore * 1.2, ?exactMatchScore)) as ?score)
 }
