@@ -28,6 +28,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
@@ -203,7 +204,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assert element.size() == 1;
         element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
 
-        return new ByteArrayInputStream(doc.toString().getBytes());
+        return new ByteArrayInputStream(doc.toString().getBytes(Charset.forName(Constants.UTF_8_ENCODING)));
     }
 
     @Test
