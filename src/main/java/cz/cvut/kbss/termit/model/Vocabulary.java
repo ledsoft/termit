@@ -8,6 +8,7 @@ import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -28,6 +29,9 @@ public class Vocabulary extends Asset implements Serializable {
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_model, cascade = CascadeType.PERSIST,
             fetch = FetchType.EAGER)
     private Model model;
+
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik, fetch = FetchType.EAGER)
+    private Set<URI> parents;
 
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
@@ -54,6 +58,14 @@ public class Vocabulary extends Asset implements Serializable {
 
     public void setModel(Model model) {
         this.model = model;
+    }
+
+    public Set<URI> getParents() {
+        return parents;
+    }
+
+    public void setParents(Set<URI> parents) {
+        this.parents = parents;
     }
 
     public Map<String, Set<String>> getProperties() {
@@ -87,6 +99,7 @@ public class Vocabulary extends Asset implements Serializable {
                 getLabel() +
                 " <" + getUri() + '>' +
                 ", glossary=" + glossary +
+                (parents != null ? ", parents = [" + parents.stream().map(p -> "<" + p + ">") + "]" : "") +
                 '}';
     }
 
