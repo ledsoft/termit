@@ -2,6 +2,8 @@ package cz.cvut.kbss.termit.persistence.dao.lucene;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.Query;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +26,9 @@ class LuceneSearchDaoTest {
     private EntityManager emMock;
 
     @Mock
+    private Configuration configMock;
+
+    @Mock
     private Query queryMock;
 
     private LuceneSearchDao sut;
@@ -35,7 +40,8 @@ class LuceneSearchDaoTest {
         when(queryMock.setParameter(anyString(), any())).thenReturn(queryMock);
         when(queryMock.setParameter(anyString(), any(), any())).thenReturn(queryMock);
         when(queryMock.getResultList()).thenReturn(Collections.emptyList());
-        this.sut = new LuceneSearchDao(emMock);
+        when(configMock.get(ConfigParam.LANGUAGE)).thenReturn("cs");
+        this.sut = new LuceneSearchDao(emMock, configMock);
     }
 
     @Test

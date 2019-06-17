@@ -3,6 +3,8 @@ package cz.cvut.kbss.termit.persistence.dao.lucene;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
 import cz.cvut.kbss.termit.persistence.dao.SearchDao;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +30,11 @@ public class LuceneSearchDao extends SearchDao {
 
     static final char LUCENE_WILDCARD = '*';
 
-    public LuceneSearchDao(EntityManager em) {
+    private final Configuration config;
+
+    public LuceneSearchDao(EntityManager em, Configuration config) {
         super(em);
+        this.config = config;
     }
 
     @Override
@@ -45,6 +50,7 @@ public class LuceneSearchDao extends SearchDao {
                                                       URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
                                               .setParameter("searchString", searchString, null)
                                               .setParameter("wildCardSearchString", wildcardString, null)
+                                              .setParameter("langTag", config.get(ConfigParam.LANGUAGE), null)
                                               .getResultList();
     }
 
