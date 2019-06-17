@@ -31,7 +31,7 @@ public class Vocabulary extends Asset implements Serializable {
     private Model model;
 
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik, fetch = FetchType.EAGER)
-    private Set<URI> parents;
+    private Set<URI> importedVocabularies;
 
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
@@ -60,12 +60,12 @@ public class Vocabulary extends Asset implements Serializable {
         this.model = model;
     }
 
-    public Set<URI> getParents() {
-        return parents;
+    public Set<URI> getImportedVocabularies() {
+        return importedVocabularies;
     }
 
-    public void setParents(Set<URI> parents) {
-        this.parents = parents;
+    public void setImportedVocabularies(Set<URI> importedVocabularies) {
+        this.importedVocabularies = importedVocabularies;
     }
 
     public Map<String, Set<String>> getProperties() {
@@ -99,7 +99,8 @@ public class Vocabulary extends Asset implements Serializable {
                 getLabel() +
                 " <" + getUri() + '>' +
                 ", glossary=" + glossary +
-                (parents != null ? ", parents = [" + parents.stream().map(p -> "<" + p + ">") + "]" : "") +
+                (importedVocabularies != null ?
+                 ", importedVocabularies = [" + importedVocabularies.stream().map(p -> "<" + p + ">") + "]" : "") +
                 '}';
     }
 
