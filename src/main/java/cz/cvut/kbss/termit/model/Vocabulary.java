@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 @JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
@@ -100,7 +101,8 @@ public class Vocabulary extends Asset implements Serializable {
                 " <" + getUri() + '>' +
                 ", glossary=" + glossary +
                 (importedVocabularies != null ?
-                 ", importedVocabularies = [" + importedVocabularies.stream().map(p -> "<" + p + ">") + "]" : "") +
+                 ", importedVocabularies = [" + importedVocabularies.stream().map(p -> "<" + p + ">").collect(
+                         Collectors.joining(", ")) + "]" : "") +
                 '}';
     }
 
