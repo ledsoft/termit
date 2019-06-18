@@ -8,7 +8,6 @@ import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
-import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
@@ -27,7 +26,8 @@ public class Term extends Asset implements HasTypes, Serializable {
      * Names of columns used in term export.
      */
     public static final List<String> EXPORT_COLUMNS = Collections
-            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "SubTerms"));
+            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "Parent term",
+                    "SubTerms"));
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
@@ -38,7 +38,11 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    @OWLObjectProperty(iri = SKOS.NARROWER, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = SKOS.BROADER)
+    private URI parent;
+
+    @Inferred
+    @OWLObjectProperty(iri = SKOS.NARROWER)
     private Set<URI> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
@@ -66,20 +70,20 @@ public class Term extends Asset implements HasTypes, Serializable {
         this.definition = definition;
     }
 
+    public URI getParent() {
+        return parent;
+    }
+
+    public void setParent(URI parent) {
+        this.parent = parent;
+    }
+
     public Set<URI> getSubTerms() {
         return subTerms;
     }
 
     public void setSubTerms(Set<URI> subTerms) {
         this.subTerms = subTerms;
-    }
-
-    public boolean addSubTerm(URI childUri) {
-        Objects.requireNonNull(childUri);
-        if (subTerms == null) {
-            this.subTerms = new HashSet<>();
-        }
-        return subTerms.add(childUri);
     }
 
     public Set<String> getSources() {
@@ -137,6 +141,10 @@ public class Term extends Asset implements HasTypes, Serializable {
             sb.append(exportCollection(sources));
         }
         sb.append(',');
+        if (parent != null) {
+            sb.append(CsvUtils.sanitizeString(parent.toString()));
+        }
+        sb.append(',');
         if (subTerms != null && !subTerms.isEmpty()) {
             sb.append(exportCollection(subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
         }
@@ -170,8 +178,11 @@ public class Term extends Asset implements HasTypes, Serializable {
         if (sources != null) {
             row.createCell(5).setCellValue(String.join(";", sources));
         }
+        if (parent != null) {
+            row.createCell(6).setCellValue(parent.toString());
+        }
         if (subTerms != null) {
-            row.createCell(6)
+            row.createCell(7)
                .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
         }
     }

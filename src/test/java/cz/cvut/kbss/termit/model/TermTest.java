@@ -33,7 +33,7 @@ class TermTest {
                 count++;
             }
         }
-        assertEquals(6, count);
+        assertEquals(7, count);
     }
 
     @Test
@@ -82,13 +82,24 @@ class TermTest {
     }
 
     @Test
+    void toCsvExportsParentTermIri() {
+        final Term term = Generator.generateTermWithId();
+        term.setParent(Generator.generateUri());
+        final String result = term.toCsv();
+        final String[] items = result.split(",");
+        assertThat(items.length, greaterThanOrEqualTo(7));
+        final String parent = items[6];
+        assertTrue(parent.contains(term.getParent().toString()));
+    }
+
+    @Test
     void toCsvExportsSubTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final String result = term.toCsv();
         final String[] items = result.split(",");
-        assertThat(items.length, greaterThanOrEqualTo(7));
-        final String subTerms = items[6];
+        assertThat(items.length, greaterThanOrEqualTo(8));
+        final String subTerms = items[7];
         assertTrue(subTerms.matches(".+;.+"));
         term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
     }
@@ -111,8 +122,8 @@ class TermTest {
         assertEquals(term.getTypes().iterator().next(), row.getCell(4).getStringCellValue());
         assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
         term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
-        assertTrue(row.getCell(6).getStringCellValue().matches(".+;.+"));
-        term.getSubTerms().forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.toString())));
+        assertTrue(row.getCell(7).getStringCellValue().matches(".+;.+"));
+        term.getSubTerms().forEach(st -> assertTrue(row.getCell(7).getStringCellValue().contains(st.toString())));
     }
 
     @Test

@@ -90,13 +90,12 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
             instance.setUri(generateIdentifier(parentTerm.getVocabulary(), instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
-        parentTerm.addSubTerm(instance.getUri());
 
         if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
+        instance.setParent(parentTerm.getUri());
 
-        termDao.update(parentTerm);
         termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
     }
 

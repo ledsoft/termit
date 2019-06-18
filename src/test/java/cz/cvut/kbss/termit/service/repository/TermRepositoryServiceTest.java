@@ -165,10 +165,9 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.addChildTerm(child, parent));
 
-        Term result = em.find(Term.class, parent.getUri());
+        Term result = em.find(Term.class, child.getUri());
         assertNotNull(result);
-        assertTrue(result.getSubTerms().contains(child.getUri()));
-        assertNotNull(em.find(Term.class, child.getUri()));
+        assertEquals(parent.getUri(), result.getParent());
     }
 
     @Test
@@ -310,12 +309,13 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void updateUpdatesTermWithSubTerms() {
+    void updateUpdatesTermWithParent() {
         final Term t = generateTermWithUri();
         vocabulary.getGlossary().addRootTerm(t);
-        final Term childOne = generateTermWithUri();
-        t.addSubTerm(childOne.getUri());
         t.setVocabulary(vocabulary.getUri());
+        final Term childOne = generateTermWithUri();
+        childOne.setParent(t.getUri());
+        childOne.setVocabulary(vocabulary.getUri());
         final Term termTwo = generateTermWithUri();
         vocabulary.getGlossary().addRootTerm(termTwo);
         transactional(() -> {
@@ -325,15 +325,13 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
         });
 
-        t.addSubTerm(termTwo.getUri());
+        childOne.setParent(termTwo.getUri());
         final String newLabel = "new term label";
-        t.setLabel(newLabel);
-        transactional(() -> sut.update(t));
-        final Term result = em.find(Term.class, t.getUri());
+        childOne.setLabel(newLabel);
+        transactional(() -> sut.update(childOne));
+        final Term result = em.find(Term.class, childOne.getUri());
         assertEquals(newLabel, result.getLabel());
-        assertEquals(2, result.getSubTerms().size());
-        assertTrue(result.getSubTerms().contains(childOne.getUri()));
-        assertTrue(result.getSubTerms().contains(termTwo.getUri()));
+        assertEquals(termTwo.getUri(), result.getParent());
     }
 
     @Test
