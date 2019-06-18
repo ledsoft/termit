@@ -35,10 +35,20 @@ pdp:term a rdfs:Class ;
 # REPLACE BY RDFS inference
 	spin:rule [
 		a sp:Construct ;
-	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
-	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#> .
 	           CONSTRUCT { ?this a skos:Concept . }
 	           WHERE { ?this a pdp:term . }"""
+    ];
+
+    # InverseOf between skos:broader and skos:narrower
+    spin:rule [
+    	a sp:Construct ;
+    sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
+               PREFIX skos: <http://www.w3.org/2004/02/skos/core#> .
+               CONSTRUCT { ?parent skos:narrower ?this . }
+               WHERE { ?this a pdp:term ;
+                        skos:broader ?parent . }"""
     ]
 .
 
