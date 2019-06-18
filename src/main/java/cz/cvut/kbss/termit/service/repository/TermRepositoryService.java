@@ -49,6 +49,17 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
                 "Persisting term by itself is not supported. It has to be connected to a vocabulary or a parent term.");
     }
 
+    @Override
+    protected void postUpdate(Term instance) {
+        final Vocabulary vocabulary = vocabularyService.getRequiredReference(instance.getVocabulary());
+        if (instance.getParent() != null) {
+            vocabulary.getGlossary().removeRootTerm(instance);
+        }
+        if (instance.getParent() == null) {
+            vocabulary.getGlossary().addRootTerm(instance);
+        }
+    }
+
     @Transactional
     public void addRootTermToVocabulary(Term instance, Vocabulary vocabulary) {
         validate(instance);

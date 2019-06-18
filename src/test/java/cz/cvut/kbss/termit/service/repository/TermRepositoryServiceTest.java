@@ -370,4 +370,48 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         assertEquals(resource.getUri(), result.get(0).getResource());
         assertEquals(resource.getLabel(), result.get(0).getResourceLabel());
     }
+
+    @Test
+    void updateRemovesTermFromRootTermsWhenParentIsSetForIt() {
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabulary.getUri());
+        final Term child = Generator.generateTermWithId();
+        child.setVocabulary(vocabulary.getUri());
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(parent);
+            vocabulary.getGlossary().addRootTerm(child);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        child.setParent(parent.getUri());
+        sut.update(child);
+
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
+                DescriptorFactory.glossaryDescriptor(vocabulary));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertFalse(result.getRootTerms().contains(child.getUri()));
+    }
+
+    @Test
+    void updateAddsTermToRootTermsWhenParentIsRemovedFromIt() {
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabulary.getUri());
+        final Term child = Generator.generateTermWithId();
+        child.setVocabulary(vocabulary.getUri());
+        child.setParent(parent.getUri());
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        child.setParent(null);
+        sut.update(child);
+
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
+                DescriptorFactory.glossaryDescriptor(vocabulary));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertTrue(result.getRootTerms().contains(child.getUri()));
+    }
 }
