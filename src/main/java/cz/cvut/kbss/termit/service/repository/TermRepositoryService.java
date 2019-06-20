@@ -52,10 +52,10 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     @Override
     protected void postUpdate(Term instance) {
         final Vocabulary vocabulary = vocabularyService.getRequiredReference(instance.getVocabulary());
-        if (instance.getParent() != null) {
+        if (instance.getParentTerms() != null) {
             vocabulary.getGlossary().removeRootTerm(instance);
         }
-        if (instance.getParent() == null) {
+        if (instance.getParentTerms() == null) {
             vocabulary.getGlossary().addRootTerm(instance);
         }
     }
@@ -105,7 +105,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
-        instance.setParent(parentTerm.getUri());
+        instance.addParentTerm(parentTerm.getUri());
 
         termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
     }

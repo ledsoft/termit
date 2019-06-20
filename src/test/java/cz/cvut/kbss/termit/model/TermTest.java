@@ -82,14 +82,15 @@ class TermTest {
     }
 
     @Test
-    void toCsvExportsParentTermIri() {
+    void toCsvExportsParentTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
-        term.setParent(Generator.generateUri());
+        term.setParentTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(7));
-        final String parent = items[6];
-        assertTrue(parent.contains(term.getParent().toString()));
+        final String parentTerms = items[6];
+        assertTrue(parentTerms.matches(".+;.+"));
+        term.getParentTerms().forEach(t -> assertTrue(parentTerms.contains(t.toString())));
     }
 
     @Test
@@ -110,6 +111,7 @@ class TermTest {
         term.setTypes(Collections.singleton(Vocabulary.s_c_object));
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
+        term.setParentTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");
@@ -122,6 +124,8 @@ class TermTest {
         assertEquals(term.getTypes().iterator().next(), row.getCell(4).getStringCellValue());
         assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
         term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
+        assertTrue(row.getCell(6).getStringCellValue().matches(".+;.+"));
+        term.getParentTerms().forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.toString())));
         assertTrue(row.getCell(7).getStringCellValue().matches(".+;.+"));
         term.getSubTerms().forEach(st -> assertTrue(row.getCell(7).getStringCellValue().contains(st.toString())));
     }

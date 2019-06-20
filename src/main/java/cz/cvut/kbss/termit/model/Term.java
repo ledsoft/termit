@@ -39,7 +39,7 @@ public class Term extends Asset implements HasTypes, Serializable {
     private Set<String> sources;
 
     @OWLObjectProperty(iri = SKOS.BROADER)
-    private URI parent;
+    private Set<URI> parentTerms;
 
     @Inferred
     @OWLObjectProperty(iri = SKOS.NARROWER)
@@ -70,12 +70,19 @@ public class Term extends Asset implements HasTypes, Serializable {
         this.definition = definition;
     }
 
-    public URI getParent() {
-        return parent;
+    public Set<URI> getParentTerms() {
+        return parentTerms;
     }
 
-    public void setParent(URI parent) {
-        this.parent = parent;
+    public void setParentTerms(Set<URI> parentTerms) {
+        this.parentTerms = parentTerms;
+    }
+
+    public void addParentTerm(URI termUri) {
+        if (parentTerms == null) {
+            this.parentTerms = new HashSet<>();
+        }
+        parentTerms.add(termUri);
     }
 
     public Set<URI> getSubTerms() {
@@ -141,8 +148,8 @@ public class Term extends Asset implements HasTypes, Serializable {
             sb.append(exportCollection(sources));
         }
         sb.append(',');
-        if (parent != null) {
-            sb.append(CsvUtils.sanitizeString(parent.toString()));
+        if (parentTerms != null && !parentTerms.isEmpty()) {
+            sb.append(exportCollection(parentTerms.stream().map(URI::toString).collect(Collectors.toSet())));
         }
         sb.append(',');
         if (subTerms != null && !subTerms.isEmpty()) {
@@ -178,8 +185,9 @@ public class Term extends Asset implements HasTypes, Serializable {
         if (sources != null) {
             row.createCell(5).setCellValue(String.join(";", sources));
         }
-        if (parent != null) {
-            row.createCell(6).setCellValue(parent.toString());
+        if (parentTerms != null) {
+            row.createCell(6)
+               .setCellValue(String.join(";", parentTerms.stream().map(URI::toString).collect(Collectors.toSet())));
         }
         if (subTerms != null) {
             row.createCell(7)
