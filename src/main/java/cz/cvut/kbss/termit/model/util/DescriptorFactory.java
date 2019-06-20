@@ -2,10 +2,7 @@ package cz.cvut.kbss.termit.model.util;
 
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
-import cz.cvut.kbss.termit.model.Glossary;
-import cz.cvut.kbss.termit.model.HasProvenanceData;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 
 import java.net.URI;
@@ -195,6 +192,8 @@ public class DescriptorFactory {
      * @return Term descriptor
      */
     public static Descriptor termDescriptor(URI vocabularyUri) {
-        return assetDescriptor(vocabularyUri);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
+        descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(vocabularyUri));
+        return descriptor;
     }
 }

@@ -168,7 +168,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         Term result = em.find(Term.class, child.getUri());
         assertNotNull(result);
-        assertEquals(Collections.singleton(parent.getUri()), result.getParentTerms());
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
     }
 
     @Test
@@ -177,7 +177,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTerm();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary);
         });
 
@@ -196,7 +196,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary.getGlossary());
         });
 
@@ -215,7 +215,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary.getGlossary());
         });
 
@@ -315,7 +315,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addRootTerm(t);
         t.setVocabulary(vocabulary.getUri());
         final Term childOne = generateTermWithUri();
-        childOne.addParentTerm(t.getUri());
+        childOne.addParentTerm(t);
         childOne.setVocabulary(vocabulary.getUri());
         final Term termTwo = generateTermWithUri();
         vocabulary.getGlossary().addRootTerm(termTwo);
@@ -326,13 +326,13 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
         });
 
-        childOne.setParentTerms(Collections.singleton(termTwo.getUri()));
+        childOne.setParentTerms(Collections.singleton(termTwo));
         final String newLabel = "new term label";
         childOne.setLabel(newLabel);
         transactional(() -> sut.update(childOne));
         final Term result = em.find(Term.class, childOne.getUri());
         assertEquals(newLabel, result.getLabel());
-        assertEquals(Collections.singleton(termTwo.getUri()), result.getParentTerms());
+        assertEquals(Collections.singleton(termTwo), result.getParentTerms());
     }
 
     @Test
@@ -385,7 +385,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
             em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
-        child.addParentTerm(parent.getUri());
+        child.addParentTerm(parent);
         sut.update(child);
 
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
@@ -400,7 +400,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         parent.setVocabulary(vocabulary.getUri());
         final Term child = Generator.generateTermWithId();
         child.setVocabulary(vocabulary.getUri());
-        child.addParentTerm(parent.getUri());
+        child.addParentTerm(parent);
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
             em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));

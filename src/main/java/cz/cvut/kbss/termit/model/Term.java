@@ -6,6 +6,7 @@ import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.CsvUtils;
@@ -13,6 +14,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,8 +40,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    @OWLObjectProperty(iri = SKOS.BROADER)
-    private Set<URI> parentTerms;
+    @OWLObjectProperty(iri = SKOS.BROADER, fetch = FetchType.EAGER)
+    private Set<Term> parentTerms;
 
     @Inferred
     @OWLObjectProperty(iri = SKOS.NARROWER)
@@ -70,19 +72,19 @@ public class Term extends Asset implements HasTypes, Serializable {
         this.definition = definition;
     }
 
-    public Set<URI> getParentTerms() {
+    public Set<Term> getParentTerms() {
         return parentTerms;
     }
 
-    public void setParentTerms(Set<URI> parentTerms) {
+    public void setParentTerms(Set<Term> parentTerms) {
         this.parentTerms = parentTerms;
     }
 
-    public void addParentTerm(URI termUri) {
+    public void addParentTerm(Term term) {
         if (parentTerms == null) {
             this.parentTerms = new HashSet<>();
         }
-        parentTerms.add(termUri);
+        parentTerms.add(term);
     }
 
     public Set<URI> getSubTerms() {
@@ -149,7 +151,8 @@ public class Term extends Asset implements HasTypes, Serializable {
         }
         sb.append(',');
         if (parentTerms != null && !parentTerms.isEmpty()) {
-            sb.append(exportCollection(parentTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+            sb.append(exportCollection(
+                    parentTerms.stream().map(pt -> pt.getUri().toString()).collect(Collectors.toSet())));
         }
         sb.append(',');
         if (subTerms != null && !subTerms.isEmpty()) {
@@ -187,7 +190,8 @@ public class Term extends Asset implements HasTypes, Serializable {
         }
         if (parentTerms != null) {
             row.createCell(6)
-               .setCellValue(String.join(";", parentTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+               .setCellValue(String.join(";",
+                       parentTerms.stream().map(pt -> pt.getUri().toString()).collect(Collectors.toSet())));
         }
         if (subTerms != null) {
             row.createCell(7)
@@ -219,5 +223,13 @@ public class Term extends Asset implements HasTypes, Serializable {
                 " <" + getUri() + '>' +
                 ", types=" + types +
                 '}';
+    }
+
+    public static Field getParentTermsField() {
+        try {
+            return Term.class.getDeclaredField("parentTerms");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"parentTerms\" field.", e);
+        }
     }
 }

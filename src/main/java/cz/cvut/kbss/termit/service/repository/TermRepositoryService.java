@@ -105,7 +105,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
-        instance.addParentTerm(parentTerm.getUri());
+        instance.addParentTerm(parentTerm);
 
         termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
     }
