@@ -46,14 +46,6 @@ public enum ConfigParam {
     NAMESPACE_USER("namespace.user"),
 
     /**
-     * Namespace for document identifiers.
-     *
-     * @deprecated This should be superseded by {@link #NAMESPACE_RESOURCE}
-     */
-    @Deprecated
-    NAMESPACE_DOCUMENT("namespace.document"),
-
-    /**
      * Namespace for resource identifiers.
      */
     NAMESPACE_RESOURCE("namespace.resource"),
