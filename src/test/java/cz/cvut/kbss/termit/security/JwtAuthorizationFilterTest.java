@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -204,5 +205,18 @@ class JwtAuthorizationFilterTest {
         assertEquals(HttpStatus.UNAUTHORIZED.value(), mockResponse.getStatus());
         final ErrorInfo errorInfo = objectMapper.readValue(mockResponse.getContentAsString(), ErrorInfo.class);
         assertNotNull(errorInfo);
+    }
+
+    @Test
+    void doFilterInternalReturnsUnauthorizedForUnknownUserInToken() throws Exception {
+        final String token = Jwts.builder().setSubject("unknownUser")
+                                 .setId(Generator.generateUri().toString())
+                                 .setIssuedAt(new Date())
+                                 .setExpiration(new Date(System.currentTimeMillis() + 10000))
+                                 .signWith(SignatureAlgorithm.HS512, config.get(ConfigParam.JWT_SECRET_KEY)).compact();
+        when(detailsServiceMock.loadUserByUsername(anyString())).thenThrow(UsernameNotFoundException.class);
+        mockRequest.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstants.JWT_TOKEN_PREFIX + token);
+        sut.doFilterInternal(mockRequest, mockResponse, chainMock);
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), mockResponse.getStatus());
     }
 }

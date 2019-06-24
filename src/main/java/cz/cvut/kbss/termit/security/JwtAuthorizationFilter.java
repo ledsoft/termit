@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -58,7 +59,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             SecurityUtils.verifyAccountStatus(existingDetails.getUser());
             securityUtils.setCurrentUser(existingDetails);
             refreshToken(authToken, response);
-        } catch (DisabledException | LockedException | JwtException e) {
+        } catch (DisabledException | LockedException | JwtException | UsernameNotFoundException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
             return;
