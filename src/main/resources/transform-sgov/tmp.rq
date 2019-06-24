@@ -1,0 +1,18 @@
+# Replace skos:narrower by skos:broader
+#
+PREFIX g: <http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.5-np>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+DELETE {
+    GRAPH g: {
+        ?t skos:broader ?b .
+	}
+} INSERT {
+    GRAPH g: {
+		?b skos:narrower ?t.
+    }
+} WHERE {
+    GRAPH g: {
+        ?t skos:broader ?b .
+	}
+}
