@@ -181,15 +181,15 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
         final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan";
         final String fragment = "locality";
         final URI result = sut
-                .resolveIdentifier(sut.buildNamespace(namespace, Constants.TERM_NAMESPACE_SEPARATOR), fragment);
-        assertEquals(namespace + Constants.TERM_NAMESPACE_SEPARATOR + "/" + fragment, result.toString());
+                .resolveIdentifier(sut.buildNamespace(namespace, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR), fragment);
+        assertEquals(namespace + Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR + "/" + fragment, result.toString());
     }
 
     @Test
     void buildNamespaceAddsComponentsToBaseUri() {
         final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary";
         final String cOne = "metropolitan-plan";
-        final String cTwo = Constants.TERM_NAMESPACE_SEPARATOR;
+        final String cTwo = Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR;
         assertEquals(base + "/" + cOne + cTwo + "/", sut.buildNamespace(base, cOne, cTwo));
     }
 

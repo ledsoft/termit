@@ -148,7 +148,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final URI vocabularyUri = vocabulary.getUri();
         final String termLabel = "Test term";
         assertEquals(
-                vocabularyUri.toString() + Constants.TERM_NAMESPACE_SEPARATOR + "/" +
+                vocabularyUri.toString() + Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR + "/" +
                         IdentifierResolver.normalize(termLabel),
                 sut.generateIdentifier(vocabularyUri, termLabel).toString());
     }

@@ -7,7 +7,8 @@ import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,8 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
 
     private final IdentifierResolver idResolver;
 
+    private final Configuration config;
+
     private final TermDao termDao;
 
     private final TermAssignmentDao termAssignmentDao;
@@ -29,10 +32,11 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     private final VocabularyRepositoryService vocabularyService;
 
     public TermRepositoryService(Validator validator, IdentifierResolver idResolver,
-                                 TermDao termDao, TermAssignmentDao termAssignmentDao,
+                                 Configuration config, TermDao termDao, TermAssignmentDao termAssignmentDao,
                                  VocabularyRepositoryService vocabularyService) {
         super(validator);
         this.idResolver = idResolver;
+        this.config = config;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
         this.vocabularyService = vocabularyService;
@@ -88,7 +92,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(termLabel);
         return idResolver.generateIdentifier(
-                idResolver.buildNamespace(vocabularyUri.toString(), Constants.TERM_NAMESPACE_SEPARATOR),
+                idResolver.buildNamespace(vocabularyUri.toString(), config.get(ConfigParam.TERM_NAMESPACE_SEPARATOR)),
                 termLabel);
     }
 

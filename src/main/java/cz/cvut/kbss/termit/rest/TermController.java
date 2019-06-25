@@ -171,7 +171,7 @@ public class TermController extends BaseController {
     private URI getTermUri(String vocabIdFragment, String termIdFragment, String namespace) {
         return idResolver.resolveIdentifier(idResolver
                 .buildNamespace(getVocabularyUri(namespace, vocabIdFragment).toString(),
-                        Constants.TERM_NAMESPACE_SEPARATOR), termIdFragment);
+                        config.get(ConfigParam.TERM_NAMESPACE_SEPARATOR)), termIdFragment);
     }
 
     /**

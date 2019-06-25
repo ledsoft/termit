@@ -87,6 +87,7 @@ public class Configuration {
         map.put(ConfigParam.ADMIN_CREDENTIALS_LOCATION, System.getProperty("user.home"));
         // Won't create term assignments unless a realistic score is set
         map.put(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE, Double.toString(Double.MAX_VALUE));
+        map.put(ConfigParam.TERM_NAMESPACE_SEPARATOR, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR);
         return map;
     }
 }

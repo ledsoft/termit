@@ -25,7 +25,7 @@ public class BaseController {
 
     final IdentifierResolver idResolver;
 
-    private final Configuration config;
+    final Configuration config;
 
     protected BaseController(IdentifierResolver idResolver, Configuration config) {
         this.idResolver = idResolver;

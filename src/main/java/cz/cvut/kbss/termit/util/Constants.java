@@ -73,14 +73,14 @@ public class Constants {
 
 
     /**
-     * Piece of text appended to vocabulary IRI for term IRI generation.
+     * Default piece of text appended to vocabulary IRI for term IRI generation.
      * <p>
      * For example, if we have a vocabulary with IRI {@code http://www.example.org/ontologies/vocabularies/metropolitan-plan}
      * and a term with label {@code Inhabited area}, the resulting IRI will be {@code
      * http://www.example.org/ontologies/vocabularies/metropolitan-plan/SEPARATOR/inhabited-area}, where 'SEPARATOR' is
      * this constant.
      */
-    public static final String TERM_NAMESPACE_SEPARATOR = "/pojem";
+    public static final String DEFAULT_TERM_NAMESPACE_SEPARATOR = "/pojem";
 
     /**
      * Path to directory containing queries used by the system.
