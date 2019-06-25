@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Asset;
@@ -133,20 +134,42 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Term child = new Term();
         child.setUri(Generator.generateUri());
         child.setLabel("test");
-        root.setSubTerms(Collections.singleton(child.getUri()));
+        child.setParentTerms(Collections.singleton(root));
         final Term matchingDesc = new Term();
         matchingDesc.setUri(Generator.generateUri());
         matchingDesc.setLabel("Metropolitan plan");
-        child.setSubTerms(Collections.singleton(matchingDesc.getUri()));
+        matchingDesc.setParentTerms(Collections.singleton(child));
         transactional(() -> {
             em.persist(child);
             em.persist(matchingDesc);
             em.merge(root);
+            insertNarrowerStatements(matchingDesc, child);
         });
 
         final List<Term> result = sut.findAllRoots("plan", vocabulary);
         assertEquals(1, result.size());
         assertEquals(root, result.get(0));
+    }
+
+    /**
+     * Simulate the inverse of skos:broader and skos:narrower
+     *
+     * @param children Terms whose parents need skos:narrower relationships to them
+     */
+    private void insertNarrowerStatements(Term... children) {
+        final Repository repo = em.unwrap(Repository.class);
+        final ValueFactory vf = repo.getValueFactory();
+        try (final RepositoryConnection conn = repo.getConnection()) {
+            conn.begin();
+            final IRI narrower = vf.createIRI(SKOS.NARROWER);
+            for (Term t : children) {
+                for (Term parent : t.getParentTerms()) {
+                    conn.add(vf.createStatement(vf.createIRI(parent.getUri().toString()), narrower,
+                            vf.createIRI(t.getUri().toString()), vf.createIRI(vocabulary.getUri().toString())));
+                }
+            }
+            conn.commit();
+        }
     }
 
     @Test
