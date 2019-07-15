@@ -42,9 +42,13 @@ public class TextAnalysisInput {
         this.content = content;
     }
 
-    public String getLanguage() { return language; }
+    public String getLanguage() {
+        return language;
+    }
 
-    public void setLanguage(String language) { this.language = language; }
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 
     public URI getVocabularyRepository() {
         return vocabularyRepository;
@@ -71,10 +75,12 @@ public class TextAnalysisInput {
 
     @Override
     public String toString() {
+        assert content != null;
         return "TextAnalysisInput{" +
                 "content='" + (content.length() > 50 ? content.substring(0, 50) + "..." : content) + '\'' +
                 ", vocabularyRepository=" + vocabularyRepository +
                 ", vocabularyContexts=" + vocabularyContexts +
+                ", language=" + language +
                 '}';
     }
 }

@@ -3,9 +3,9 @@ package cz.cvut.kbss.termit.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.cvut.kbss.jsonld.ConfigParam;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.AdjustedUriTemplateProxyServlet;
 import java.util.Properties;
@@ -62,7 +62,7 @@ public class WebAppConfig implements WebMvcConfigurer {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         final JsonLdModule jsonLdModule = new JsonLdModule();
-        jsonLdModule.configure(ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
+        jsonLdModule.configure(cz.cvut.kbss.jsonld.ConfigParam.SCAN_PACKAGE, "cz.cvut.kbss.termit");
         mapper.registerModule(jsonLdModule);
         return mapper;
     }
@@ -79,6 +79,8 @@ public class WebAppConfig implements WebMvcConfigurer {
         final Properties p = new Properties();
         p.setProperty("targetUri",config.get(REPOSITORY_URL));
         p.setProperty("log","false");
+        p.setProperty(ConfigParam.REPO_USERNAME.toString(), config.get(ConfigParam.REPO_USERNAME, ""));
+        p.setProperty(ConfigParam.REPO_PASSWORD.toString(), config.get(ConfigParam.REPO_PASSWORD, ""));
         controller.setInitParameters(p);
         controller.afterPropertiesSet();
         return controller;

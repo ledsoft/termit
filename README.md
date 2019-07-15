@@ -116,13 +116,14 @@ Fulltext search currently supports multiple types of implementation:
 
 * Simple substring matching on term and vocabulary label _(default)_
 * RDF4J with Lucene SAIL
-* GraphDB with Lucene connector using czech analyzer
+* GraphDB with Lucene connector
 
 Each implementation has its own search query which is loaded and used by `SearchDao`. In order for the more advanced implementations
 for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
 artifact during build. If none of the profiles is selected, the default search is used.
 
-Note that in case of GraphDB, a corresponding Lucene connector has to be created as well.
+Note that in case of GraphDB, corresponding Lucene connectors (`label_index` for labels and `defcom_index` for definitions and comments)
+ have to be created as well.
 
 ### RDFS Inference in Tests
 
