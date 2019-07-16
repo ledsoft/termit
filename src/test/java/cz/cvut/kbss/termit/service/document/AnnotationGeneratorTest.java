@@ -420,4 +420,19 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assertFalse(result.isEmpty());
         result.forEach(ta -> assertTrue(ta.getTypes().contains(Vocabulary.s_c_navrzene_prirazeni_termu)));
     }
+
+    @Test
+    void repeatedAnnotationGenerationDoesNotIncreaseTotalNumberOfTermOccurrencesForResource() throws Exception {
+        generateFile();
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesOne = termOccurrenceDao.findAll(file);
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesTwo = termOccurrenceDao.findAll(file);
+        assertEquals(occurrencesOne.size(), occurrencesTwo.size());
+        final int instanceCount = em.createNativeQuery("SELECT (count(*) as ?count) WHERE {" +
+                "?x a ?termOccurrence ." +
+                "}", Integer.class).setParameter("termOccurrence", URI.create(Vocabulary.s_c_vyskyt_termu))
+                                    .getSingleResult();
+        assertEquals(occurrencesTwo.size(), instanceCount);
+    }
 }

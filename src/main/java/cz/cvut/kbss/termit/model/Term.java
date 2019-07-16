@@ -139,8 +139,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     public String toCsv() {
         final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
         sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
-        sb.append(',').append(definition != null ? CsvUtils.sanitizeString(definition) : "");
-        sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
+        sb.append(',').append(CsvUtils.sanitizeString(definition));
+        sb.append(',').append(CsvUtils.sanitizeString(comment));
         sb.append(',');
         if (types != null && !types.isEmpty()) {
             sb.append(exportCollection(types));
