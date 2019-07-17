@@ -11,6 +11,7 @@ import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Constants;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllWithDefaultPageSpecReturnsAllTerms() {
+    void findAllRootsWithDefaultPageSpecReturnsAllTerms() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
 
@@ -58,13 +59,13 @@ class TermDaoTest extends BaseDaoTestRunner {
         assertEquals(terms, result);
     }
 
-    private void addTermsAndSave(Set<Term> terms) {
+    private void addTermsAndSave(Collection<Term> terms) {
         vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             em.merge(vocabulary.getGlossary());
             terms.forEach(t -> {
                 t.setVocabulary(vocabulary.getUri());
-                em.persist(t);
+                em.persist(t, DescriptorFactory.termDescriptor(vocabulary));
             });
         });
     }
@@ -75,7 +76,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllReturnsMatchingPageWithTerms() {
+    void findAllRootsReturnsMatchingPageWithTerms() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
 
@@ -86,7 +87,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllReturnsOnlyTermsInSpecifiedVocabulary() {
+    void findAllRootsReturnsOnlyTermsInSpecifiedVocabulary() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
         final Vocabulary another = Generator.generateVocabulary();
@@ -102,7 +103,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllReturnsOnlyRootTerms() {
+    void findAllRootsReturnsOnlyRootTerms() {
         final List<Term> terms = generateTerms(10);
         terms.forEach(t -> t.setSubTerms(
                 new HashSet<URI>(generateTerms(2).stream().map(Term::getUri).collect(Collectors.toSet()))));
@@ -117,7 +118,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllBySearchStringReturnsRootTermsWithMatchingLabel() {
+    void findAllRootsBySearchStringReturnsRootTermsWithMatchingLabel() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
 
@@ -127,7 +128,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
+    void findAllRootsBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms));
         final Term root = terms.get(Generator.randomIndex(terms));
@@ -275,5 +276,40 @@ class TermDaoTest extends BaseDaoTestRunner {
         assertEquals(updatedLabel, result.getLabel());
         assertFalse(em.createNativeQuery("ASK WHERE { ?x rdfs:label ?label }", Boolean.class)
                       .setParameter("label", oldLabel, Constants.DEFAULT_LANGUAGE).getSingleResult());
+    }
+
+    @Test
+    void findAllRootsReturnsOnlyTermsWithMatchingLabelLanguage() {
+        final List<Term> terms = generateTerms(5);
+        final Term foreignLabelTerm = Generator.generateTermWithId();
+        final List<Term> allTerms = new ArrayList<>(terms);
+        allTerms.add(foreignLabelTerm);
+        addTermsAndSave(allTerms);
+        transactional(() -> insertForeignLabel(foreignLabelTerm));
+
+        final List<Term> result = sut.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+        assertEquals(terms, result);
+    }
+
+    private void insertForeignLabel(Term term) {
+        final Repository repo = em.unwrap(Repository.class);
+        try (final RepositoryConnection conn = repo.getConnection()) {
+            final ValueFactory vf = conn.getValueFactory();
+            conn.remove(vf.createIRI(term.getUri().toString()), RDFS.LABEL, null);
+            conn.add(vf.createIRI(term.getUri().toString()), RDFS.LABEL, vf.createLiteral("Adios", "es"));
+        }
+    }
+
+    @Test
+    void findAllReturnsOnlyTermsWithMatchingLanguageLabel() {
+        final List<Term> terms = generateTerms(5);
+        final Term foreignLabelTerm = Generator.generateTermWithId();
+        final List<Term> allTerms = new ArrayList<>(terms);
+        allTerms.add(foreignLabelTerm);
+        addTermsAndSave(allTerms);
+        transactional(() -> insertForeignLabel(foreignLabelTerm));
+
+        final List<Term> result = sut.findAll(vocabulary);
+        assertEquals(terms, result);
     }
 }

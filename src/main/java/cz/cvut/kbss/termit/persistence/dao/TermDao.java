@@ -74,11 +74,13 @@ public class TermDao extends AssetDao<Term> {
                 "?term a ?type ;" +
                 "rdfs:label ?label ;" +
                 "?inVocabulary ?vocabulary ." +
+                "FILTER (lang(?label) = ?labelLang) ." +
                 "} ORDER BY ?label", Term.class)
                  .setParameter("type", typeUri)
                  .setParameter("vocabulary", vocabulary.getUri())
                  .setParameter("inVocabulary",
                          URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                 .setParameter("labelLang", config.get(ConfigParam.LANGUAGE))
                  .getResultList();
     }
 
@@ -96,11 +98,13 @@ public class TermDao extends AssetDao<Term> {
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
+                "FILTER (lang(?label) = ?labelLang) ." +
                 "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class)
                  .setParameter("type", typeUri)
                  .setParameter("hasGlossary", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
                  .setParameter("hasTerm", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_korenovy_pojem))
                  .setParameter("vocabulary", vocabulary.getUri())
+                 .setParameter("labelLang", config.get(ConfigParam.LANGUAGE))
                  .setUntypedParameter("offset", pageSpec.getOffset())
                  .setUntypedParameter("limit", pageSpec.getPageSize())
                  .getResultList();
