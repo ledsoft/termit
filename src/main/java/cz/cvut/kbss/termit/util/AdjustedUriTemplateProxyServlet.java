@@ -26,7 +26,7 @@ public class AdjustedUriTemplateProxyServlet extends URITemplateProxyServlet {
                            HttpServletResponse servletResponse)
             throws ServletException, IOException {
         final String username = getConfigParam(ConfigParam.REPO_USERNAME.toString());
-        final String password = getConfigParam(ConfigParam.REPO_USERNAME.toString());
+        final String password = getConfigParam(ConfigParam.REPO_PASSWORD.toString());
         super.service(new AuthenticatingServletRequestWrapper(servletRequest, username, password),
                 new HttpServletResponseWrapper(servletResponse) {
                     @Override
