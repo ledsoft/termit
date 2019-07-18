@@ -133,6 +133,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
      * @param vocabulary Vocabulary whose terms should be returned
      * @param pageSpec   Page specifying result number and position
      * @return Matching root terms
+     * @see #findAllRootsIncludingImported(Vocabulary, Pageable)
      */
     public List<Term> findAllRoots(Vocabulary vocabulary, Pageable pageSpec) {
         Objects.requireNonNull(vocabulary);
@@ -140,8 +141,46 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         return termDao.findAllRoots(vocabulary, pageSpec);
     }
 
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any of its imported
+     * vocabularies.
+     * <p>
+     * Basically, this does a transitive closure over the vocabulary import relationship, starting at the specified
+     * vocabulary, and returns all parent-less terms.
+     *
+     * @param vocabulary Base vocabulary for the vocabulary import closure
+     * @param pageSpec   Page specifying result number and position
+     * @return Matching root terms
+     * @see #findAllRoots(Vocabulary, Pageable)
+     */
+    public List<Term> findAllRootsIncludingImported(Vocabulary vocabulary, Pageable pageSpec) {
+        return termDao.findAllRootsIncludingImports(vocabulary, pageSpec);
+    }
+
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary whose sub-terms or themselves match
+     * the specified search string.
+     *
+     * @param vocabulary   Vocabulary whose terms should be returned
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRootsIncludingImported(Vocabulary, String)
+     */
     public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {
         return termDao.findAllRoots(searchString, vocabulary);
+    }
+
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
+     * (transitively) whose sub-terms or themselves match the specified search string.
+     *
+     * @param vocabulary   Base vocabulary for the vocabulary import closure
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRoots(Vocabulary, String)
+     */
+    public List<Term> findAllRootsIncludingImported(Vocabulary vocabulary, String searchString) {
+        return termDao.findAllRootsIncludingImports(searchString, vocabulary);
     }
 
     /**

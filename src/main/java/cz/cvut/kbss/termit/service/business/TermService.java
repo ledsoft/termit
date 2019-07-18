@@ -79,6 +79,24 @@ public class TermService {
     }
 
     /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any of its imported
+     * vocabularies.
+     * <p>
+     * Basically, this does a transitive closure over the vocabulary import relationship, starting at the specified
+     * vocabulary, and returns all parent-less terms.
+     *
+     * @param vocabulary Base vocabulary for the vocabulary import closure
+     * @param pageSpec   Page specifying result number and position
+     * @return Matching root terms
+     * @see #findAllRoots(Vocabulary, Pageable)
+     */
+    public List<Term> findAllRootsIncludingImports(Vocabulary vocabulary, Pageable pageSpec) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(pageSpec);
+        return repositoryService.findAllRootsIncludingImported(vocabulary, pageSpec);
+    }
+
+    /**
      * Retrieves root terms (terms without parent) in whose subterm tree (including themselves as the root) is a term
      * with label matching the specified search string.
      * <p>
@@ -95,6 +113,21 @@ public class TermService {
     }
 
     /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
+     * (transitively) whose sub-terms or themselves match the specified search string.
+     *
+     * @param vocabulary   Base vocabulary for the vocabulary import closure
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRoots(Vocabulary, String)
+     */
+    public List<Term> findAllRootsIncludingImports(Vocabulary vocabulary, String searchString) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(searchString);
+        return repositoryService.findAllRootsIncludingImported(vocabulary, searchString);
+    }
+
+    /**
      * Gets vocabulary with the specified identifier.
      *
      * @param id Vocabulary identifier
@@ -102,6 +135,7 @@ public class TermService {
      * @throws NotFoundException When vocabulary with the specified identifier does not exist
      */
     public Vocabulary findVocabularyRequired(URI id) {
+        Objects.requireNonNull(id);
         return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }

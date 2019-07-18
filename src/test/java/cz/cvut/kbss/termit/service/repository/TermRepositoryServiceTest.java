@@ -20,9 +20,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,9 +32,6 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private EntityManager em;
-
-    @Autowired
-    private VocabularyRepositoryService vrs;
 
     @Autowired
     private TermRepositoryService sut;
@@ -52,7 +47,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         this.vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vrs.persist(vocabulary);
+        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
     }
 
     @Test
@@ -242,12 +237,11 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findAllRootsReturnsRootTermsOnMatchingPage() {
-        final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
-                Collectors.toList());
+        final List<Term> terms = Generator.generateTermsWithIds(10);
         vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
-            terms.forEach(em::persist);
-            em.merge(vocabulary.getGlossary());
+            terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
         final List<Term> resultOne = sut.findAllRoots(vocabulary, PageRequest.of(0, 5));
@@ -265,29 +259,20 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findTermsBySearchString() {
-        Set<Term> terms = new HashSet<>(10);
-        Term term;
-        for (int i = 0; i < 10; i++) {
-            term = Generator.generateTerm();
-            term.setUri(Generator.generateUri());
-            if (i < 5) {
-                term.setLabel("Result " + term.getLabel());
-            }
-            terms.add(term);
-        }
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        final List<Term> matching = terms.subList(0, 5);
+        matching.forEach(t -> t.setLabel("Result + " + t.getLabel()));
 
-        final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));
-            em.merge(toPersist.getGlossary());
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
-        List<Term> result1 = sut.findAllRoots(vocabulary, "Result");
-
-        assertEquals(5, result1.size());
-        result1.forEach(o -> assertTrue(o.getLabel().contains("Result")));
+        List<Term> result = sut.findAllRoots(vocabulary, "Result");
+        assertEquals(matching.size(), result.size());
+        assertTrue(matching.containsAll(result));
     }
 
     @Test
@@ -414,5 +399,46 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
                 DescriptorFactory.glossaryDescriptor(vocabulary));
         assertTrue(result.getRootTerms().contains(parent.getUri()));
         assertTrue(result.getRootTerms().contains(child.getUri()));
+    }
+
+    @Test
+    void findAllRootsIncludingImportsReturnsRootTermsOnMatchingPage() {
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        transactional(() -> {
+            terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        final List<Term> resultOne = sut.findAllRootsIncludingImported(vocabulary, PageRequest.of(0, 5));
+        final List<Term> resultTwo = sut.findAllRootsIncludingImported(vocabulary, PageRequest.of(1, 5));
+
+        assertEquals(5, resultOne.size());
+        assertEquals(5, resultTwo.size());
+
+        resultOne.forEach(t -> {
+            assertTrue(terms.contains(t));
+            assertFalse(resultTwo.contains(t));
+        });
+        resultTwo.forEach(t -> assertTrue(terms.contains(t)));
+    }
+
+    @Test
+    void findAllRootsIncludingImportsBySearchStringReturnsMatchingRootTerms() {
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        final String searchString = "Result";
+        final List<Term> matching = terms.subList(0, 5);
+        matching.forEach(t -> t.setLabel(searchString + " " + t.getLabel()));
+
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        transactional(() -> {
+            terms.forEach(t -> em.persist(t, termDescriptor));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        List<Term> result = sut.findAllRootsIncludingImported(vocabulary, searchString);
+        assertEquals(matching.size(), result.size());
+        assertTrue(matching.containsAll(result));
     }
 }

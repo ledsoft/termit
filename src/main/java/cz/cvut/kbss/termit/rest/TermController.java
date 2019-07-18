@@ -104,6 +104,8 @@ public class TermController extends BaseController {
      * @param pageSize             Limit the number of elements in the returned page. Optional
      * @param pageNo               Number of the page to return. Optional
      * @param searchString         String to filter term labels by. Optional
+     * @param includeImported      Whether a transitive closure of vocabulary imports should be used when getting the
+     *                             root terms. Optional, defaults to {@code false}
      * @return List of root terms of the specific vocabulary
      */
     @GetMapping(value = "/vocabularies/{vocabularyIdFragment}/terms/roots",
@@ -112,12 +114,17 @@ public class TermController extends BaseController {
                                   @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                   @RequestParam(name = QueryParams.PAGE_SIZE, required = false) Integer pageSize,
                                   @RequestParam(name = QueryParams.PAGE, required = false) Integer pageNo,
-                                  @RequestParam(name = "searchString", required = false) String searchString) {
+                                  @RequestParam(name = "searchString", required = false) String searchString,
+                                  @RequestParam(name = "includeImported", required = false) boolean includeImported) {
         final Vocabulary vocabulary = getVocabulary(getVocabularyUri(namespace, vocabularyIdFragment));
         if (searchString != null && !searchString.trim().isEmpty()) {
-            return termService.findAllRoots(vocabulary, searchString);
+            return includeImported ?
+                   termService.findAllRootsIncludingImports(vocabulary, searchString) :
+                   termService.findAllRoots(vocabulary, searchString);
         }
-        return termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo));
+        return includeImported ?
+               termService.findAllRootsIncludingImports(vocabulary, createPageRequest(pageSize, pageNo)) :
+               termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo));
     }
 
     /**

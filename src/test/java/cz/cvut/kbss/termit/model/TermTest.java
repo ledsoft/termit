@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -84,8 +85,7 @@ class TermTest {
     @Test
     void toCsvExportsParentTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
-        term.setParentTerms(
-                IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId()).collect(Collectors.toSet()));
+        term.setParentTerms(new HashSet<>(Generator.generateTermsWithIds(5)));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(7));
@@ -112,8 +112,7 @@ class TermTest {
         term.setTypes(Collections.singleton(Vocabulary.s_c_object));
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
-        term.setParentTerms(
-                IntStream.range(0, 5).mapToObj(i -> Generator.generateTermWithId()).collect(Collectors.toSet()));
+        term.setParentTerms(new HashSet<>(Generator.generateTermsWithIds(5)));
         term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");

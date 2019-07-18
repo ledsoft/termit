@@ -164,4 +164,17 @@ class TermServiceTest {
         sut.getRequiredReference(iri);
         verify(termRepositoryService).getRequiredReference(iri);
     }
+
+    @Test
+    void findAllRootsIncludingImportsRetrievesRootTermsUsingRepositoryService() {
+        sut.findAllRootsIncludingImports(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+        verify(termRepositoryService).findAllRootsIncludingImported(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+    }
+
+    @Test
+    void findAllRootsIncludingImportsWithSearchStringRetrievesRootTermsUsingRepositoryService() {
+        final String searchString = "test";
+        sut.findAllRootsIncludingImports(vocabulary, searchString);
+        verify(termRepositoryService).findAllRootsIncludingImported(vocabulary, searchString);
+    }
 }
