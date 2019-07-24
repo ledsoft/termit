@@ -40,7 +40,7 @@ public class LuceneSearchDao extends SearchDao {
     @Override
     public List<FullTextSearchResult> fullTextSearch(String searchString) {
         Objects.requireNonNull(searchString);
-        final String wildcardString = this.addWildcard(searchString);
+        final String wildcardString = addWildcard(searchString);
         LOG.trace("Running full text search for search string \"{}\", using wildcard variant \"{}\".", searchString,
                 wildcardString);
         return (List<FullTextSearchResult>) em.createNativeQuery(ftsQuery, "FullTextSearchResult")
@@ -54,7 +54,7 @@ public class LuceneSearchDao extends SearchDao {
                                               .getResultList();
     }
 
-    private String addWildcard(String searchString) {
+    private static String addWildcard(String searchString) {
         // Search string already contains a wildcard
         if (searchString.charAt(searchString.length() - 1) == LUCENE_WILDCARD) {
             return searchString;
