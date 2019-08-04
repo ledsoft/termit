@@ -1,0 +1,53 @@
+# Insert model diagrams metadata related to a vocabulary
+PREFIX g: <__VOC_IRI__>
+
+PREFIX v-sgov-pojem: <https://slovník.gov.cz/veřejný-sektor/pojem/>
+PREFIX popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+PREFIX termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/terms/>
+PREFIX dce: <http://purl.org/dc/elements/1.1/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+INSERT {
+  GRAPH g: {
+     ?r 
+	a popis-dat-pojem:zdroj ;
+        popis-dat-pojem:má-autora ?a ;
+        popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
+        rdfs:label ?rTitleEn ;
+        rdfs:label ?rTitleCs ;
+        dc:description ?rDescriptionEn ;
+        dc:description ?rDescriptionCs .
+
+     ?target  
+	a popis-dat-pojem:cíl ;
+	popis-dat-pojem:má-zdroj ?r .
+
+     ?termAssignment 
+	a termit-pojem:přiřazení-termu ;
+	termit-pojem:má-cíl ?target ;
+	termit-pojem:je-přiřazením-termu ?term .
+
+    }
+} WHERE {
+  GRAPH g: {
+     ?x 
+	a popis-dat-pojem:dokumentový-slovník ;
+        popis-dat-pojem:má-autora ?a ;
+        popis-dat-pojem:má-datum-a-čas-vytvoření ?t .
+
+     ?diagram 
+	skos:prefLabel ?diagramTitle ;
+	dce:relation ?term ;
+	dce:identifier ?diagramId .
+  }
+  BIND(iri(concat("https://kbss.felk.cvut.cz/ipr/packages/img/", ?diagramId, ".png")) as ?r)
+  BIND(iri(concat(str(termit-pojem:cíl), "/instance-", md5(str(?diagramId)))) as ?target)
+  BIND(iri(concat(str(termit-pojem:přiřazení-termu), "/instance-", md5(concat(str(?diagramId), str(?term))))) as ?termAssignment)
+  BIND(strlang(concat("Diagram pro ", ?diagramTitle), "cs") as ?rTitleCs)
+  BIND(strlang(concat("Diagram for ", ?diagramTitle), "en") as ?rTitleEn)
+  BIND(strlang(concat("Diagram modelu pro ", ?diagramTitle), "cs") as ?rDescriptionCs)
+  BIND(strlang(concat("Diagram of model for ", ?diagramTitle), "en") as ?rDescriptionEn)
+}

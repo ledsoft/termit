@@ -24,6 +24,7 @@ function transform() {
     runUpdateQuery transform-4.rq $VOC_IRI
     runUpdateQuery transform-1.rq $VOC_IRI
     runUpdateQuery transform-3.rq $VOC_IRI
+    runUpdateQuery transform-diagram.rq $VOC_IRI
 }
 
 URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=http://onto.fel.cvut.cz/ontologies/termit"
@@ -35,3 +36,4 @@ transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-50
 transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-501 l-sgov-501-2006
 transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-psp-2016 psp-2016
 transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.4 mpp-3.4
+transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.5-np mpp-3.5-np
