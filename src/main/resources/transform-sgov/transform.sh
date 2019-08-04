@@ -7,7 +7,7 @@ FILE=tmp.rq
 function runUpdateQuery() {
     cp $1 $FILE
     sed -i -e "s!__VOC_IRI__!$2!g" $FILE
-    curl -X POST -H "Content-type: application/sparql-update" -T $FILE $RDF4J_ENDPOINT/statements
+    curl --netrc-file .netrc -X POST -H "Content-type: application/sparql-update" -T $FILE $RDF4J_ENDPOINT/statements
 }
 
 function transform() {
@@ -15,9 +15,10 @@ function transform() {
     PREFIX=$2
 
     URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=$VOC_IRI"
-    curl -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-model.ttl" $URL
-    curl -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-glosář.ttl" $URL
-    curl -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" $URL
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-model.ttl" $URL
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-glosář.ttl" $URL
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" $URL
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-diagram.ttl" $URL
 
     runUpdateQuery transform-2.rq $VOC_IRI
     runUpdateQuery transform-4.rq $VOC_IRI
