@@ -91,6 +91,8 @@ public class AnnotationGenerator {
 
     private void saveOccurrences(List<TermOccurrence> occurrences, File source) {
         LOG.trace("Saving term occurrences for file {}.", source);
+        // Bug #928 - Remove old suggested occurrences in one go
+        termOccurrenceDao.removeSuggested(source);
         final List<TermOccurrence> existing = termOccurrenceDao.findAll(source);
         occurrences.stream().filter(o -> isNew(o, existing)).forEach(o -> {
             o.addType(cz.cvut.kbss.termit.util.Vocabulary.s_c_navrzeny_vyskyt_termu);

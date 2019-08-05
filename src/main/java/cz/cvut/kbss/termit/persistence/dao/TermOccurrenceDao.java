@@ -37,7 +37,7 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
     }
 
     /**
-     * Finds all term occurrences which have at least one target pointing to the specified resource.
+     * Finds all term occurrences whose target points to the specified resource.
      * <p>
      * I.e., these term occurrences appear in the specified resource (presumably file).
      *
@@ -53,5 +53,31 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("resource", resource.getUri()).getResultList();
+    }
+
+    /**
+     * Removes all suggested term occurrences whose target points to the specified resource.
+     *
+     * @param resource Resource for which suggested term occurrences will be removed
+     */
+    public void removeSuggested(Resource resource) {
+        Objects.requireNonNull(resource);
+        em.createNativeQuery("DELETE {" +
+                "?x ?toY ?toZ ." +
+                "?target ?tY ?tZ ." +
+                "?selector ?sY ?sZ ." +
+                "} WHERE {" +
+                "?x a ?suggestedOccurrence ;" +
+                "?hasTarget ?target ;" +
+                "?toY ?toZ ." +
+                "?target ?hasSelector ?selector ;" +
+                "?hasSource ?resource ;" +
+                "?tY ?tZ ." +
+                "?selector ?sY ?sZ . }")
+          .setParameter("suggestedOccurrence", URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu))
+          .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
+          .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
+          .setParameter("resource", resource.getUri())
+          .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor_termu)).executeUpdate();
     }
 }

@@ -28,7 +28,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
@@ -204,7 +203,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assert element.size() == 1;
         element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
 
-        return new ByteArrayInputStream(doc.toString().getBytes(Charset.forName(Constants.UTF_8_ENCODING)));
+        return new ByteArrayInputStream(doc.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -434,5 +433,22 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
                 "}", Integer.class).setParameter("termOccurrence", URI.create(Vocabulary.s_c_vyskyt_termu))
                                     .getSingleResult();
         assertEquals(occurrencesTwo.size(), instanceCount);
+    }
+
+    @Test
+    void repeatedAnnotationGenerationDoesNotOverwriteConfirmedAnnotations() throws Exception {
+        generateFile();
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesOne = termOccurrenceDao.findAll(file);
+        final List<TermOccurrence> confirmed = occurrencesOne.stream().filter(to -> Generator.randomBoolean()).collect(
+                Collectors.toList());
+        transactional(() -> confirmed.forEach(to -> {
+            to.removeType(Vocabulary.s_c_navrzeny_vyskyt_termu);
+            em.merge(to);
+        }));
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesTwo = termOccurrenceDao.findAll(file);
+        assertEquals(occurrencesOne.size(), occurrencesTwo.size());
+        confirmed.forEach(to -> assertTrue(occurrencesTwo.stream().anyMatch(toA -> toA.getUri().equals(to.getUri()))));
     }
 }
