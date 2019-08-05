@@ -119,6 +119,7 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
                 l -> l.stream().filter(to -> to.getTarget().getSource().equals(fOne.getUri())))
                                                             .collect(Collectors.toList());
 
+        em.getEntityManagerFactory().getCache().evictAll();
         final List<TermOccurrence> result = sut.findAll(fOne);
         assertEquals(matching.size(), result.size());
         for (TermOccurrence to : result) {

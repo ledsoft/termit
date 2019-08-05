@@ -62,20 +62,19 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
      */
     public void removeSuggested(Resource resource) {
         Objects.requireNonNull(resource);
-        em.createNativeQuery("DELETE {" +
-                "?x ?toY ?toZ ." +
-                "?target ?tY ?tZ ." +
-                "?selector ?sY ?sZ ." +
-                "} WHERE {" +
+        em.createNativeQuery("DELETE WHERE {" +
                 "?x a ?suggestedOccurrence ;" +
-                "?hasTarget ?target ;" +
-                "?toY ?toZ ." +
-                "?target ?hasSelector ?selector ;" +
-                "?hasSource ?resource ;" +
-                "?tY ?tZ ." +
+                "a ?toType ;" +
+                "?hasTerm ?term ;" +
+                "?hasTarget ?target ." +
+                "?target a ?occurrenceTarget ;" +
+                "?hasSelector ?selector ;" +
+                "?hasSource ?resource ." +
                 "?selector ?sY ?sZ . }")
           .setParameter("suggestedOccurrence", URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu))
+          .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
           .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
+          .setParameter("occurrenceTarget", URI.create(Vocabulary.s_c_cil_vyskytu))
           .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
           .setParameter("resource", resource.getUri())
           .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor_termu)).executeUpdate();
