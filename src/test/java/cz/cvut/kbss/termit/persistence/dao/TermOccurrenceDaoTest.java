@@ -157,4 +157,21 @@ class TermOccurrenceDaoTest extends BaseDaoTestRunner {
         assertEquals(retained.size(), result.size());
         result.forEach(to -> assertTrue(retained.stream().anyMatch(toExp -> toExp.getUri().equals(to.getUri()))));
     }
+
+    @Test
+    void removeAllRemovesSuggestedAndConfirmedOccurrences() {
+        final File file = new File();
+        file.setLabel("test.html");
+        final Map<Term, List<TermOccurrence>> allOccurrences = generateOccurrences(true, file);
+        assertFalse(sut.findAll(file).isEmpty());
+        transactional(() -> allOccurrences
+                .forEach((t, list) -> list.stream().filter(to -> Generator.randomBoolean()).forEach(to -> {
+                    to.removeType(Vocabulary.s_c_navrzeny_vyskyt_termu);
+                    em.merge(to);
+                })));
+        transactional(() -> sut.removeAll(file));
+        assertTrue(sut.findAll(file).isEmpty());
+        assertFalse(em.createNativeQuery("ASK { ?x a ?termOccurrence . }", Boolean.class).setParameter("termOccurrence",
+                URI.create(Vocabulary.s_c_vyskyt_termu)).getSingleResult());
+    }
 }

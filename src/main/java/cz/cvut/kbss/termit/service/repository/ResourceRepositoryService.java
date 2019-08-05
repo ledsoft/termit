@@ -165,10 +165,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     @Override
     protected void preRemove(Resource instance) {
         LOG.trace("Removing term occurrences in resource {} which is about to be removed.", instance);
-        termOccurrenceDao.findAll(instance).forEach(to -> {
-            termOccurrenceDao.remove(to);
-            targetDao.remove(to.getTarget());
-        });
+        termOccurrenceDao.removeAll(instance);
         assignmentService.removeAll(instance);
         removeFromParentDocumentIfFile(instance);
     }

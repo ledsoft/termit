@@ -62,21 +62,36 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
      */
     public void removeSuggested(Resource resource) {
         Objects.requireNonNull(resource);
+        removeAll(resource, URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu));
+    }
+
+    private void removeAll(Resource resource, URI toType) {
+        Objects.requireNonNull(resource);
         em.createNativeQuery("DELETE WHERE {" +
-                "?x a ?suggestedOccurrence ;" +
-                "a ?toType ;" +
+                "?x a ?toType ;" +
+                "a ?type ;" +
                 "?hasTerm ?term ;" +
                 "?hasTarget ?target ." +
                 "?target a ?occurrenceTarget ;" +
                 "?hasSelector ?selector ;" +
                 "?hasSource ?resource ." +
                 "?selector ?sY ?sZ . }")
-          .setParameter("suggestedOccurrence", URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu))
+          .setParameter("toType", toType)
           .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
           .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
           .setParameter("occurrenceTarget", URI.create(Vocabulary.s_c_cil_vyskytu))
           .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
           .setParameter("resource", resource.getUri())
           .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor_termu)).executeUpdate();
+    }
+
+    /**
+     * Removes all term occurrences whose target points to the specified resource.
+     *
+     * @param resource Resource for which term occurrences will be removed
+     */
+    public void removeAll(Resource resource) {
+        Objects.requireNonNull(resource);
+        removeAll(resource, URI.create(Vocabulary.s_c_vyskyt_termu));
     }
 }
