@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.query.TypedQuery;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
@@ -223,7 +224,8 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void persistSavesTermIntoVocabularyContext() {
         final Term term = Generator.generateTermWithId();
-        transactional(() -> sut.persist(term, vocabulary));
+        term.setVocabulary(vocabulary.getUri());
+        transactional(() -> sut.persist(term));
 
         final Term result = em.find(Term.class, term.getUri(), DescriptorFactory.termDescriptor(vocabulary));
         assertNotNull(result);
@@ -367,5 +369,52 @@ class TermDaoTest extends BaseDaoTestRunner {
         assertFalse(result.isEmpty());
         assertThat(result.size(), lessThan(directTerms.size() + parentTerms.size() + grandParentTerms.size()));
         assertTrue(result.contains(grandParentTerms.get(0)));
+    }
+
+    @Test
+    void persistSupportsReferencingParentTermInSameVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        transactional(() -> {
+            parent.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+
+        transactional(() -> sut.persist(term));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+    }
+
+    @Test
+    void persistSupportsReferencingParentTermInDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        final Vocabulary parentVoc = Generator.generateVocabularyWithId();
+        parent.setVocabulary(parentVoc.getUri());
+        transactional(() -> {
+            parentVoc.getGlossary().addRootTerm(parent);
+            em.persist(parentVoc, DescriptorFactory.vocabularyDescriptor(parentVoc));
+            em.persist(parent, DescriptorFactory.termDescriptor(parentVoc));
+        });
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+
+        transactional(() -> sut.persist(term));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+        // TODO This will be fixed in JOPA 0.13.1
+        final TypedQuery<Boolean> query = em.createNativeQuery("ASK {GRAPH ?g {?t ?hasParent ?p .}}", Boolean.class)
+                                            .setParameter("g", vocabulary.getUri()).setParameter("t", term.getUri())
+                                            .setParameter("hasParent", URI.create(SKOS.BROADER))
+                                            .setParameter("p", parent.getUri());
+        assertTrue(query.getSingleResult());
     }
 }

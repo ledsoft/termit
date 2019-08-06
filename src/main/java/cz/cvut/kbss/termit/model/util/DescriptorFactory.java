@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.model.util;
 
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
+import cz.cvut.kbss.jopa.model.descriptors.ObjectPropertyCollectionDescriptor;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 
@@ -194,6 +195,31 @@ public class DescriptorFactory {
     public static Descriptor termDescriptor(URI vocabularyUri) {
         final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(vocabularyUri));
+        return descriptor;
+    }
+
+    /**
+     * Creates a JOPA descriptor for the specified term.
+     * <p>
+     * This takes the context from the term's vocabulary. Note that if parent terms are provided for the term, their
+     * vocabularies are used as their contexts.
+     *
+     * @param term Term to create descriptor for
+     * @return Term descriptor
+     */
+    public static Descriptor termDescriptor(Term term) {
+        Objects.requireNonNull(term);
+        assert term.getVocabulary() != null;
+        final EntityDescriptor descriptor = assetDescriptor(term.getVocabulary());
+        if (term.getParentTerms() != null && !term.getParentTerms().isEmpty()) {
+            // NOTE: This does not support parents being from multiple different vocabularies. Such situation is currently not supported by JOPA
+            final URI parentVocabulary = term.getParentTerms().iterator().next().getVocabulary();
+            final ObjectPropertyCollectionDescriptor opDescriptor = new ObjectPropertyCollectionDescriptor(
+                    parentVocabulary, Term.getParentTermsField());
+            descriptor.addAttributeDescriptor(Term.getParentTermsField(), opDescriptor);
+        } else {
+            descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(term.getVocabulary()));
+        }
         return descriptor;
     }
 }

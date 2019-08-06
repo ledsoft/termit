@@ -78,7 +78,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         verifyIdentifierUnique(instance);
         toUpdate.getGlossary().addRootTerm(instance);
         instance.setVocabulary(toUpdate.getUri());
-        termDao.persist(instance, toUpdate);
+        termDao.persist(instance);
     }
 
     /**
@@ -111,7 +111,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         }
         instance.addParentTerm(parentTerm);
 
-        termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
+        termDao.persist(instance);
     }
 
     /**

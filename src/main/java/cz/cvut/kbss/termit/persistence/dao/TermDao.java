@@ -34,14 +34,15 @@ public class TermDao extends AssetDao<Term> {
      * <p>
      * Note that this is the preferred way of persisting terms.
      *
-     * @param instance   The instance to persist
-     * @param vocabulary Vocabulary to which the instance belongs
+     * @param instance The instance to persist
      */
-    public void persist(Term instance, Vocabulary vocabulary) {
+    @Override
+    public void persist(Term instance) {
         Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabulary);
+        assert instance.getVocabulary() != null;
+
         try {
-            em.persist(instance, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(instance, DescriptorFactory.termDescriptor(instance));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

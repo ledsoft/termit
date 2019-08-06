@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -440,5 +439,27 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         List<Term> result = sut.findAllRootsIncludingImported(vocabulary, searchString);
         assertEquals(matching.size(), result.size());
         assertTrue(matching.containsAll(result));
+    }
+
+    @Test
+    void addChildTermAllowsAddingChildTermToDifferentVocabularyThanParent() {
+        final Term parentTerm = Generator.generateTermWithId();
+        final Vocabulary childVocabulary = Generator.generateVocabularyWithId();
+        childVocabulary.setImportedVocabularies(Collections.singleton(vocabulary.getUri()));
+
+        transactional(() -> {
+            parentTerm.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(parentTerm);
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+            em.persist(childVocabulary, DescriptorFactory.vocabularyDescriptor(childVocabulary));
+        });
+        final Term childTerm = Generator.generateTermWithId();
+        childTerm.setVocabulary(childVocabulary.getUri());
+
+        sut.addChildTerm(childTerm, parentTerm);
+        assertTrue(sut.findAll(childVocabulary).contains(childTerm));
+        final Term result = em.find(Term.class, childTerm.getUri(), DescriptorFactory.termDescriptor(childVocabulary));
+        assertEquals(childTerm, result);
     }
 }
