@@ -417,4 +417,61 @@ class TermDaoTest extends BaseDaoTestRunner {
                                             .setParameter("p", parent.getUri());
         assertTrue(query.getSingleResult());
     }
+
+    @Test
+    void updateSupportsReferencingParentTermInDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        final Vocabulary parentVoc = Generator.generateVocabularyWithId();
+        parent.setVocabulary(parentVoc.getUri());
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+        transactional(() -> {
+            parentVoc.getGlossary().addRootTerm(parent);
+            em.persist(parentVoc, DescriptorFactory.vocabularyDescriptor(parentVoc));
+            em.persist(parent, DescriptorFactory.termDescriptor(parentVoc));
+            em.persist(term, DescriptorFactory.termDescriptor(term));
+        });
+
+        final Term toUpdate = sut.find(term.getUri()).get();
+        assertEquals(Collections.singleton(parent), toUpdate.getParentTerms());
+        final String newDefinition = "Updated definition";
+        toUpdate.setDefinition(newDefinition);
+        transactional(() -> sut.update(toUpdate));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+        assertEquals(newDefinition, result.getDefinition());
+    }
+
+    @Test
+    void updateSupportsSettingNewParentFromAnotherDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parentOne = Generator.generateTermWithId();
+        final Vocabulary parentOneVoc = Generator.generateVocabularyWithId();
+        parentOne.setVocabulary(parentOneVoc.getUri());
+        final Term parentTwo = Generator.generateTermWithId();
+        final Vocabulary parentTwoVoc = Generator.generateVocabularyWithId();
+        parentTwo.setVocabulary(parentTwoVoc.getUri());
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parentOne);
+        transactional(() -> {
+            parentOneVoc.getGlossary().addRootTerm(parentOne);
+            em.persist(parentOneVoc, DescriptorFactory.vocabularyDescriptor(parentOneVoc));
+            em.persist(parentOne, DescriptorFactory.termDescriptor(parentOneVoc));
+            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(parentTwoVoc, DescriptorFactory.vocabularyDescriptor(parentTwoVoc));
+            em.persist(parentTwo, DescriptorFactory.termDescriptor(parentTwoVoc));
+        });
+
+        final Term toUpdate = sut.find(term.getUri()).get();
+        assertEquals(Collections.singleton(parentOne), toUpdate.getParentTerms());
+        toUpdate.setParentTerms(Collections.singleton(parentTwo));
+        transactional(() -> sut.update(toUpdate));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parentTwo), result.getParentTerms());
+    }
 }

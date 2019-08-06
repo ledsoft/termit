@@ -216,6 +216,8 @@ public class DescriptorFactory {
             final URI parentVocabulary = term.getParentTerms().iterator().next().getVocabulary();
             final ObjectPropertyCollectionDescriptor opDescriptor = new ObjectPropertyCollectionDescriptor(
                     parentVocabulary, Term.getParentTermsField());
+            opDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+            opDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
             descriptor.addAttributeDescriptor(Term.getParentTermsField(), opDescriptor);
         } else {
             descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(term.getVocabulary()));
