@@ -26,14 +26,14 @@ INSERT {
        rdfs:label ?vTitle .
 
     ?d a popis-dat-pojem:dokument ;
-       rdfs:label ?dTitle ;
+       rdfs:label ?dTitleCs ;
        dc:description ""@cs ;
        popis-dat-pojem:má-autora ?a ;
        popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        popis-dat-pojem:má-soubor ?s .
 
     ?s a popis-dat-pojem:soubor ;
-       rdfs:label ?sTitle ;
+       rdfs:label ?sTitleCs ;
        dc:description ""@cs ;
        popis-dat-pojem:má-autora ?a ;
        popis-dat-pojem:má-datum-a-čas-vytvoření ?t .
@@ -80,11 +80,11 @@ INSERT {
 	}
     BIND (<http://onto.fel.cvut.cz/ontologies/uzivatel/michal-med> as ?a)
     BIND (iri(concat(str(?x),"/document")) as ?d)
-    BIND (strlang(concat("Dokument pro ",str(?vTitle)),"cs") as ?dTitle)
-    BIND (strlang(concat("Document for ",str(?vTitle)),"en") as ?dTitle)
+    BIND (strlang(concat("Dokument pro ",str(?vTitle)),"cs") as ?dTitleCs)
+    BIND (strlang(concat("Document for ",str(?vTitle)),"en") as ?dTitleEn)
     BIND (iri(concat(str(?d),"/file")) as ?s)
-    BIND (strlang(concat("Soubor pro ",str(?vTitle)),"cs") as ?sTitle)
-    BIND (strlang(concat("File for ",str(?vTitle)),"en") as ?sTitle)
+    BIND (strlang(concat("Soubor pro ",str(?vTitle)),"cs") as ?sTitleCs)
+    BIND (strlang(concat("File for ",str(?vTitle)),"en") as ?sTitleEn)
     BIND (NOW() as ?t)
     OPTIONAL {
         ?d dc:created ?y3 .
