@@ -410,7 +410,6 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Term result = em.find(Term.class, term.getUri());
         assertNotNull(result);
         assertEquals(Collections.singleton(parent), result.getParentTerms());
-        // TODO This will be fixed in JOPA 0.13.1
         final TypedQuery<Boolean> query = em.createNativeQuery("ASK {GRAPH ?g {?t ?hasParent ?p .}}", Boolean.class)
                                             .setParameter("g", vocabulary.getUri()).setParameter("t", term.getUri())
                                             .setParameter("hasParent", URI.create(SKOS.BROADER))
