@@ -56,10 +56,9 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     @Override
     protected void postUpdate(Term instance) {
         final Vocabulary vocabulary = vocabularyService.getRequiredReference(instance.getVocabulary());
-        if (instance.getParentTerms() != null) {
+        if (instance.hasParentInSameVocabulary()) {
             vocabulary.getGlossary().removeRootTerm(instance);
-        }
-        if (instance.getParentTerms() == null) {
+        } else {
             vocabulary.getGlossary().addRootTerm(instance);
         }
     }
@@ -73,11 +72,9 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
-        // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
-        final Vocabulary toUpdate = vocabularyService.getRequiredReference(vocabulary.getUri());
         verifyIdentifierUnique(instance);
-        toUpdate.getGlossary().addRootTerm(instance);
-        instance.setVocabulary(toUpdate.getUri());
+        instance.setVocabulary(vocabulary.getUri());
+        addTermAsRootToGlossary(instance);
         termDao.persist(instance);
     }
 
@@ -96,20 +93,29 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
                 termLabel);
     }
 
+    private void addTermAsRootToGlossary(Term instance) {
+        // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
+        final Vocabulary toUpdate = vocabularyService.getRequiredReference(instance.getVocabulary());
+        toUpdate.getGlossary().addRootTerm(instance);
+    }
+
     @Transactional
     public void addChildTerm(Term instance, Term parentTerm) {
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(parentTerm);
-        if (instance.getUri() == null) {
-            instance.setUri(generateIdentifier(parentTerm.getVocabulary(), instance.getLabel()));
-        }
-        verifyIdentifierUnique(instance);
-
         if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
+        if (instance.getUri() == null) {
+            instance.setUri(generateIdentifier(instance.getVocabulary(), instance.getLabel()));
+        }
+        verifyIdentifierUnique(instance);
+
         instance.addParentTerm(parentTerm);
+        if (!instance.hasParentInSameVocabulary()) {
+            addTermAsRootToGlossary(instance);
+        }
 
         termDao.persist(instance);
     }

@@ -18,8 +18,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TermTest {
 
@@ -169,5 +168,34 @@ class TermTest {
                 "http://onto.fel.cvut.cz/ontologies/slovnik/oha-togaf/pojem/koncept-katalogů,-matic-a-pohledů"));
         final String result = term.toCsv();
         assertTrue(result.startsWith("\"" + term.getUri().toString() + "\","));
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsFalseWhenTermHasNoParent() {
+        final Term sut = Generator.generateTermWithId();
+        assertFalse(sut.hasParentInSameVocabulary());
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsTrueWhenTermHasParentWithSameVocabulary() {
+        final Term sut = Generator.generateTermWithId();
+        final URI vocabularyUri = Generator.generateUri();
+        sut.setVocabulary(vocabularyUri);
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabularyUri);
+        sut.addParentTerm(parent);
+
+        assertTrue(sut.hasParentInSameVocabulary());
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsFalseWhenTermHasParentWithDifferentVocabulary() {
+        final Term sut = Generator.generateTermWithId();
+        sut.setVocabulary(Generator.generateUri());
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(Generator.generateUri());
+        sut.addParentTerm(parent);
+
+        assertFalse(sut.hasParentInSameVocabulary());
     }
 }
