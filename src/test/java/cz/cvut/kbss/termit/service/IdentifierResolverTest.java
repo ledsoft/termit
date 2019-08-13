@@ -212,4 +212,22 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
         environment.setProperty(ConfigParam.NAMESPACE_VOCABULARY.toString(), base);
         assertEquals(base + component, sut.buildNamespace(ConfigParam.NAMESPACE_VOCABULARY, component));
     }
+
+    @Test
+    void sanitizeFileNameMakesSpecifiedLabelCompatibleWithLinuxFileNameRules() {
+        final String label = "Zákon 130/2002.html";
+        assertEquals("Zákon 130-2002.html", IdentifierResolver.sanitizeFileName(label));
+    }
+
+    @Test
+    void sanitizeFileNameMakesSpecifiedLabelCompatibleWithWindowsFileNameRules() {
+        final String label = "label:2002/130.html";
+        assertEquals("label-2002-130.html", IdentifierResolver.sanitizeFileName(label));
+    }
+
+    @Test
+    void sanitizeFileNameTrimsLeadingAndTrailingWhiteSpaces() {
+        final String label = "  label enclosed in spaces   ";
+        assertEquals(label.trim(), IdentifierResolver.sanitizeFileName(label));
+    }
 }
