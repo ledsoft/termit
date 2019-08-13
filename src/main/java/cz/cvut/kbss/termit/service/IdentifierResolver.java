@@ -17,7 +17,7 @@ import java.util.Objects;
 public class IdentifierResolver {
 
     private static final char REPLACEMENT_CHARACTER = '-';
-    private final static int[] ILLEGAL_FILENAME_CHARS = {34,
+    private static final int[] ILLEGAL_FILENAME_CHARS = {34,
             60,
             62,
             124,
