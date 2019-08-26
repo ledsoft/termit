@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.text.Normalizer;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -14,6 +15,53 @@ import java.util.Objects;
  */
 @Service
 public class IdentifierResolver {
+
+    private static final char REPLACEMENT_CHARACTER = '-';
+    private static final int[] ILLEGAL_FILENAME_CHARS = {34,
+            60,
+            62,
+            124,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            58,
+            42,
+            63,
+            92,
+            47};
+
+    static {
+        Arrays.sort(ILLEGAL_FILENAME_CHARS);
+    }
 
     private final Configuration config;
 
@@ -39,7 +87,8 @@ public class IdentifierResolver {
      */
     public static String normalize(String value) {
         Objects.requireNonNull(value);
-        final String normalized = value.toLowerCase().trim().replaceAll("[\\s/\\\\]", "-");
+        final String normalized = value.toLowerCase().trim()
+                                       .replaceAll("[\\s/\\\\]", Character.toString(REPLACEMENT_CHARACTER));
         return Normalizer.normalize(normalized, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "")
                          .replaceAll("[()]", "");
     }
@@ -157,7 +206,7 @@ public class IdentifierResolver {
         final String strUri = uri.toString();
         final int slashIndex = strUri.lastIndexOf('/');
         final int hashIndex = strUri.lastIndexOf('#');
-        return strUri.substring((slashIndex > hashIndex ? slashIndex : hashIndex) + 1);
+        return strUri.substring((Math.max(slashIndex, hashIndex)) + 1);
     }
 
     /**
@@ -173,6 +222,27 @@ public class IdentifierResolver {
         final String strUri = uri.toString();
         final int slashIndex = strUri.lastIndexOf('/');
         final int hashIndex = strUri.lastIndexOf('#');
-        return strUri.substring(0, (slashIndex > hashIndex ? slashIndex : hashIndex) + 1);
+        return strUri.substring(0, (Math.max(slashIndex, hashIndex)) + 1);
+    }
+
+    /**
+     * Sanitizes the specified label so that it can be used as a file name.
+     * <p>
+     * This means replacing illegal characters (e.g., slashes) with dashes.
+     *
+     * @param label Label to sanitize to a valid file name
+     * @return Valid file name based on the specified label
+     */
+    public static String sanitizeFileName(String label) {
+        StringBuilder cleanName = new StringBuilder();
+        for (int i = 0; i < label.length(); i++) {
+            int c = label.charAt(i);
+            if (Arrays.binarySearch(ILLEGAL_FILENAME_CHARS, c) < 0) {
+                cleanName.append((char) c);
+            } else {
+                cleanName.append(REPLACEMENT_CHARACTER);
+            }
+        }
+        return cleanName.toString().trim();
     }
 }

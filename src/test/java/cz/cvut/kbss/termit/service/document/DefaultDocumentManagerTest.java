@@ -6,6 +6,7 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.MimeTypeUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collections;
@@ -27,6 +29,8 @@ import java.util.Optional;
 
 import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
@@ -258,5 +262,56 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         assertTrue(physicalFile.exists());
         physicalFile.getParentFile().deleteOnExit();
         physicalFile.deleteOnExit();
+    }
+
+    @Test
+    void resolveFileSanitizesFileLabelToEnsureValidFileName() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        final String label = "Zákon 130/2002";
+        file.setLabel(label);
+        sut.saveFileContent(file, new ByteArrayInputStream(CONTENT.getBytes()));
+
+        final java.io.File physicalFile = new java.io.File(
+                dir.getAbsolutePath() + java.io.File.separator + file.getDirectoryName() + java.io.File.separator +
+                        IdentifierResolver.sanitizeFileName(file.getLabel()));
+        assertTrue(physicalFile.exists());
+        physicalFile.getParentFile().deleteOnExit();
+        physicalFile.deleteOnExit();
+    }
+
+    @Test
+    void createBackupSanitizesFileLabelToEnsureValidFileName() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final java.io.File docDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
+                document.getDirectoryName());
+        docDir.mkdir();
+        docDir.deleteOnExit();
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        final String label = "Zákon 130/2002";
+        file.setLabel(label);
+        document.addFile(file);
+        file.setDocument(document);
+        final java.io.File content = new java.io.File(docDir, IdentifierResolver.sanitizeFileName(label));
+        content.deleteOnExit();
+        Files.write(content.toPath(), CONTENT.getBytes());
+        sut.createBackup(file);
+
+        final java.io.File[] files = docDir.listFiles();
+        assertNotNull(files);
+        assertEquals(2, files.length);
+        for (java.io.File f : files) {
+            try {
+                assertThat(f.getName(), startsWith(IdentifierResolver.sanitizeFileName(label)));
+            } finally {
+                f.deleteOnExit();
+            }
+        }
     }
 }

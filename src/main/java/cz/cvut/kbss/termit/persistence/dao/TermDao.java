@@ -34,14 +34,15 @@ public class TermDao extends AssetDao<Term> {
      * <p>
      * Note that this is the preferred way of persisting terms.
      *
-     * @param instance   The instance to persist
-     * @param vocabulary Vocabulary to which the instance belongs
+     * @param entity The instance to persist
      */
-    public void persist(Term instance, Vocabulary vocabulary) {
-        Objects.requireNonNull(instance);
-        Objects.requireNonNull(vocabulary);
+    @Override
+    public void persist(Term entity) {
+        Objects.requireNonNull(entity);
+        assert entity.getVocabulary() != null;
+
         try {
-            em.persist(instance, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(entity, DescriptorFactory.termDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -55,7 +56,7 @@ public class TermDao extends AssetDao<Term> {
         try {
             // Evict possibly cached instance loaded from default context
             em.getEntityManagerFactory().getCache().evict(Term.class, entity.getUri(), null);
-            return em.merge(entity, DescriptorFactory.termDescriptor(entity.getVocabulary()));
+            return em.merge(entity, DescriptorFactory.termDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

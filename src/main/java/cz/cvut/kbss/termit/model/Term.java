@@ -199,6 +199,16 @@ public class Term extends Asset implements HasTypes, Serializable {
         }
     }
 
+    /**
+     * Checks whether this term has a parent term in the same vocabulary.
+     *
+     * @return Whether this term has parent in its vocabulary. Returns {@code false} also if this term has no parent
+     * term at all
+     */
+    public boolean hasParentInSameVocabulary() {
+        return parentTerms != null && parentTerms.stream().anyMatch(p -> p.getVocabulary().equals(vocabulary));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

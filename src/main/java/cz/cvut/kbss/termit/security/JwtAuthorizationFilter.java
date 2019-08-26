@@ -61,7 +61,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             refreshToken(authToken, response);
         } catch (DisabledException | LockedException | JwtException | UsernameNotFoundException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
+            objectMapper.writeValue(response.getOutputStream(),
+                    ErrorInfo.createWithMessage(e.getMessage(), request.getRequestURI()));
             return;
         }
         chain.doFilter(request, response);

@@ -34,7 +34,7 @@ public class RestExceptionHandler {
     }
 
     private static ErrorInfo errorInfo(HttpServletRequest request, Throwable e) {
-        return new ErrorInfo(e.getMessage(), request.getRequestURI());
+        return ErrorInfo.createWithMessage(e.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(PersistenceException.class)
@@ -103,7 +103,8 @@ public class RestExceptionHandler {
     @ExceptionHandler(JsonLdException.class)
     public ResponseEntity<ErrorInfo> jsonLdException(HttpServletRequest request, JsonLdException e) {
         logException(e);
-        return new ResponseEntity<>(new ErrorInfo("Error when processing JSON-LD.", request.getRequestURI()),
+        return new ResponseEntity<>(
+                ErrorInfo.createWithMessage("Error when processing JSON-LD.", request.getRequestURI()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

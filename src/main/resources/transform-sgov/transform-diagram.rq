@@ -43,7 +43,7 @@ INSERT {
 	dce:relation ?term ;
 	dce:identifier ?diagramId .
   }
-  BIND(iri(concat("https://kbss.felk.cvut.cz/ipr/packages/img/", ?diagramId, ".png")) as ?r)
+  BIND(iri(concat("https://kbss.felk.cvut.cz/ipr/img/", ?diagramId, ".png")) as ?r)
   BIND(iri(concat(str(termit-pojem:cíl), "/instance-", md5(str(?diagramId)))) as ?target)
   BIND(iri(concat(str(termit-pojem:přiřazení-termu), "/instance-", md5(concat(str(?diagramId), str(?term))))) as ?termAssignment)
   BIND(strlang(concat("Diagram pro ", ?diagramTitle), "cs") as ?rTitleCs)

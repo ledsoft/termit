@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.query.TypedQuery;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
@@ -223,7 +224,8 @@ class TermDaoTest extends BaseDaoTestRunner {
     @Test
     void persistSavesTermIntoVocabularyContext() {
         final Term term = Generator.generateTermWithId();
-        transactional(() -> sut.persist(term, vocabulary));
+        term.setVocabulary(vocabulary.getUri());
+        transactional(() -> sut.persist(term));
 
         final Term result = em.find(Term.class, term.getUri(), DescriptorFactory.termDescriptor(vocabulary));
         assertNotNull(result);
@@ -367,5 +369,108 @@ class TermDaoTest extends BaseDaoTestRunner {
         assertFalse(result.isEmpty());
         assertThat(result.size(), lessThan(directTerms.size() + parentTerms.size() + grandParentTerms.size()));
         assertTrue(result.contains(grandParentTerms.get(0)));
+    }
+
+    @Test
+    void persistSupportsReferencingParentTermInSameVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        transactional(() -> {
+            parent.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+
+        transactional(() -> sut.persist(term));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+    }
+
+    @Test
+    void persistSupportsReferencingParentTermInDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        final Vocabulary parentVoc = Generator.generateVocabularyWithId();
+        parent.setVocabulary(parentVoc.getUri());
+        transactional(() -> {
+            parentVoc.getGlossary().addRootTerm(parent);
+            em.persist(parentVoc, DescriptorFactory.vocabularyDescriptor(parentVoc));
+            em.persist(parent, DescriptorFactory.termDescriptor(parentVoc));
+        });
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+
+        transactional(() -> sut.persist(term));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+        final TypedQuery<Boolean> query = em.createNativeQuery("ASK {GRAPH ?g {?t ?hasParent ?p .}}", Boolean.class)
+                                            .setParameter("g", vocabulary.getUri()).setParameter("t", term.getUri())
+                                            .setParameter("hasParent", URI.create(SKOS.BROADER))
+                                            .setParameter("p", parent.getUri());
+        assertTrue(query.getSingleResult());
+    }
+
+    @Test
+    void updateSupportsReferencingParentTermInDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parent = Generator.generateTermWithId();
+        final Vocabulary parentVoc = Generator.generateVocabularyWithId();
+        parent.setVocabulary(parentVoc.getUri());
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parent);
+        transactional(() -> {
+            parentVoc.getGlossary().addRootTerm(parent);
+            em.persist(parentVoc, DescriptorFactory.vocabularyDescriptor(parentVoc));
+            em.persist(parent, DescriptorFactory.termDescriptor(parentVoc));
+            em.persist(term, DescriptorFactory.termDescriptor(term));
+        });
+
+        final Term toUpdate = sut.find(term.getUri()).get();
+        assertEquals(Collections.singleton(parent), toUpdate.getParentTerms());
+        final String newDefinition = "Updated definition";
+        toUpdate.setDefinition(newDefinition);
+        transactional(() -> sut.update(toUpdate));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
+        assertEquals(newDefinition, result.getDefinition());
+    }
+
+    @Test
+    void updateSupportsSettingNewParentFromAnotherDifferentVocabulary() {
+        final Term term = Generator.generateTermWithId();
+        final Term parentOne = Generator.generateTermWithId();
+        final Vocabulary parentOneVoc = Generator.generateVocabularyWithId();
+        parentOne.setVocabulary(parentOneVoc.getUri());
+        final Term parentTwo = Generator.generateTermWithId();
+        final Vocabulary parentTwoVoc = Generator.generateVocabularyWithId();
+        parentTwo.setVocabulary(parentTwoVoc.getUri());
+        term.setVocabulary(vocabulary.getUri());
+        term.addParentTerm(parentOne);
+        transactional(() -> {
+            parentOneVoc.getGlossary().addRootTerm(parentOne);
+            em.persist(parentOneVoc, DescriptorFactory.vocabularyDescriptor(parentOneVoc));
+            em.persist(parentOne, DescriptorFactory.termDescriptor(parentOneVoc));
+            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(parentTwoVoc, DescriptorFactory.vocabularyDescriptor(parentTwoVoc));
+            em.persist(parentTwo, DescriptorFactory.termDescriptor(parentTwoVoc));
+        });
+
+        final Term toUpdate = sut.find(term.getUri()).get();
+        assertEquals(Collections.singleton(parentOne), toUpdate.getParentTerms());
+        toUpdate.setParentTerms(Collections.singleton(parentTwo));
+        transactional(() -> sut.update(toUpdate));
+
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(Collections.singleton(parentTwo), result.getParentTerms());
     }
 }

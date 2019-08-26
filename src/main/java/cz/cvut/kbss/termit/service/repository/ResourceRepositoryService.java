@@ -9,7 +9,6 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.ResourceDao;
-import cz.cvut.kbss.termit.persistence.dao.TargetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -31,7 +30,6 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
     private final ResourceDao resourceDao;
-    private final TargetDao targetDao;
     private final TermOccurrenceDao termOccurrenceDao;
 
     private final TermAssignmentRepositoryService assignmentService;
@@ -41,14 +39,12 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
 
     @Autowired
     public ResourceRepositoryService(Validator validator, ResourceDao resourceDao,
-                                     TargetDao targetDao,
                                      TermOccurrenceDao termOccurrenceDao,
                                      TermAssignmentRepositoryService assignmentService,
                                      VocabularyRepositoryService vocabularyService,
                                      IdentifierResolver idResolver) {
         super(validator);
         this.resourceDao = resourceDao;
-        this.targetDao = targetDao;
         this.termOccurrenceDao = termOccurrenceDao;
         this.vocabularyService = vocabularyService;
         this.assignmentService = assignmentService;
@@ -165,10 +161,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     @Override
     protected void preRemove(Resource instance) {
         LOG.trace("Removing term occurrences in resource {} which is about to be removed.", instance);
-        termOccurrenceDao.findAll(instance).forEach(to -> {
-            termOccurrenceDao.remove(to);
-            targetDao.remove(to.getTarget());
-        });
+        termOccurrenceDao.removeAll(instance);
         assignmentService.removeAll(instance);
         removeFromParentDocumentIfFile(instance);
     }
