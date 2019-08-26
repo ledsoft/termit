@@ -29,7 +29,7 @@ function transform() {
 
 URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=http://onto.fel.cvut.cz/ontologies/termit"
 TERMIT=$(pwd)
-curl -X POST -H "Content-type: text/turtle" -T "$TERMIT/../../../../ontology/termit-model.ttl" $URL
+curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$TERMIT/../../../../ontology/termit-model.ttl" $URL
 
 transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-183 l-sgov-183-2006
 transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-500 l-sgov-500-2006
