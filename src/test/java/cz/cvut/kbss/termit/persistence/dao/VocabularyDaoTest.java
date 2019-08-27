@@ -196,4 +196,37 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
             assertTrue(em.contains(merged));
         });
     }
+
+    @Test
+    void hasInterVocabularyTermRelationshipsReturnsFalseForVocabulariesWithoutSKOSRelatedTerms() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+        });
+
+        assertFalse(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
+    }
+
+    @Test
+    void hasInterVocabularyTermRelationshipsReturnsTrueForSKOSRelatedTermsInSpecifiedVocabularies() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        final Term child = Generator.generateTermWithId();
+        final Term parentTerm = Generator.generateTermWithId();
+        child.addParentTerm(parentTerm);
+        subjectVocabulary.getGlossary().addRootTerm(child);
+        child.setVocabulary(subjectVocabulary.getUri());
+        targetVocabulary.getGlossary().addRootTerm(parentTerm);
+        parentTerm.setVocabulary(targetVocabulary.getUri());
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+        });
+
+        assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
+    }
 }

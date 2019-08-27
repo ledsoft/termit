@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -83,5 +84,28 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
     public Glossary updateGlossary(Vocabulary entity) {
         Objects.requireNonNull(entity);
         return em.merge(entity.getGlossary(), DescriptorFactory.glossaryDescriptor(entity));
+    }
+
+    /**
+     * Checks whether terms from the {@code subjectVocabulary} reference (as parent terms) any terms from the {@code
+     * targetVocabulary}.
+     *
+     * @param subjectVocabulary Subject vocabulary identifier
+     * @param targetVocabulary  Target vocabulary identifier
+     * @return Whether subject vocabulary terms reference target vocabulary terms
+     */
+    public boolean hasInterVocabularyTermRelationships(URI subjectVocabulary, URI targetVocabulary) {
+        Objects.requireNonNull(subjectVocabulary);
+        Objects.requireNonNull(targetVocabulary);
+        return em.createNativeQuery("ASK {" +
+                "    ?x ?isTermFromVocabulary ?subjectVocabulary ; " +
+                "       ?hasParentTerm ?y ." +
+                "    ?y ?isTermFromVocabulary ?targetVocabulary ." +
+                "}", Boolean.class)
+                 .setParameter("isTermFromVocabulary",
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                 .setParameter("subjectVocabulary", subjectVocabulary)
+                 .setParameter("hasParentTerm", URI.create(SKOS.BROADER))
+                 .setParameter("targetVocabulary", targetVocabulary).getSingleResult();
     }
 }

@@ -7,21 +7,26 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
 import cz.cvut.kbss.termit.exception.ValidationException;
+import cz.cvut.kbss.termit.exception.VocabularyImportException;
+import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
@@ -154,5 +159,52 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final String label = "Test vocabulary";
         assertEquals(config.get(ConfigParam.NAMESPACE_VOCABULARY) + IdentifierResolver.normalize(label),
                 sut.generateIdentifier(label).toString());
+    }
+
+    @Test
+    void updateThrowsVocabularyImportExceptionWhenTryingToDeleteVocabularyImportRelationshipAndTermsAreStillRelated() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        subjectVocabulary.setImportedVocabularies(Collections.singleton(targetVocabulary.getUri()));
+        final Term child = Generator.generateTermWithId();
+        final Term parentTerm = Generator.generateTermWithId();
+        child.addParentTerm(parentTerm);
+        subjectVocabulary.getGlossary().addRootTerm(child);
+        child.setVocabulary(subjectVocabulary.getUri());
+        targetVocabulary.getGlossary().addRootTerm(parentTerm);
+        parentTerm.setVocabulary(targetVocabulary.getUri());
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+        });
+
+        subjectVocabulary.setImportedVocabularies(Collections.emptySet());
+        assertThrows(VocabularyImportException.class, () -> sut.update(subjectVocabulary));
+    }
+
+    @Test
+    void updateUpdatesVocabularyWithImportRemovalWhenNoRelationshipsBetweenTermsExist() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        subjectVocabulary.setImportedVocabularies(Collections.singleton(targetVocabulary.getUri()));
+        final Term child = Generator.generateTermWithId();
+        final Term parentTerm = Generator.generateTermWithId();
+        subjectVocabulary.getGlossary().addRootTerm(child);
+        child.setVocabulary(subjectVocabulary.getUri());
+        targetVocabulary.getGlossary().addRootTerm(parentTerm);
+        parentTerm.setVocabulary(targetVocabulary.getUri());
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+        });
+
+        subjectVocabulary.setImportedVocabularies(Collections.emptySet());
+        sut.update(subjectVocabulary);
+        assertThat(em.find(Vocabulary.class, subjectVocabulary.getUri()).getImportedVocabularies(),
+                anyOf(nullValue(), IsEmptyCollection.empty()));
     }
 }
