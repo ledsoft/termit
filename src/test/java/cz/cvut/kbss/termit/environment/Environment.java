@@ -12,7 +12,6 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.security.model.AuthenticationToken;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
-import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -30,7 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
@@ -144,7 +143,7 @@ public class Environment {
     }
 
     public static HttpMessageConverter<?> createStringEncodingMessageConverter() {
-        return new StringHttpMessageConverter(Charset.forName(Constants.UTF_8_ENCODING));
+        return new StringHttpMessageConverter(StandardCharsets.UTF_8);
     }
 
     public static HttpMessageConverter<?> createResourceMessageConverter() {

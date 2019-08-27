@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
-import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.AdjustedUriTemplateProxyServlet;
-import java.util.Properties;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.cvut.kbss.termit.util.ConfigParam;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,12 +22,13 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ServletWrappingController;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 
@@ -40,8 +38,11 @@ import static cz.cvut.kbss.termit.util.ConfigParam.REPOSITORY_URL;
 @Import({RestConfig.class, SecurityConfig.class})
 public class WebAppConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private cz.cvut.kbss.termit.util.Configuration config;
+    private final cz.cvut.kbss.termit.util.Configuration config;
+
+    public WebAppConfig(cz.cvut.kbss.termit.util.Configuration config) {
+        this.config = config;
+    }
 
     @Bean(name = "multipartResolver")
     public MultipartResolver multipartResolver() {
@@ -69,6 +70,7 @@ public class WebAppConfig implements WebMvcConfigurer {
 
     /**
      * Register the proxy for SPARQL endpoint.
+     *
      * @return Returns the ServletWrappingController for the SPARQL endpoint.
      */
     @Bean(name = "sparqlEndpointProxyServlet")
@@ -77,8 +79,8 @@ public class WebAppConfig implements WebMvcConfigurer {
         controller.setServletClass(AdjustedUriTemplateProxyServlet.class);
         controller.setBeanName("sparqlEndpointProxyServlet");
         final Properties p = new Properties();
-        p.setProperty("targetUri",config.get(REPOSITORY_URL));
-        p.setProperty("log","false");
+        p.setProperty("targetUri", config.get(REPOSITORY_URL));
+        p.setProperty("log", "false");
         p.setProperty(ConfigParam.REPO_USERNAME.toString(), config.get(ConfigParam.REPO_USERNAME, ""));
         p.setProperty(ConfigParam.REPO_PASSWORD.toString(), config.get(ConfigParam.REPO_PASSWORD, ""));
         controller.setInitParameters(p);
@@ -102,8 +104,7 @@ public class WebAppConfig implements WebMvcConfigurer {
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(createJsonLdMessageConverter());
         converters.add(createDefaultMessageConverter());
-        final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
-                Constants.UTF_8_ENCODING));
+        final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
         converters.add(stringConverter);
         converters.add(new ResourceHttpMessageConverter());
     }

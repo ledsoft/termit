@@ -14,11 +14,6 @@ public class Constants {
     public static final String REST_MAPPING_PATH = "/rest";
 
     /**
-     * UTF-8 encoding identifier.
-     */
-    public static final String UTF_8_ENCODING = "UTF-8";
-
-    /**
      * Temporary location where uploaded files will be stored.
      */
     public static final String UPLOADED_FILE_LOCATION = "/tmp/";
