@@ -114,4 +114,13 @@ public class RestExceptionHandler {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(VocabularyImportException.class)
+    public ResponseEntity<ErrorInfo> vocabularyImportException(HttpServletRequest request,
+                                                               VocabularyImportException e) {
+        logException(e);
+        return new ResponseEntity<>(
+                ErrorInfo.createWithMessageAndMessageId(e.getMessage(), e.getMessageId(), request.getRequestURI()),
+                HttpStatus.CONFLICT);
+    }
 }

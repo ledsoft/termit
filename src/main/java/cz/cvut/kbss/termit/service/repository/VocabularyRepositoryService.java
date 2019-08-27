@@ -62,7 +62,9 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
     }
 
     /**
-     * Ensures that possible vocabulary import removals are not prevented by existing inter-term relationships.
+     * Ensures that possible vocabulary import removals are not prevented by existing inter-vocabulary term
+     * relationships (terms from the updated vocabulary having parents from vocabularies whose import has been
+     * removed).
      */
     private void verifyVocabularyImports(Vocabulary update) {
         final Vocabulary original = findRequired(update.getUri());
@@ -73,7 +75,8 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
                 Collectors.toSet());
         if (!invalid.isEmpty()) {
             throw new VocabularyImportException("Cannot remove imports of vocabularies " + invalid +
-                    ", there are still relationships between terms.");
+                    ", there are still relationships between terms.",
+                    "error.vocabulary.update.imports.danglingTermReferences");
         }
     }
 

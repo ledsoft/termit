@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.VocabularyImportException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
@@ -198,5 +199,26 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         assertNotNull(errorInfo);
         assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
         verify(serviceMock, never()).update(any());
+    }
+
+    @Test
+    void updateVocabularyThrowsVocabularyImportExceptionWithMessageIdWhenServiceThrowsException() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setCreated(new Date());
+        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
+        vocabulary.setUri(uri);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, "test")).thenReturn(uri);
+        final String errorMsg = "Error message";
+        final String errorMsgId = "message.id";
+        when(serviceMock.update(any())).thenThrow(new VocabularyImportException(errorMsg, errorMsgId));
+
+        final MvcResult mvcResult = mockMvc.perform(put(PATH + "/test").contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                                       .content(toJson(vocabulary)))
+                                           .andExpect(status().isConflict()).andReturn();
+        final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
+        assertNotNull(errorInfo);
+        assertEquals(errorMsg, errorInfo.getMessage());
+        assertEquals(errorMsgId, errorInfo.getMessageId());
     }
 }
