@@ -1,0 +1,13 @@
+;# Clear all data related to vocabulary 
+
+PREFIX g: <__VOC_IRI__>
+
+DELETE {
+    GRAPH g: {
+	?s ?p ?o .
+    }
+} WHERE {
+    GRAPH g: {
+        ?s ?p ?o .
+    }
+}

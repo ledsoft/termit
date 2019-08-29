@@ -3,6 +3,7 @@ RDF4J_ENDPOINT=http://onto.fel.cvut.cz:7200/repositories/termit-dev
 DIR="/home/michal/modelio/workspace/IPR Praha/"
 IFS=
 FILE=tmp.rq
+CLEAR_INITIAL_DATA=false
 
 function runUpdateQuery() {
     cp $1 $FILE
@@ -20,6 +21,9 @@ function transform() {
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" $URL
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-diagram.ttl" $URL
 
+    if "$CLEAR_INITIAL_DATA"; then
+	    runUpdateQuery transform-clear.rq $VOC_IRI
+    fi
     runUpdateQuery transform-2.rq $VOC_IRI
     runUpdateQuery transform-4.rq $VOC_IRI
     runUpdateQuery transform-1.rq $VOC_IRI
