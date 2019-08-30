@@ -77,7 +77,7 @@ What is important is the correct setup of the repository. We will describe two o
 1. Start by creating an RDF4J repository of type **RDFS+SPIN with Lucene support**
 2. Upload SPIN rules from `rulesets/rules-termit-spin.ttl` into the repository
 3. There is no need to configure Lucene connectors, it by default indexes all properties in RDF4J (alternatively, it is possible
-to upload a repository configuration directly into the system repository - see examples at [1](https://github.com/eclipse/rdf4j/tree/master/repository/api/src/main/resources/org/eclipse/rdf4j/repository/config))
+to upload a repository configuration directly into the system repository - see examples at [[1]](https://github.com/eclipse/rdf4j/tree/master/core/repository/api/src/main/resources/org/eclipse/rdf4j/repository/config)
 4. -----
 
 #### Common
@@ -91,4 +91,3 @@ to upload a repository configuration directly into the system repository - see e
 6. Deploy TermIt. It will generate a default admin account, write its credentials to standard output and into a hidden file in the current user's home.
 
 For proper functionality of the text analysis service, [Annotace](https://github.com/kbss-cvut/annotace) has to be running and its URL configured in `config.properties`.
-  
