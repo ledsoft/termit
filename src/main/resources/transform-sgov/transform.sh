@@ -28,7 +28,6 @@ function transform() {
     runUpdateQuery transform-2.rq $VOC_IRI
     runUpdateQuery transform-4.rq $VOC_IRI
     runUpdateQuery transform-1.rq $VOC_IRI
-    runUpdateQuery transform-3.rq $VOC_IRI
     runUpdateQuery transform-diagram.rq $VOC_IRI
 }
 
