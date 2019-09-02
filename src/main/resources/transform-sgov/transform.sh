@@ -15,15 +15,16 @@ function transform() {
     VOC_IRI=$1
     PREFIX=$2
 
+    if $CLEAR_INITIAL_DATA; then
+	    runUpdateQuery transform-clear.rq $VOC_IRI
+    fi
+
     URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=$VOC_IRI"
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-model.ttl" $URL
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-glosář.ttl" $URL
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" $URL
     curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-diagram.ttl" $URL
 
-    if "$CLEAR_INITIAL_DATA"; then
-	    runUpdateQuery transform-clear.rq $VOC_IRI
-    fi
     runUpdateQuery transform-2.rq $VOC_IRI
     runUpdateQuery transform-4.rq $VOC_IRI
     runUpdateQuery transform-1.rq $VOC_IRI
