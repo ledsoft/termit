@@ -97,15 +97,21 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
     public boolean hasInterVocabularyTermRelationships(URI subjectVocabulary, URI targetVocabulary) {
         Objects.requireNonNull(subjectVocabulary);
         Objects.requireNonNull(targetVocabulary);
-        return em.createNativeQuery("ASK {" +
-                "    ?x ?isTermFromVocabulary ?subjectVocabulary ; " +
-                "       ?hasParentTerm ?y ." +
-                "    ?y ?isTermFromVocabulary ?targetVocabulary ." +
-                "}", Boolean.class)
+        return em.createNativeQuery("ASK WHERE {" +
+                "    ?t ?isTermFromVocabulary ?subjectVocabulary ; " +
+                "       ?hasParentTerm ?parent . " +
+                "    ?parent ?isTermFromVocabulary ?import . " +
+                "    {" +
+                "        SELECT ?import WHERE {" +
+                "           ?targetVocabulary ?importsVocabulary* ?import . " +
+                "} } }", Boolean.class)
                  .setParameter("isTermFromVocabulary",
                          URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .setParameter("subjectVocabulary", subjectVocabulary)
                  .setParameter("hasParentTerm", URI.create(SKOS.BROADER))
-                 .setParameter("targetVocabulary", targetVocabulary).getSingleResult();
+                 .setParameter("targetVocabulary", targetVocabulary)
+                 .setParameter("importsVocabulary",
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
+                 .getSingleResult();
     }
 }

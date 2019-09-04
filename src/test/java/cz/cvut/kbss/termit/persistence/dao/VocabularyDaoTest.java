@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -213,6 +214,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void hasInterVocabularyTermRelationshipsReturnsTrueForSKOSRelatedTermsInSpecifiedVocabularies() {
         final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
         final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        subjectVocabulary.setImportedVocabularies(Collections.singleton(targetVocabulary.getUri()));
         final Term child = Generator.generateTermWithId();
         final Term parentTerm = Generator.generateTermWithId();
         child.addParentTerm(parentTerm);
@@ -223,6 +225,31 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         transactional(() -> {
             em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
             em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+        });
+
+        assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
+    }
+
+    @Test
+    void hasInterVocabularyTermRelationshipsReturnsTrueForSKOSRelatedTermsInTransitivelyImportedVocabularies() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary transitiveVocabulary = Generator.generateVocabularyWithId();
+        subjectVocabulary.setImportedVocabularies(Collections.singleton(targetVocabulary.getUri()));
+        targetVocabulary.setImportedVocabularies(Collections.singleton(transitiveVocabulary.getUri()));
+        final Term child = Generator.generateTermWithId();
+        final Term parentTerm = Generator.generateTermWithId();
+        child.addParentTerm(parentTerm);
+        subjectVocabulary.getGlossary().addRootTerm(child);
+        child.setVocabulary(subjectVocabulary.getUri());
+        transitiveVocabulary.getGlossary().addRootTerm(parentTerm);
+        parentTerm.setVocabulary(transitiveVocabulary.getUri());
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(transitiveVocabulary, DescriptorFactory.vocabularyDescriptor(transitiveVocabulary));
             em.persist(child, DescriptorFactory.termDescriptor(child));
             em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
         });
