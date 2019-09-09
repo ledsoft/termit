@@ -13,10 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.net.URI;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -255,5 +253,28 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         });
 
         assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
+    }
+
+    @Test
+    void getTransitivelyImportedVocabulariesReturnsAllImportedVocabulariesForVocabulary() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        final Vocabulary importedVocabularyOne = Generator.generateVocabularyWithId();
+        final Vocabulary importedVocabularyTwo = Generator.generateVocabularyWithId();
+        final Vocabulary transitiveVocabulary = Generator.generateVocabularyWithId();
+        subjectVocabulary.setImportedVocabularies(
+                new HashSet<>(Arrays.asList(importedVocabularyOne.getUri(), importedVocabularyTwo.getUri())));
+        importedVocabularyOne.setImportedVocabularies(Collections.singleton(transitiveVocabulary.getUri()));
+        transactional(() -> {
+            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(importedVocabularyOne, DescriptorFactory.vocabularyDescriptor(importedVocabularyOne));
+            em.persist(importedVocabularyTwo, DescriptorFactory.vocabularyDescriptor(importedVocabularyTwo));
+            em.persist(transitiveVocabulary, DescriptorFactory.vocabularyDescriptor(transitiveVocabulary));
+        });
+
+        final Collection<URI> result = sut.getTransitivelyImportedVocabularies(subjectVocabulary);
+        assertEquals(3, result.size());
+        assertTrue(result.contains(importedVocabularyOne.getUri()));
+        assertTrue(result.contains(importedVocabularyTwo.getUri()));
+        assertTrue(result.contains(transitiveVocabulary.getUri()));
     }
 }

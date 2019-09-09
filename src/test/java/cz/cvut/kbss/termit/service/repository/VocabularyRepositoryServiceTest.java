@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
@@ -206,5 +207,14 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         sut.update(subjectVocabulary);
         assertThat(em.find(Vocabulary.class, subjectVocabulary.getUri()).getImportedVocabularies(),
                 anyOf(nullValue(), IsEmptyCollection.empty()));
+    }
+
+    @Test
+    void getTransitivelyImportedVocabulariesReturnsEmptyCollectionsWhenVocabularyHasNoImports() {
+        final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary)));
+        final Collection<URI> result = sut.getTransitivelyImportedVocabularies(subjectVocabulary);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }
