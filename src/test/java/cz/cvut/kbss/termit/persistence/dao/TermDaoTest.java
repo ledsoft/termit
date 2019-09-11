@@ -541,4 +541,12 @@ class TermDaoTest extends BaseDaoTestRunner {
         assertEquals(parent, result.get(0));
         assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
     }
+
+    @Test
+    void findLoadsSubTermsForResult() {
+        final Term parent = persistParentWithChild();
+        final Optional<Term> result = sut.find(parent.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(parent.getSubTerms(), result.get().getSubTerms());
+    }
 }

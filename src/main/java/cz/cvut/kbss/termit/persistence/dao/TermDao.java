@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +31,13 @@ public class TermDao extends AssetDao<Term> {
     public TermDao(EntityManager em, Configuration config) {
         super(Term.class, em);
         this.config = config;
+    }
+
+    @Override
+    public Optional<Term> find(URI id) {
+        final Optional<Term> result = super.find(id);
+        result.ifPresent(this::loadSubTerms);
+        return result;
     }
 
     /**
