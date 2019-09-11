@@ -191,8 +191,9 @@ public class TermService {
     public List<Term> findSubTerms(Term parent) {
         Objects.requireNonNull(parent);
         return parent.getSubTerms() == null ? Collections.emptyList() :
-               parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
-                       () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
+               parent.getSubTerms().stream().map(u -> repositoryService.find(u.getUri()).orElseThrow(
+                       () -> new NotFoundException(
+                               "Child of term " + parent + " with id " + u.getUri() + " not found!")))
                      .collect(Collectors.toList());
     }
 

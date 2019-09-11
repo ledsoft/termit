@@ -6,6 +6,7 @@ import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
@@ -43,9 +44,9 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLObjectProperty(iri = SKOS.BROADER, fetch = FetchType.EAGER)
     private Set<Term> parentTerms;
 
-    @Inferred
-    @OWLObjectProperty(iri = SKOS.NARROWER)
-    private Set<URI> subTerms;
+    @Transient  // Not used by JOPA
+    @OWLObjectProperty(iri = SKOS.NARROWER) // But map the property for JSON-LD serialization
+    private Set<TermInfo> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
@@ -87,11 +88,11 @@ public class Term extends Asset implements HasTypes, Serializable {
         parentTerms.add(term);
     }
 
-    public Set<URI> getSubTerms() {
+    public Set<TermInfo> getSubTerms() {
         return subTerms;
     }
 
-    public void setSubTerms(Set<URI> subTerms) {
+    public void setSubTerms(Set<TermInfo> subTerms) {
         this.subTerms = subTerms;
     }
 
@@ -156,7 +157,8 @@ public class Term extends Asset implements HasTypes, Serializable {
         }
         sb.append(',');
         if (subTerms != null && !subTerms.isEmpty()) {
-            sb.append(exportCollection(subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+            sb.append(
+                    exportCollection(subTerms.stream().map(ti -> ti.getUri().toString()).collect(Collectors.toSet())));
         }
         return sb.toString();
     }
@@ -195,7 +197,8 @@ public class Term extends Asset implements HasTypes, Serializable {
         }
         if (subTerms != null) {
             row.createCell(7)
-               .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+               .setCellValue(String.join(";",
+                       subTerms.stream().map(ti -> ti.getUri().toString()).collect(Collectors.toSet())));
         }
     }
 

@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -96,23 +97,30 @@ class TermTest {
     @Test
     void toCsvExportsSubTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
-        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> generateTermInfo()).collect(Collectors.toSet()));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(8));
         final String subTerms = items[7];
         assertTrue(subTerms.matches(".+;.+"));
-        term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
+        term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.getUri().toString())));
+    }
+
+    private TermInfo generateTermInfo() {
+        final TermInfo ti = new TermInfo();
+        ti.setUri(Generator.generateUri());
+        ti.setLabel("Term" + Generator.randomInt());
+        return ti;
     }
 
     @Test
-    void toExcelExportsTermToExcelRw() {
+    void toExcelExportsTermToExcelRow() {
         final Term term = Generator.generateTermWithId();
         term.setTypes(Collections.singleton(Vocabulary.s_c_object));
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
         term.setParentTerms(new HashSet<>(Generator.generateTermsWithIds(5)));
-        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> generateTermInfo()).collect(Collectors.toSet()));
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");
         final XSSFRow row = sheet.createRow(0);
@@ -128,7 +136,8 @@ class TermTest {
         term.getParentTerms()
             .forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.getUri().toString())));
         assertTrue(row.getCell(7).getStringCellValue().matches(".+;.+"));
-        term.getSubTerms().forEach(st -> assertTrue(row.getCell(7).getStringCellValue().contains(st.toString())));
+        term.getSubTerms()
+            .forEach(st -> assertTrue(row.getCell(7).getStringCellValue().contains(st.getUri().toString())));
     }
 
     @Test
