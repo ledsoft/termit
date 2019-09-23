@@ -71,9 +71,20 @@ public enum ConfigParam {
     TEXT_ANALYSIS_SERVICE_URL("textAnalysis.url"),
 
     /**
-     * Specifies folder in which admin credentials are stored when his account is generated.
+     * Specifies folder in which admin credentials are saved when his account is generated.
+     *
+     * @see #ADMIN_CREDENTIALS_FILE
      */
     ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation"),
+
+    /**
+     * Name of the file in which admin credentials are saved when his account is generated.
+     * <p>
+     * This file is stored in the {@link #ADMIN_CREDENTIALS_LOCATION}.
+     *
+     * @see #ADMIN_CREDENTIALS_LOCATION
+     */
+    ADMIN_CREDENTIALS_FILE("admin.credentialsFile"),
 
     /**
      * Specifies root directory in which document files are stored.

@@ -46,7 +46,7 @@ public class Constants {
     public static final String DEFAULT_LANGUAGE = "en";
 
     /**
-     * Name of the file in which admin credentials are stored.
+     * Default name of the file in which admin credentials are stored.
      */
     public static final String ADMIN_CREDENTIALS_FILE = ".termit-admin";
 
