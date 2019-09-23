@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Validator;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -80,15 +81,14 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
         }
     }
 
-    /**
-     * Generates a vocabulary identifier based on the specified label.
-     *
-     * @param label Vocabulary label
-     * @return Vocabulary identifier
-     */
     @Override
     public URI generateIdentifier(String label) {
         Objects.requireNonNull(label);
         return idResolver.generateIdentifier(ConfigParam.NAMESPACE_VOCABULARY, label);
+    }
+
+    @Override
+    public Collection<URI> getTransitivelyImportedVocabularies(Vocabulary entity) {
+        return vocabularyDao.getTransitivelyImportedVocabularies(entity);
     }
 }

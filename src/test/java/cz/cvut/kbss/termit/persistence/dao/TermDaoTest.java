@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.TypedQuery;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Asset;
@@ -106,17 +107,18 @@ class TermDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findAllRootsReturnsOnlyRootTerms() {
-        final List<Term> terms = generateTerms(10);
-        terms.forEach(t -> t.setSubTerms(
-                new HashSet<URI>(generateTerms(2).stream().map(Term::getUri).collect(Collectors.toSet()))));
-        addTermsAndSave(new HashSet<>(terms), vocabulary);
+        final List<Term> rootTerms = generateTerms(10);
+        addTermsAndSave(new HashSet<>(rootTerms), vocabulary);
+        transactional(() -> rootTerms.forEach(t -> {
+            final Term child = Generator.generateTermWithId();
+            child.setParentTerms(Collections.singleton(t));
+            child.setVocabulary(vocabulary.getUri());
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+        }));
+
 
         final List<Term> result = sut.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC);
-        assertEquals(terms.size(), result.size());
-        for (int i = 0; i < terms.size(); i++) {
-            assertEquals(terms.get(i), result.get(i));
-            assertEquals(terms.get(i).getSubTerms(), result.get(i).getSubTerms());
-        }
+        assertEquals(rootTerms, result);
     }
 
     @Test
@@ -472,5 +474,79 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Term result = em.find(Term.class, term.getUri());
         assertNotNull(result);
         assertEquals(Collections.singleton(parentTwo), result.getParentTerms());
+    }
+
+    @Test
+    void findAllLoadsSubTermsForResults() {
+        final Term parent = persistParentWithChild();
+
+        final List<Term> result = sut.findAll(vocabulary);
+        assertEquals(2, result.size());
+        final Optional<Term> parentResult = result.stream().filter(t -> t.equals(parent)).findFirst();
+        assertTrue(parentResult.isPresent());
+        assertEquals(parent.getSubTerms(), parentResult.get().getSubTerms());
+    }
+
+    private Term persistParentWithChild() {
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabulary.getUri());
+        final Term child = Generator.generateTermWithId();
+        child.setVocabulary(vocabulary.getUri());
+        child.setParentTerms(Collections.singleton(parent));
+        parent.setSubTerms(Collections.singleton(new TermInfo(child)));
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(parent);
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            insertNarrowerStatements(child);
+        });
+        return parent;
+    }
+
+    @Test
+    void findAllRootsLoadsSubTermsForResults() {
+        final Term parent = persistParentWithChild();
+        final List<Term> result = sut.findAllRoots(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+        assertEquals(1, result.size());
+        assertEquals(parent, result.get(0));
+        assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
+    }
+
+    @Test
+    void findAllRootsIncludingImportsLoadsSubTermsForResults() {
+        final Term parent = persistParentWithChild();
+        final List<Term> result = sut.findAllRootsIncludingImports(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+        assertEquals(1, result.size());
+        assertEquals(parent, result.get(0));
+        assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
+    }
+
+    @Test
+    void findAllRootsViaSearchStringLoadsSubTermsForResults() {
+        final Term parent = persistParentWithChild();
+        final String searchString = parent.getSubTerms().iterator().next().getLabel();
+        final List<Term> result = sut.findAllRoots(searchString, vocabulary);
+        assertEquals(1, result.size());
+        assertEquals(parent, result.get(0));
+        assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
+    }
+
+    @Test
+    void findAllRootsIncludingImportsViaSearchStringLoadsSubTermsForResults() {
+        final Term parent = persistParentWithChild();
+        final String searchString = parent.getSubTerms().iterator().next().getLabel();
+        final List<Term> result = sut.findAllRootsIncludingImports(searchString, vocabulary);
+        assertEquals(1, result.size());
+        assertEquals(parent, result.get(0));
+        assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
+    }
+
+    @Test
+    void findLoadsSubTermsForResult() {
+        final Term parent = persistParentWithChild();
+        final Optional<Term> result = sut.find(parent.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(parent.getSubTerms(), result.get().getSubTerms());
     }
 }

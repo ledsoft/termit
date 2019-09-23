@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -34,33 +35,42 @@ public class VocabularyController extends BaseController {
         this.vocabularyService = vocabularyService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Vocabulary> getAll() {
         return vocabularyService.findAll();
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public ResponseEntity<Void> createVocabulary(@RequestBody Vocabulary vocabulary) {
         vocabularyService.persist(vocabulary);
         LOG.debug("Vocabulary {} created.", vocabulary);
         return ResponseEntity.created(generateLocation(vocabulary.getUri(), ConfigParam.NAMESPACE_VOCABULARY)).build();
     }
 
-    @RequestMapping(value = "/{fragment}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public Vocabulary getById(@PathVariable("fragment") String fragment,
+    @GetMapping(value = "/{fragment}", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public Vocabulary getById(@PathVariable String fragment,
                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI id = resolveVocabularyUri(fragment, namespace);
         return vocabularyService.findRequired(id);
+    }
+
+    /**
+     * Gets imports (including transitive) of vocabulary with the specified identification
+     */
+    @GetMapping(value = "/{fragment}/imports", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public Collection<URI> getTransitiveImports(@PathVariable String fragment,
+                                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final Vocabulary vocabulary = vocabularyService.getRequiredReference(resolveVocabularyUri(fragment, namespace));
+        return vocabularyService.getTransitivelyImportedVocabularies(vocabulary);
     }
 
     private URI resolveVocabularyUri(String fragment, String namespace) {
         return resolveIdentifier(namespace, fragment, ConfigParam.NAMESPACE_VOCABULARY);
     }
 
-    @RequestMapping(value = "/{fragment}", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE,
-            JsonLd.MEDIA_TYPE})
+    @PutMapping(value = "/{fragment}", consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateVocabulary(@PathVariable("fragment") String fragment,
+    public void updateVocabulary(@PathVariable String fragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                  @RequestBody Vocabulary update) {
         final URI vocabularyUri = resolveVocabularyUri(fragment, namespace);
@@ -77,7 +87,7 @@ public class VocabularyController extends BaseController {
      * @return Generated vocabulary identifier
      */
     @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/identifier", method = RequestMethod.GET)
+    @GetMapping(value = "/identifier")
     public URI generateIdentifier(@RequestParam("name") String name) {
         return vocabularyService.generateIdentifier(name);
     }

@@ -74,10 +74,19 @@ What is important is the correct setup of the repository. We will describe two o
 
 #### RDF4J
 
+For RDF4J 2.x: 
 1. Start by creating an RDF4J repository of type **RDFS+SPIN with Lucene support**
 2. Upload SPIN rules from `rulesets/rules-termit-spin.ttl` into the repository
 3. There is no need to configure Lucene connectors, it by default indexes all properties in RDF4J (alternatively, it is possible
 to upload a repository configuration directly into the system repository - see examples at [[1]](https://github.com/eclipse/rdf4j/tree/master/core/repository/api/src/main/resources/org/eclipse/rdf4j/repository/config)
+4. -----
+
+For RDF4J 3.x: 
+1. Start by creating an RDF4J repository with RDFS and SPIN inference and Lucene support
+    * Copy repository configuration into the appropriate directory, as described at [[2]](https://rdf4j.eclipse.org/documentation/server-workbench-console/#repository-configuration)
+    * Native store with RDFS+SPIN and Lucene sample configuration is at [[3]](https://github.com/eclipse/rdf4j/blob/master/core/repository/api/src/main/resources/org/eclipse/rdf4j/repository/config/native-spin-rdfs-lucene.ttl)
+2. Upload SPIN rules from `rulesets/rules-termit-spin.ttl` into the repository
+3. There is no need to configure Lucene connectors, it by default indexes all properties in RDF4J
 4. -----
 
 #### Common

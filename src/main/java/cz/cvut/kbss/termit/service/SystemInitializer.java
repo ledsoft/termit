@@ -4,7 +4,6 @@ import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +74,8 @@ public class SystemInitializer {
     }
 
     private File createHiddenFile() throws IOException {
-        final File credentialsFile = new File(
-                config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
+        final File credentialsFile = new File(config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator +
+                config.get(ConfigParam.ADMIN_CREDENTIALS_FILE));
         credentialsFile.createNewFile();
         // Hidden attribute on Windows
         Files.setAttribute(credentialsFile.toPath(), "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);

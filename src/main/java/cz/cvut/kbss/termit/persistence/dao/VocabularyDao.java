@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class VocabularyDao extends AssetDao<Vocabulary> {
@@ -45,6 +42,25 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
         Objects.requireNonNull(id);
         try {
             return Optional.ofNullable(em.getReference(type, id, DescriptorFactory.vocabularyDescriptor(id)));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    /**
+     * Gets identifiers of all vocabularies imported by the specified vocabulary, including transitively imported ones.
+     *
+     * @param entity Base vocabulary, whose imports should be retrieved
+     * @return Collection of (transitively) imported vocabularies
+     */
+    public Collection<URI> getTransitivelyImportedVocabularies(Vocabulary entity) {
+        Objects.requireNonNull(entity);
+        try {
+            return em.createNativeQuery("SELECT DISTINCT ?imported WHERE {" +
+                    "?x ?imports+ ?imported ." +
+                    "}", URI.class)
+                     .setParameter("imports", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
+                     .setParameter("x", entity.getUri()).getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -97,15 +113,21 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
     public boolean hasInterVocabularyTermRelationships(URI subjectVocabulary, URI targetVocabulary) {
         Objects.requireNonNull(subjectVocabulary);
         Objects.requireNonNull(targetVocabulary);
-        return em.createNativeQuery("ASK {" +
-                "    ?x ?isTermFromVocabulary ?subjectVocabulary ; " +
-                "       ?hasParentTerm ?y ." +
-                "    ?y ?isTermFromVocabulary ?targetVocabulary ." +
-                "}", Boolean.class)
+        return em.createNativeQuery("ASK WHERE {" +
+                "    ?t ?isTermFromVocabulary ?subjectVocabulary ; " +
+                "       ?hasParentTerm ?parent . " +
+                "    ?parent ?isTermFromVocabulary ?import . " +
+                "    {" +
+                "        SELECT ?import WHERE {" +
+                "           ?targetVocabulary ?importsVocabulary* ?import . " +
+                "} } }", Boolean.class)
                  .setParameter("isTermFromVocabulary",
                          URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .setParameter("subjectVocabulary", subjectVocabulary)
                  .setParameter("hasParentTerm", URI.create(SKOS.BROADER))
-                 .setParameter("targetVocabulary", targetVocabulary).getSingleResult();
+                 .setParameter("targetVocabulary", targetVocabulary)
+                 .setParameter("importsVocabulary",
+                         URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
+                 .getSingleResult();
     }
 }
