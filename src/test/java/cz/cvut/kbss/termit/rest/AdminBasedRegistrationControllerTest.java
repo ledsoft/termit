@@ -9,6 +9,7 @@ import cz.cvut.kbss.termit.rest.handler.RestExceptionHandler;
 import cz.cvut.kbss.termit.security.JwtUtils;
 import cz.cvut.kbss.termit.service.business.UserService;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,37 +25,28 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
-import java.util.Collections;
 import java.util.List;
 
-import static cz.cvut.kbss.termit.service.IdentifierResolver.extractIdentifierFragment;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * This tests only the security aspect of {@link UserController}. Functionality is tested in {@link
- * UserControllerTest}.
- */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestConfig.class,
-                                 TestRestSecurityConfig.class,
-                                 UserControllerSecurityTest.Config.class})
+        TestRestSecurityConfig.class,
+        AdminBasedRegistrationControllerTest.Config.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @WebAppConfiguration
-class UserControllerSecurityTest extends BaseControllerTestRunner {
-
-    private static final String BASE_URL = "/users";
+class AdminBasedRegistrationControllerTest extends BaseControllerTestRunner {
 
     @Autowired
     private Filter springSecurityFilterChain;
@@ -87,7 +79,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         private SecurityUtils securityUtilsMock;
 
         @InjectMocks
-        private UserController controller;
+        private AdminBasedRegistrationController controller;
 
         Config() {
             MockitoAnnotations.initMocks(this);
@@ -99,7 +91,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         }
 
         @Bean
-        public UserController userController() {
+        public AdminBasedRegistrationController registrationController() {
             return controller;
         }
 
@@ -127,57 +119,23 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void findAllThrowsForbiddenForUnauthorizedUser() throws Exception {
-        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
-        when(userService.findAll()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/users")).andExpect(status().isForbidden());
-        verify(userService, never()).findAll();
+    void createUserPersistsUserWhenCalledByAdmin() throws Exception {
+        final UserAccount admin = Generator.generateUserAccount();
+        admin.addType(Vocabulary.s_c_administrator_termitu);
+        Environment.setCurrentUser(admin);
+        final UserAccount user = Generator.generateUserAccount();
+        mockMvc.perform(post("/users").content(toJson(user)).contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(status().isCreated());
+        verify(userService).persist(user);
     }
 
     @Test
-    void getCurrentReturnsCurrentlyLoggedInUser() throws Exception {
-        final UserAccount user = Generator.generateUserAccountWithPassword();
-        Environment.setCurrentUser(user);
-        when(userService.getCurrent()).thenReturn(user);
-        final MvcResult mvcResult = mockMvc.perform(get(BASE_URL + "/current").accept(MediaType.APPLICATION_JSON_VALUE))
-                                           .andExpect(status().isOk()).andReturn();
-        final UserAccount result = readValue(mvcResult, UserAccount.class);
-        assertEquals(user, result);
-    }
-
-    @Test
-    void unlockThrowsForbiddenForNonAdmin() throws Exception {
-        // This one is not an admin
-        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
-        final UserAccount toUnlock = Generator.generateUserAccountWithPassword();
-
-        mockMvc.perform(
-                delete(BASE_URL + "/" + extractIdentifierFragment(toUnlock.getUri()) + "/lock")
-                        .content(toUnlock.getPassword()))
+    void createUserThrowsForbiddenForNonAdminUser() throws Exception {
+        final UserAccount admin = Generator.generateUserAccount();
+        Environment.setCurrentUser(admin);
+        final UserAccount user = Generator.generateUserAccount();
+        mockMvc.perform(post("/users").content(toJson(user)).contentType(MediaType.APPLICATION_JSON_VALUE))
                .andExpect(status().isForbidden());
-        verify(userService, never()).unlock(any(), any());
-    }
-
-    @Test
-    void enableThrowsForbiddenForNonAdmin() throws Exception {
-        // This one is not an admin
-        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
-        final UserAccount toEnable = Generator.generateUserAccountWithPassword();
-
-        mockMvc.perform(post(BASE_URL + "/" + extractIdentifierFragment(toEnable.getUri()) + "/status"))
-               .andExpect(status().isForbidden());
-        verify(userService, never()).enable(any());
-    }
-
-    @Test
-    void disableThrowsForbiddenForNonAdmin() throws Exception {
-        // This one is not an admin
-        Environment.setCurrentUser(Generator.generateUserAccountWithPassword());
-        final UserAccount toDisable = Generator.generateUserAccountWithPassword();
-
-        mockMvc.perform(delete(BASE_URL + "/" + extractIdentifierFragment(toDisable.getUri()) + "/status"))
-               .andExpect(status().isForbidden());
-        verify(userService, never()).disable(any());
+        verify(userService, never()).persist(any());
     }
 }

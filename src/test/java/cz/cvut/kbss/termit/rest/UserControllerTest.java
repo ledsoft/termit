@@ -65,14 +65,6 @@ class UserControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void createUserPersistsUser() throws Exception {
-        final UserAccount user = Generator.generateUserAccount();
-        mockMvc.perform(post(BASE_URL).content(toJson(user)).contentType(MediaType.APPLICATION_JSON_VALUE))
-               .andExpect(status().isCreated());
-        verify(userService).persist(user);
-    }
-
-    @Test
     void updateCurrentSendsUserUpdateToService() throws Exception {
         final UserUpdateDto dto = dtoForUpdate();
 
