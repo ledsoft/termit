@@ -37,8 +37,7 @@ TERMIT=$(pwd)
 curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$TERMIT/../../../../ontology/termit-model.ttl" $URL
 
 transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-183 l-sgov-183-2006
-transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-500 l-sgov-500-2006
-transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-501 l-sgov-501-2006
+transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-vyhlaska-2006-500 l-sgov-500-2006
+transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-vyhlaska-2006-501 l-sgov-501-2006
 transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-psp-2016 psp-2016
-transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.4 mpp-3.4
 transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.5-np mpp-3.5-np
