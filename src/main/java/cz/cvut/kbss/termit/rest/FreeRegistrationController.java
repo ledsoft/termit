@@ -31,6 +31,7 @@ public class FreeRegistrationController {
     @Autowired
     public FreeRegistrationController(UserService userService) {
         this.userService = userService;
+        LOG.debug("Instantiating free registration controller.");
     }
 
     @PreAuthorize("permitAll()")

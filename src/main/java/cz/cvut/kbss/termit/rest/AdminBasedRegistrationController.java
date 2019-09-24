@@ -32,6 +32,7 @@ public class AdminBasedRegistrationController {
     @Autowired
     public AdminBasedRegistrationController(UserService userService) {
         this.userService = userService;
+        LOG.debug("Instantiating admin-based registration controller.");
     }
 
     @PreAuthorize("hasRole(\'" + SecurityConstants.ROLE_ADMIN + "\')")
