@@ -26,9 +26,16 @@ The rest of the configuration is done in the `config.properties` file in `src/ma
 
 Most of the parameters there should be self-explanatory or have documentation in the `ConfigParam` class.
 
-There is one parameter not used by the application itself, but by Spring - `spring.profiles.active`. The only option currently
-available for it is whether `lucene` is turned on or not. This depends on the repository used and whether it has Lucene indexing.
-For the purpose of this document, turn it on.
+There is one parameter not used by the application itself, but by Spring - `spring.profiles.active`. There are two Spring profiles currently used
+by the application:
+* `lucene` - decides whether Lucene text indexing is enabled and should be used in full text search queries.
+* `admin-registration-only` - decides whether new users can be registered only by application admin, or whether anyone can register.
+
+The `lucene` Spring profile is activated automatically by the `rdf4j` and `graphdb` Maven profiles. `admin-registration-only` has to be added
+either in `config.properties` directly, or one can pass the parameter to Maven build, e.g.:
+
+* `mvn clean package -P graphdb -Dspring.profiles.active=lucene,admin-registration-only`
+
 
 ### Example
 
