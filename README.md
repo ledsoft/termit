@@ -68,33 +68,6 @@ Use it to verify input data. See `User` and its validation in `BaseRepositorySer
 TermIt is preconfigured to run against a local GraphDB repository at `http://locahost:7200/repositories/termit`.
 This can be changed by updating `config.properties`.
 
-### GraphDB Ruleset
-
-_Applies when running against a GraphDB repository._
-
-In order to support inference used by the application, a custom ruleset has to be specified for the TermIt repository. This
-ruleset is available in `rulesets/rulest-termit-graphdb.pie`.
-
-### RDF4J SPIN Rules
-
-_Applies when running against an RDF4J repository._
-
-In order to support the inference used by the application, new rules need to be added to RDF4J because its own RDFS rule engine does not
-support OWL stuff like inverse properties (which are used in the model). Thus, when creating a new repository, a store 
-with **RDFS+SPIN support** should be selected (if proper search should be supported as well, a **RDFS+SPIN with Lucene support** should be selected). 
-Then, rules contained in `rulesets/rules-termit-spin.ttl` should be added to the repository, 
-as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
-
-### Loading Ontologies into Repository
-
-TermIt needs the repository to provide some inference. Besides loading the appropriate rulesets (see above), it is also
-necessary to load the ontological models into the repository.
-
-First model to load is the TermIt model itself. It can be found in `ontology/termit-model.ttl`. The other necessary model
-is the _popis dat_ model. It is available online at 
-[http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model](http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model).
-With these two models loaded, the repository should provide the inference services required by TermIt.
-
 
 ### User vs UserAccount
 `User` is a domain class used for domain functions, mostly for resource provenance (author, last editor). It does not support password.
@@ -147,4 +120,4 @@ on the `/monitoring` endpoint and are secured using _basic_ authentication, see 
 
 TermIt REST API is documented on [SwaggerHub](https://app.swaggerhub.com/apis/ledvima1/TermIt/) under the appropriate version.
 
-Build configuration and deployment is described in [setup.md](setup.md).
+Build configuration and deployment is described in [setup.md](doc/setup.md).
