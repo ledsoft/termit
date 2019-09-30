@@ -358,4 +358,12 @@ class ResourceServiceTest {
         assertEquals(Collections.singletonList(rta), result);
         verify(resourceRepositoryService).getAssignmentInfo(resource);
     }
+
+    @Test
+    void removeRemovesAssociatedDiskContent() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(resourceRepositoryService.getRequiredReference(resource.getUri())).thenReturn(resource);
+        sut.remove(resource.getUri());
+        verify(documentManager).remove(resource);
+    }
 }

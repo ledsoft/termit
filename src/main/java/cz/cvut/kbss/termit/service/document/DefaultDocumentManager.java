@@ -142,6 +142,7 @@ public class DefaultDocumentManager implements DocumentManager {
         } else if (resource instanceof Document) {
             removeDocumentFolderWithContent((Document) resource);
         }
+        // Do nothing for Resources not supporting content storage
     }
 
     private void removeFile(File file) {
