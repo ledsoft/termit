@@ -78,4 +78,11 @@ public interface DocumentManager {
      * @throws NotFoundException If a corresponding physical file cannot be found
      */
     Optional<String> getContentType(File file);
+
+    /**
+     * Deletes the specified file and all its backups.
+     *
+     * @param file The file to remove
+     */
+    void remove(File file);
 }

@@ -131,4 +131,30 @@ public class DefaultDocumentManager implements DocumentManager {
             return Optional.empty();
         }
     }
+
+    @Override
+    public void remove(File file) {
+        Objects.requireNonNull(file);
+        final java.io.File physicalFile = resolveFile(file, false);
+        removeBackups(file, physicalFile);
+        physicalFile.delete();
+        removeParentIfNotInDocument(file, physicalFile);
+    }
+
+    private void removeBackups(File file, java.io.File physicalFile) {
+        final String backupStartPattern = IdentifierResolver.sanitizeFileName(file.getLabel()) + "~";
+        final java.io.File[] backups = physicalFile.getParentFile()
+                                                   .listFiles((f, fn) -> fn.startsWith(backupStartPattern));
+        if (backups != null) {
+            for (java.io.File backup : backups) {
+                backup.delete();
+            }
+        }
+    }
+
+    private void removeParentIfNotInDocument(File file, java.io.File physicalFile) {
+        if (file.getDocument() == null) {
+            physicalFile.getParentFile().delete();
+        }
+    }
 }

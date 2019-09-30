@@ -30,6 +30,7 @@ import java.util.Optional;
 import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -97,6 +98,13 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final File file = new File();
         file.setLabel("test-file.html");
         file.setUri(Generator.generateUri());
+        generateFileWithoutParentDocument(file);
+
+        final String result = sut.loadFileContent(file);
+        assertEquals(CONTENT, result);
+    }
+
+    private java.io.File generateFileWithoutParentDocument(File file) throws Exception {
         final java.io.File dir = Files.createTempDirectory("termit").toFile();
         dir.deleteOnExit();
         ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
@@ -107,9 +115,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         final java.io.File content = new java.io.File(fileDir + java.io.File.separator + file.getLabel());
         content.deleteOnExit();
         Files.write(content.toPath(), Collections.singletonList(CONTENT));
-
-        final String result = sut.loadFileContent(file);
-        assertEquals(CONTENT, result);
+        return content;
     }
 
     @Test
@@ -313,5 +319,87 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
                 f.deleteOnExit();
             }
         }
+    }
+
+    @Test
+    void removeRemovesPhysicalFileForFileInDocument() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+
+        assertTrue(physicalFile.exists());
+        final java.io.File docDir = physicalFile.getParentFile();
+        sut.remove(file);
+        assertFalse(physicalFile.exists());
+        assertTrue(docDir.exists());
+    }
+
+    @Test
+    void removeRemovesPhysicalFileForStandaloneFile() throws Exception {
+        final File file = new File();
+        file.setLabel("test-file.html");
+        file.setUri(Generator.generateUri());
+        final java.io.File physicalFile = generateFileWithoutParentDocument(file);
+
+        assertTrue(physicalFile.exists());
+        sut.remove(file);
+        assertFalse(physicalFile.exists());
+    }
+
+    @Test
+    void removeRemovesAlsoBackupFilesOfFileInDocument() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+
+        createTestBackups(physicalFile);
+        final java.io.File docDir = physicalFile.getParentFile();
+        assertThat(docDir.list().length, greaterThan(0));
+        sut.remove(file);
+        assertEquals(0, docDir.list().length);
+    }
+
+    private void createTestBackups(java.io.File file) throws Exception {
+        for (int i = 0; i < 3; i++) {
+            final String path = file.getAbsolutePath();
+            final String newPath = path + "~" + System.currentTimeMillis() + "-" + i;
+            Files.copy(file.toPath(), new java.io.File(newPath).toPath());
+        }
+    }
+
+    @Test
+    void removeRemovesAlsoBackupFilesOfStandaloneFile() throws Exception {
+        final File file = new File();
+        file.setLabel("test-file.html");
+        file.setUri(Generator.generateUri());
+        final java.io.File physicalFile = generateFileWithoutParentDocument(file);
+        createTestBackups(physicalFile);
+
+        final java.io.File parentDir = physicalFile.getParentFile();
+        final java.io.File[] files = parentDir.listFiles();
+        assertNotNull(files);
+        assertThat(files.length, greaterThan(0));
+        sut.remove(file);
+        for (java.io.File f : files) {
+            assertFalse(f.exists());
+        }
+    }
+
+    @Test
+    void removeRemovesParentFolderForStandaloneFile() throws Exception {
+        final File file = new File();
+        file.setLabel("test-file.html");
+        file.setUri(Generator.generateUri());
+        final java.io.File physicalFile = generateFileWithoutParentDocument(file);
+        final java.io.File parentDir = physicalFile.getParentFile();
+
+        assertTrue(physicalFile.exists());
+        sut.remove(file);
+        assertFalse(physicalFile.exists());
+        assertFalse(parentDir.exists());
     }
 }
