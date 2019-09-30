@@ -121,3 +121,7 @@ on the `/monitoring` endpoint and are secured using _basic_ authentication, see 
 TermIt REST API is documented on [SwaggerHub](https://app.swaggerhub.com/apis/ledvima1/TermIt/) under the appropriate version.
 
 Build configuration and deployment is described in [setup.md](doc/setup.md).
+
+## License
+
+Licensed under GPL v3.0.
