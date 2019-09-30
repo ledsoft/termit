@@ -1,0 +1,21 @@
+# adds import between vocabularies
+
+PREFIX g: <__VOC_IRI__>
+PREFIX base: <__VOC_IRI__/>
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX popis-dat: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+
+INSERT {
+GRAPH g: {
+    g:  popis-dat:importuje-slovník ?voc
+    }
+    }
+WHERE {
+	  base:model owl:imports ?o .
+    ?o a <https://slovník.gov.cz/veřejný-sektor/pojem/model>;
+       owl:imports ?glo.
+    ?voc owl:imports ?o, ?glo .
+    g: owl:imports base:model.
+    ?b owl:imports ?o.
+}

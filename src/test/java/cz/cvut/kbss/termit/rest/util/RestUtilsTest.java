@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.rest.util;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.security.SecurityConstants;
-import cz.cvut.kbss.termit.util.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -12,6 +11,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.Cookie;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -66,7 +66,7 @@ class RestUtilsTest {
     @Test
     void urlEncodeEncodesSpecifiedStringWithUTF8URLEncoding() throws Exception {
         final String value = Generator.generateUri().toString();
-        assertEquals(URLEncoder.encode(value, Constants.UTF_8_ENCODING), RestUtils.urlEncode(value));
+        assertEquals(URLEncoder.encode(value, StandardCharsets.UTF_8.name()), RestUtils.urlEncode(value));
     }
 
     @Test

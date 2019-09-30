@@ -1,6 +1,5 @@
 package cz.cvut.kbss.termit.model;
 
-import cz.cvut.kbss.jopa.model.annotations.FetchType;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.model.annotations.OWLObjectProperty;
 import cz.cvut.kbss.jopa.model.annotations.ParticipationConstraints;
@@ -17,7 +16,7 @@ import java.util.Objects;
 public class Target extends AbstractEntity {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdroj, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zdroj)
     private URI source;
 
     public Target() {

@@ -158,6 +158,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         input.setContent(CONTENT);
         input.addVocabularyContext(vocabulary.getUri());
         input.setVocabularyRepository(URI.create(config.get(REPOSITORY_URL)));
+        input.setLanguage(config.get(ConfigParam.LANGUAGE));
         return input;
     }
 

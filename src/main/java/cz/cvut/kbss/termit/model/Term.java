@@ -4,15 +4,18 @@ import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.termit.dto.TermInfo;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
-import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,21 +29,24 @@ public class Term extends Asset implements HasTypes, Serializable {
      * Names of columns used in term export.
      */
     public static final List<String> EXPORT_COLUMNS = Collections
-            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "SubTerms"));
+            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "Parent term",
+                    "SubTerms"));
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
 
-    // TODO Can be replaced by JOPA SKOS.DEFINITION constant, available in the next eversion
-    @OWLAnnotationProperty(iri = Vocabulary.s_p_definition)
+    @OWLAnnotationProperty(iri = SKOS.DEFINITION)
     private String definition;
 
     @OWLDataProperty(iri = DC.Elements.SOURCE)
     private Set<String> sources;
 
-    // TODO Replace with a reference to JOPA SKOS, which will be available in the next version
-    @OWLObjectProperty(iri = Constants.SKOS_NARROWER, fetch = FetchType.EAGER)
-    private Set<URI> subTerms;
+    @OWLObjectProperty(iri = SKOS.BROADER, fetch = FetchType.EAGER)
+    private Set<Term> parentTerms;
+
+    @Transient  // Not used by JOPA
+    @OWLObjectProperty(iri = SKOS.NARROWER) // But map the property for JSON-LD serialization
+    private Set<TermInfo> subTerms;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
@@ -67,20 +73,27 @@ public class Term extends Asset implements HasTypes, Serializable {
         this.definition = definition;
     }
 
-    public Set<URI> getSubTerms() {
+    public Set<Term> getParentTerms() {
+        return parentTerms;
+    }
+
+    public void setParentTerms(Set<Term> parentTerms) {
+        this.parentTerms = parentTerms;
+    }
+
+    public void addParentTerm(Term term) {
+        if (parentTerms == null) {
+            this.parentTerms = new HashSet<>();
+        }
+        parentTerms.add(term);
+    }
+
+    public Set<TermInfo> getSubTerms() {
         return subTerms;
     }
 
-    public void setSubTerms(Set<URI> subTerms) {
+    public void setSubTerms(Set<TermInfo> subTerms) {
         this.subTerms = subTerms;
-    }
-
-    public boolean addSubTerm(URI childUri) {
-        Objects.requireNonNull(childUri);
-        if (subTerms == null) {
-            this.subTerms = new HashSet<>();
-        }
-        return subTerms.add(childUri);
     }
 
     public Set<String> getSources() {
@@ -127,8 +140,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     public String toCsv() {
         final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
         sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
-        sb.append(',').append(definition != null ? CsvUtils.sanitizeString(definition) : "");
-        sb.append(',').append(comment != null ? CsvUtils.sanitizeString(comment) : "");
+        sb.append(',').append(CsvUtils.sanitizeString(definition));
+        sb.append(',').append(CsvUtils.sanitizeString(comment));
         sb.append(',');
         if (types != null && !types.isEmpty()) {
             sb.append(exportCollection(types));
@@ -138,8 +151,14 @@ public class Term extends Asset implements HasTypes, Serializable {
             sb.append(exportCollection(sources));
         }
         sb.append(',');
+        if (parentTerms != null && !parentTerms.isEmpty()) {
+            sb.append(exportCollection(
+                    parentTerms.stream().map(pt -> pt.getUri().toString()).collect(Collectors.toSet())));
+        }
+        sb.append(',');
         if (subTerms != null && !subTerms.isEmpty()) {
-            sb.append(exportCollection(subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+            sb.append(
+                    exportCollection(subTerms.stream().map(ti -> ti.getUri().toString()).collect(Collectors.toSet())));
         }
         return sb.toString();
     }
@@ -171,10 +190,26 @@ public class Term extends Asset implements HasTypes, Serializable {
         if (sources != null) {
             row.createCell(5).setCellValue(String.join(";", sources));
         }
-        if (subTerms != null) {
+        if (parentTerms != null) {
             row.createCell(6)
-               .setCellValue(String.join(";", subTerms.stream().map(URI::toString).collect(Collectors.toSet())));
+               .setCellValue(String.join(";",
+                       parentTerms.stream().map(pt -> pt.getUri().toString()).collect(Collectors.toSet())));
         }
+        if (subTerms != null) {
+            row.createCell(7)
+               .setCellValue(String.join(";",
+                       subTerms.stream().map(ti -> ti.getUri().toString()).collect(Collectors.toSet())));
+        }
+    }
+
+    /**
+     * Checks whether this term has a parent term in the same vocabulary.
+     *
+     * @return Whether this term has parent in its vocabulary. Returns {@code false} also if this term has no parent
+     * term at all
+     */
+    public boolean hasParentInSameVocabulary() {
+        return parentTerms != null && parentTerms.stream().anyMatch(p -> p.getVocabulary().equals(vocabulary));
     }
 
     @Override
@@ -201,5 +236,13 @@ public class Term extends Asset implements HasTypes, Serializable {
                 " <" + getUri() + '>' +
                 ", types=" + types +
                 '}';
+    }
+
+    public static Field getParentTermsField() {
+        try {
+            return Term.class.getDeclaredField("parentTerms");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"parentTerms\" field.", e);
+        }
     }
 }

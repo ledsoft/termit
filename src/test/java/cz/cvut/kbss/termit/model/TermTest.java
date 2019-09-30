@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.model;
 
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,8 +19,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TermTest {
 
@@ -33,7 +34,7 @@ class TermTest {
                 count++;
             }
         }
-        assertEquals(6, count);
+        assertEquals(7, count);
     }
 
     @Test
@@ -82,24 +83,44 @@ class TermTest {
     }
 
     @Test
-    void toCsvExportsSubTermIrisDelimitedBySemicolons() {
+    void toCsvExportsParentTermIrisDelimitedBySemicolons() {
         final Term term = Generator.generateTermWithId();
-        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+        term.setParentTerms(new HashSet<>(Generator.generateTermsWithIds(5)));
         final String result = term.toCsv();
         final String[] items = result.split(",");
         assertThat(items.length, greaterThanOrEqualTo(7));
-        final String subTerms = items[6];
-        assertTrue(subTerms.matches(".+;.+"));
-        term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.toString())));
+        final String parentTerms = items[6];
+        assertTrue(parentTerms.matches(".+;.+"));
+        term.getParentTerms().forEach(t -> assertTrue(parentTerms.contains(t.getUri().toString())));
     }
 
     @Test
-    void toExcelExportsTermToExcelRw() {
+    void toCsvExportsSubTermIrisDelimitedBySemicolons() {
+        final Term term = Generator.generateTermWithId();
+        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> generateTermInfo()).collect(Collectors.toSet()));
+        final String result = term.toCsv();
+        final String[] items = result.split(",");
+        assertThat(items.length, greaterThanOrEqualTo(8));
+        final String subTerms = items[7];
+        assertTrue(subTerms.matches(".+;.+"));
+        term.getSubTerms().forEach(t -> assertTrue(subTerms.contains(t.getUri().toString())));
+    }
+
+    private TermInfo generateTermInfo() {
+        final TermInfo ti = new TermInfo();
+        ti.setUri(Generator.generateUri());
+        ti.setLabel("Term" + Generator.randomInt());
+        return ti;
+    }
+
+    @Test
+    void toExcelExportsTermToExcelRow() {
         final Term term = Generator.generateTermWithId();
         term.setTypes(Collections.singleton(Vocabulary.s_c_object));
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
-        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> Generator.generateUri()).collect(Collectors.toSet()));
+        term.setParentTerms(new HashSet<>(Generator.generateTermsWithIds(5)));
+        term.setSubTerms(IntStream.range(0, 5).mapToObj(i -> generateTermInfo()).collect(Collectors.toSet()));
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");
         final XSSFRow row = sheet.createRow(0);
@@ -112,7 +133,11 @@ class TermTest {
         assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
         term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
         assertTrue(row.getCell(6).getStringCellValue().matches(".+;.+"));
-        term.getSubTerms().forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.toString())));
+        term.getParentTerms()
+            .forEach(st -> assertTrue(row.getCell(6).getStringCellValue().contains(st.getUri().toString())));
+        assertTrue(row.getCell(7).getStringCellValue().matches(".+;.+"));
+        term.getSubTerms()
+            .forEach(st -> assertTrue(row.getCell(7).getStringCellValue().contains(st.getUri().toString())));
     }
 
     @Test
@@ -152,5 +177,34 @@ class TermTest {
                 "http://onto.fel.cvut.cz/ontologies/slovnik/oha-togaf/pojem/koncept-katalogů,-matic-a-pohledů"));
         final String result = term.toCsv();
         assertTrue(result.startsWith("\"" + term.getUri().toString() + "\","));
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsFalseWhenTermHasNoParent() {
+        final Term sut = Generator.generateTermWithId();
+        assertFalse(sut.hasParentInSameVocabulary());
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsTrueWhenTermHasParentWithSameVocabulary() {
+        final Term sut = Generator.generateTermWithId();
+        final URI vocabularyUri = Generator.generateUri();
+        sut.setVocabulary(vocabularyUri);
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabularyUri);
+        sut.addParentTerm(parent);
+
+        assertTrue(sut.hasParentInSameVocabulary());
+    }
+
+    @Test
+    void hasParentInSameVocabularyReturnsFalseWhenTermHasParentWithDifferentVocabulary() {
+        final Term sut = Generator.generateTermWithId();
+        sut.setVocabulary(Generator.generateUri());
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(Generator.generateUri());
+        sut.addParentTerm(parent);
+
+        assertFalse(sut.hasParentInSameVocabulary());
     }
 }

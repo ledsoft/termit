@@ -14,11 +14,6 @@ public class Constants {
     public static final String REST_MAPPING_PATH = "/rest";
 
     /**
-     * UTF-8 encoding identifier.
-     */
-    public static final String UTF_8_ENCODING = "UTF-8";
-
-    /**
      * Temporary location where uploaded files will be stored.
      */
     public static final String UPLOADED_FILE_LOCATION = "/tmp/";
@@ -51,7 +46,7 @@ public class Constants {
     public static final String DEFAULT_LANGUAGE = "en";
 
     /**
-     * Name of the file in which admin credentials are stored.
+     * Default name of the file in which admin credentials are stored.
      */
     public static final String ADMIN_CREDENTIALS_FILE = ".termit-admin";
 
@@ -73,14 +68,14 @@ public class Constants {
 
 
     /**
-     * Piece of text appended to vocabulary IRI for term IRI generation.
+     * Default piece of text appended to vocabulary IRI for term IRI generation.
      * <p>
      * For example, if we have a vocabulary with IRI {@code http://www.example.org/ontologies/vocabularies/metropolitan-plan}
      * and a term with label {@code Inhabited area}, the resulting IRI will be {@code
      * http://www.example.org/ontologies/vocabularies/metropolitan-plan/SEPARATOR/inhabited-area}, where 'SEPARATOR' is
      * this constant.
      */
-    public static final String TERM_NAMESPACE_SEPARATOR = "/pojem";
+    public static final String DEFAULT_TERM_NAMESPACE_SEPARATOR = "/pojem";
 
     /**
      * Path to directory containing queries used by the system.
@@ -89,8 +84,6 @@ public class Constants {
      * ClassLoader#getResourceAsStream(String)}.
      */
     public static final String QUERY_DIRECTORY = "query";
-
-    public static final String SKOS_NARROWER = "http://www.w3.org/2004/02/skos/core#narrower";
 
     private Constants() {
         throw new AssertionError();

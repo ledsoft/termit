@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.JOPAPersistenceProperties;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermOccurrences;
 import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
@@ -11,7 +12,12 @@ import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.XPathSelector;
+import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -311,6 +317,37 @@ class TermAssignmentDaoTest extends BaseDaoTestRunner {
             assertEquals(term.getLabel(), rta.getTermLabel());
             assertEquals(file.getUri(), rta.getResource());
             assertEquals(term.getVocabulary(), rta.getVocabulary());
+        }
+    }
+
+    @Test
+    void getAssignmentsInfoByResourceReturnsOnlyTermsWithLabelMatchingSystemLanguage() {
+        final Term term = Generator.generateTermWithId();
+        term.setVocabulary(Generator.generateUri());
+        final File file = Generator.generateFileWithId("test.html");
+        transactional(() -> {
+            enableRdfsInference(em);
+            em.persist(term);
+            em.persist(file);
+            saveTermLabelInOtherLanguage(term);
+        });
+        generateTermOccurrences(term, file, false);
+        generateAssignment(term, file, false);
+
+        final List<ResourceTermAssignments> result = sut.getAssignmentInfo(file);
+        // One assignment and one occurrence
+        assertEquals(2, result.size());
+        result.forEach(rta -> assertEquals(term.getLabel(), rta.getTermLabel()));
+    }
+
+    private void saveTermLabelInOtherLanguage(Term term) {
+        assertEquals(Constants.DEFAULT_LANGUAGE,
+                em.getEntityManagerFactory().getProperties().get(JOPAPersistenceProperties.LANG));
+        final Repository repo = em.unwrap(Repository.class);
+        final ValueFactory vf = repo.getValueFactory();
+        try (final RepositoryConnection conn = repo.getConnection()) {
+            conn.add(vf.createStatement(vf.createIRI(term.getUri().toString()), RDFS.LABEL,
+                    vf.createLiteral("Czech label", "cs")));
         }
     }
 }

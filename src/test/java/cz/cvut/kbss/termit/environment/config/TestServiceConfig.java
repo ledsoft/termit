@@ -5,7 +5,6 @@ import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.service.Services;
 import cz.cvut.kbss.termit.service.document.html.DummySelectorGenerator;
 import cz.cvut.kbss.termit.service.document.html.HtmlSelectorGenerators;
-import cz.cvut.kbss.termit.util.Constants;
 import org.jsoup.nodes.Element;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -39,8 +38,7 @@ public class TestServiceConfig {
         final RestTemplate client = new RestTemplate();
         final MappingJackson2HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter();
         jacksonConverter.setObjectMapper(Environment.getObjectMapper());
-        final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(Charset.forName(
-                Constants.UTF_8_ENCODING));
+        final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
         client.setMessageConverters(
                 Arrays.asList(jacksonConverter, stringConverter, new ResourceHttpMessageConverter()));
         return client;

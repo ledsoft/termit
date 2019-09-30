@@ -46,17 +46,24 @@ public enum ConfigParam {
     NAMESPACE_USER("namespace.user"),
 
     /**
-     * Namespace for document identifiers.
-     *
-     * @deprecated This should be superseded by {@link #NAMESPACE_RESOURCE}
-     */
-    @Deprecated
-    NAMESPACE_DOCUMENT("namespace.document"),
-
-    /**
      * Namespace for resource identifiers.
      */
     NAMESPACE_RESOURCE("namespace.resource"),
+
+    /**
+     * Separator of Term namespace from the parent Vocabulary identifier.
+     * <p>
+     * Since Term identifier is given by the identifier of the Vocabulary it belongs to and its own normalized label,
+     * this separator is used to (optionally) configure the Term identifier namespace.
+     * <p>
+     * For example, if we have a Vocabulary with IRI {@code http://www.example.org/ontologies/vocabularies/metropolitan-plan}
+     * and a Term with normalized label {@code inhabited-area}, the resulting IRI will be {@code
+     * http://www.example.org/ontologies/vocabularies/metropolitan-plan/SEPARATOR/inhabited-area}, where 'SEPARATOR' is
+     * the value of this configuration parameter.
+     * <p>
+     * Defaults to {@link Constants#DEFAULT_TERM_NAMESPACE_SEPARATOR}.
+     */
+    TERM_NAMESPACE_SEPARATOR("namespace.term.separator"),
 
     /**
      * URL of the text analysis service.
@@ -64,9 +71,20 @@ public enum ConfigParam {
     TEXT_ANALYSIS_SERVICE_URL("textAnalysis.url"),
 
     /**
-     * Specifies folder in which admin credentials are stored when his account is generated.
+     * Specifies folder in which admin credentials are saved when his account is generated.
+     *
+     * @see #ADMIN_CREDENTIALS_FILE
      */
     ADMIN_CREDENTIALS_LOCATION("admin.credentialsLocation"),
+
+    /**
+     * Name of the file in which admin credentials are saved when his account is generated.
+     * <p>
+     * This file is stored in the {@link #ADMIN_CREDENTIALS_LOCATION}.
+     *
+     * @see #ADMIN_CREDENTIALS_LOCATION
+     */
+    ADMIN_CREDENTIALS_FILE("admin.credentialsFile"),
 
     /**
      * Specifies root directory in which document files are stored.

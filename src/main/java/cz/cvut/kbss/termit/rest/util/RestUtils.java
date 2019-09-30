@@ -1,7 +1,6 @@
 package cz.cvut.kbss.termit.rest.util;
 
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.util.Constants;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.Cookie;
@@ -9,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -86,14 +86,14 @@ public class RestUtils {
     }
 
     /**
-     * Encodes the specifies value with an URL encoder, using {@link Constants#UTF_8_ENCODING}.
+     * Encodes the specifies value with an URL encoder, using {@link StandardCharsets#UTF_8}.
      *
      * @param value The value to encode
      * @return Encoded string
      */
     public static String urlEncode(String value) {
         try {
-            return URLEncoder.encode(value, Constants.UTF_8_ENCODING);
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             // Unlikely
             throw new TermItException("Encoding not found.", e);

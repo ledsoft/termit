@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.Persistence;
 import cz.cvut.kbss.jopa.model.EntityManagerFactory;
 import cz.cvut.kbss.jopa.model.JOPAPersistenceProvider;
 import cz.cvut.kbss.ontodriver.config.OntoDriverProperties;
+import cz.cvut.kbss.ontodriver.sesame.config.SesameOntoDriverProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +53,8 @@ public class MainPersistenceFactory {
             properties.put(OntoDriverProperties.DATA_SOURCE_USERNAME, config.get(REPO_USERNAME));
             properties.put(OntoDriverProperties.DATA_SOURCE_PASSWORD, config.get(REPO_PASSWORD));
         }
+        // OPTIMIZATION: Always use statement retrieval with unbound property. Should spare repository queries
+        properties.put(SesameOntoDriverProperties.SESAME_LOAD_ALL_THRESHOLD, "1");
         this.emf = Persistence.createEntityManagerFactory("termitPU", properties);
     }
 

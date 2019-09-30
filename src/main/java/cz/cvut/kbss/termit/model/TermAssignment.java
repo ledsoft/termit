@@ -13,7 +13,7 @@ import java.util.Set;
 public class TermAssignment extends AbstractEntity implements HasTypes {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu)
     private URI term;
 
     @ParticipationConstraints(nonEmpty = true)

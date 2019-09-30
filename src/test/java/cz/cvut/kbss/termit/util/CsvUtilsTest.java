@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class CsvUtilsTest {
 
     @Test
-    void sanitizeStringReturnsNullIfNullIsPassedAsArgument() {
-        assertNull(CsvUtils.sanitizeString(null));
+    void sanitizeStringReturnsEmptyStringIfNullIsPassedAsArgument() {
+        assertEquals("", CsvUtils.sanitizeString(null));
     }
 
     @Test

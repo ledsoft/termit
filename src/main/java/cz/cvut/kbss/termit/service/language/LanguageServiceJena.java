@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.service.language;
 
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -39,10 +40,10 @@ public class LanguageServiceJena extends LanguageService {
     }
 
     /**
-     * Gets all types for the given lang.
+     * Gets all types with labels in the given language.
      *
-     * @param lang
-     * @return
+     * @param lang label language
+     * @return List of types as {@code Term}s
      */
     public List<Term> getTypesForLang(String lang) {
         try {
@@ -65,7 +66,7 @@ public class LanguageServiceJena extends LanguageService {
                      t.setComment(st.getObject().asLiteral().getString());
                  }
                  t.setSubTerms(c.listProperties(SKOS.narrower)
-                                .mapWith(s -> URI.create(s.getObject().asResource().getURI())).toSet());
+                                .mapWith(s -> new TermInfo(URI.create(s.getObject().asResource().getURI()))).toSet());
                  terms.add(t);
              });
             return terms;

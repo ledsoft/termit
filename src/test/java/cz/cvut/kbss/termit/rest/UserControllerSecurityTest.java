@@ -99,7 +99,7 @@ class UserControllerSecurityTest extends BaseControllerTestRunner {
         }
 
         @Bean
-        public UserController personController() {
+        public UserController userController() {
             return controller;
         }
 

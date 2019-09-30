@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.document;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -44,7 +45,7 @@ public class DefaultDocumentManager implements DocumentManager {
         Objects.requireNonNull(file);
         final String path =
                 config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + file.getDirectoryName() +
-                        java.io.File.separator + file.getLabel();
+                        java.io.File.separator + IdentifierResolver.sanitizeFileName(file.getLabel());
         final java.io.File result = new java.io.File(path);
         if (verifyExists && !result.exists()) {
             LOG.error("File {} not found at location {}.", file, path);
@@ -105,7 +106,7 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     private String generateBackupFileName(File file) {
-        final String origName = file.getLabel();
+        final String origName = IdentifierResolver.sanitizeFileName(file.getLabel());
         final int dotIndex = origName.lastIndexOf('.');
         final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
         final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";

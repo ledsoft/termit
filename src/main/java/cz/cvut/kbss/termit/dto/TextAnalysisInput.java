@@ -18,6 +18,11 @@ public class TextAnalysisInput {
     private String content;
 
     /**
+     * Language of the text content.
+     */
+    private String language;
+
+    /**
      * URI of the repository containing vocabularies whose terms are used in the text analysis.
      */
     private URI vocabularyRepository;
@@ -35,6 +40,14 @@ public class TextAnalysisInput {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public URI getVocabularyRepository() {
@@ -62,10 +75,12 @@ public class TextAnalysisInput {
 
     @Override
     public String toString() {
+        assert content != null;
         return "TextAnalysisInput{" +
                 "content='" + (content.length() > 50 ? content.substring(0, 50) + "..." : content) + '\'' +
                 ", vocabularyRepository=" + vocabularyRepository +
                 ", vocabularyContexts=" + vocabularyContexts +
+                ", language=" + language +
                 '}';
     }
 }

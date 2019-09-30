@@ -8,12 +8,19 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?score {
-  ?search a inst:czech_index ;
-          :query ?searchString ;
+  {
+    ?search a inst:label_index .
+  }
+  UNION
+  {
+    ?search a inst:defcom_index .
+  }
+    ?search :query ?wildCardSearchString ;
+          :snippetSize 2000 ;
           :entities ?entity .
   ?entity rdfs:label ?label ;
           a ?type ;
-          :score ?score ;
+          :score ?initScore ;
           :snippets _:s .
   _:s :snippetText ?snippetText ;
           :snippetField ?snippetField .
@@ -21,6 +28,8 @@ SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?
         ?entity ?inVocabulary ?vocabularyUri .
     }
     FILTER (?type = ?term || ?type = ?vocabulary)
-          
+    FILTER (lang(?label) = ?langTag)
+    BIND(IF(lcase(str(?snippetText)) = lcase(str(concat("<em>", ?searchString, "</em>"))), ?initScore * 2, IF(CONTAINS(lcase(str(?snippetText)), ?searchString), IF(?snippetField = "label", ?initScore * 1.5, ?initScore), ?initScore)) as ?exactMatchScore)
+    BIND(IF(?snippetField = "label", ?exactMatchScore * 2, IF(?snippetField = "definition", ?exactMatchScore * 1.2, ?exactMatchScore)) as ?score)
 }
 ORDER BY desc(?score)

@@ -21,7 +21,7 @@ import java.util.Set;
 @JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class Document extends Resource implements SupportsStorage {
 
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_soubor, fetch = FetchType.EAGER)
     private Set<File> files;
 
     @JsonIgnore

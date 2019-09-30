@@ -12,6 +12,8 @@ import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
@@ -61,6 +63,7 @@ class HtmlTermOccurrenceResolverTest extends BaseServiceTestRunner {
         assertTrue(sut.supports(file));
     }
 
+    @DisabledOnOs(OS.WINDOWS)
     @Test
     void supportsReturnsTrueForHtmlFileWithoutExtension() throws Exception {
         final File file = generateFile();

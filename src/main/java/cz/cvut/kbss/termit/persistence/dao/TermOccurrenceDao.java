@@ -37,7 +37,7 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
     }
 
     /**
-     * Finds all term occurrences which have at least one target pointing to the specified resource.
+     * Finds all term occurrences whose target points to the specified resource.
      * <p>
      * I.e., these term occurrences appear in the specified resource (presumably file).
      *
@@ -53,5 +53,45 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("resource", resource.getUri()).getResultList();
+    }
+
+    /**
+     * Removes all suggested term occurrences whose target points to the specified resource.
+     *
+     * @param resource Resource for which suggested term occurrences will be removed
+     */
+    public void removeSuggested(Resource resource) {
+        Objects.requireNonNull(resource);
+        removeAll(resource, URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu));
+    }
+
+    private void removeAll(Resource resource, URI toType) {
+        Objects.requireNonNull(resource);
+        em.createNativeQuery("DELETE WHERE {" +
+                "?x a ?toType ;" +
+                "a ?type ;" +
+                "?hasTerm ?term ;" +
+                "?hasTarget ?target ." +
+                "?target a ?occurrenceTarget ;" +
+                "?hasSelector ?selector ;" +
+                "?hasSource ?resource ." +
+                "?selector ?sY ?sZ . }")
+          .setParameter("toType", toType)
+          .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
+          .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
+          .setParameter("occurrenceTarget", URI.create(Vocabulary.s_c_cil_vyskytu))
+          .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
+          .setParameter("resource", resource.getUri())
+          .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor_termu)).executeUpdate();
+    }
+
+    /**
+     * Removes all term occurrences whose target points to the specified resource.
+     *
+     * @param resource Resource for which term occurrences will be removed
+     */
+    public void removeAll(Resource resource) {
+        Objects.requireNonNull(resource);
+        removeAll(resource, URI.create(Vocabulary.s_c_vyskyt_termu));
     }
 }

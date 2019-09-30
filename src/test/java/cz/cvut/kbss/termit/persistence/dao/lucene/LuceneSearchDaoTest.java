@@ -2,6 +2,8 @@ package cz.cvut.kbss.termit.persistence.dao.lucene;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.Query;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -12,8 +14,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static cz.cvut.kbss.termit.persistence.dao.lucene.LuceneSearchDao.LUCENE_WILDCARD;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +24,9 @@ class LuceneSearchDaoTest {
 
     @Mock
     private EntityManager emMock;
+
+    @Mock
+    private Configuration configMock;
 
     @Mock
     private Query queryMock;
@@ -37,7 +40,8 @@ class LuceneSearchDaoTest {
         when(queryMock.setParameter(anyString(), any())).thenReturn(queryMock);
         when(queryMock.setParameter(anyString(), any(), any())).thenReturn(queryMock);
         when(queryMock.getResultList()).thenReturn(Collections.emptyList());
-        this.sut = new LuceneSearchDao(emMock);
+        when(configMock.get(ConfigParam.LANGUAGE)).thenReturn("cs");
+        this.sut = new LuceneSearchDao(emMock, configMock);
     }
 
     @Test
@@ -46,10 +50,10 @@ class LuceneSearchDaoTest {
         sut.fullTextSearch(searchString);
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(queryMock, atLeastOnce()).setParameter(anyString(), captor.capture(), any());
-        final Optional<String> argument = captor.getAllValues().stream().filter(s -> s.startsWith(searchString))
+        final Optional<String> argument = captor.getAllValues().stream().filter(s -> s
+                .equals(searchString + " " + searchString + LUCENE_WILDCARD))
                                                 .findAny();
         assertTrue(argument.isPresent());
-        assertEquals(searchString + " " + searchString + LUCENE_WILDCARD, argument.get());
     }
 
     @Test
@@ -59,10 +63,10 @@ class LuceneSearchDaoTest {
         sut.fullTextSearch(searchString);
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(queryMock, atLeastOnce()).setParameter(anyString(), captor.capture(), any());
-        final Optional<String> argument = captor.getAllValues().stream().filter(s -> s.startsWith(searchString))
+        final Optional<String> argument = captor.getAllValues().stream()
+                                                .filter(s -> s.equals(searchString + " " + lastToken + LUCENE_WILDCARD))
                                                 .findAny();
         assertTrue(argument.isPresent());
-        assertThat(argument.get(), containsString(lastToken + " " + lastToken + LUCENE_WILDCARD));
     }
 
     @Test

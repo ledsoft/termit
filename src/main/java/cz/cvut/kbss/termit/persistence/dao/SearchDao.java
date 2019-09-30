@@ -26,9 +26,9 @@ public class SearchDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchDao.class);
 
-    private String ftsQuery;
+    protected String ftsQuery;
 
-    private final EntityManager em;
+    protected final EntityManager em;
 
     @Autowired
     public SearchDao(EntityManager em) {

@@ -30,7 +30,7 @@ public class CsvUtils {
      */
     public static String sanitizeString(String str) {
         if (str == null) {
-            return null;
+            return "";
         }
         String result = str;
         boolean sanitized = false;

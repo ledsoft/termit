@@ -591,4 +591,24 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         assertEquals(assignmentInfo, result);
         verify(resourceServiceMock).getAssignmentInfo(resource);
     }
+
+    @Test
+    void getContentSupportsReturningContentAsAttachment() throws Exception {
+        final File file = generateFile();
+        when(identifierResolverMock.resolveIdentifier(any(ConfigParam.class), eq(FILE_NAME)))
+                .thenReturn(file.getUri());
+        when(resourceServiceMock.findRequired(file.getUri())).thenReturn(file);
+        final java.io.File content = createTemporaryHtmlFile();
+        when(resourceServiceMock.getContent(file))
+                .thenReturn(new TypeAwareFileSystemResource(content, MediaType.TEXT_HTML_VALUE));
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + FILE_NAME + "/content").param("attachment", Boolean.toString(true)))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION), containsString("attachment"));
+        assertThat(mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION),
+                containsString("filename=\"" + FILE_NAME + "\""));
+        final String resultContent = mvcResult.getResponse().getContentAsString();
+        assertEquals(HTML_CONTENT, resultContent);
+        assertEquals(MediaType.TEXT_HTML_VALUE, mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_TYPE));
+    }
 }

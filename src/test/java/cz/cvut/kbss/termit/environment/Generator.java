@@ -7,7 +7,10 @@ import cz.cvut.kbss.termit.model.resource.Resource;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Generator {
 
@@ -178,6 +181,10 @@ public class Generator {
         final Term term = generateTerm();
         term.setUri(Generator.generateUri());
         return term;
+    }
+
+    public static List<Term> generateTermsWithIds(int count) {
+        return IntStream.range(0, count).mapToObj(i -> generateTermWithId()).collect(Collectors.toList());
     }
 
     public static Resource generateResource() {

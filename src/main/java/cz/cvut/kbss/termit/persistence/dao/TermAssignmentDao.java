@@ -7,6 +7,8 @@ import cz.cvut.kbss.termit.model.Target;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -46,9 +48,12 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
             "  ?x ?hasTerm ?term ;" +
             "    ?hasTarget/?hasSource ?resource.";
 
+    private final Configuration config;
+
     @Autowired
-    public TermAssignmentDao(EntityManager em) {
+    public TermAssignmentDao(EntityManager em, Configuration config) {
         super(TermAssignment.class, em);
+        this.config = config;
     }
 
     /**
@@ -136,6 +141,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                 ASSIGNMENTS_CONDITION +
                 "  ?term rdfs:label ?label ;" +
                 "  ?inVocabulary ?vocabulary ." +
+                "FILTER langMatches(lang(?label), ?lang)" +
                 "BIND (?resource AS ?res)" +
                 "} ORDER BY ?label", "ResourceTermAssignments")
                  .setParameter("suggestedAssignment", URI.create(Vocabulary.s_c_navrzene_prirazeni_termu))
@@ -144,6 +150,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("inVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .setParameter("assignment", URI.create(Vocabulary.s_c_prirazeni_termu))
+                 .setParameter("lang", config.get(ConfigParam.LANGUAGE))
                  .setParameter("resource", resource.getUri()).getResultList();
     }
 
@@ -152,6 +159,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                         OCCURRENCES_CONDITION +
                         "  ?term rdfs:label ?label ;" +
                         "    ?inVocabulary ?vocabulary ." +
+                        "FILTER langMatches(lang(?label), ?lang)" +
                         "BIND (?resource AS ?res)" +
                         "} GROUP BY ?term ?label ?vocabulary ?res ?suggested HAVING (?cnt > 0) ORDER BY ?label",
                 "ResourceTermOccurrences")
@@ -161,6 +169,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("inVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
                  .setParameter("occurrence", URI.create(Vocabulary.s_c_vyskyt_termu))
+                 .setParameter("lang", config.get(ConfigParam.LANGUAGE))
                  .setParameter("resource", resource.getUri()).getResultList();
     }
 }

@@ -73,4 +73,13 @@ class ConfigurationTest {
     void isReturnsFalseWhenPropertyIsNotConfigured() {
         assertFalse(sut.is(ConfigParam.DRIVER));
     }
+
+    @Test
+    void containsSensibleDefaults() {
+        assertEquals(Constants.DEFAULT_LANGUAGE, sut.get(ConfigParam.LANGUAGE));
+        assertEquals(System.getProperty("user.home"), sut.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION));
+        assertEquals(Constants.ADMIN_CREDENTIALS_FILE, sut.get(ConfigParam.ADMIN_CREDENTIALS_FILE));
+        assertEquals(Double.toString(Double.MAX_VALUE), sut.get(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE));
+        assertEquals(Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR, sut.get(ConfigParam.TERM_NAMESPACE_SEPARATOR));
+    }
 }
