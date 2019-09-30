@@ -17,9 +17,6 @@
  */
 package cz.cvut.kbss.termit.util;
 
-import java.io.IOException;
-package cz.cvut.kbss.termit.util;
-
 import org.mitre.dsmiley.httpproxy.URITemplateProxyServlet;
 import org.springframework.http.HttpHeaders;
 
