@@ -88,5 +88,11 @@ Rules
     -------------------------------
     this <pdp:je-částí-dokumentu> doc
 
+  Id: pdp_term_6
+
+    this <rdf:type> <pdp:term>
+    this <skos:broader> parent
+    -------------------------------
+    parent <skos:narrower> this
 }
 

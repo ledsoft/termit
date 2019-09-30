@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.util;
 
 import org.springframework.data.domain.PageRequest;
@@ -29,11 +12,6 @@ public class Constants {
      * URL path to the application's REST API.
      */
     public static final String REST_MAPPING_PATH = "/rest";
-
-    /**
-     * UTF-8 encoding identifier.
-     */
-    public static final String UTF_8_ENCODING = "UTF-8";
 
     /**
      * Temporary location where uploaded files will be stored.
@@ -68,7 +46,7 @@ public class Constants {
     public static final String DEFAULT_LANGUAGE = "en";
 
     /**
-     * Name of the file in which admin credentials are stored.
+     * Default name of the file in which admin credentials are stored.
      */
     public static final String ADMIN_CREDENTIALS_FILE = ".termit-admin";
 
@@ -90,14 +68,14 @@ public class Constants {
 
 
     /**
-     * Piece of text appended to vocabulary IRI for term IRI generation.
+     * Default piece of text appended to vocabulary IRI for term IRI generation.
      * <p>
      * For example, if we have a vocabulary with IRI {@code http://www.example.org/ontologies/vocabularies/metropolitan-plan}
      * and a term with label {@code Inhabited area}, the resulting IRI will be {@code
      * http://www.example.org/ontologies/vocabularies/metropolitan-plan/SEPARATOR/inhabited-area}, where 'SEPARATOR' is
      * this constant.
      */
-    public static final String TERM_NAMESPACE_SEPARATOR = "/pojem";
+    public static final String DEFAULT_TERM_NAMESPACE_SEPARATOR = "/pojem";
 
     /**
      * Path to directory containing queries used by the system.

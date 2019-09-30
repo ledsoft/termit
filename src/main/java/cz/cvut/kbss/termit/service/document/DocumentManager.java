@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
@@ -23,6 +6,7 @@ import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * Manages the physical aspect of documents supported by the system, i.e., mainly the files stored for each document.
@@ -84,4 +68,14 @@ public interface DocumentManager {
      * @return Whether file content is stored
      */
     boolean exists(File file);
+
+    /**
+     * Determines content type of the specified file.
+     *
+     * @param file File whose content type is to be resolved
+     * @return Resolved content type. If the system was unable to determine file content type, an empty optional is
+     * returned
+     * @throws NotFoundException If a corresponding physical file cannot be found
+     */
+    Optional<String> getContentType(File file);
 }

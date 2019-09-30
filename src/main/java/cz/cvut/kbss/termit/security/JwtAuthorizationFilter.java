@@ -1,25 +1,7 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cvut.kbss.termit.exception.JwtException;
-import cz.cvut.kbss.termit.exception.TokenExpiredException;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.security.model.TermItUserDetails;
 import cz.cvut.kbss.termit.service.security.SecurityUtils;
@@ -29,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -76,13 +59,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             SecurityUtils.verifyAccountStatus(existingDetails.getUser());
             securityUtils.setCurrentUser(existingDetails);
             refreshToken(authToken, response);
-        } catch (DisabledException | LockedException | TokenExpiredException e) {
+        } catch (DisabledException | LockedException | JwtException | UsernameNotFoundException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
-            return;
-        } catch (JwtException e) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            objectMapper.writeValue(response.getOutputStream(), new ErrorInfo(e.getMessage(), request.getRequestURI()));
+            objectMapper.writeValue(response.getOutputStream(),
+                    ErrorInfo.createWithMessage(e.getMessage(), request.getRequestURI()));
             return;
         }
         chain.doFilter(request, response);

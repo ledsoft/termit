@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
@@ -22,6 +5,7 @@ import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.termit.model.util.HasTypes;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,8 +13,8 @@ import java.util.Set;
 public class TermAssignment extends AbstractEntity implements HasTypes {
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu, fetch = FetchType.EAGER)
-    private Term term;
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_prirazenim_termu)
+    private URI term;
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = Vocabulary.s_p_ma_cil, cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -45,16 +29,16 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     public TermAssignment() {
     }
 
-    public TermAssignment(Term term, Target target) {
-        this.term = Objects.requireNonNull(term);
+    public TermAssignment(URI termUri, Target target) {
+        this.term = Objects.requireNonNull(termUri);
         this.target = Objects.requireNonNull(target);
     }
 
-    public Term getTerm() {
+    public URI getTerm() {
         return term;
     }
 
-    public void setTerm(Term term) {
+    public void setTerm(URI term) {
         this.term = term;
     }
 
@@ -87,7 +71,7 @@ public class TermAssignment extends AbstractEntity implements HasTypes {
     @Override
     public String toString() {
         return "TermAssignment{" +
-                "term=" + term +
+                "term=<" + term + ">" +
                 ", target=" + target +
                 ", description='" + description + '\'' +
                 ", types=" + types +

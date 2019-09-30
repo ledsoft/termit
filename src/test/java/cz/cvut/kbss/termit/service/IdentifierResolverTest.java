@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service;
 
 import cz.cvut.kbss.termit.environment.Environment;
@@ -198,15 +181,15 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
         final String namespace = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary/metropolitan-plan";
         final String fragment = "locality";
         final URI result = sut
-                .resolveIdentifier(sut.buildNamespace(namespace, Constants.TERM_NAMESPACE_SEPARATOR), fragment);
-        assertEquals(namespace + Constants.TERM_NAMESPACE_SEPARATOR + "/" + fragment, result.toString());
+                .resolveIdentifier(sut.buildNamespace(namespace, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR), fragment);
+        assertEquals(namespace + Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR + "/" + fragment, result.toString());
     }
 
     @Test
     void buildNamespaceAddsComponentsToBaseUri() {
         final String base = "http://onto.fel.cvut.cz/ontologies/termit/vocabulary";
         final String cOne = "metropolitan-plan";
-        final String cTwo = Constants.TERM_NAMESPACE_SEPARATOR;
+        final String cTwo = Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR;
         assertEquals(base + "/" + cOne + cTwo + "/", sut.buildNamespace(base, cOne, cTwo));
     }
 
@@ -228,5 +211,23 @@ class IdentifierResolverTest extends BaseServiceTestRunner {
         final String component = "/term/";
         environment.setProperty(ConfigParam.NAMESPACE_VOCABULARY.toString(), base);
         assertEquals(base + component, sut.buildNamespace(ConfigParam.NAMESPACE_VOCABULARY, component));
+    }
+
+    @Test
+    void sanitizeFileNameMakesSpecifiedLabelCompatibleWithLinuxFileNameRules() {
+        final String label = "Zákon 130/2002.html";
+        assertEquals("Zákon 130-2002.html", IdentifierResolver.sanitizeFileName(label));
+    }
+
+    @Test
+    void sanitizeFileNameMakesSpecifiedLabelCompatibleWithWindowsFileNameRules() {
+        final String label = "label:2002/130.html";
+        assertEquals("label-2002-130.html", IdentifierResolver.sanitizeFileName(label));
+    }
+
+    @Test
+    void sanitizeFileNameTrimsLeadingAndTrailingWhiteSpaces() {
+        final String label = "  label enclosed in spaces   ";
+        assertEquals(label.trim(), IdentifierResolver.sanitizeFileName(label));
     }
 }

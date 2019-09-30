@@ -1,24 +1,12 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
+import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -30,11 +18,11 @@ import org.mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +30,9 @@ class ResourceServiceTest {
 
     @Mock
     private ResourceRepositoryService resourceRepositoryService;
+
+    @Mock
+    private VocabularyService vocabularyService;
 
     @Mock
     private DocumentManager documentManager;
@@ -110,7 +101,8 @@ class ResourceServiceTest {
     @Test
     void removeRemovesResourceViaRepositoryService() {
         final Resource resource = Generator.generateResourceWithId();
-        sut.remove(resource);
+        when(resourceRepositoryService.getRequiredReference(resource.getUri())).thenReturn(resource);
+        sut.remove(resource.getUri());
         verify(resourceRepositoryService).remove(resource);
     }
 
@@ -192,15 +184,26 @@ class ResourceServiceTest {
         final File file = new File();
         file.setLabel("Test");
         file.setUri(Generator.generateUri());
-        sut.runTextAnalysis(file);
+        sut.runTextAnalysis(file, Collections.emptySet());
         verify(textAnalysisService).analyzeFile(file);
     }
 
     @Test
     void runTextAnalysisThrowsUnsupportedAssetOperationWhenResourceIsNotFile() {
         final Resource resource = Generator.generateResourceWithId();
-        assertThrows(UnsupportedAssetOperationException.class, () -> sut.runTextAnalysis(resource));
+        assertThrows(UnsupportedAssetOperationException.class,
+                () -> sut.runTextAnalysis(resource, Collections.emptySet()));
         verify(textAnalysisService, never()).analyzeFile(any());
+    }
+
+    @Test
+    void runTextAnalysisInvokesAnalysisWithCustomVocabulariesWhenSpecified() {
+        final File file = new File();
+        file.setLabel("Test");
+        file.setUri(Generator.generateUri());
+        final Set<URI> vocabularies = new HashSet<>(Arrays.asList(Generator.generateUri(), Generator.generateUri()));
+        sut.runTextAnalysis(file, vocabularies);
+        verify(textAnalysisService).analyzeFile(file, vocabularies);
     }
 
     @Test
@@ -222,5 +225,137 @@ class ResourceServiceTest {
         final URI uri = Generator.generateUri();
         sut.getRequiredReference(uri);
         verify(resourceRepositoryService).getRequiredReference(uri);
+    }
+
+    @Test
+    void getFilesReturnsFilesFromDocument() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        final File fOne = Generator.generateFileWithId("test.html");
+        doc.addFile(fOne);
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertEquals(doc.getFiles().size(), result.size());
+        assertTrue(doc.getFiles().containsAll(result));
+        verify(resourceRepositoryService).findRequired(doc.getUri());
+    }
+
+    @Test
+    void getFilesReturnsFilesSortedByLabel() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        final File fOne = Generator.generateFileWithId("test.html");
+        doc.addFile(fOne);
+        final File fTwo = Generator.generateFileWithId("act.html");
+        doc.addFile(fTwo);
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertEquals(Arrays.asList(fTwo, fOne), result);
+    }
+
+    @Test
+    void getFilesReturnsEmptyListWhenDocumentHasNoFiles() {
+        final Document doc = new Document();
+        doc.setLabel("test document");
+        doc.setUri(Generator.generateUri());
+        when(resourceRepositoryService.findRequired(doc.getUri())).thenReturn(doc);
+        final List<File> result = sut.getFiles(doc);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getFilesThrowsUnsupportedAssetOperationExceptionWhenSpecifiedResourceIsNotDocument() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(resourceRepositoryService.findRequired(resource.getUri())).thenReturn(resource);
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.getFiles(resource));
+    }
+
+    @Test
+    void addFileToDocumentPersistsFileAndUpdatesDocumentWithAddedFile() {
+        final Document doc = Generator.generateDocumentWithId();
+        final File fOne = Generator.generateFileWithId("test.html");
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).persist(fOne);
+        verify(resourceRepositoryService).update(doc);
+    }
+
+    @Test
+    void addFileToDocumentThrowsUnsupportedAssetOperationExceptionWhenSpecifiedResourceIsNotDocument() {
+        final Resource resource = Generator.generateResourceWithId();
+        final File fOne = Generator.generateFileWithId("test.html");
+        assertThrows(UnsupportedAssetOperationException.class, () -> sut.addFileToDocument(resource, fOne));
+    }
+
+    @Test
+    void addFileToDocumentPersistsFileIntoVocabularyContextForDocumentWithVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+        doc.setVocabulary(vocabulary.getUri());
+        final File fOne = Generator.generateFileWithId("test.html");
+        when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
+
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).persist(fOne, vocabulary);
+        verify(vocabularyService).getRequiredReference(vocabulary.getUri());
+    }
+
+    @Test
+    void addFileToDocumentUpdatesDocumentInVocabularyContextForDocumentWithVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        final Document doc = Generator.generateDocumentWithId();
+        doc.setVocabulary(vocabulary.getUri());
+        final File fOne = Generator.generateFileWithId("test.html");
+        when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
+
+        sut.addFileToDocument(doc, fOne);
+        verify(resourceRepositoryService).update(doc, vocabulary);
+        verify(vocabularyService).getRequiredReference(vocabulary.getUri());
+    }
+
+    @Test
+    void findLatestTextAnalysisRecordRetrievesLatestTextAnalysisRecordForResource() {
+        final File file = Generator.generateFileWithId("test.html");
+        final TextAnalysisRecord record = new TextAnalysisRecord(new Date(), file);
+        when(textAnalysisService.findLatestAnalysisRecord(file)).thenReturn(Optional.of(record));
+
+        final TextAnalysisRecord result = sut.findLatestTextAnalysisRecord(file);
+        assertEquals(record, result);
+        verify(textAnalysisService).findLatestAnalysisRecord(file);
+    }
+
+    @Test
+    void findLatestTextAnalysisRecordThrowsNotFoundExceptionWhenNoRecordExists() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(textAnalysisService.findLatestAnalysisRecord(any())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> sut.findLatestTextAnalysisRecord(resource));
+        verify(textAnalysisService).findLatestAnalysisRecord(resource);
+    }
+
+    @Test
+    void hasContentChecksForContentExistenceInDocumentManager() {
+        final File file = Generator.generateFileWithId("test.html");
+        sut.hasContent(file);
+        verify(documentManager).exists(file);
+    }
+
+    @Test
+    void hasContentReturnsFalseForNonFile() {
+        final Resource resource = Generator.generateResourceWithId();
+        assertFalse(sut.hasContent(resource));
+        verify(documentManager, never()).exists(any(File.class));
+    }
+
+    @Test
+    void getAssignmentInfoRetrievesAssignmentDataForResource() {
+        final Resource resource = Generator.generateResourceWithId();
+        final ResourceTermAssignments rta = new ResourceTermAssignments(Generator.generateUri(), "test",
+                Generator.generateUri(), resource.getUri(), false);
+        when(resourceRepositoryService.getAssignmentInfo(resource)).thenReturn(Collections.singletonList(rta));
+        final List<ResourceTermAssignments> result = sut.getAssignmentInfo(resource);
+        assertEquals(Collections.singletonList(rta), result);
+        verify(resourceRepositoryService).getAssignmentInfo(resource);
     }
 }

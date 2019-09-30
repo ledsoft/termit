@@ -1,28 +1,9 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.model.util;
 
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
-import cz.cvut.kbss.termit.model.Glossary;
-import cz.cvut.kbss.termit.model.HasProvenanceData;
-import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.jopa.model.descriptors.ObjectPropertyCollectionDescriptor;
+import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 
 import java.net.URI;
@@ -50,10 +31,17 @@ public class DescriptorFactory {
      */
     public static Descriptor vocabularyDescriptor(Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabulary.getUri());
         descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabulary));
         descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabulary));
+        return descriptor;
+    }
+
+    private static EntityDescriptor assetDescriptor(URI vocabularyUri) {
+        Objects.requireNonNull(vocabularyUri);
+        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
+        descriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+        descriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
         return descriptor;
     }
 
@@ -70,23 +58,17 @@ public class DescriptorFactory {
      */
     public static Descriptor vocabularyDescriptor(URI vocabularyUri) {
         Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Vocabulary.getGlossaryField(), glossaryDescriptor(vocabularyUri));
         descriptor.addAttributeDescriptor(DocumentVocabulary.getDocumentField(), documentDescriptor(vocabularyUri));
         return descriptor;
-    }
-
-    private static void addAuthorAndEditorDescriptors(EntityDescriptor targetDescriptor) {
-        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
-        targetDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
     }
 
     /**
      * Creates a JOPA descriptor for a {@link Document} related to the specified vocabulary (presumably a {@link
      * DocumentVocabulary}).
      * <p>
-     * This means that the context of the document (and all its relevant attributes) is given by the specified
+     * This means that the context of the Document (and all its relevant attributes) is given by the specified
      * vocabulary's IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -103,7 +85,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link Document} related to a vocabulary with the specified identifier
      * (presumably of a {@link DocumentVocabulary}).
      * <p>
-     * This means that the context of the document (and all its relevant attributes) is given by the specified IRI.
+     * This means that the context of the Document (and all its relevant attributes) is given by the specified IRI.
      * <p>
      * Note that default context is used for asset author.
      *
@@ -111,19 +93,48 @@ public class DescriptorFactory {
      * @return Document descriptor
      */
     public static Descriptor documentDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
-        final EntityDescriptor fileDescriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(fileDescriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
+        final Descriptor fileDescriptor = fileDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Document.getFilesField(), fileDescriptor);
         return descriptor;
     }
 
     /**
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.resource.File} related to the specified
+     * vocabulary.
+     * <p>
+     * This means that the context of the File (and all its relevant attributes) is given by the specified vocabulary's
+     * IRI.
+     * <p>
+     * Note that default context is used for asset author and last editor.
+     *
+     * @param vocabulary Vocabulary identifier on which the descriptor should be based
+     * @return File descriptor
+     */
+    public static Descriptor fileDescriptor(Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        return fileDescriptor(vocabulary.getUri());
+    }
+
+    /**
+     * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.resource.File} related to a vocabulary with the
+     * specified identifier.
+     * <p>
+     * This means that the context of the File (and all its relevant attributes) is given by the specified IRI.
+     * <p>
+     * Note that default context is used for asset author.
+     *
+     * @param vocabularyUri Vocabulary identifier on which the descriptor should be based
+     * @return File descriptor
+     */
+    public static Descriptor fileDescriptor(URI vocabularyUri) {
+        return assetDescriptor(vocabularyUri);
+    }
+
+    /**
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Glossary} related to the specified vocabulary.
      * <p>
-     * This means that the context of the glossary (and all its relevant attributes) is given by the specified
+     * This means that the context of the Glossary (and all its relevant attributes) is given by the specified
      * vocabulary's IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -140,7 +151,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Glossary} related to a vocabulary with the
      * specified identifier.
      * <p>
-     * This means that the context of the glossary (and all its relevant attributes) is given by the specified IRI.
+     * This means that the context of the Glossary (and all its relevant attributes) is given by the specified IRI.
      * <p>
      * Note that default context is used for asset author.
      *
@@ -148,9 +159,7 @@ public class DescriptorFactory {
      * @return Glossary descriptor
      */
     public static Descriptor glossaryDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Glossary.getTermsField(), termDescriptor(vocabularyUri));
         return descriptor;
     }
@@ -158,7 +167,7 @@ public class DescriptorFactory {
     /**
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in the specified vocabulary.
      * <p>
-     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary's
+     * This means that the context of the Term (and all its relevant attributes) is given by the specified vocabulary's
      * IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -175,7 +184,7 @@ public class DescriptorFactory {
      * Creates a JOPA descriptor for a {@link cz.cvut.kbss.termit.model.Term} contained in a vocabulary with the
      * specified identifier.
      * <p>
-     * This means that the context of the term (and all its relevant attributes) is given by the specified vocabulary
+     * This means that the context of the Term (and all its relevant attributes) is given by the specified vocabulary
      * IRI.
      * <p>
      * Note that default context is used for asset author.
@@ -184,9 +193,35 @@ public class DescriptorFactory {
      * @return Term descriptor
      */
     public static Descriptor termDescriptor(URI vocabularyUri) {
-        Objects.requireNonNull(vocabularyUri);
-        final EntityDescriptor descriptor = new EntityDescriptor(vocabularyUri);
-        addAuthorAndEditorDescriptors(descriptor);
+        final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
+        descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(vocabularyUri));
+        return descriptor;
+    }
+
+    /**
+     * Creates a JOPA descriptor for the specified term.
+     * <p>
+     * This takes the context from the term's vocabulary. Note that if parent terms are provided for the term, their
+     * vocabularies are used as their contexts.
+     *
+     * @param term Term to create descriptor for
+     * @return Term descriptor
+     */
+    public static Descriptor termDescriptor(Term term) {
+        Objects.requireNonNull(term);
+        assert term.getVocabulary() != null;
+        final EntityDescriptor descriptor = assetDescriptor(term.getVocabulary());
+        if (term.getParentTerms() != null && !term.getParentTerms().isEmpty()) {
+            // NOTE: This does not support parents being from multiple different vocabularies. Such situation is currently not supported by JOPA
+            final URI parentVocabulary = term.getParentTerms().iterator().next().getVocabulary();
+            final ObjectPropertyCollectionDescriptor opDescriptor = new ObjectPropertyCollectionDescriptor(
+                    parentVocabulary, Term.getParentTermsField());
+            opDescriptor.addAttributeDescriptor(HasProvenanceData.getAuthorField(), new EntityDescriptor(null));
+            opDescriptor.addAttributeDescriptor(HasProvenanceData.getLastEditorField(), new EntityDescriptor(null));
+            descriptor.addAttributeDescriptor(Term.getParentTermsField(), opDescriptor);
+        } else {
+            descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(term.getVocabulary()));
+        }
         return descriptor;
     }
 }

@@ -1,29 +1,16 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.environment;
 
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Generator {
 
@@ -185,6 +172,7 @@ public class Generator {
     public static Term generateTerm() {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
+        term.setDefinition("Normative definition of term " + term.getLabel());
         term.setComment("Comment" + randomInt());
         return term;
     }
@@ -193,6 +181,10 @@ public class Generator {
         final Term term = generateTerm();
         term.setUri(Generator.generateUri());
         return term;
+    }
+
+    public static List<Term> generateTermsWithIds(int count) {
+        return IntStream.range(0, count).mapToObj(i -> generateTermWithId()).collect(Collectors.toList());
     }
 
     public static Resource generateResource() {
@@ -218,5 +210,20 @@ public class Generator {
         final TermAssignment termAssignment = new TermAssignment();
         termAssignment.setUri(Generator.generateUri());
         return termAssignment;
+    }
+
+    public static Document generateDocumentWithId() {
+        final Document document = new Document();
+        document.setLabel("Document " + randomInt());
+        document.setDescription("Document description");
+        document.setUri(generateUri());
+        return document;
+    }
+
+    public static File generateFileWithId(String fileName) {
+        final File file = new File();
+        file.setLabel(fileName);
+        file.setUri(Generator.generateUri());
+        return file;
     }
 }

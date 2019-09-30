@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
@@ -31,6 +14,7 @@ import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -174,12 +158,24 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() {
-        final InputStream content = loadFile("data/rdfa-simple.html");
-        file.setLabel("test.txt");
+    void generateAnnotationsThrowsAnnotationGenerationExceptionForUnsupportedFileType() throws Exception {
+        final InputStream content = loadFile("config.properties");
+        file.setLabel(generateIncompatibleFile());
         final AnnotationGenerationException ex = assertThrows(AnnotationGenerationException.class,
                 () -> sut.generateAnnotations(content, file));
         assertThat(ex.getMessage(), containsString("Unsupported type of file"));
+    }
+
+    private String generateIncompatibleFile() throws Exception {
+        final String tempDir = System.getProperty("java.io.tmpdir");
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), tempDir);
+        final java.io.File docDir = new java.io.File(tempDir + java.io.File.separator +
+                document.getDirectoryName());
+        docDir.mkdir();
+        docDir.deleteOnExit();
+        final java.io.File content = Files.createTempFile(docDir.toPath(), "test", ".txt").toFile();
+        content.deleteOnExit();
+        return content.getName();
     }
 
     @Test
@@ -207,7 +203,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         assert element.size() == 1;
         element.attr(Constants.RDFa.RESOURCE, Generator.generateUri().toString());
 
-        return new ByteArrayInputStream(doc.toString().getBytes());
+        return new ByteArrayInputStream(doc.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -348,7 +344,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         otherTerm.setUri(Generator.generateUri());
         otherTerm.setLabel("Other term");
         final TermOccurrence to = new TermOccurrence();
-        to.setTerm(otherTerm);
+        to.setTerm(otherTerm.getUri());
         final TextQuoteSelector selector = new TextQuoteSelector("Územní plán");
         selector.setPrefix("RDFa simple");
         selector.setSuffix(" hlavního města Prahy.");
@@ -365,7 +361,94 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         sut.generateAnnotations(content, file);
         final List<TermOccurrence> allOccurrences = termOccurrenceDao.findAll(file);
         assertEquals(2, allOccurrences.size());
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm)));
-        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term)));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(otherTerm.getUri())));
+        assertTrue(allOccurrences.stream().anyMatch(o -> o.getTerm().equals(term.getUri())));
+    }
+
+    @Test
+    void generateAnnotationsCreatesTermAssignmentsForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().toString());
+    }
+
+    @Test
+    void generateAnnotationsDoesNotCreateAssignmentsForOccurrencesWithInsufficientScore() throws Exception {
+        ((MockEnvironment) environment)
+                .setProperty(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE.toString(), Double.toString(Double.MAX_VALUE));
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void generateAnnotationsCreatesSingleAssignmentForMultipleOccurrencesOfTerm() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple-multiple-occurrences.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertEquals(1, result.size());
+        assertEquals("http://onto.fel.cvut.cz/ontologies/mpp/domains/uzemni-plan",
+                result.get(0).getTerm().toString());
+    }
+
+    @Test
+    void generateAnnotationsCreatesAssignmentsWithTypeSuggestedForOccurrencesWithSufficientScore() throws Exception {
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        generateFile();
+        sut.generateAnnotations(content, file);
+        final List<TermAssignment> result = em
+                .createNativeQuery("SELECT ?x WHERE { ?x a ?assignment . }", TermAssignment.class)
+                .setParameter("assignment", URI.create(
+                        Vocabulary.s_c_prirazeni_termu)).getResultList();
+        assertFalse(result.isEmpty());
+        result.forEach(ta -> assertTrue(ta.getTypes().contains(Vocabulary.s_c_navrzene_prirazeni_termu)));
+    }
+
+    @Test
+    void repeatedAnnotationGenerationDoesNotIncreaseTotalNumberOfTermOccurrencesForResource() throws Exception {
+        generateFile();
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesOne = termOccurrenceDao.findAll(file);
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesTwo = termOccurrenceDao.findAll(file);
+        assertEquals(occurrencesOne.size(), occurrencesTwo.size());
+        final int instanceCount = em.createNativeQuery("SELECT (count(*) as ?count) WHERE {" +
+                "?x a ?termOccurrence ." +
+                "}", Integer.class).setParameter("termOccurrence", URI.create(Vocabulary.s_c_vyskyt_termu))
+                                    .getSingleResult();
+        assertEquals(occurrencesTwo.size(), instanceCount);
+    }
+
+    @Test
+    void repeatedAnnotationGenerationDoesNotOverwriteConfirmedAnnotations() throws Exception {
+        generateFile();
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesOne = termOccurrenceDao.findAll(file);
+        final List<TermOccurrence> confirmed = occurrencesOne.stream().filter(to -> Generator.randomBoolean()).collect(
+                Collectors.toList());
+        transactional(() -> confirmed.forEach(to -> {
+            to.removeType(Vocabulary.s_c_navrzeny_vyskyt_termu);
+            em.merge(to);
+        }));
+        sut.generateAnnotations(loadFile("data/rdfa-simple.html"), file);
+        final List<TermOccurrence> occurrencesTwo = termOccurrenceDao.findAll(file);
+        assertEquals(occurrencesOne.size(), occurrencesTwo.size());
+        confirmed.forEach(to -> assertTrue(occurrencesTwo.stream().anyMatch(toA -> toA.getUri().equals(to.getUri()))));
     }
 }

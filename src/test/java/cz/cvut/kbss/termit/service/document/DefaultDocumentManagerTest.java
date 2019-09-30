@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.environment.Generator;
@@ -23,6 +6,7 @@ import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,15 +17,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.MimeTypeUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static cz.cvut.kbss.termit.environment.Environment.loadFile;
 import static cz.cvut.kbss.termit.util.ConfigParam.FILE_STORAGE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
@@ -234,5 +223,95 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         document.addFile(file);
         file.setDocument(document);
         assertFalse(sut.exists(file));
+    }
+
+    @Test
+    void getContentTypeResolvesContentTypeOfSpecifiedFileFromDisk() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+        final Optional<String> result = sut.getContentType(file);
+        assertTrue(result.isPresent());
+        assertEquals(MimeTypeUtils.TEXT_HTML_VALUE, result.get());
+    }
+
+    @Test
+    void getContentTypeThrowsNotFoundExceptionWhenFileDoesNotExist() {
+        final File file = new File();
+        file.setLabel("test.html");
+        document.addFile(file);
+        file.setDocument(document);
+        assertThrows(NotFoundException.class, () -> sut.getContentType(file));
+    }
+
+    @Test
+    void saveFileContentCreatesParentDirectoryWhenItDoesNotExist() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final InputStream content = loadFile("data/rdfa-simple.html");
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        file.setLabel("test.html");
+        sut.saveFileContent(file, content);
+        final java.io.File physicalFile = new java.io.File(
+                dir.getAbsolutePath() + java.io.File.separator + file.getDirectoryName() + java.io.File.separator +
+                        file.getLabel());
+        assertTrue(physicalFile.exists());
+        physicalFile.getParentFile().deleteOnExit();
+        physicalFile.deleteOnExit();
+    }
+
+    @Test
+    void resolveFileSanitizesFileLabelToEnsureValidFileName() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        final String label = "Zákon 130/2002";
+        file.setLabel(label);
+        sut.saveFileContent(file, new ByteArrayInputStream(CONTENT.getBytes()));
+
+        final java.io.File physicalFile = new java.io.File(
+                dir.getAbsolutePath() + java.io.File.separator + file.getDirectoryName() + java.io.File.separator +
+                        IdentifierResolver.sanitizeFileName(file.getLabel()));
+        assertTrue(physicalFile.exists());
+        physicalFile.getParentFile().deleteOnExit();
+        physicalFile.deleteOnExit();
+    }
+
+    @Test
+    void createBackupSanitizesFileLabelToEnsureValidFileName() throws Exception {
+        final java.io.File dir = Files.createTempDirectory("termit").toFile();
+        dir.deleteOnExit();
+        ((MockEnvironment) environment).setProperty(ConfigParam.FILE_STORAGE.toString(), dir.getAbsolutePath());
+        final java.io.File docDir = new java.io.File(dir.getAbsolutePath() + java.io.File.separator +
+                document.getDirectoryName());
+        docDir.mkdir();
+        docDir.deleteOnExit();
+        final File file = new File();
+        file.setUri(Generator.generateUri());
+        final String label = "Zákon 130/2002";
+        file.setLabel(label);
+        document.addFile(file);
+        file.setDocument(document);
+        final java.io.File content = new java.io.File(docDir, IdentifierResolver.sanitizeFileName(label));
+        content.deleteOnExit();
+        Files.write(content.toPath(), CONTENT.getBytes());
+        sut.createBackup(file);
+
+        final java.io.File[] files = docDir.listFiles();
+        assertNotNull(files);
+        assertEquals(2, files.length);
+        for (java.io.File f : files) {
+            try {
+                assertThat(f.getName(), startsWith(IdentifierResolver.sanitizeFileName(label)));
+            } finally {
+                f.deleteOnExit();
+            }
+        }
     }
 }

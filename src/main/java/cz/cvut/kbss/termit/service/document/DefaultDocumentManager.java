@@ -1,25 +1,9 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -38,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Default document manager uses files on filesystem to store content.
@@ -60,7 +45,7 @@ public class DefaultDocumentManager implements DocumentManager {
         Objects.requireNonNull(file);
         final String path =
                 config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + file.getDirectoryName() +
-                        java.io.File.separator + file.getLabel();
+                        java.io.File.separator + IdentifierResolver.sanitizeFileName(file.getLabel());
         final java.io.File result = new java.io.File(path);
         if (verifyExists && !result.exists()) {
             LOG.error("File {} not found at location {}.", file, path);
@@ -100,6 +85,7 @@ public class DefaultDocumentManager implements DocumentManager {
         try {
             final java.io.File target = resolveFile(file, false);
             LOG.debug("Saving file content to {}.", target);
+            target.getParentFile().mkdirs();
             Files.copy(content, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new TermItException("Unable to write out file content.", e);
@@ -120,7 +106,7 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     private String generateBackupFileName(File file) {
-        final String origName = file.getLabel();
+        final String origName = IdentifierResolver.sanitizeFileName(file.getLabel());
         final int dotIndex = origName.lastIndexOf('.');
         final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
         final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
@@ -130,5 +116,16 @@ public class DefaultDocumentManager implements DocumentManager {
     @Override
     public boolean exists(File file) {
         return resolveFile(file, false).exists();
+    }
+
+    @Override
+    public Optional<String> getContentType(File file) {
+        final java.io.File physicalFile = resolveFile(file, true);
+        try {
+            return Optional.ofNullable(Files.probeContentType(physicalFile.toPath()));
+        } catch (IOException e) {
+            LOG.error("Exception caught when determining content type of file {}.", file, e);
+            return Optional.empty();
+        }
     }
 }

@@ -1,27 +1,15 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
+import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +22,77 @@ public class ResourceDao extends AssetDao<Resource> {
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
+    }
+
+    /**
+     * Ensures that the specified instance is detached from the current persistence context.
+     *
+     * @param resource Instance to detach
+     */
+    public void detach(Resource resource) {
+        em.detach(resource);
+    }
+
+    /**
+     * Persists the specified Resource into the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to persist
+     * @param vocabulary Vocabulary providing context
+     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
+     */
+    public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        try {
+            em.persist(resource, descriptor);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    private static Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        final Descriptor descriptor;
+        if (resource instanceof Document) {
+            descriptor = DescriptorFactory.documentDescriptor(vocabulary);
+        } else if (resource instanceof File) {
+            descriptor = DescriptorFactory.fileDescriptor(vocabulary);
+        } else {
+            throw new IllegalArgumentException(
+                    "Resource " + resource + " cannot be persisted into vocabulary context.");
+        }
+        return descriptor;
+    }
+
+    /**
+     * Updates the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to update
+     * @param vocabulary Vocabulary providing context
+     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
+     */
+    public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        try {
+            em.getEntityManagerFactory().getCache()
+              .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
+            return em.merge(resource, descriptor);
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    @Override
+    public Resource update(Resource entity) {
+        if (entity instanceof Document) {
+            final Document doc = (Document) entity;
+            if (doc.getVocabulary() != null) {
+                em.getEntityManagerFactory().getCache().evict(doc.getVocabulary());
+            }
+        }
+        return super.update(entity);
     }
 
     @Override
@@ -53,7 +112,7 @@ public class ResourceDao extends AssetDao<Resource> {
     }
 
     /**
-     * Gets terms the specified resource is annotated with.
+     * Gets Terms the specified Resource is annotated with.
      * <p>
      * The terms are ordered by their name (ascending).
      *

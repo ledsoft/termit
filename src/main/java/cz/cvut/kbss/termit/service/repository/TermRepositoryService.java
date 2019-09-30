@@ -1,30 +1,14 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.TermAssignmentDao;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.util.Constants;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +23,8 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
 
     private final IdentifierResolver idResolver;
 
+    private final Configuration config;
+
     private final TermDao termDao;
 
     private final TermAssignmentDao termAssignmentDao;
@@ -46,10 +32,11 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     private final VocabularyRepositoryService vocabularyService;
 
     public TermRepositoryService(Validator validator, IdentifierResolver idResolver,
-                                 TermDao termDao, TermAssignmentDao termAssignmentDao,
+                                 Configuration config, TermDao termDao, TermAssignmentDao termAssignmentDao,
                                  VocabularyRepositoryService vocabularyService) {
         super(validator);
         this.idResolver = idResolver;
+        this.config = config;
         this.termDao = termDao;
         this.termAssignmentDao = termAssignmentDao;
         this.vocabularyService = vocabularyService;
@@ -66,6 +53,16 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
                 "Persisting term by itself is not supported. It has to be connected to a vocabulary or a parent term.");
     }
 
+    @Override
+    protected void postUpdate(Term instance) {
+        final Vocabulary vocabulary = vocabularyService.getRequiredReference(instance.getVocabulary());
+        if (instance.hasParentInSameVocabulary()) {
+            vocabulary.getGlossary().removeRootTerm(instance);
+        } else {
+            vocabulary.getGlossary().addRootTerm(instance);
+        }
+    }
+
     @Transactional
     public void addRootTermToVocabulary(Term instance, Vocabulary vocabulary) {
         validate(instance);
@@ -75,12 +72,10 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         if (instance.getUri() == null) {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
-        // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
-        final Vocabulary toUpdate = vocabularyService.getRequiredReference(vocabulary.getUri());
         verifyIdentifierUnique(instance);
-        toUpdate.getGlossary().addRootTerm(instance);
-        instance.setVocabulary(toUpdate.getUri());
-        termDao.persist(instance, toUpdate);
+        instance.setVocabulary(vocabulary.getUri());
+        addTermAsRootToGlossary(instance);
+        termDao.persist(instance);
     }
 
     /**
@@ -94,8 +89,14 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         Objects.requireNonNull(vocabularyUri);
         Objects.requireNonNull(termLabel);
         return idResolver.generateIdentifier(
-                idResolver.buildNamespace(vocabularyUri.toString(), Constants.TERM_NAMESPACE_SEPARATOR),
+                idResolver.buildNamespace(vocabularyUri.toString(), config.get(ConfigParam.TERM_NAMESPACE_SEPARATOR)),
                 termLabel);
+    }
+
+    private void addTermAsRootToGlossary(Term instance) {
+        // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
+        final Vocabulary toUpdate = vocabularyService.getRequiredReference(instance.getVocabulary());
+        toUpdate.getGlossary().addRootTerm(instance);
     }
 
     @Transactional
@@ -103,18 +104,20 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(parentTerm);
-        if (instance.getUri() == null) {
-            instance.setUri(generateIdentifier(parentTerm.getVocabulary(), instance.getLabel()));
-        }
-        verifyIdentifierUnique(instance);
-        parentTerm.addSubTerm(instance.getUri());
-
         if (instance.getVocabulary() == null) {
             instance.setVocabulary(parentTerm.getVocabulary());
         }
+        if (instance.getUri() == null) {
+            instance.setUri(generateIdentifier(instance.getVocabulary(), instance.getLabel()));
+        }
+        verifyIdentifierUnique(instance);
 
-        termDao.update(parentTerm);
-        termDao.persist(instance, vocabularyService.getRequiredReference(parentTerm.getVocabulary()));
+        instance.addParentTerm(parentTerm);
+        if (!instance.hasParentInSameVocabulary()) {
+            addTermAsRootToGlossary(instance);
+        }
+
+        termDao.persist(instance);
     }
 
     /**
@@ -136,6 +139,7 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
      * @param vocabulary Vocabulary whose terms should be returned
      * @param pageSpec   Page specifying result number and position
      * @return Matching root terms
+     * @see #findAllRootsIncludingImported(Vocabulary, Pageable)
      */
     public List<Term> findAllRoots(Vocabulary vocabulary, Pageable pageSpec) {
         Objects.requireNonNull(vocabulary);
@@ -143,8 +147,46 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         return termDao.findAllRoots(vocabulary, pageSpec);
     }
 
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any of its imported
+     * vocabularies.
+     * <p>
+     * Basically, this does a transitive closure over the vocabulary import relationship, starting at the specified
+     * vocabulary, and returns all parent-less terms.
+     *
+     * @param vocabulary Base vocabulary for the vocabulary import closure
+     * @param pageSpec   Page specifying result number and position
+     * @return Matching root terms
+     * @see #findAllRoots(Vocabulary, Pageable)
+     */
+    public List<Term> findAllRootsIncludingImported(Vocabulary vocabulary, Pageable pageSpec) {
+        return termDao.findAllRootsIncludingImports(vocabulary, pageSpec);
+    }
+
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary whose sub-terms or themselves match
+     * the specified search string.
+     *
+     * @param vocabulary   Vocabulary whose terms should be returned
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRootsIncludingImported(Vocabulary, String)
+     */
     public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {
         return termDao.findAllRoots(searchString, vocabulary);
+    }
+
+    /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
+     * (transitively) whose sub-terms or themselves match the specified search string.
+     *
+     * @param vocabulary   Base vocabulary for the vocabulary import closure
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRoots(Vocabulary, String)
+     */
+    public List<Term> findAllRootsIncludingImported(Vocabulary vocabulary, String searchString) {
+        return termDao.findAllRootsIncludingImports(searchString, vocabulary);
     }
 
     /**
@@ -159,13 +201,13 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     }
 
     /**
-     * Retrieves all assignments of the specified term.
+     * Retrieves aggregated information about the specified Term's assignments to and occurrences in {@link
+     * cz.cvut.kbss.termit.model.resource.Resource}s.
      *
-     * @param instance Term whose assignments should be retrieved
-     * @return List of term assignments (including term occurrences)
+     * @param instance Term whose assignment/occurrence data should be retrieved
+     * @return Aggregated Term assignment/occurrence data
      */
-    public List<TermAssignment> getAssignments(Term instance) {
-        Objects.requireNonNull(instance);
-        return termAssignmentDao.findAll(instance);
+    public List<TermAssignments> getAssignmentsInfo(Term instance) {
+        return termAssignmentDao.getAssignmentInfo(instance);
     }
 }

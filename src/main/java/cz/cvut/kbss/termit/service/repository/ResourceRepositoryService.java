@@ -1,30 +1,15 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.repository;
 
-import cz.cvut.kbss.termit.exception.NotFoundException;
-import cz.cvut.kbss.termit.model.Target;
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.persistence.dao.*;
+import cz.cvut.kbss.termit.persistence.dao.AssetDao;
+import cz.cvut.kbss.termit.persistence.dao.ResourceDao;
+import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import org.slf4j.Logger;
@@ -35,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Validator;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource> {
@@ -43,24 +30,24 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
     private final ResourceDao resourceDao;
-    private final TermAssignmentDao termAssignmentDao;
-    private final TargetDao targetDao;
     private final TermOccurrenceDao termOccurrenceDao;
-    private final TermDao termDao;
+
+    private final TermAssignmentRepositoryService assignmentService;
+    private final VocabularyRepositoryService vocabularyService;
 
     private final IdentifierResolver idResolver;
 
     @Autowired
-    public ResourceRepositoryService(Validator validator, ResourceDao resourceDao, TermDao termDao,
-                                     TermAssignmentDao termAssignmentDao, TargetDao targetDao,
+    public ResourceRepositoryService(Validator validator, ResourceDao resourceDao,
                                      TermOccurrenceDao termOccurrenceDao,
+                                     TermAssignmentRepositoryService assignmentService,
+                                     VocabularyRepositoryService vocabularyService,
                                      IdentifierResolver idResolver) {
         super(validator);
         this.resourceDao = resourceDao;
-        this.termDao = termDao;
-        this.termAssignmentDao = termAssignmentDao;
-        this.targetDao = targetDao;
         this.termOccurrenceDao = termOccurrenceDao;
+        this.vocabularyService = vocabularyService;
+        this.assignmentService = assignmentService;
         this.idResolver = idResolver;
     }
 
@@ -76,6 +63,39 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
             instance.setUri(generateIdentifier(instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
+    }
+
+    /**
+     * Persists the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to persist
+     * @param vocabulary Vocabulary context
+     * @throws IllegalArgumentException If the specified Resource is neither a {@code Document} nor a {@code File}
+     */
+    @Transactional
+    public void persist(Resource resource, Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        prePersist(resource);
+        resourceDao.persist(resource, vocabulary);
+    }
+
+    /**
+     * Updates the specified Resource in the context of the specified Vocabulary.
+     *
+     * @param resource   Resource to update
+     * @param vocabulary Vocabulary context
+     * @throws IllegalArgumentException If the specified Resource is neither a {@code Document} nor a {@code File}
+     */
+    @Transactional
+    public Resource update(Resource resource, Vocabulary vocabulary) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabulary);
+        preUpdate(resource);
+        final Resource result = resourceDao.update(resource, vocabulary);
+        assert result != null;
+        postUpdate(resource);
+        return result;
     }
 
     /**
@@ -97,7 +117,22 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
      * @return List of term assignments and occurrences
      */
     public List<TermAssignment> findAssignments(Resource resource) {
-        return termAssignmentDao.findAll(resource);
+        return assignmentService.findAll(resource);
+    }
+
+    /**
+     * Gets aggregated information about Terms assigned to the specified Resource.
+     * <p>
+     * Since retrieving all the assignments and occurrences related to the specified Resource may be time consuming and
+     * is rarely required, this method provides aggregate information in that the returned instances contain only
+     * distinct Terms assigned to/occurring in a Resource together with information about how many times they occur and
+     * whether they are suggested or asserted.
+     *
+     * @param resource Resource to get assignment info for
+     * @return Aggregated assignment information for Resource
+     */
+    public List<ResourceTermAssignments> getAssignmentInfo(Resource resource) {
+        return assignmentService.getResourceAssignmentInfo(resource);
     }
 
     /**
@@ -120,57 +155,14 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
      */
     @Transactional
     public void setTags(Resource resource, final Collection<URI> iTerms) {
-        Objects.requireNonNull(resource);
-        Objects.requireNonNull(iTerms);
-        LOG.trace("Setting tags {} on resource {}.", iTerms, resourceDao);
-
-        // get the whole-resource target
-        final Target target = targetDao.findByWholeResource(resource).orElseGet(() -> {
-            final Target target2 = new Target(resource);
-            targetDao.persist(target2);
-            return target2;
-        });
-
-        // remove obsolete existing term assignments and determine new assignments to add
-        final List<TermAssignment> termAssignments = termAssignmentDao.findByTarget(target);
-        final Collection<URI> toAdd = new HashSet<>(iTerms);
-        final List<TermAssignment> toRemove = new ArrayList<>(termAssignments.size());
-        for (TermAssignment existing : termAssignments) {
-            if (!iTerms.contains(existing.getTerm().getUri())) {
-                toRemove.add(existing);
-            } else {
-                toAdd.remove(existing.getTerm().getUri());
-            }
-        }
-        toRemove.forEach(termAssignmentDao::remove);
-
-        // create term assignments for each input term to the target
-        toAdd.forEach(iTerm -> {
-            final Term term = termDao.find(iTerm).orElseThrow(
-                    () -> NotFoundException.create(Term.class.getSimpleName(), iTerm));
-
-            final TermAssignment termAssignment = new TermAssignment(term, target);
-            termAssignmentDao.persist(termAssignment);
-        });
-
-        update(resource);
-        LOG.trace("Finished setting tags on resource {}.", resource);
+        assignmentService.setOnResource(resource, iTerms);
     }
 
     @Override
     protected void preRemove(Resource instance) {
         LOG.trace("Removing term occurrences in resource {} which is about to be removed.", instance);
-        termOccurrenceDao.findAll(instance).forEach(to -> {
-            termOccurrenceDao.remove(to);
-            targetDao.remove(to.getTarget());
-        });
-        final Optional<Target> target = targetDao.findByWholeResource(instance);
-        target.ifPresent(t -> {
-            LOG.trace("removing term assignments to resource {} which is about to be removed.", instance);
-            final List<TermAssignment> assignments = termAssignmentDao.findByTarget(t);
-            assignments.forEach(termAssignmentDao::remove);
-            targetDao.remove(t);
-        });
+        termOccurrenceDao.removeAll(instance);
+        assignmentService.removeAll(instance);
         removeFromParentDocumentIfFile(instance);
     }
 
@@ -182,8 +174,15 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
         final Document parent = file.getDocument();
         if (parent != null) {
             LOG.trace("Removing file {} from its parent document {}.", instance, parent);
+            // Need to detach the parent because we may want to merge it into a vocabulary context,
+            // which would cause issues because it was originally loaded from the default context
+            resourceDao.detach(parent);
             parent.removeFile(file);
-            resourceDao.update(parent);
+            if (parent.getVocabulary() != null) {
+                resourceDao.update(parent, vocabularyService.getRequiredReference(parent.getVocabulary()));
+            } else {
+                resourceDao.update(parent);
+            }
         }
     }
 

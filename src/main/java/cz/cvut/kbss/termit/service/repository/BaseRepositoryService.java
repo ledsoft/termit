@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.repository;
 
 import com.fasterxml.classmate.ResolvedType;
@@ -190,9 +173,6 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     @Transactional
     public T update(T instance) {
         Objects.requireNonNull(instance);
-        if (!exists(instance.getUri())) {
-            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
-        }
         preUpdate(instance);
         final T result = getPrimaryDao().update(instance);
         assert result != null;
@@ -203,11 +183,14 @@ public abstract class BaseRepositoryService<T extends HasIdentifier> {
     /**
      * Override this method to plug custom behavior into the transactional cycle of {@link #update(HasIdentifier)} )}.
      * <p>
-     * The default behavior is to validate the specified instance.
+     * The default behavior is to validate the specified instance and ensure its existence in the repository.
      *
      * @param instance The instance to be updated, not {@code null}
      */
     protected void preUpdate(@NonNull T instance) {
+        if (!exists(instance.getUri())) {
+            throw NotFoundException.create(instance.getClass().getSimpleName(), instance.getUri());
+        }
         validate(instance);
     }
 

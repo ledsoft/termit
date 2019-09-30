@@ -1,25 +1,8 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -96,6 +79,24 @@ public class TermService {
     }
 
     /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any of its imported
+     * vocabularies.
+     * <p>
+     * Basically, this does a transitive closure over the vocabulary import relationship, starting at the specified
+     * vocabulary, and returns all parent-less terms.
+     *
+     * @param vocabulary Base vocabulary for the vocabulary import closure
+     * @param pageSpec   Page specifying result number and position
+     * @return Matching root terms
+     * @see #findAllRoots(Vocabulary, Pageable)
+     */
+    public List<Term> findAllRootsIncludingImports(Vocabulary vocabulary, Pageable pageSpec) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(pageSpec);
+        return repositoryService.findAllRootsIncludingImported(vocabulary, pageSpec);
+    }
+
+    /**
      * Retrieves root terms (terms without parent) in whose subterm tree (including themselves as the root) is a term
      * with label matching the specified search string.
      * <p>
@@ -112,6 +113,21 @@ public class TermService {
     }
 
     /**
+     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
+     * (transitively) whose sub-terms or themselves match the specified search string.
+     *
+     * @param vocabulary   Base vocabulary for the vocabulary import closure
+     * @param searchString Search string
+     * @return Match root terms
+     * @see #findAllRoots(Vocabulary, String)
+     */
+    public List<Term> findAllRootsIncludingImports(Vocabulary vocabulary, String searchString) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(searchString);
+        return repositoryService.findAllRootsIncludingImported(vocabulary, searchString);
+    }
+
+    /**
      * Gets vocabulary with the specified identifier.
      *
      * @param id Vocabulary identifier
@@ -119,6 +135,7 @@ public class TermService {
      * @throws NotFoundException When vocabulary with the specified identifier does not exist
      */
     public Vocabulary findVocabularyRequired(URI id) {
+        Objects.requireNonNull(id);
         return vocabularyService.find(id)
                                 .orElseThrow(() -> NotFoundException.create(Vocabulary.class.getSimpleName(), id));
     }
@@ -145,6 +162,27 @@ public class TermService {
     }
 
     /**
+     * Gets a reference to a Term with the specified identifier.
+     *
+     * @param id Term identifier
+     * @return Matching Term reference wrapped in an {@code Optional}
+     */
+    public Optional<Term> getReference(URI id) {
+        return repositoryService.getReference(id);
+    }
+
+    /**
+     * Gets a reference to a Term with the specified identifier.
+     *
+     * @param id Term identifier
+     * @return Matching term reference
+     * @throws NotFoundException When no matching term is found
+     */
+    public Term getRequiredReference(URI id) {
+        return repositoryService.getRequiredReference(id);
+    }
+
+    /**
      * Gets child terms of the specified parent term.
      *
      * @param parent Parent term whose children should be loaded
@@ -153,20 +191,20 @@ public class TermService {
     public List<Term> findSubTerms(Term parent) {
         Objects.requireNonNull(parent);
         return parent.getSubTerms() == null ? Collections.emptyList() :
-               parent.getSubTerms().stream().map(u -> repositoryService.find(u).orElseThrow(
-                       () -> new NotFoundException("Child of term " + parent + " with id " + u + " not found!")))
+               parent.getSubTerms().stream().map(u -> repositoryService.find(u.getUri()).orElseThrow(
+                       () -> new NotFoundException(
+                               "Child of term " + parent + " with id " + u.getUri() + " not found!")))
                      .collect(Collectors.toList());
     }
 
     /**
-     * Gets assignments of the specified term.
+     * Gets aggregated info about assignments and occurrences of the specified Term.
      *
-     * @param term Term whose assignments to retrieve
-     * @return Term assignments
+     * @param term Term whose assignments and occurrences to retrieve
+     * @return List of term assignment describing instances
      */
-    public List<TermAssignment> getAssignments(Term term) {
-        Objects.requireNonNull(term);
-        return repositoryService.getAssignments(term);
+    public List<TermAssignments> getAssignmentInfo(Term term) {
+        return repositoryService.getAssignmentsInfo(term);
     }
 
     /**

@@ -1,25 +1,9 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.VocabularyImportException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
@@ -39,8 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -56,6 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VocabularyControllerTest extends BaseControllerTestRunner {
 
     private static final String PATH = "/vocabularies";
+    private static final String NAMESPACE = "http://onto.fel.cvut.cz/ontologies/termit/vocabularies/";
+    private static final String FRAGMENT = "test";
+    private static final URI VOCABULARY_URI = URI.create(NAMESPACE + FRAGMENT);
 
     @Mock
     private VocabularyService serviceMock;
@@ -173,16 +162,14 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     void createVocabularyReturnsResponseWithLocationSpecifyingNamespaceWhenItIsDifferentFromConfiguredOne()
             throws Exception {
         final Vocabulary vocabulary = Generator.generateVocabulary();
-        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
-        final String uriNs = "http://onto.fel.cvut.cz/ontologies/termit/vocabularies/";
-        vocabulary.setUri(uri);
-        final String namespace = "http://kbss.felk.cvut.cz/ontologies/termit/vocabularies/";
-        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(namespace);
+        vocabulary.setUri(VOCABULARY_URI);
+        final String configuredNamespace = "http://kbss.felk.cvut.cz/ontologies/termit/vocabularies/";
+        when(configMock.get(ConfigParam.NAMESPACE_VOCABULARY)).thenReturn(configuredNamespace);
         final MvcResult mvcResult = mockMvc.perform(
                 post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
         final String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
-        assertThat(location, containsString(QueryParams.NAMESPACE + "=" + uriNs));
+        assertThat(location, containsString(QueryParams.NAMESPACE + "=" + NAMESPACE));
     }
 
     @Test
@@ -190,10 +177,9 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(user);
         vocabulary.setCreated(new Date());
-        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
-        vocabulary.setUri(uri);
-        when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_VOCABULARY), any())).thenReturn(uri);
-        when(serviceMock.exists(uri)).thenReturn(true);
+        vocabulary.setUri(VOCABULARY_URI);
+        when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_VOCABULARY), any())).thenReturn(VOCABULARY_URI);
+        when(serviceMock.exists(VOCABULARY_URI)).thenReturn(true);
         mockMvc.perform(put(PATH + "/test").contentType(MediaType.APPLICATION_JSON_VALUE).content(toJson(vocabulary)))
                .andExpect(status().isNoContent());
         verify(serviceMock).update(vocabulary);
@@ -204,16 +190,78 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         final Vocabulary vocabulary = Generator.generateVocabulary();
         vocabulary.setAuthor(user);
         vocabulary.setCreated(new Date());
-        final URI uri = URI.create("http://onto.fel.cvut.cz/ontologies/termit/vocabularies/test");
         vocabulary.setUri(Generator.generateUri());
-        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, "test")).thenReturn(uri);
-        when(serviceMock.exists(uri)).thenReturn(false);
-        final MvcResult mvcResult = mockMvc.perform(put(PATH + "/test").contentType(MediaType.APPLICATION_JSON_VALUE)
-                                                                       .content(toJson(vocabulary)))
-                                           .andExpect(status().isConflict()).andReturn();
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
+        when(serviceMock.exists(VOCABULARY_URI)).thenReturn(false);
+        final MvcResult mvcResult = mockMvc
+                .perform(put(PATH + "/" + FRAGMENT).contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                   .content(toJson(vocabulary)))
+                .andExpect(status().isConflict()).andReturn();
         final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
         assertNotNull(errorInfo);
         assertThat(errorInfo.getMessage(), containsString("does not match the ID of the specified entity"));
         verify(serviceMock, never()).update(any());
+    }
+
+    @Test
+    void updateVocabularyThrowsVocabularyImportExceptionWithMessageIdWhenServiceThrowsException() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setCreated(new Date());
+        vocabulary.setUri(VOCABULARY_URI);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
+        final String errorMsg = "Error message";
+        final String errorMsgId = "message.id";
+        when(serviceMock.update(any())).thenThrow(new VocabularyImportException(errorMsg, errorMsgId));
+
+        final MvcResult mvcResult = mockMvc
+                .perform(put(PATH + "/" + FRAGMENT).contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                   .content(toJson(vocabulary)))
+                .andExpect(status().isConflict()).andReturn();
+        final ErrorInfo errorInfo = readValue(mvcResult, ErrorInfo.class);
+        assertNotNull(errorInfo);
+        assertEquals(errorMsg, errorInfo.getMessage());
+        assertEquals(errorMsgId, errorInfo.getMessageId());
+    }
+
+    @Test
+    void getTransitiveImportsReturnsCollectionOfImportIdentifiersRetrievedFromService() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setCreated(new Date());
+        vocabulary.setUri(VOCABULARY_URI);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
+        final Set<URI> imports = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
+                                          .collect(Collectors.toSet());
+        when(serviceMock.getRequiredReference(VOCABULARY_URI)).thenReturn(vocabulary);
+        when(serviceMock.getTransitivelyImportedVocabularies(vocabulary)).thenReturn(imports);
+
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + FRAGMENT + "/imports")).andExpect(status().isOk())
+                                           .andReturn();
+        final Set<URI> result = readValue(mvcResult, new TypeReference<Set<URI>>() {
+        });
+        assertEquals(imports, result);
+        verify(serviceMock).getRequiredReference(VOCABULARY_URI);
+        verify(serviceMock).getTransitivelyImportedVocabularies(vocabulary);
+    }
+
+    @Test
+    void getTransitiveImportsReturnsEmptyCollectionWhenNoImportsAreFoundForVocabulary() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setAuthor(user);
+        vocabulary.setCreated(new Date());
+        vocabulary.setUri(VOCABULARY_URI);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
+        when(serviceMock.getRequiredReference(VOCABULARY_URI)).thenReturn(vocabulary);
+        when(serviceMock.getTransitivelyImportedVocabularies(vocabulary)).thenReturn(Collections.emptySet());
+
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + FRAGMENT + "/imports")).andExpect(status().isOk())
+                                           .andReturn();
+        final Set<URI> result = readValue(mvcResult, new TypeReference<Set<URI>>() {
+        });
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(serviceMock).getRequiredReference(VOCABULARY_URI);
+        verify(serviceMock).getTransitivelyImportedVocabularies(vocabulary);
     }
 }

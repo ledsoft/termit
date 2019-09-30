@@ -1,7 +1,7 @@
 PREFIX g: <__VOC_IRI__>
 
 PREFIX v-sgov-pojem: <https://slovník.gov.cz/veřejný-sektor/pojem/>
-PREFIX popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> 
+PREFIX popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/terms/>
 PREFIX dce: <http://purl.org/dc/elements/1.1/>
@@ -17,39 +17,39 @@ DELETE {
 }
 INSERT {
     GRAPH g: {
-    ?x a popis-dat-pojem:dokumentovy-slovnik ;
-       popis-dat-pojem:ma-glosar ?g ;
-       popis-dat-pojem:ma-model ?m ;
+    ?x a popis-dat-pojem:dokumentový-slovník ;
+       popis-dat-pojem:má-glosář ?g ;
+       popis-dat-pojem:má-model ?m ;
        popis-dat-pojem:popisuje-dokument ?d ;
-       popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t ;
+       popis-dat-pojem:má-autora ?a ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        rdfs:label ?vTitle .
-        
+
     ?d a popis-dat-pojem:dokument ;
-       rdfs:label ?dTitle ;
-       dce:description ""@cs ;
-       popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t ;
-       popis-dat-pojem:ma-soubor ?s .
+       rdfs:label ?dTitleCs ;
+       dc:description ""@cs ;
+       popis-dat-pojem:má-autora ?a ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
+       popis-dat-pojem:má-soubor ?s .
 
     ?s a popis-dat-pojem:soubor ;
-       rdfs:label ?sTitle ;
-       dce:description ""@cs ;
-       popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t .
-        
+       rdfs:label ?sTitleCs ;
+       dc:description ""@cs ;
+       popis-dat-pojem:má-autora ?a ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t .
+
     ?m a popis-dat-pojem:model .
-    ?g a popis-dat-pojem:glosar .
+    ?g a popis-dat-pojem:glosář .
     ?c a popis-dat-pojem:term ;
        rdfs:label ?l ;
        rdfs:comment ?cComment ;
-       popis-dat-pojem:ma-autora ?a ;
-       dc:created ?t ;
+       popis-dat-pojem:má-autora ?a ;
+       popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
        dce:source ?srcd ;
-       popis-dat-pojem:je-pojmem-ze-slovniku ?x .
-    ?g popis-dat-pojem:obsahuje-korenovy-pojem ?cTop .
+       popis-dat-pojem:je-pojmem-ze-slovníku ?x .
+    ?g popis-dat-pojem:obsahuje-kořenový-pojem ?cTop .
     }
-} WHERE { 
+} WHERE {
     GRAPH g: {
     ?x a v-sgov-pojem:slovník ;
        v-sgov-pojem:má-glosář ?g ;
@@ -78,11 +78,13 @@ INSERT {
         }
         BIND( ?c AS ?cTop )
 	}
-    BIND (<http://onto.fel.cvut.cz/ontologies/uzivatel/petr-kremen> as ?a)
+    BIND (<http://onto.fel.cvut.cz/ontologies/uzivatel/michal-med> as ?a)
     BIND (iri(concat(str(?x),"/document")) as ?d)
-    BIND (strlang(concat("Dokument pro ",str(?vTitle)),"cs") as ?dTitle)
+    BIND (strlang(concat("Dokument pro ",str(?vTitle)),"cs") as ?dTitleCs)
+    BIND (strlang(concat("Document for ",str(?vTitle)),"en") as ?dTitleEn)
     BIND (iri(concat(str(?d),"/file")) as ?s)
-    BIND (strlang(concat("Soubor pro ",str(?vTitle)),"cs") as ?sTitle)
+    BIND (strlang(concat("Soubor pro ",str(?vTitle)),"cs") as ?sTitleCs)
+    BIND (strlang(concat("File for ",str(?vTitle)),"en") as ?sTitleEn)
     BIND (NOW() as ?t)
     OPTIONAL {
         ?d dc:created ?y3 .

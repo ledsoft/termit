@@ -1,28 +1,11 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.OccurrenceTarget;
-import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermOccurrence;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.service.document.DocumentManager;
 import cz.cvut.kbss.termit.service.document.TermOccurrenceResolver;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.Constants;
@@ -36,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -57,6 +41,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private static final Logger LOG = LoggerFactory.getLogger(HtmlTermOccurrenceResolver.class);
 
     private final HtmlSelectorGenerators selectorGenerators;
+    private final DocumentManager documentManager;
 
     private Document document;
     private File source;
@@ -66,9 +51,11 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
     private Map<String, List<Element>> annotatedElements;
 
     @Autowired
-    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators) {
+    HtmlTermOccurrenceResolver(TermRepositoryService termService, HtmlSelectorGenerators selectorGenerators,
+                               DocumentManager documentManager) {
         super(termService);
         this.selectorGenerators = selectorGenerators;
+        this.documentManager = documentManager;
     }
 
     @Override
@@ -160,7 +147,7 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             LOG.trace("Processing RDFa annotated elements {}.", elements);
             final Optional<TermOccurrence> occurrence = resolveAnnotation(elements, source);
             occurrence.ifPresent(to -> {
-                LOG.trace("Found term occurrence {}.", to, source);
+                LOG.trace("Found term occurrence {}.", to);
                 result.add(to);
             });
         }
@@ -174,17 +161,33 @@ public class HtmlTermOccurrenceResolver extends TermOccurrenceResolver {
             LOG.trace("No term identifier found in RDFa element {}. Skipping it.", rdfaElem);
             return Optional.empty();
         }
-        final Term term = termService.find(URI.create(termId)).orElseThrow(() -> new AnnotationGenerationException(
-                "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found."));
-        final TermOccurrence occurrence = createOccurrence(term);
+        final URI termUri = URI.create(termId);
+        if (!termService.exists(termUri)) {
+            throw new AnnotationGenerationException(
+                    "Term with id " + termId + " denoted by RDFa element " + rdfaElem + " not found.");
+        }
+        final TermOccurrence occurrence = createOccurrence(termUri);
         final OccurrenceTarget target = new OccurrenceTarget(source);
         target.setSelectors(selectorGenerators.generateSelectors(rdfaElem.toArray(new Element[0])));
         occurrence.setTarget(target);
+        final String strScore = rdfaElem.get(0).attr("score");
+        if (!strScore.isEmpty()) {
+            try {
+                final Double score = Double.parseDouble(strScore);
+                occurrence.setScore(score);
+            } catch (NumberFormatException e) {
+                LOG.error("Unable to parse score.", e);
+            }
+        }
         return Optional.of(occurrence);
     }
 
     @Override
     public boolean supports(File source) {
-        return source.getLabel().endsWith("html") || source.getLabel().endsWith("htm");
+        if (source.getLabel().endsWith("html") || source.getLabel().endsWith("htm")) {
+            return true;
+        }
+        final Optional<String> probedContentType = documentManager.getContentType(source);
+        return probedContentType.isPresent() && probedContentType.get().equals(MimeTypeUtils.TEXT_HTML_VALUE);
     }
 }

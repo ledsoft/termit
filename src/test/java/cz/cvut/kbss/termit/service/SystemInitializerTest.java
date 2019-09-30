@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
@@ -37,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
@@ -74,7 +58,7 @@ class SystemInitializerTest extends BaseServiceTestRunner {
         MockitoAnnotations.initMocks(this);
         // Randomize admin credentials folder
         this.adminCredentialsDir =
-                System.getProperty("java.io.tmpdir") + File.separator + Integer.toString(Generator.randomInt(0, 10000));
+                System.getProperty("java.io.tmpdir") + File.separator + Generator.randomInt(0, 10000);
         ((MockEnvironment) environment)
                 .setProperty(ConfigParam.ADMIN_CREDENTIALS_LOCATION.toString(), adminCredentialsDir);
         this.sut = new SystemInitializer(config, userService, txManager);
@@ -115,9 +99,26 @@ class SystemInitializerTest extends BaseServiceTestRunner {
         final File credentialsFile = new File(home + File.separator + Constants.ADMIN_CREDENTIALS_FILE);
         assertTrue(credentialsFile.exists());
         assertTrue(credentialsFile.isHidden());
+        verifyAdminCredentialsFileContent(admin, credentialsFile);
+    }
+
+    private void verifyAdminCredentialsFileContent(UserAccount admin, File credentialsFile) throws IOException {
         final List<String> lines = Files.readAllLines(credentialsFile.toPath());
         assertThat(lines.get(0), containsString(admin.getUsername() + "/"));
         final String password = lines.get(0).substring(lines.get(0).indexOf('/') + 1);
         assertTrue(passwordEncoder.matches(password, admin.getPassword()));
+    }
+
+    @Test
+    void savesAdminLoginCredentialsIntoConfiguredFile() throws Exception {
+        final String adminFileName = ".admin-file-with-different-name";
+        ((MockEnvironment) environment).setProperty(ConfigParam.ADMIN_CREDENTIALS_FILE.toString(), adminFileName);
+        this.sut = new SystemInitializer(config, userService, txManager);
+        sut.initSystemAdmin();
+        final UserAccount admin = em.find(UserAccount.class, ADMIN_URI);
+        final File credentialsFile = new File(adminCredentialsDir + File.separator + adminFileName);
+        assertTrue(credentialsFile.exists());
+        assertTrue(credentialsFile.isHidden());
+        verifyAdminCredentialsFileContent(admin, credentialsFile);
     }
 }

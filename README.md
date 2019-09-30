@@ -47,6 +47,11 @@ _* Technology not used in INBAS RT_
 We are using `basePackageClasses` instead of `basePackages` in `ComponentScan`. This is more resilient to refactoring errors 
 because it uses classes instead of String-based package info. Thus, any errors are discovered during compilation.
 
+### REST Method Annotations
+
+Started to switch to HTTP method-specific annotation shortcuts, e.g., instead of `@RequestMapping(method=RequestMethod.GET)`,
+we should use `@GetMapping`. It should make the REST controller code a bit more concise.
+
 ### jsoup
 
 Had to switch from standard Java DOM implementation to **jsoup** because DOM had sometimes trouble parsing HTML documents (`meta` tags in header).
@@ -63,36 +68,9 @@ Use it to verify input data. See `User` and its validation in `BaseRepositorySer
 TermIt is preconfigured to run against a local GraphDB repository at `http://locahost:7200/repositories/termit`.
 This can be changed by updating `config.properties`.
 
-### GraphDB Ruleset
-
-_Applies when running against a GraphDB repository._
-
-In order to support inference used by the application, a custom ruleset has to be specified for the TermIt repository. This
-ruleset is available in `rulesets/rulest-termit-graphdb.pie`.
-
-### RDF4J SPIN Rules
-
-_Applies when running against an RDF4J repository._
-
-In order to support the inference used by the application, new rules need to be added to RDF4J because its own RDFS rule engine does not
-support OWL stuff like inverse properties (which are used in the model). Thus, when creating a new repository, a store 
-with **RDFS+SPIN support** should be selected (if proper search should be supported as well, a **RDFS+SPIN with Lucene support** should be selected). 
-Then, rules contained in `rulesets/rules-termit-spin.ttl` should be added to the repository, 
-as described by the [RDF4J documentation](http://docs.rdf4j.org/programming/#_adding_rules).
-
-### Loading Ontologies into Repository
-
-TermIt needs the repository to provide some inference. Besides loading the appropriate rulesets (see above), it is also
-necessary to load the ontological models into the repository.
-
-First model to load is the TermIt model itself. It can be found in `ontology/termit-model.ttl`. The other necessary model
-is the _popis dat_ model. It is available online at 
-[http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model](http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model).
-With these two models loaded, the repository should provide the inference services required by TermIt.
-
 
 ### User vs UserAccount
-`User` is a domain class used for domain functions, mostly for resource provenance (author). It does not support password.
+`User` is a domain class used for domain functions, mostly for resource provenance (author, last editor). It does not support password.
  `UserAccount` is used for security-related functions and supports password. Most parts of the application **should** use
  `User`.
 
@@ -111,13 +89,14 @@ Fulltext search currently supports multiple types of implementation:
 
 * Simple substring matching on term and vocabulary label _(default)_
 * RDF4J with Lucene SAIL
-* GraphDB with Lucene connector using czech analyzer
+* GraphDB with Lucene connector
 
 Each implementation has its own search query which is loaded and used by `SearchDao`. In order for the more advanced implementations
 for Lucene to work, a corresponding Maven profile (**graphdb**, **rdf4j**) has to be selected. This inserts the correct query into the resulting
 artifact during build. If none of the profiles is selected, the default search is used.
 
-Note that in case of GraphDB, a corresponding Lucene connector has to be created as well.
+Note that in case of GraphDB, corresponding Lucene connectors (`label_index` for labels and `defcom_index` for definitions and comments)
+ have to be created as well.
 
 ### RDFS Inference in Tests
 
@@ -137,6 +116,8 @@ used by TermIt.
 We are using [JavaMelody](https://github.com/javamelody/javamelody) for monitoring the application and its usage. The data are available
 on the `/monitoring` endpoint and are secured using _basic_ authentication, see `SecurityConstants` for credentials.
 
-## License
+## Documentation
 
-Licensed under GPL v3.0.
+TermIt REST API is documented on [SwaggerHub](https://app.swaggerhub.com/apis/ledvima1/TermIt/) under the appropriate version.
+
+Build configuration and deployment is described in [setup.md](doc/setup.md).

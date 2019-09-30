@@ -11,13 +11,16 @@
 <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term>
         a       owl:Class .
 
-<http://www.w3.org/2004/02/skos/core#narrower>
-        a       owl:ObjectProperty .
-
 termit-pojem:má-cíl-výskytu
         a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
         rdfs:range          termit-pojem:cíl-výskytu ;
         rdfs:subPropertyOf  termit-pojem:má-cíl .
+
+termit-pojem:má-analyzovaný-zdroj
+        a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        rdfs:domain         termit-pojem:záznam-o-textové-analýze ;
+        rdfs:range          <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj> ;
+        rdfs:subPropertyOf  <https://slovník.gov.cz/základní/pojem/vztah> .
 
 termit-pojem:zablokovaný-uživatel-termitu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
@@ -42,15 +45,18 @@ termit:model  a         owl:Ontology , <https://slovník.gov.cz/veřejný-sektor
         <http://purl.org/dc/elements/1.1/title>
                 "Slovník systému TermIt - model"@cs , "Vocabulary of system TermIt - model"@en ;
         <http://purl.org/dc/terms/created>
-                "25.03.2019" ;
+                "25.04.2019" ;
         <http://purl.org/ontology/bibo/status>
                 "Specifikace"@cs , "Specification"@en ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     termit:glosář , <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model> ;
+        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/model> , termit:glosář ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/model/verze/1.1.1> .
+
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovník>
+        a       owl:Class .
 
 termit-pojem:uzamčený-uživatel-termitu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
@@ -69,6 +75,12 @@ termit-pojem:je-přiřazením-termu
         a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
         rdfs:domain         termit-pojem:přiřazení-termu ;
         rdfs:range          <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/term> ;
+        rdfs:subPropertyOf  <https://slovník.gov.cz/základní/pojem/vztah> .
+
+termit-pojem:má-slovník-pro-analýzu
+        a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        rdfs:domain         termit-pojem:záznam-o-textové-analýze ;
+        rdfs:range          <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovník> ;
         rdfs:subPropertyOf  <https://slovník.gov.cz/základní/pojem/vztah> .
 
 termit-pojem:selektor-xpath
@@ -96,6 +108,10 @@ termit-pojem:navržený-výskyt-termu
 termit-pojem:omezený-uživatel-termitu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
         rdfs:subClassOf  termit-pojem:uživatel-termitu .
+
+termit-pojem:záznam-o-textové-analýze
+        a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
+        rdfs:subClassOf  <https://slovník.gov.cz/základní/pojem/objekt> .
 
 termit-pojem:má-koncovou-pozici
         a                   owl:DatatypeProperty , <https://slovník.gov.cz/základní/pojem/typ-vlastnosti> ;
@@ -134,12 +150,20 @@ termit-pojem:selektor-termu
 
 termit-pojem:má-selektor-termu
         a                   owl:ObjectProperty , <https://slovník.gov.cz/základní/pojem/typ-vztahu> ;
+        rdfs:domain         termit-pojem:cíl-výskytu ;
         rdfs:range          termit-pojem:selektor-termu ;
         rdfs:subPropertyOf  <https://slovník.gov.cz/základní/pojem/vztah> .
+
+<http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/zdroj>
+        a       owl:Class .
 
 termit-pojem:cíl-výskytu
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
         rdfs:subClassOf  termit-pojem:cíl .
+
+termit-pojem:navržené-přiřazení-termu
+        a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
+        rdfs:subClassOf  termit-pojem:přiřazení-termu .
 
 <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/uživatel>
         a       owl:Class .

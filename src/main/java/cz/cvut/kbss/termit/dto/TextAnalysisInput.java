@@ -1,28 +1,13 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.dto;
 
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents input passed to the text analysis service.
  * <p>
- * Mainly contains the content to analyze and identification of the vocabulary whose terms will be used in the text
+ * Mainly contains the content to analyze and identification of the vocabularies whose terms will be used in the text
  * analysis.
  */
 public class TextAnalysisInput {
@@ -33,16 +18,21 @@ public class TextAnalysisInput {
     private String content;
 
     /**
-     * URI of the repository containing vocabulary whose terms are used in the text analysis.
+     * Language of the text content.
+     */
+    private String language;
+
+    /**
+     * URI of the repository containing vocabularies whose terms are used in the text analysis.
      */
     private URI vocabularyRepository;
 
     /**
-     * URI of the context containing vocabulary whose terms are used in the text analysis. Optional.
+     * URIs of contexts containing vocabularies whose terms are used in the text analysis. Optional.
      * <p>
      * If not specified, the whole {@link #vocabularyRepository} is searched for terms.
      */
-    private URI vocabularyContext;
+    private Set<URI> vocabularyContexts;
 
     public String getContent() {
         return content;
@@ -50,6 +40,14 @@ public class TextAnalysisInput {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public URI getVocabularyRepository() {
@@ -60,20 +58,29 @@ public class TextAnalysisInput {
         this.vocabularyRepository = vocabularyRepository;
     }
 
-    public URI getVocabularyContext() {
-        return vocabularyContext;
+    public Set<URI> getVocabularyContexts() {
+        return vocabularyContexts;
     }
 
-    public void setVocabularyContext(URI vocabularyContext) {
-        this.vocabularyContext = vocabularyContext;
+    public void setVocabularyContexts(Set<URI> vocabularyContexts) {
+        this.vocabularyContexts = vocabularyContexts;
+    }
+
+    public void addVocabularyContext(URI vocabularyContext) {
+        if (vocabularyContexts == null) {
+            this.vocabularyContexts = new HashSet<>();
+        }
+        vocabularyContexts.add(vocabularyContext);
     }
 
     @Override
     public String toString() {
+        assert content != null;
         return "TextAnalysisInput{" +
                 "content='" + (content.length() > 50 ? content.substring(0, 50) + "..." : content) + '\'' +
                 ", vocabularyRepository=" + vocabularyRepository +
-                ", vocabularyContext=" + vocabularyContext +
+                ", vocabularyContexts=" + vocabularyContexts +
+                ", language=" + language +
                 '}';
     }
 }

@@ -1,25 +1,9 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.business;
 
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -105,10 +89,10 @@ class TermServiceTest {
     }
 
     @Test
-    void getAssignmentsRetrievesTermAssignmentsFromRepositoryService() {
+    void getAssignmentInfoRetrievesTermAssignmentInfoFromRepositoryService() {
         final Term term = Generator.generateTermWithId();
-        sut.getAssignments(term);
-        verify(termRepositoryService).getAssignments(term);
+        sut.getAssignmentInfo(term);
+        verify(termRepositoryService).getAssignmentsInfo(term);
     }
 
     @Test
@@ -148,7 +132,7 @@ class TermServiceTest {
             when(termRepositoryService.find(child.getUri())).thenReturn(Optional.of(child));
             return child;
         }).collect(Collectors.toList());
-        parent.setSubTerms(children.stream().map(Term::getUri).collect(Collectors.toSet()));
+        parent.setSubTerms(children.stream().map(TermInfo::new).collect(Collectors.toSet()));
 
         final List<Term> result = sut.findSubTerms(parent);
         assertEquals(children.size(), result.size());
@@ -166,5 +150,32 @@ class TermServiceTest {
     void findAllRetrievesAllTermsFromVocabularyUsingRepositoryService() {
         sut.findAll(vocabulary);
         verify(termRepositoryService).findAll(vocabulary);
+    }
+
+    @Test
+    void getReferenceRetrievesTermReferenceFromRepositoryService() {
+        final URI iri = Generator.generateUri();
+        sut.getReference(iri);
+        verify(termRepositoryService).getReference(iri);
+    }
+
+    @Test
+    void getRequiredReferenceRetrievesTermReferenceFromRepositoryService() {
+        final URI iri = Generator.generateUri();
+        sut.getRequiredReference(iri);
+        verify(termRepositoryService).getRequiredReference(iri);
+    }
+
+    @Test
+    void findAllRootsIncludingImportsRetrievesRootTermsUsingRepositoryService() {
+        sut.findAllRootsIncludingImports(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+        verify(termRepositoryService).findAllRootsIncludingImported(vocabulary, Constants.DEFAULT_PAGE_SPEC);
+    }
+
+    @Test
+    void findAllRootsIncludingImportsWithSearchStringRetrievesRootTermsUsingRepositoryService() {
+        final String searchString = "test";
+        sut.findAllRootsIncludingImports(vocabulary, searchString);
+        verify(termRepositoryService).findAllRootsIncludingImported(vocabulary, searchString);
     }
 }

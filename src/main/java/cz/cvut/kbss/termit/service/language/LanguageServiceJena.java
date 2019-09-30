@@ -1,23 +1,7 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.language;
 
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -56,10 +40,10 @@ public class LanguageServiceJena extends LanguageService {
     }
 
     /**
-     * Gets all types for the given lang.
+     * Gets all types with labels in the given language.
      *
-     * @param lang
-     * @return
+     * @param lang label language
+     * @return List of types as {@code Term}s
      */
     public List<Term> getTypesForLang(String lang) {
         try {
@@ -82,7 +66,7 @@ public class LanguageServiceJena extends LanguageService {
                      t.setComment(st.getObject().asLiteral().getString());
                  }
                  t.setSubTerms(c.listProperties(SKOS.narrower)
-                                .mapWith(s -> URI.create(s.getObject().asResource().getURI())).toSet());
+                                .mapWith(s -> new TermInfo(URI.create(s.getObject().asResource().getURI()))).toSet());
                  terms.add(t);
              });
             return terms;

@@ -1,25 +1,13 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
+import cz.cvut.kbss.termit.model.TextAnalysisRecord;
+import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.document.DocumentManager;
@@ -34,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Interface of business logic concerning resources.
@@ -49,16 +34,20 @@ public class ResourceService implements CrudService<Resource> {
 
     private final ResourceRepositoryService repositoryService;
 
+
     private final DocumentManager documentManager;
 
     private final TextAnalysisService textAnalysisService;
 
+    private final VocabularyService vocabularyService;
+
     @Autowired
     public ResourceService(ResourceRepositoryService repositoryService, DocumentManager documentManager,
-                           TextAnalysisService textAnalysisService) {
+                           TextAnalysisService textAnalysisService, VocabularyService vocabularyService) {
         this.repositoryService = repositoryService;
         this.documentManager = documentManager;
         this.textAnalysisService = textAnalysisService;
+        this.vocabularyService = vocabularyService;
     }
 
     /**
@@ -73,17 +62,17 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
-     * Removes the specified resource.
+     * Removes resource with the specified identifier.
      * <p>
      * Resource removal also involves cleanup of annotations and term occurrences associated with it.
      * <p>
      * TODO: Pull remove method up into AssetService once removal is supported by other types of assets as well
      *
-     * @param resource Resource to remove
+     * @param identifier Identifier of a resource to remove
      */
     @Transactional
-    public void remove(Resource resource) {
-        repositoryService.remove(resource);
+    public void remove(URI identifier) {
+        repositoryService.remove(getRequiredReference(identifier));
     }
 
     /**
@@ -109,6 +98,16 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
+     * Gets aggregate information about Term assignments/occurrences for the specified Resource.
+     *
+     * @param resource Resource to get assignments for
+     * @return Aggregate assignment data
+     */
+    public List<ResourceTermAssignments> getAssignmentInfo(Resource resource) {
+        return repositoryService.getAssignmentInfo(resource);
+    }
+
+    /**
      * Finds resources which are related to the specified one.
      * <p>
      * Two resources are related in this scenario if they have at least one common term assigned to them.
@@ -118,6 +117,20 @@ public class ResourceService implements CrudService<Resource> {
      */
     public List<Resource> findRelated(Resource resource) {
         return repositoryService.findRelated(resource);
+    }
+
+    /**
+     * Checks whether content is stored for the specified resource.
+     * <p>
+     * Note that content is typically stored only for {@link File}s, so this method will return false for any other type
+     * of {@link Resource}.
+     *
+     * @param resource Resource whose content existence is to be verified
+     * @return Whether content is stored
+     */
+    public boolean hasContent(Resource resource) {
+        Objects.requireNonNull(resource);
+        return (resource instanceof File) && documentManager.exists((File) resource);
     }
 
     /**
@@ -158,18 +171,90 @@ public class ResourceService implements CrudService<Resource> {
     }
 
     /**
-     * Executes text analysis on the specified resource's content.
+     * Retrieves files contained in the specified document.
+     * <p>
+     * The files are sorted by their label (ascending).
      *
-     * @param resource Resource to analyze
+     * @param document Document resource
+     * @return Files in the document
+     * @throws UnsupportedAssetOperationException If the specified instance is not a Document
+     */
+    public List<File> getFiles(Resource document) {
+        Objects.requireNonNull(document);
+        final Resource instance = findRequired(document.getUri());
+        if (!(instance instanceof Document)) {
+            throw new UnsupportedAssetOperationException("Cannot get files from resource which is not a document.");
+        }
+        final Document doc = (Document) instance;
+        if (doc.getFiles() != null) {
+            final List<File> list = new ArrayList<>(doc.getFiles());
+            list.sort(Comparator.comparing(File::getLabel));
+            return list;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Adds the specified file to the specified document and persists it.
+     *
+     * @param document Document into which the file should be added
+     * @param file     The file to add and save
+     * @throws UnsupportedAssetOperationException If the specified resource is not a Document
+     */
+    @Transactional
+    public void addFileToDocument(Resource document, File file) {
+        Objects.requireNonNull(document);
+        Objects.requireNonNull(file);
+        if (!(document instanceof Document)) {
+            throw new UnsupportedAssetOperationException("Cannot add file to the specified resource " + document);
+        }
+        final Document doc = (Document) document;
+        doc.addFile(file);
+        if (doc.getVocabulary() != null) {
+            final Vocabulary vocabulary = vocabularyService.getRequiredReference(doc.getVocabulary());
+            repositoryService.persist(file, vocabulary);
+            repositoryService.update(doc, vocabulary);
+        } else {
+            persist(file);
+            update(doc);
+        }
+    }
+
+    /**
+     * Executes text analysis on the specified resource's content.
+     * <p>
+     * The specified vocabulary identifiers represent sources of Terms for the text analysis. If not provided, it is
+     * assumed the file belongs to a Document associated with a Vocabulary which will be used as the Term source.
+     *
+     * @param resource     Resource to analyze
+     * @param vocabularies Set of identifiers of vocabularies to use as Term sources for the analysis. Possibly empty
      * @throws UnsupportedAssetOperationException If text analysis is not supported for the specified resource
      */
-    public void runTextAnalysis(Resource resource) {
+    public void runTextAnalysis(Resource resource, Set<URI> vocabularies) {
         Objects.requireNonNull(resource);
+        Objects.requireNonNull(vocabularies);
         if (!(resource instanceof File)) {
             throw new UnsupportedAssetOperationException("Text analysis is not supported for resource " + resource);
         }
         LOG.trace("Invoking text analysis on resource {}.", resource);
-        textAnalysisService.analyzeFile((File) resource);
+        if (vocabularies.isEmpty()) {
+            textAnalysisService.analyzeFile((File) resource);
+        } else {
+            textAnalysisService.analyzeFile((File) resource, vocabularies);
+        }
+    }
+
+    /**
+     * Gets the latest {@link TextAnalysisRecord} for the specified Resource.
+     *
+     * @param resource Analyzed Resource
+     * @return Latest text analysis record
+     * @throws NotFoundException When no text analysis record exists for the specified resource
+     */
+    public TextAnalysisRecord findLatestTextAnalysisRecord(Resource resource) {
+        return textAnalysisService.findLatestAnalysisRecord(resource).orElseThrow(
+                () -> new NotFoundException("No text analysis record exists for " + resource));
     }
 
     @Override

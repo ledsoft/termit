@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document.html;
 
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
@@ -182,6 +165,20 @@ class TextQuoteSelectorGeneratorTest {
                 "<div><h1>Title</h1><p>Followed by paragraph ending with <span>EXACT </span><span>MATCH</span> with full stop.</p></div>");
         final Elements elements = document.getElementsByTag("span");
         final TextQuoteSelector result = sut.generateSelector(elements.toArray(new Element[0]));
+        assertNotNull(result);
+        assertEquals(exact, result.getExactMatch());
+        assertEquals(prefix.substring(Math.max(0, prefix.length() - CONTEXT_LENGTH)), result.getPrefix());
+        assertEquals(suffix.substring(0, Math.min(suffix.length(), CONTEXT_LENGTH)), result.getSuffix());
+    }
+
+    @Test
+    void generateSelectorSkipsComments() {
+        final String prefix = "Prefix";
+        final String suffix = ". Suffix.";
+        final String exact = "EXACT";
+        document.html("<div>" + prefix + "<!-- comment --><span id=\"elem\">" + exact + "</span>" + suffix + "</div>");
+        final Element element = document.getElementById("elem");
+        final TextQuoteSelector result = sut.generateSelector(element);
         assertNotNull(result);
         assertEquals(exact, result.getExactMatch());
         assertEquals(prefix.substring(Math.max(0, prefix.length() - CONTEXT_LENGTH)), result.getPrefix());

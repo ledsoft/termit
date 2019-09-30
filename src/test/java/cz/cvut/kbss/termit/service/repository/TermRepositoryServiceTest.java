@@ -1,24 +1,8 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
+import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -35,15 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TermRepositoryServiceTest extends BaseServiceTestRunner {
@@ -52,13 +34,11 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     private EntityManager em;
 
     @Autowired
-    private VocabularyRepositoryService vrs;
-
-    @Autowired
     private TermRepositoryService sut;
 
     private UserAccount user;
     private Vocabulary vocabulary;
+    private Vocabulary childVocabulary;
 
     @BeforeEach
     void setUp() {
@@ -66,9 +46,13 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> em.persist(user));
         Environment.setCurrentUser(user);
 
-        this.vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
-        vrs.persist(vocabulary);
+        this.vocabulary = Generator.generateVocabularyWithId();
+        this.childVocabulary = Generator.generateVocabularyWithId();
+        childVocabulary.setImportedVocabularies(Collections.singleton(vocabulary.getUri()));
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(childVocabulary, DescriptorFactory.vocabularyDescriptor(childVocabulary));
+        });
     }
 
     @Test
@@ -164,7 +148,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final URI vocabularyUri = vocabulary.getUri();
         final String termLabel = "Test term";
         assertEquals(
-                vocabularyUri.toString() + Constants.TERM_NAMESPACE_SEPARATOR + "/" +
+                vocabularyUri.toString() + Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR + "/" +
                         IdentifierResolver.normalize(termLabel),
                 sut.generateIdentifier(vocabularyUri, termLabel).toString());
     }
@@ -182,10 +166,9 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
         transactional(() -> sut.addChildTerm(child, parent));
 
-        Term result = em.find(Term.class, parent.getUri());
+        Term result = em.find(Term.class, child.getUri());
         assertNotNull(result);
-        assertTrue(result.getSubTerms().contains(child.getUri()));
-        assertNotNull(em.find(Term.class, child.getUri()));
+        assertEquals(Collections.singleton(parent), result.getParentTerms());
     }
 
     @Test
@@ -194,7 +177,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTerm();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary);
         });
 
@@ -213,7 +196,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary.getGlossary());
         });
 
@@ -232,7 +215,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         final Term child = Generator.generateTermWithId();
         transactional(() -> {
             vocabulary.getGlossary().addRootTerm(parent);
-            em.persist(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary.getUri()));
             em.merge(vocabulary.getGlossary());
         });
 
@@ -259,12 +242,11 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findAllRootsReturnsRootTermsOnMatchingPage() {
-        final List<Term> terms = IntStream.range(0, 10).mapToObj(i -> Generator.generateTermWithId()).collect(
-                Collectors.toList());
+        final List<Term> terms = Generator.generateTermsWithIds(10);
         vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
-            terms.forEach(em::persist);
-            em.merge(vocabulary.getGlossary());
+            terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
         final List<Term> resultOne = sut.findAllRoots(vocabulary, PageRequest.of(0, 5));
@@ -282,34 +264,25 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findTermsBySearchString() {
-        Set<Term> terms = new HashSet<>(10);
-        Term term;
-        for (int i = 0; i < 10; i++) {
-            term = Generator.generateTerm();
-            term.setUri(Generator.generateUri());
-            if (i < 5) {
-                term.setLabel("Result " + term.getLabel());
-            }
-            terms.add(term);
-        }
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        final List<Term> matching = terms.subList(0, 5);
+        matching.forEach(t -> t.setLabel("Result + " + t.getLabel()));
 
-        final Vocabulary toPersist = em.find(Vocabulary.class, vocabulary.getUri());
-        toPersist.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));
-            em.merge(toPersist.getGlossary());
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
-        List<Term> result1 = sut.findAllRoots(vocabulary, "Result");
-
-        assertEquals(5, result1.size());
-        result1.forEach(o -> assertTrue(o.getLabel().contains("Result")));
+        List<Term> result = sut.findAllRoots(vocabulary, "Result");
+        assertEquals(matching.size(), result.size());
+        assertTrue(matching.containsAll(result));
     }
 
     @Test
     void existsInVocabularyChecksForTermWithMatchingLabel() {
-        final Term t = generateTermWithUri();
+        final Term t = Generator.generateTermWithId();
         transactional(() -> {
             t.setVocabulary(vocabulary.getUri());
             vocabulary.getGlossary().addRootTerm(t);
@@ -320,21 +293,17 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
         assertTrue(sut.existsInVocabulary(t.getLabel(), vocabulary));
     }
 
-    private Term generateTermWithUri() {
-        final Term t = Generator.generateTerm();
-        t.setUri(Generator.generateUri());
-        return t;
-    }
-
     @Test
-    void updateUpdatesTermWithSubTerms() {
-        final Term t = generateTermWithUri();
+    void updateUpdatesTermWithParent() {
+        final Term t = Generator.generateTermWithId();
         vocabulary.getGlossary().addRootTerm(t);
-        final Term childOne = generateTermWithUri();
-        t.addSubTerm(childOne.getUri());
         t.setVocabulary(vocabulary.getUri());
-        final Term termTwo = generateTermWithUri();
+        final Term childOne = Generator.generateTermWithId();
+        childOne.addParentTerm(t);
+        childOne.setVocabulary(vocabulary.getUri());
+        final Term termTwo = Generator.generateTermWithId();
         vocabulary.getGlossary().addRootTerm(termTwo);
+        termTwo.setVocabulary(vocabulary.getUri());
         transactional(() -> {
             em.persist(childOne, DescriptorFactory.termDescriptor(vocabulary));
             em.persist(t, DescriptorFactory.termDescriptor(vocabulary));
@@ -342,20 +311,18 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
         });
 
-        t.addSubTerm(termTwo.getUri());
+        childOne.setParentTerms(Collections.singleton(termTwo));
         final String newLabel = "new term label";
-        t.setLabel(newLabel);
-        transactional(() -> sut.update(t));
-        final Term result = em.find(Term.class, t.getUri());
+        childOne.setLabel(newLabel);
+        transactional(() -> sut.update(childOne));
+        final Term result = em.find(Term.class, childOne.getUri());
         assertEquals(newLabel, result.getLabel());
-        assertEquals(2, result.getSubTerms().size());
-        assertTrue(result.getSubTerms().contains(childOne.getUri()));
-        assertTrue(result.getSubTerms().contains(termTwo.getUri()));
+        assertEquals(Collections.singleton(termTwo), result.getParentTerms());
     }
 
     @Test
     void updateThrowsValidationExceptionForEmptyTermLabel() {
-        final Term t = generateTermWithUri();
+        final Term t = Generator.generateTermWithId();
         vocabulary.getGlossary().addRootTerm(t);
         vocabulary.getGlossary().addRootTerm(t);
         transactional(() -> {
@@ -368,27 +335,178 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void getAssignmentsReturnsTermAssignments() {
-        final Term t = generateTermWithUri();
-        vocabulary.getGlossary().addRootTerm(t);
+    void getAssignmentsInfoRetrievesAssignmentData() {
+        final Term t = Generator.generateTermWithId();
+        t.setVocabulary(vocabulary.getUri());
 
         final Resource resource = Generator.generateResourceWithId();
-        resource.setAuthor(user.toUser());
-        resource.setCreated(new Date());
         final TermAssignment ta = new TermAssignment();
-        ta.setTerm(t);
+        ta.setTerm(t.getUri());
         ta.setTarget(new Target(resource));
         transactional(() -> {
             em.persist(t);
-            em.merge(vocabulary);
             em.persist(resource);
             em.persist(ta.getTarget());
             em.persist(ta);
         });
 
-        final List<TermAssignment> result = sut.getAssignments(t);
+        final List<TermAssignments> result = sut.getAssignmentsInfo(t);
         assertEquals(1, result.size());
-        assertEquals(ta.getTerm(), result.get(0).getTerm());
-        assertEquals(ta.getUri(), result.get(0).getUri());
+        assertEquals(t.getUri(), result.get(0).getTerm());
+        assertEquals(resource.getUri(), result.get(0).getResource());
+        assertEquals(resource.getLabel(), result.get(0).getResourceLabel());
+    }
+
+    @Test
+    void updateRemovesTermFromRootTermsWhenParentIsSetForIt() {
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabulary.getUri());
+        final Term child = Generator.generateTermWithId();
+        child.setVocabulary(vocabulary.getUri());
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(parent);
+            vocabulary.getGlossary().addRootTerm(child);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        child.addParentTerm(parent);
+        sut.update(child);
+
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
+                DescriptorFactory.glossaryDescriptor(vocabulary));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertFalse(result.getRootTerms().contains(child.getUri()));
+    }
+
+    @Test
+    void updateAddsTermToRootTermsWhenParentIsRemovedFromIt() {
+        final Term parent = Generator.generateTermWithId();
+        parent.setVocabulary(vocabulary.getUri());
+        final Term child = Generator.generateTermWithId();
+        child.setVocabulary(vocabulary.getUri());
+        child.addParentTerm(parent);
+        transactional(() -> {
+            vocabulary.getGlossary().addRootTerm(parent);
+            em.persist(parent, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        child.setParentTerms(null);
+        sut.update(child);
+
+        final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
+                DescriptorFactory.glossaryDescriptor(vocabulary));
+        assertTrue(result.getRootTerms().contains(parent.getUri()));
+        assertTrue(result.getRootTerms().contains(child.getUri()));
+    }
+
+    @Test
+    void findAllRootsIncludingImportsReturnsRootTermsOnMatchingPage() {
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        transactional(() -> {
+            terms.forEach(t -> em.persist(t, DescriptorFactory.termDescriptor(vocabulary)));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        final List<Term> resultOne = sut.findAllRootsIncludingImported(vocabulary, PageRequest.of(0, 5));
+        final List<Term> resultTwo = sut.findAllRootsIncludingImported(vocabulary, PageRequest.of(1, 5));
+
+        assertEquals(5, resultOne.size());
+        assertEquals(5, resultTwo.size());
+
+        resultOne.forEach(t -> {
+            assertTrue(terms.contains(t));
+            assertFalse(resultTwo.contains(t));
+        });
+        resultTwo.forEach(t -> assertTrue(terms.contains(t)));
+    }
+
+    @Test
+    void findAllRootsIncludingImportsBySearchStringReturnsMatchingRootTerms() {
+        final List<Term> terms = Generator.generateTermsWithIds(10);
+        final String searchString = "Result";
+        final List<Term> matching = terms.subList(0, 5);
+        matching.forEach(t -> t.setLabel(searchString + " " + t.getLabel()));
+
+        vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        transactional(() -> {
+            terms.forEach(t -> em.persist(t, termDescriptor));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+
+        List<Term> result = sut.findAllRootsIncludingImported(vocabulary, searchString);
+        assertEquals(matching.size(), result.size());
+        assertTrue(matching.containsAll(result));
+    }
+
+    @Test
+    void addChildTermAllowsAddingChildTermToDifferentVocabularyThanParent() {
+        final Term parentTerm = generateParentTermFromDifferentVocabulary();
+        final Term childTerm = Generator.generateTermWithId();
+        childTerm.setVocabulary(childVocabulary.getUri());
+
+        sut.addChildTerm(childTerm, parentTerm);
+        assertTrue(sut.findAll(childVocabulary).contains(childTerm));
+        final Term result = em.find(Term.class, childTerm.getUri(), DescriptorFactory.termDescriptor(childVocabulary));
+        assertEquals(childTerm, result);
+    }
+
+    private Term generateParentTermFromDifferentVocabulary() {
+        final Term parentTerm = Generator.generateTermWithId();
+
+        transactional(() -> {
+            parentTerm.setVocabulary(vocabulary.getUri());
+            vocabulary.getGlossary().addRootTerm(parentTerm);
+            em.persist(parentTerm, DescriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+        });
+        return parentTerm;
+    }
+
+    @Test
+    void addChildTermUsesTermVocabularyWhenGeneratingUri() {
+        final Term parentTerm = generateParentTermFromDifferentVocabulary();
+        final Term childTerm = Generator.generateTerm();
+        childTerm.setVocabulary(childVocabulary.getUri());
+        sut.addChildTerm(childTerm, parentTerm);
+
+        assertThat(childTerm.getUri().toString(), startsWith(childVocabulary.getUri().toString()));
+    }
+
+    @Test
+    void addChildTermSetsItAsVocabularyRootTermWhenParentIsFromDifferentVocabulary() {
+        final Term parentTerm = generateParentTermFromDifferentVocabulary();
+        final Term childTerm = Generator.generateTermWithId();
+        childTerm.setVocabulary(childVocabulary.getUri());
+        sut.addChildTerm(childTerm, parentTerm);
+
+        assertTrue(sut.findAllRoots(childVocabulary, Constants.DEFAULT_PAGE_SPEC).contains(childTerm));
+        final Glossary result = em.find(Glossary.class, childVocabulary.getGlossary().getUri());
+        assertTrue(result.getRootTerms().contains(childTerm.getUri()));
+    }
+
+    @Test
+    void updateAddsTermToGlossaryRootTermsWhenNewParentIsFromDifferentVocabulary() {
+        final Term newParentTerm = generateParentTermFromDifferentVocabulary();
+        final Term oldParentTerm = Generator.generateTermWithId();
+        final Term childTerm = Generator.generateTermWithId();
+        childTerm.addParentTerm(oldParentTerm);
+        childTerm.setVocabulary(childVocabulary.getUri());
+        transactional(() -> {
+            oldParentTerm.setVocabulary(childVocabulary.getUri());
+            childVocabulary.getGlossary().addRootTerm(oldParentTerm);
+            em.persist(oldParentTerm, DescriptorFactory.termDescriptor(childVocabulary));
+            em.persist(childTerm,  DescriptorFactory.termDescriptor(childTerm));
+            em.merge(childVocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(childVocabulary));
+        });
+
+        childTerm.setParentTerms(Collections.singleton(newParentTerm));
+        sut.update(childTerm);
+        assertTrue(sut.findAllRoots(childVocabulary, Constants.DEFAULT_PAGE_SPEC).contains(childTerm));
+        final Glossary result = em.find(Glossary.class, childVocabulary.getGlossary().getUri());
+        assertTrue(result.getRootTerms().contains(childTerm.getUri()));
     }
 }

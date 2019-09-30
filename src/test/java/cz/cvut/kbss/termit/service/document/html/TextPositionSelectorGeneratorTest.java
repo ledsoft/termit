@@ -1,20 +1,3 @@
-/**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package cz.cvut.kbss.termit.service.document.html;
 
 
@@ -76,5 +59,17 @@ class TextPositionSelectorGeneratorTest {
         final TextPositionSelector result = sut.generateSelector(elements.toArray(new Element[0]));
         assertEquals(prefix.length(), result.getStart().intValue());
         assertEquals(prefix.length() + match.length(), result.getEnd().intValue());
+    }
+
+    @Test
+    void generateSelectorSkipsComments() {
+        final String prefix = "Prefix before the matching element ";
+        final String suffix = " and suffix after the matching element.";
+        document.html("<div>" + prefix + "<!-- Comment --><span id=\"elem\">" + MATCH + "</span>" + suffix + "</div>");
+        final Element element = document.getElementById("elem");
+        final TextPositionSelector result = sut.generateSelector(element);
+        assertNotNull(result);
+        assertEquals(prefix.length(), result.getStart().intValue());
+        assertEquals(prefix.length() + MATCH.length(), result.getEnd().intValue());
     }
 }
