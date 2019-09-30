@@ -105,12 +105,15 @@ public class DefaultDocumentManager implements DocumentManager {
         }
     }
 
+    /**
+     * Backup file name consists of the original file name + ~ + the current time stamp in a predefined format
+     *
+     * @param file File for which backup file name should be generated
+     * @return Backup name
+     */
     private String generateBackupFileName(File file) {
         final String origName = IdentifierResolver.sanitizeFileName(file.getLabel());
-        final int dotIndex = origName.lastIndexOf('.');
-        final String name = origName.substring(0, dotIndex > 0 ? dotIndex : origName.length());
-        final String extension = dotIndex > 0 ? origName.substring(dotIndex) : "";
-        return name + "~" + dateFormat.format(new Date()) + extension;
+        return origName + "~" + dateFormat.format(new Date());
     }
 
     @Override
