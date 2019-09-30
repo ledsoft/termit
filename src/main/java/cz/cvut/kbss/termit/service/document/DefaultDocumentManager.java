@@ -2,7 +2,9 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.TermItException;
+import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -133,15 +135,28 @@ public class DefaultDocumentManager implements DocumentManager {
     }
 
     @Override
-    public void remove(File file) {
-        Objects.requireNonNull(file);
+    public void remove(Resource resource) {
+        Objects.requireNonNull(resource);
+        if (resource instanceof File) {
+            removeFile((File) resource);
+        } else if (resource instanceof Document) {
+            removeDocumentFolderWithContent((Document) resource);
+        }
+    }
+
+    private void removeFile(File file) {
+        LOG.debug("Removing stored content of file {}.", file);
         final java.io.File physicalFile = resolveFile(file, false);
+        if (!physicalFile.exists()) {
+            return;
+        }
         removeBackups(file, physicalFile);
         physicalFile.delete();
         removeParentIfNotInDocument(file, physicalFile);
     }
 
     private void removeBackups(File file, java.io.File physicalFile) {
+        LOG.trace("Removing backups of file {}.", physicalFile);
         final String backupStartPattern = IdentifierResolver.sanitizeFileName(file.getLabel()) + "~";
         final java.io.File[] backups = physicalFile.getParentFile()
                                                    .listFiles((f, fn) -> fn.startsWith(backupStartPattern));
@@ -154,7 +169,24 @@ public class DefaultDocumentManager implements DocumentManager {
 
     private void removeParentIfNotInDocument(File file, java.io.File physicalFile) {
         if (file.getDocument() == null) {
+            LOG.trace("Removing directory of document-less file {}.", file);
             physicalFile.getParentFile().delete();
+        }
+    }
+
+    private void removeDocumentFolderWithContent(Document document) {
+        LOG.debug("Removing directory of document {} together will all its content.", document);
+        final String path =
+                config.get(ConfigParam.FILE_STORAGE) + java.io.File.separator + document.getDirectoryName();
+        final java.io.File result = new java.io.File(path);
+        if (result.exists()) {
+            final java.io.File[] files = result.listFiles();
+            if (files != null) {
+                for (java.io.File f : files) {
+                    f.delete();
+                }
+            }
+            result.delete();
         }
     }
 }

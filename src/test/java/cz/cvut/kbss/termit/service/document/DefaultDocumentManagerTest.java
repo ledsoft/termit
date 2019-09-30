@@ -5,6 +5,7 @@ import cz.cvut.kbss.termit.environment.PropertyMockingApplicationContextInitiali
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.ContextConfiguration;
@@ -125,7 +125,7 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         file.setLabel(physicalFile.getName());
         document.addFile(file);
         file.setDocument(document);
-        final Resource result = sut.getAsResource(file);
+        final TypeAwareResource result = sut.getAsResource(file);
         assertNotNull(result);
         assertEquals(physicalFile, result.getFile());
     }
@@ -401,5 +401,40 @@ class DefaultDocumentManagerTest extends BaseServiceTestRunner {
         sut.remove(file);
         assertFalse(physicalFile.exists());
         assertFalse(parentDir.exists());
+    }
+
+    @Test
+    void removeRemovesDocumentFolderWithAllFilesItContains() throws Exception {
+        final File file = new File();
+        final java.io.File physicalFile = generateFile();
+        file.setLabel(physicalFile.getName());
+        document.addFile(file);
+        file.setDocument(document);
+        final java.io.File docDir = physicalFile.getParentFile();
+        assertTrue(docDir.exists());
+
+        sut.remove(document);
+        assertFalse(physicalFile.exists());
+        assertFalse(docDir.exists());
+    }
+
+    @Test
+    void removeDoesNothingWhenDocumentFolderDoesNotExist() {
+        sut.remove(document);
+    }
+
+    @Test
+    void removeDoesNothingWhenResourceDoesNotSupportFileStorage() {
+        final Resource resource = Generator.generateResourceWithId();
+        sut.remove(resource);
+    }
+
+    @Test
+    void removeDoesNothingWhenFileDoesNotExist() {
+        final File file = new File();
+        file.setLabel("test-file.html");
+        file.setUri(Generator.generateUri());
+
+        sut.remove(file);
     }
 }

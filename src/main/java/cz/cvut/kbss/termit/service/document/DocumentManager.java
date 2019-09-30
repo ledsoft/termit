@@ -2,8 +2,8 @@ package cz.cvut.kbss.termit.service.document;
 
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
-import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public interface DocumentManager {
     String loadFileContent(File file);
 
     /**
-     * Gets the file as a {@link Resource}.
+     * Gets the file as a {@link org.springframework.core.io.Resource}.
      * <p>
      * Resource is more suitable for sending the content over network.
      *
@@ -80,9 +80,11 @@ public interface DocumentManager {
     Optional<String> getContentType(File file);
 
     /**
-     * Deletes the specified file and all its backups.
+     * Deletes the specified resource and all related data.
+     * <p>
+     * Such related data may be files contained in the document, or backups of a file.
      *
-     * @param file The file to remove
+     * @param resource The resource to remove
      */
-    void remove(File file);
+    void remove(Resource resource);
 }
