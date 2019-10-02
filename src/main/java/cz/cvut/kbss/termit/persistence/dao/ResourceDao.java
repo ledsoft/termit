@@ -43,7 +43,7 @@ public class ResourceDao extends AssetDao<Resource> {
     public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary.getUri());
         try {
             em.persist(resource, descriptor);
         } catch (RuntimeException e) {
@@ -51,12 +51,12 @@ public class ResourceDao extends AssetDao<Resource> {
         }
     }
 
-    private static Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+    private static Descriptor createDescriptor(Resource resource, URI vocabularyUri) {
         final Descriptor descriptor;
         if (resource instanceof Document) {
-            descriptor = DescriptorFactory.documentDescriptor(vocabulary);
+            descriptor = DescriptorFactory.documentDescriptor(vocabularyUri);
         } else if (resource instanceof File) {
-            descriptor = DescriptorFactory.fileDescriptor(vocabulary);
+            descriptor = DescriptorFactory.fileDescriptor(vocabularyUri);
         } else {
             throw new IllegalArgumentException(
                     "Resource " + resource + " cannot be persisted into vocabulary context.");
@@ -74,7 +74,7 @@ public class ResourceDao extends AssetDao<Resource> {
     public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary.getUri());
         try {
             em.getEntityManagerFactory().getCache()
               .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
@@ -86,13 +86,28 @@ public class ResourceDao extends AssetDao<Resource> {
 
     @Override
     public Resource update(Resource entity) {
-        if (entity instanceof Document) {
-            final Document doc = (Document) entity;
-            if (doc.getVocabulary() != null) {
-                em.getEntityManagerFactory().getCache().evict(doc.getVocabulary());
+        try {
+            final URI context = resolveVocabularyContext(entity);
+            if (context != null) {
+                // This evict is a bit overkill, but there are multiple relationships that would have to be evicted
+                em.getEntityManagerFactory().getCache().evict(context);
+                return em.merge(entity, createDescriptor(entity, context));
+            } else {
+                return em.merge(entity);
             }
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
         }
-        return super.update(entity);
+    }
+
+    private URI resolveVocabularyContext(Resource resource) {
+        if (resource instanceof Document) {
+            return ((Document) resource).getVocabulary();
+        } else if (resource instanceof File) {
+            final File f = (File) resource;
+            return f.getDocument() != null ? f.getDocument().getVocabulary() : null;
+        }
+        return null;
     }
 
     @Override

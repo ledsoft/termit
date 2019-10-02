@@ -3,11 +3,13 @@ package cz.cvut.kbss.termit.model.resource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.SupportsStorage;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Set;
 
@@ -86,6 +88,14 @@ public class File extends Resource implements SupportsStorage {
             final int dotIndex = getLabel().indexOf('.');
             final String labelPart = dotIndex > 0 ? getLabel().substring(0, getLabel().indexOf('.')) : getLabel();
             return IdentifierResolver.normalize(labelPart) + '_' + getUri().hashCode();
+        }
+    }
+
+    public static Field getDocumentField() {
+        try {
+            return File.class.getDeclaredField("document");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"document\" field.", e);
         }
     }
 }

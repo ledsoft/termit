@@ -216,11 +216,10 @@ public class ResourceService implements CrudService<Resource> {
         if (doc.getVocabulary() != null) {
             final Vocabulary vocabulary = vocabularyService.getRequiredReference(doc.getVocabulary());
             repositoryService.persist(file, vocabulary);
-            repositoryService.update(doc, vocabulary);
         } else {
             persist(file);
-            update(doc);
         }
+        update(doc);
     }
 
     /**

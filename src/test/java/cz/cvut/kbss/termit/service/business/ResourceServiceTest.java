@@ -311,7 +311,7 @@ class ResourceServiceTest {
         when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
 
         sut.addFileToDocument(doc, fOne);
-        verify(resourceRepositoryService).update(doc, vocabulary);
+        verify(resourceRepositoryService).update(doc);
         verify(vocabularyService).getRequiredReference(vocabulary.getUri());
     }
 

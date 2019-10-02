@@ -284,20 +284,20 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void updateWithVocabularyUpdatesInstanceInVocabularyContext() {
+    void updateDocumentWithVocabularyUpdatesInstanceInVocabularyContext() {
         enableRdfsInference(em);
-        final File file = new File();
-        file.setLabel("test.html");
-        file.setUri(Generator.generateUri());
+        final Document document = Generator.generateDocumentWithId();
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+        document.setVocabulary(vocabulary.getUri());
+        transactional(() -> em.persist(document, DescriptorFactory.documentDescriptor(vocabulary)));
 
-        final String newLabel = "updated-test.html";
-        file.setLabel(newLabel);
+        final String newLabel = "Updated document";
+        document.setLabel(newLabel);
 
-        sut.update(file, vocabulary);
+        sut.update(document);
 
-        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
+        final Document result = em
+                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }

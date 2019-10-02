@@ -5,7 +5,9 @@ import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.jopa.model.descriptors.ObjectPropertyCollectionDescriptor;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 
+import javax.print.Doc;
 import java.net.URI;
 import java.util.Objects;
 
@@ -128,7 +130,11 @@ public class DescriptorFactory {
      * @return File descriptor
      */
     public static Descriptor fileDescriptor(URI vocabularyUri) {
-        return assetDescriptor(vocabularyUri);
+        final Descriptor descriptor = assetDescriptor(vocabularyUri);
+        final Descriptor docDescriptor = assetDescriptor(vocabularyUri);
+        docDescriptor.addAttributeDescriptor(Document.getFilesField(), assetDescriptor(vocabularyUri));
+        descriptor.addAttributeDescriptor(File.getDocumentField(), docDescriptor);
+        return descriptor;
     }
 
     /**
