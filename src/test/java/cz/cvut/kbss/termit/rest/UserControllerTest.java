@@ -70,7 +70,7 @@ class UserControllerTest extends BaseControllerTestRunner {
 
         mockMvc.perform(
                 put(BASE_URL + "/current").content(toJson(dto)).contentType(MediaType.APPLICATION_JSON_VALUE))
-               .andExpect(status().isOk()).andReturn();
+               .andExpect(status().isNoContent());
         verify(userService).updateCurrent(dto);
     }
 
