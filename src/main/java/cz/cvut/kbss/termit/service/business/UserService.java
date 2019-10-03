@@ -117,7 +117,6 @@ public class UserService {
             securityUtils.verifyCurrentUserPassword(update.getOriginalPassword());
         }
         repositoryService.update(update.asUserAccount());
-        securityUtils.updateCurrentUser();
     }
 
     /**
