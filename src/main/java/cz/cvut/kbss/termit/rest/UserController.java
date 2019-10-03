@@ -45,11 +45,11 @@ public class UserController extends BaseController {
         return userService.getCurrent();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(value = "/current", consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public void updateCurrent(@RequestBody UserUpdateDto update) {
+    public UserAccount updateCurrent(@RequestBody UserUpdateDto update) {
         userService.updateCurrent(update);
         LOG.debug("User {} successfully updated.", update);
+        return getCurrent();
     }
 
     @PreAuthorize("hasRole('" + SecurityConstants.ROLE_ADMIN + "')")
