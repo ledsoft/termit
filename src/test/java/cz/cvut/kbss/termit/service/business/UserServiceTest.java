@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
@@ -10,6 +11,8 @@ import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+
+import javax.validation.Validation;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -83,6 +86,18 @@ class UserServiceTest {
         final UserAccount ua = Generator.generateUserAccount();
         when(securityUtilsMock.getCurrentUser()).thenReturn(ua);
         assertThrows(AuthorizationException.class, () -> sut.updateCurrent(update));
+    }
+
+    @Test
+    void updateThrowsValidationExceptionWhenAttemptingToUpdateUsernameOfAccount() {
+        final UserAccount ua = Generator.generateUserAccount();
+        final UserUpdateDto update = new UserUpdateDto();
+
+        update.setUri(ua.getUri());
+        update.setUsername("username");
+
+        when(securityUtilsMock.getCurrentUser()).thenReturn(ua);
+        assertThrows(ValidationException.class, () -> sut.updateCurrent(update));
     }
 
     @Test
