@@ -4,7 +4,6 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -64,26 +63,6 @@ public class ResourceDao extends AssetDao<Resource> {
         return descriptor;
     }
 
-    /**
-     * Updates the specified Resource in the context of the specified Vocabulary.
-     *
-     * @param resource   Resource to update
-     * @param vocabulary Vocabulary providing context
-     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
-     */
-    public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
-        Objects.requireNonNull(resource);
-        Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary.getUri());
-        try {
-            em.getEntityManagerFactory().getCache()
-              .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
-            return em.merge(resource, descriptor);
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
     @Override
     public Resource update(Resource entity) {
         try {
@@ -105,7 +84,12 @@ public class ResourceDao extends AssetDao<Resource> {
             return ((Document) resource).getVocabulary();
         } else if (resource instanceof File) {
             final File f = (File) resource;
-            return f.getDocument() != null ? f.getDocument().getVocabulary() : null;
+            if (f.getDocument() != null) {
+                // TODO Shouldn't need to do this. If the document is the same, merge should just replace it with existing instance and continue
+                f.setDocument(em.find(Document.class, f.getDocument().getUri()));
+                return f.getDocument().getVocabulary();
+            }
+            return null;
         }
         return null;
     }
