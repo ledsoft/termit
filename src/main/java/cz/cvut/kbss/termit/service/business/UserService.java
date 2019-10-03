@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
@@ -102,14 +103,21 @@ public class UserService {
     public void updateCurrent(UserUpdateDto update) {
         LOG.trace("Updating current user account.");
         Objects.requireNonNull(update);
-        if (!securityUtils.getCurrentUser().getUri().equals(update.getUri())) {
+        UserAccount currentUser = securityUtils.getCurrentUser();
+
+        if (!currentUser.getUri().equals(update.getUri())) {
             throw new AuthorizationException(
                     "User " + securityUtils.getCurrentUser() + " attempted to update a different user's account.");
+        }
+        if (!currentUser.getUsername().equals(update.getUsername())) {
+            throw new ValidationException(
+                    "User " + securityUtils.getCurrentUser() + " attempted to update his username.");
         }
         if (update.getPassword() != null) {
             securityUtils.verifyCurrentUserPassword(update.getOriginalPassword());
         }
         repositoryService.update(update.asUserAccount());
+        securityUtils.updateCurrentUser();
     }
 
     /**
