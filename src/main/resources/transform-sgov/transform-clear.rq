@@ -1,4 +1,4 @@
-;# Clear all data related to vocabulary 
+# Clear all data related to vocabulary 
 
 PREFIX g: <__VOC_IRI__>
 
