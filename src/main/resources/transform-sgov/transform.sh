@@ -19,11 +19,10 @@ function transform() {
 	    runUpdateQuery transform-clear.rq $VOC_IRI
     fi
 
-    URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=$VOC_IRI"
-    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-model.ttl" $URL
-    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-glosář.ttl" $URL
-    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" $URL
-    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-diagram.ttl" $URL
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-model.ttl" -G --data-urlencode "graph=$VOC_IRI" $RDF4J_ENDPOINT/rdf-graphs/service
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-glosář.ttl" -G --data-urlencode "graph=$VOC_IRI" $RDF4J_ENDPOINT/rdf-graphs/service
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-slovník.ttl" -G --data-urlencode "graph=$VOC_IRI" $RDF4J_ENDPOINT/rdf-graphs/service
+    curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$DIR/$PREFIX-diagram.ttl" -G --data-urlencode "graph=$VOC_IRI" $RDF4J_ENDPOINT/rdf-graphs/service
 
     runUpdateQuery transform-2.rq $VOC_IRI
     runUpdateQuery transform-4.rq $VOC_IRI
@@ -36,8 +35,8 @@ URL="$RDF4J_ENDPOINT/rdf-graphs/service?graph=http://onto.fel.cvut.cz/ontologies
 TERMIT=$(pwd)
 curl --netrc-file .netrc -X POST -H "Content-type: text/turtle" -T "$TERMIT/../../../../ontology/termit-model.ttl" $URL
 
-transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-sbirka-2006-183 l-sgov-183-2006
-transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-vyhlaska-2006-500 l-sgov-500-2006
-transform http://onto.fel.cvut.cz/ontologies/slovnik/legislativni-vyhlaska-2006-501 l-sgov-501-2006
-transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-psp-2016 psp-2016
-transform http://onto.fel.cvut.cz/ontologies/slovnik/datovy-mpp-3.5-np mpp-3.5-np
+transform http://onto.fel.cvut.cz/ontologies/legislativní/sbírka/183/2006 l-sgov-183-2006
+transform http://onto.fel.cvut.cz/ontologies/legislativní/sbírka/500/2006 l-sgov-500-2006
+transform http://onto.fel.cvut.cz/ontologies/legislativní/sbírka/501/2006 l-sgov-501-2006
+transform http://onto.fel.cvut.cz/ontologies/slovník/datový/psp-2016 psp-2016
+transform http://onto.fel.cvut.cz/ontologies/slovník/datový/mpp-3.5-np mpp-3.5-np
