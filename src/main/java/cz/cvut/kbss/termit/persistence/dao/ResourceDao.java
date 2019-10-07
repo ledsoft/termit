@@ -4,7 +4,6 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -43,7 +42,7 @@ public class ResourceDao extends AssetDao<Resource> {
     public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary.getUri());
         try {
             em.persist(resource, descriptor);
         } catch (RuntimeException e) {
@@ -51,12 +50,12 @@ public class ResourceDao extends AssetDao<Resource> {
         }
     }
 
-    private static Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+    private static Descriptor createDescriptor(Resource resource, URI vocabularyUri) {
         final Descriptor descriptor;
         if (resource instanceof Document) {
-            descriptor = DescriptorFactory.documentDescriptor(vocabulary);
+            descriptor = DescriptorFactory.documentDescriptor(vocabularyUri);
         } else if (resource instanceof File) {
-            descriptor = DescriptorFactory.fileDescriptor(vocabulary);
+            descriptor = DescriptorFactory.fileDescriptor(vocabularyUri);
         } else {
             throw new IllegalArgumentException(
                     "Resource " + resource + " cannot be persisted into vocabulary context.");
@@ -64,35 +63,35 @@ public class ResourceDao extends AssetDao<Resource> {
         return descriptor;
     }
 
-    /**
-     * Updates the specified Resource in the context of the specified Vocabulary.
-     *
-     * @param resource   Resource to update
-     * @param vocabulary Vocabulary providing context
-     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
-     */
-    public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
-        Objects.requireNonNull(resource);
-        Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+    @Override
+    public Resource update(Resource entity) {
         try {
-            em.getEntityManagerFactory().getCache()
-              .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
-            return em.merge(resource, descriptor);
+            final URI context = resolveVocabularyContext(entity);
+            if (context != null) {
+                // This evict is a bit overkill, but there are multiple relationships that would have to be evicted
+                em.getEntityManagerFactory().getCache().evict(context);
+                return em.merge(entity, createDescriptor(entity, context));
+            } else {
+                return em.merge(entity);
+            }
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
     }
 
-    @Override
-    public Resource update(Resource entity) {
-        if (entity instanceof Document) {
-            final Document doc = (Document) entity;
-            if (doc.getVocabulary() != null) {
-                em.getEntityManagerFactory().getCache().evict(doc.getVocabulary());
+    private URI resolveVocabularyContext(Resource resource) {
+        if (resource instanceof Document) {
+            return ((Document) resource).getVocabulary();
+        } else if (resource instanceof File) {
+            final File f = (File) resource;
+            if (f.getDocument() != null) {
+                // TODO Shouldn't need to do this. If the document is the same, merge should just replace it with existing instance and continue
+                f.setDocument(em.find(Document.class, f.getDocument().getUri()));
+                return f.getDocument().getVocabulary();
             }
+            return null;
         }
-        return super.update(entity);
+        return null;
     }
 
     @Override

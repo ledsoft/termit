@@ -72,7 +72,9 @@ public class ResourceService implements CrudService<Resource> {
      */
     @Transactional
     public void remove(URI identifier) {
-        repositoryService.remove(getRequiredReference(identifier));
+        final Resource toRemove = getRequiredReference(identifier);
+        documentManager.remove(toRemove);
+        repositoryService.remove(toRemove);
     }
 
     /**
@@ -214,11 +216,10 @@ public class ResourceService implements CrudService<Resource> {
         if (doc.getVocabulary() != null) {
             final Vocabulary vocabulary = vocabularyService.getRequiredReference(doc.getVocabulary());
             repositoryService.persist(file, vocabulary);
-            repositoryService.update(doc, vocabulary);
         } else {
             persist(file);
-            update(doc);
         }
+        update(doc);
     }
 
     /**

@@ -311,7 +311,7 @@ class ResourceServiceTest {
         when(vocabularyService.getRequiredReference(vocabulary.getUri())).thenReturn(vocabulary);
 
         sut.addFileToDocument(doc, fOne);
-        verify(resourceRepositoryService).update(doc, vocabulary);
+        verify(resourceRepositoryService).update(doc);
         verify(vocabularyService).getRequiredReference(vocabulary.getUri());
     }
 
@@ -357,5 +357,13 @@ class ResourceServiceTest {
         final List<ResourceTermAssignments> result = sut.getAssignmentInfo(resource);
         assertEquals(Collections.singletonList(rta), result);
         verify(resourceRepositoryService).getAssignmentInfo(resource);
+    }
+
+    @Test
+    void removeRemovesAssociatedDiskContent() {
+        final Resource resource = Generator.generateResourceWithId();
+        when(resourceRepositoryService.getRequiredReference(resource.getUri())).thenReturn(resource);
+        sut.remove(resource.getUri());
+        verify(documentManager).remove(resource);
     }
 }

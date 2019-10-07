@@ -3,16 +3,18 @@ package cz.cvut.kbss.termit.model.util;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.metamodel.FieldSpecification;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.HasProvenanceData;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.resource.Document;
+import cz.cvut.kbss.termit.model.resource.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,5 +77,23 @@ class DescriptorFactoryTest {
         final FieldSpecification lastEditorFieldSpec = mock(FieldSpecification.class);
         when(lastEditorFieldSpec.getJavaField()).thenReturn(HasProvenanceData.getLastEditorField());
         assertNull(parentDescriptor.getAttributeDescriptor(lastEditorFieldSpec).getContext());
+    }
+
+    @Test
+    void fileDescriptorContainsAlsoDescriptorForDocument() {
+        final File file = Generator.generateFileWithId("test.html");
+        final Document doc = Generator.generateDocumentWithId();
+        doc.addFile(file);
+        file.setDocument(doc);
+        doc.setVocabulary(Generator.generateUri());
+        final Descriptor result = DescriptorFactory.fileDescriptor(doc.getVocabulary());
+        final FieldSpecification docFieldSpec = mock(FieldSpecification.class);
+        when(docFieldSpec.getJavaField()).thenReturn(File.getDocumentField());
+        final Descriptor docDescriptor = result.getAttributeDescriptor(docFieldSpec);
+        assertNotNull(docDescriptor);
+        final FieldSpecification authorFieldSpec = mock(FieldSpecification.class);
+        when(authorFieldSpec.getJavaField()).thenReturn(Asset.getAuthorField());
+        final Descriptor authorDescriptor = docDescriptor.getAttributeDescriptor(authorFieldSpec);
+        assertNull(authorDescriptor.getContext());
     }
 }
