@@ -55,12 +55,14 @@ INSERT {
        v-sgov-pojem:má-glosář ?g ;
        v-sgov-pojem:má-model ?m ;
        dce:title ?vTitle .
-    ?c skos:inScheme ?g ;
-	   skos:prefLabel ?l .
+    ?c skos:inScheme ?g .
 	FILTER(lang(?vTitle)="cs")
     OPTIONAL {
         ?c dce:description ?cComment .
 	}
+    OPTIONAL {
+        ?c skos:prefLabel ?l .
+  }
     OPTIONAL {
         ?x dc:created ?y .
 	}
