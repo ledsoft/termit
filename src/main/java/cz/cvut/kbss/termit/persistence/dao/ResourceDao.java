@@ -85,7 +85,8 @@ public class ResourceDao extends AssetDao<Resource> {
         } else if (resource instanceof File) {
             final File f = (File) resource;
             if (f.getDocument() != null) {
-                // TODO Shouldn't need to do this. If the document is the same, merge should just replace it with existing instance and continue
+                // This is a workaround for the issue that GraphDB stores inferred statement (like File.document) in a separate
+                // context, so that it is not loaded during merge and JOPA acts as though File.document has changed (which it cannot, as it is inferred)
                 f.setDocument(em.find(Document.class, f.getDocument().getUri()));
                 return f.getDocument().getVocabulary();
             }

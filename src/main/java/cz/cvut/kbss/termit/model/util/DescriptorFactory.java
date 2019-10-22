@@ -7,7 +7,6 @@ import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 
-import javax.print.Doc;
 import java.net.URI;
 import java.util.Objects;
 
