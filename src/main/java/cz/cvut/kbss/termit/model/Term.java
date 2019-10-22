@@ -38,7 +38,7 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLAnnotationProperty(iri = SKOS.DEFINITION)
     private String definition;
 
-    @OWLDataProperty(iri = DC.Elements.SOURCE)
+    @OWLAnnotationProperty(iri = DC.Elements.SOURCE, simpleLiteral = true)
     private Set<String> sources;
 
     @OWLObjectProperty(iri = SKOS.BROADER, fetch = FetchType.EAGER)

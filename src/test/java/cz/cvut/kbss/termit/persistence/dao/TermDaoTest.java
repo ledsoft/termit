@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.TypedQuery;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Environment;
@@ -11,9 +12,13 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Constants;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
@@ -548,5 +553,44 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Optional<Term> result = sut.find(parent.getUri());
         assertTrue(result.isPresent());
         assertEquals(parent.getSubTerms(), result.get().getSubTerms());
+    }
+
+    @Test
+    void termSupportsSimpleLiteralSources() {
+        final Term term = Generator.generateTermWithId();
+        final Set<String> sources = new HashSet<>(
+                Arrays.asList(Generator.generateUri().toString(), "mpp/navrh/c-3/h-0/p-36/o-2"));
+        term.setSources(sources);
+        term.setVocabulary(vocabulary.getUri());
+        transactional(() -> sut.persist(term));
+
+        transactional(() -> verifyTermSourceStatements(term));
+
+        em.clear();
+        em.getEntityManagerFactory().getCache().evictAll();
+        final Term result = em.find(Term.class, term.getUri());
+        assertNotNull(result);
+        assertEquals(sources, result.getSources());
+    }
+
+    private void verifyTermSourceStatements(Term term) {
+        final Repository repository = em.unwrap(Repository.class);
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            final ValueFactory vf = conn.getValueFactory();
+            final IRI subject = vf.createIRI(term.getUri().toString());
+            final IRI hasSource = vf.createIRI(DC.Elements.SOURCE);
+            final List<Statement> sourceStatements = Iterations.asList(conn.getStatements(subject, hasSource, null));
+            assertEquals(term.getSources().size(), sourceStatements.size());
+            sourceStatements.forEach(ss -> {
+                assertTrue(term.getSources().contains(ss.getObject().stringValue()));
+                if (ss.getObject() instanceof Literal) {
+                    final Literal litSource = (Literal) ss.getObject();
+                    assertFalse(litSource.getLanguage().isPresent());
+                    assertEquals(XMLSchema.STRING, litSource.getDatatype());
+                } else {
+                    assertTrue(ss.getObject() instanceof IRI);
+                }
+            });
+        }
     }
 }
