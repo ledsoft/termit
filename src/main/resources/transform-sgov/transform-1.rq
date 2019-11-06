@@ -4,16 +4,15 @@ PREFIX v-sgov-pojem: <https://slovník.gov.cz/veřejný-sektor/pojem/>
 PREFIX popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/terms/>
-PREFIX dce: <http://purl.org/dc/elements/1.1/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 DELETE {
     ?x dc:created ?y .
 	?c dc:created ?y2 .
 	?d dc:created ?y3 .
-	?c dce:relation ?src ;
+	?c dc:relation ?src ;
 	   skos:prefLabel ?l;
-	   dce:description ?cComment .
+	   dc:description ?cComment .
 }
 INSERT {
     GRAPH g: {
@@ -45,7 +44,7 @@ INSERT {
        rdfs:comment ?cComment ;
        popis-dat-pojem:má-autora ?a ;
        popis-dat-pojem:má-datum-a-čas-vytvoření ?t ;
-       dce:source ?srcd ;
+       dc:source ?srcd ;
        popis-dat-pojem:je-pojmem-ze-slovníku ?x .
     ?g popis-dat-pojem:obsahuje-kořenový-pojem ?cTop .
     }
@@ -54,11 +53,11 @@ INSERT {
     ?x a v-sgov-pojem:slovník ;
        v-sgov-pojem:má-glosář ?g ;
        v-sgov-pojem:má-model ?m ;
-       dce:title ?vTitle .
+       dc:title ?vTitle .
     ?c skos:inScheme ?g .
 	FILTER(lang(?vTitle)="cs")
     OPTIONAL {
-        ?c dce:description ?cComment .
+        ?c dc:description ?cComment .
 	}
     OPTIONAL {
         ?c skos:prefLabel ?l .
@@ -70,7 +69,7 @@ INSERT {
         ?c dc:created ?y2 .
 	}
     OPTIONAL {
-        ?c dce:relation ?src .
+        ?c dc:relation ?src .
         BIND (str(?src) as ?srcd)
 	}
     OPTIONAL {
