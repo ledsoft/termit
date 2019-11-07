@@ -102,10 +102,13 @@ public class ResourceDao extends AssetDao<Resource> {
                     "?x a ?type ;" +
                     "rdfs:label ?label ." +
                     "FILTER NOT EXISTS {" +
-                    "?y ?hasFile ?x ." +
+                    "{ ?y ?hasFile ?x . }" +
+                    " UNION " +
+                    "{ ?x a ?vocabulary . }" +
                     "} } ORDER BY ?label", Resource.class)
                      .setParameter("type", typeUri)
-                     .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor)).getResultList();
+                     .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor))
+                     .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik)).getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
