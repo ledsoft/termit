@@ -17,7 +17,7 @@ public class DocumentVocabulary extends Vocabulary {
 
     @NotNull
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_popisuje_dokument, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_popisuje_dokument, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Document document;
 
     public Document getDocument() {

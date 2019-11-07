@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 RDF4J_ENDPOINT=http://onto.fel.cvut.cz:7200/repositories/termit-dev
-DIR="/home/michal/modelio/workspace/IPR Praha/"
+#RDF4J_ENDPOINT=http://localhost:7200/repositories/termit-dev
+DIR="/home/blcha/projects/modelio-workspace/IPR Praha/"
 IFS=
 FILE=tmp.rq
-CLEAR_INITIAL_DATA=false
+CLEAR_INITIAL_DATA=true
 
 function runUpdateQuery() {
     cp $1 $FILE
