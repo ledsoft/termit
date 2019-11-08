@@ -15,3 +15,4 @@ done;
 
 echo "Joining files ..."
 rdfpipe -i text/turtle -o text/turtle $FILES > language.ttl
+mv language.ttl ../../resources/
