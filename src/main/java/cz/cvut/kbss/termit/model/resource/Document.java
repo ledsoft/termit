@@ -112,4 +112,12 @@ public class Document extends Resource implements SupportsStorage {
             throw new TermItException("Fatal error! Unable to retrieve \"files\" field.", e);
         }
     }
+
+    public static Field getVocabularyField() {
+        try {
+            return Document.class.getDeclaredField("vocabulary");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"vocabulary\" field.", e);
+        }
+    }
 }

@@ -334,4 +334,35 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             assertFalse(sut.em.contains(resource));
         });
     }
+
+    /**
+     * Bug #1000
+     */
+    @Test
+    void updateVocabularyDocumentWorksCorrectlyWithContexts() {
+        final Document doc = Generator.generateDocumentWithId();
+        final DocumentVocabulary voc = new DocumentVocabulary();
+        voc.setUri(Generator.generateUri());
+        voc.setLabel("Test vocabulary");
+        voc.setDocument(doc);
+        voc.setGlossary(new Glossary());
+        voc.setModel(new Model());
+
+        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        insertInferredDocumentVocabularyPropertyAssertions(doc, voc);
+        doc.setVocabulary(voc.getUri());
+
+        final File f = Generator.generateFileWithId("test.html");
+
+        transactional(() -> {
+            doc.addFile(f);
+            sut.persist(f, voc);
+            sut.update(doc);
+        });
+
+        assertNotNull(em.find(File.class, f.getUri(), DescriptorFactory.fileDescriptor(voc)));
+        assertTrue(
+                em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(voc)).getFile(f.getLabel())
+                  .isPresent());
+    }
 }

@@ -97,6 +97,8 @@ public class DescriptorFactory {
         final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
         final Descriptor fileDescriptor = fileDescriptor(vocabularyUri);
         descriptor.addAttributeDescriptor(Document.getFilesField(), fileDescriptor);
+        // Vocabulary field is inferred, so it cannot be in any specific context
+        descriptor.addAttributeContext(Document.getVocabularyField(), null);
         return descriptor;
     }
 
