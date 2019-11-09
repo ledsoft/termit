@@ -60,10 +60,19 @@ public class SystemInitializer {
         LOG.info("----------------------------------------------");
         final File directory = new File(config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION));
         if (!directory.exists()) {
-            directory.mkdirs();
+            final boolean result = directory.mkdirs();
+            if (!result) {
+                LOG.error(
+                        "Unable to create admin credentials directory {} or one of its ancestor directories. Admin credentials won't be saved in any file!",
+                        config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION));
+                return;
+            }
         }
         try {
             final File credentialsFile = createHiddenFile();
+            if (credentialsFile == null) {
+                return;
+            }
             LOG.debug("Writing admin credentials into file: {}", credentialsFile);
             Files.write(credentialsFile.toPath(),
                     Collections.singletonList(admin.getUsername() + "/" + passwordPlain),
@@ -76,7 +85,12 @@ public class SystemInitializer {
     private File createHiddenFile() throws IOException {
         final File credentialsFile = new File(config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION) + File.separator +
                 config.get(ConfigParam.ADMIN_CREDENTIALS_FILE));
-        credentialsFile.createNewFile();
+        final boolean result = credentialsFile.createNewFile();
+        if (!result) {
+            LOG.error("Unable to create admin credentials file {}. Admin credentials won't be saved in any file!",
+                    config.get(ConfigParam.ADMIN_CREDENTIALS_FILE));
+            return null;
+        }
         // Hidden attribute on Windows
         Files.setAttribute(credentialsFile.toPath(), "dos:hidden", Boolean.TRUE, LinkOption.NOFOLLOW_LINKS);
         return credentialsFile;
