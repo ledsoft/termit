@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
+import cz.cvut.kbss.termit.exception.UnsupportedOperationException;
 import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
@@ -107,6 +108,7 @@ class UserServiceTest {
 
     @Test
     void unlockUnlocksUserAccountAndUpdatesItViaRepositoryService() {
+        when(securityUtilsMock.getCurrentUser()).thenReturn(Generator.generateUserAccount());
         final UserAccount account = Generator.generateUserAccount();
         account.lock();
         sut.unlock(account, "newPassword");
@@ -117,6 +119,7 @@ class UserServiceTest {
 
     @Test
     void unlockSetsNewPasswordOnAccountSpecifiedAsArgument() {
+        when(securityUtilsMock.getCurrentUser()).thenReturn(Generator.generateUserAccount());
         final UserAccount account = Generator.generateUserAccount();
         account.lock();
         final String newPassword = "newPassword";
@@ -127,7 +130,17 @@ class UserServiceTest {
     }
 
     @Test
+    void unlockThrowsUnsupportedOperationExceptionWhenAttemptingToUnlockOwnAccount() {
+        final UserAccount account = Generator.generateUserAccount();
+        account.lock();
+        when(securityUtilsMock.getCurrentUser()).thenReturn(account);
+        assertThrows(UnsupportedOperationException.class, () -> sut.unlock(account, "newPassword"));
+        verify(repositoryServiceMock, never()).update(any());
+    }
+
+    @Test
     void disableDisablesUserAccountAndUpdatesItViaRepositoryService() {
+        when(securityUtilsMock.getCurrentUser()).thenReturn(Generator.generateUserAccount());
         final UserAccount account = Generator.generateUserAccount();
         sut.disable(account);
         final ArgumentCaptor<UserAccount> captor = ArgumentCaptor.forClass(UserAccount.class);
@@ -136,13 +149,31 @@ class UserServiceTest {
     }
 
     @Test
+    void disableThrowsUnsupportedOperationExceptionWhenAttemptingToDisableOwnAccount() {
+        final UserAccount account = Generator.generateUserAccount();
+        when(securityUtilsMock.getCurrentUser()).thenReturn(account);
+        assertThrows(UnsupportedOperationException.class, () -> sut.disable(account));
+        verify(repositoryServiceMock, never()).update(any());
+    }
+
+    @Test
     void enableEnablesUserAccountAndUpdatesItViaRepositoryService() {
+        when(securityUtilsMock.getCurrentUser()).thenReturn(Generator.generateUserAccount());
         final UserAccount account = Generator.generateUserAccount();
         account.disable();
         sut.enable(account);
         final ArgumentCaptor<UserAccount> captor = ArgumentCaptor.forClass(UserAccount.class);
         verify(repositoryServiceMock).update(captor.capture());
         assertTrue(captor.getValue().isEnabled());
+    }
+
+    @Test
+    void enableThrowsUnsupportedOperationExceptionWhenAttemptingToEnableOwnAccount() {
+        final UserAccount account = Generator.generateUserAccount();
+        account.disable();
+        when(securityUtilsMock.getCurrentUser()).thenReturn(account);
+        assertThrows(UnsupportedOperationException.class, () -> sut.enable(account));
+        verify(repositoryServiceMock, never()).update(any());
     }
 
     @Test

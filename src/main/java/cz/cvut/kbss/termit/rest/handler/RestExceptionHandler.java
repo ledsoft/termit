@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.rest.handler;
 import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
 import cz.cvut.kbss.jsonld.exception.JsonLdException;
 import cz.cvut.kbss.termit.exception.*;
+import cz.cvut.kbss.termit.exception.UnsupportedOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -108,9 +109,9 @@ public class RestExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(UnsupportedAssetOperationException.class)
+    @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ErrorInfo> unsupportedAssetOperationException(HttpServletRequest request,
-                                                                        UnsupportedAssetOperationException e) {
+                                                                        UnsupportedOperationException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
