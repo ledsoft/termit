@@ -1,7 +1,6 @@
 # Insert model diagrams metadata related to a vocabulary
 PREFIX g: <__VOC_IRI__>
 
-PREFIX v-sgov-pojem: <https://slovník.gov.cz/veřejný-sektor/pojem/>
 PREFIX popis-dat-pojem: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 PREFIX termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
