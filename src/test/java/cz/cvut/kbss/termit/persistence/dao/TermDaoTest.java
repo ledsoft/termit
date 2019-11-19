@@ -578,7 +578,7 @@ class TermDaoTest extends BaseDaoTestRunner {
         try (final RepositoryConnection conn = repository.getConnection()) {
             final ValueFactory vf = conn.getValueFactory();
             final IRI subject = vf.createIRI(term.getUri().toString());
-            final IRI hasSource = vf.createIRI(DC.Elements.SOURCE);
+            final IRI hasSource = vf.createIRI(DC.Terms.SOURCE);
             final List<Statement> sourceStatements = Iterations.asList(conn.getStatements(subject, hasSource, null));
             assertEquals(term.getSources().size(), sourceStatements.size());
             sourceStatements.forEach(ss -> {
