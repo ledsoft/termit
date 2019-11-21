@@ -18,7 +18,6 @@ import java.util.Set;
 @JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class File extends Resource implements SupportsStorage {
 
-    @JsonIgnore
     @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_je_casti_dokumentu, fetch = FetchType.EAGER)
     private Document document;
