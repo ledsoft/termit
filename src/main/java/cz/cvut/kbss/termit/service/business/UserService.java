@@ -42,7 +42,7 @@ public class UserService {
     /**
      * Gets accounts of all users in the system.
      *
-     * @return List of user accounts
+     * @return List of user accounts ordered by last name and first name
      */
     public List<UserAccount> findAll() {
         return repositoryService.findAll();
