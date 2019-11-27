@@ -59,16 +59,10 @@ public class SystemInitializer {
         LOG.info("Admin credentials are: {}/{}", admin.getUsername(), passwordPlain);
         LOG.info("----------------------------------------------");
         final File directory = new File(config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION));
-        if (!directory.exists()) {
-            final boolean result = directory.mkdirs();
-            if (!result) {
-                LOG.error(
-                        "Unable to create admin credentials directory {} or one of its ancestor directories. Admin credentials won't be saved in any file!",
-                        config.get(ConfigParam.ADMIN_CREDENTIALS_LOCATION));
-                return;
-            }
-        }
         try {
+            if (!directory.exists()) {
+                Files.createDirectories(directory.toPath());
+            }
             final File credentialsFile = createHiddenFile();
             if (credentialsFile == null) {
                 return;

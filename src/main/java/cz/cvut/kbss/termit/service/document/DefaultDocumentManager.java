@@ -87,7 +87,7 @@ public class DefaultDocumentManager implements DocumentManager {
         try {
             final java.io.File target = resolveFile(file, false);
             LOG.debug("Saving file content to {}.", target);
-            target.getParentFile().mkdirs();
+            Files.createDirectories(target.getParentFile().toPath());
             Files.copy(content, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new TermItException("Unable to write out file content.", e);
