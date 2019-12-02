@@ -178,4 +178,11 @@ class TermServiceTest {
         sut.findAllIncludingImported(searchString, vocabulary);
         verify(termRepositoryService).findAllIncludingImported(searchString, vocabulary);
     }
+
+    @Test
+    void removeRemovesTermViaRepositoryService() {
+        final Term toRemove = Generator.generateTermWithId();
+        sut.remove(toRemove);
+        verify(termRepositoryService).remove(toRemove);
+    }
 }

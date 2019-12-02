@@ -6,6 +6,7 @@ import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -535,12 +536,25 @@ class TermControllerTest extends BaseControllerTestRunner {
     void removeByIdStandaloneRemovesTermByIdentifier() throws Exception {
         final URI termUri = URI.create(NAMESPACE + TERM_NAME);
         final Term term = Generator.generateTerm();
-        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
         term.setUri(termUri);
+        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.getRequiredReference(termUri)).thenReturn(term);
         mockMvc.perform(delete("/terms/" + TERM_NAME).param(QueryParams.NAMESPACE, NAMESPACE))
                .andExpect(status().isNoContent());
         verify(idResolverMock).resolveIdentifier(NAMESPACE, TERM_NAME);
-        verify(termServiceMock).remove(termUri);
+        verify(termServiceMock).remove(term);
+    }
+
+    @Test
+    void removeByIdStandaloneThrowsNotFoundExceptionWhenTermDoesNotExist() throws Exception {
+        final URI termUri = URI.create(NAMESPACE + TERM_NAME);
+        final Term term = Generator.generateTerm();
+        term.setUri(termUri);
+        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.getRequiredReference(termUri)).thenThrow(NotFoundException.class);
+        mockMvc.perform(delete("/terms/" + TERM_NAME).param(QueryParams.NAMESPACE, NAMESPACE))
+               .andExpect(status().isNotFound());
+        verify(termServiceMock, never()).remove(term);
     }
 
     @Test
@@ -663,5 +677,37 @@ class TermControllerTest extends BaseControllerTestRunner {
         verify(termServiceMock).findAllIncludingImported(searchString, vocabulary);
     }
 
-    // TODO Test term removal
+    @Test
+    void removeRemovesTermWithSpecifiedIdentifier() throws Exception {
+        final URI termUri = URI.create(NAMESPACE + TERM_NAME);
+        final Term toRemove = Generator.generateTerm();
+        toRemove.setUri(termUri);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(VOCABULARY_URI));
+        when(idResolverMock.buildNamespace(VOCABULARY_URI, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(NAMESPACE);
+        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.getRequiredReference(termUri)).thenReturn(toRemove);
+
+        mockMvc.perform(
+                delete(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME))
+               .andExpect(status().isNoContent());
+        verify(termServiceMock).remove(toRemove);
+    }
+
+    @Test
+    void removeThrowsNotFoundWhenTermToRemoveDoesNotExist() throws Exception {
+        final URI termUri = URI.create(NAMESPACE + TERM_NAME);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
+                .thenReturn(URI.create(VOCABULARY_URI));
+        when(idResolverMock.buildNamespace(VOCABULARY_URI, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR))
+                .thenReturn(NAMESPACE);
+        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.getRequiredReference(termUri)).thenThrow(NotFoundException.class);
+
+        mockMvc.perform(
+                delete(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME))
+               .andExpect(status().isNotFound());
+        verify(termServiceMock, never()).remove(any());
+    }
 }

@@ -190,7 +190,7 @@ public class TermController extends BaseController {
                            @PathVariable("termIdFragment") String termIdFragment,
                            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
-        termService.remove(termUri);
+        termService.remove(termService.getRequiredReference(termUri));
         LOG.debug("Term {} removed.", termUri);
     }
 
@@ -199,7 +199,7 @@ public class TermController extends BaseController {
     public void removeById(@PathVariable("termIdFragment") String termIdFragment,
                            @RequestParam(name = QueryParams.NAMESPACE) String namespace) {
         final URI termUri = idResolver.resolveIdentifier(namespace, termIdFragment);
-        termService.remove(termUri);
+        termService.remove(termService.getRequiredReference(termUri));
         LOG.debug("Term {} removed.", termUri);
     }
 

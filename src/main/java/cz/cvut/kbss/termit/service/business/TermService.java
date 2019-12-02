@@ -256,11 +256,12 @@ public class TermService {
     /**
      * Removes the specified term.
      *
-     * @param termUri Uri of the term
+     * @param term Term to remove
      */
     @Transactional
-    public void remove(URI termUri) {
-        repositoryService.remove(termUri);
+    public void remove(Term term) {
+        Objects.requireNonNull(term);
+        repositoryService.remove(term);
     }
 
     /**
