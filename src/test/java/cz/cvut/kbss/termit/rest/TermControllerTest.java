@@ -227,22 +227,22 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getAllRootsUsesSearchStringToFindMatchingTerms() throws Exception {
+    void getAllUsesSearchStringToFindMatchingTerms() throws Exception {
         when(idResolverMock.resolveIdentifier(Environment.BASE_URI, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(idResolverMock.buildNamespace(eq(VOCABULARY_URI), any())).thenReturn(NAMESPACE);
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
         final List<Term> terms = Generator.generateTermsWithIds(5);
-        when(termServiceMock.findAllRoots(any(), anyString())).thenReturn(terms);
+        when(termServiceMock.findAll(anyString(), any())).thenReturn(terms);
         final String searchString = "test";
 
-        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/roots")
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + VOCABULARY_NAME + "/terms")
                 .param(QueryParams.NAMESPACE, Environment.BASE_URI)
                 .param("searchString", searchString)).andExpect(status().isOk()).andReturn();
         final List<Term> result = readValue(mvcResult, new TypeReference<List<Term>>() {
         });
         assertEquals(terms, result);
-        verify(termServiceMock).findAllRoots(vocabulary, searchString);
+        verify(termServiceMock).findAll(searchString, vocabulary);
     }
 
     @Test
@@ -650,16 +650,18 @@ class TermControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getAllRootsWithSearchStringAndIncludeImportsGetsRootTermsIncludingImportedTermsFromService() throws Exception {
+    void getAllWithSearchStringAndIncludeImportsGetsMatchingTermsIncludingImportedTermsFromService() throws Exception {
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, VOCABULARY_NAME))
                 .thenReturn(URI.create(VOCABULARY_URI));
         when(termServiceMock.findVocabularyRequired(vocabulary.getUri())).thenReturn(vocabulary);
         final String searchString = "test";
         mockMvc.perform(
-                get(PATH + "/" + VOCABULARY_NAME + "/terms/roots")
+                get(PATH + "/" + VOCABULARY_NAME + "/terms")
                         .param("includeImported", Boolean.TRUE.toString())
                         .param("searchString", searchString))
                .andExpect(status().isOk());
-        verify(termServiceMock).findAllRootsIncludingImports(vocabulary, searchString);
+        verify(termServiceMock).findAllIncludingImported(searchString, vocabulary);
     }
+
+    // TODO Test term removal
 }

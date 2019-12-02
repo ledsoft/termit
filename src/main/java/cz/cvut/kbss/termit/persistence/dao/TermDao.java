@@ -206,7 +206,7 @@ public class TermDao extends AssetDao<Term> {
 
     /**
      * Finds terms whose label contains the specified search string.
-     *
+     * <p>
      * This method searches in the specified vocabulary only.
      *
      * @param searchString String the search term labels by
@@ -245,14 +245,14 @@ public class TermDao extends AssetDao<Term> {
 
     /**
      * Finds terms whose label contains the specified search string.
-     *
+     * <p>
      * This method searches in the specified vocabulary and all the vocabularies it (transitively) imports.
      *
      * @param searchString String the search term labels by
      * @param vocabulary   Vocabulary whose terms should be searched
      * @return List of matching terms
      */
-    public List<Term> findAllIncludingImports(String searchString, Vocabulary vocabulary) {
+    public List<Term> findAllIncludingImported(String searchString, Vocabulary vocabulary) {
         Objects.requireNonNull(searchString);
         Objects.requireNonNull(vocabulary);
         final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
@@ -265,81 +265,14 @@ public class TermDao extends AssetDao<Term> {
                                          .setParameter("type", typeUri)
                                          .setParameter("inVocabulary", URI.create(
                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                                         .setParameter("imports",
+                                                 URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
                                          .setParameter("targetVocabulary", vocabulary.getUri())
                                          .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE));
         try {
             final List<Term> terms = executeQueryAndLoadSubTerms(query);
             terms.forEach(this::loadParentSubTerms);
             return terms;
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
-    /**
-     * Finds root terms whose term subtree contains a term with label matching the specified search string.
-     * <p>
-     * Currently, the match uses SPARQL {@code contains} function on lowercase label and search string. A more
-     * sophisticated matching can be added.
-     *
-     * @param searchString String to search term labels by
-     * @param vocabulary   Vocabulary whose terms should be returned
-     * @return List of root terms contain a matching term in subtree
-     */
-    public List<Term> findAllRoots(String searchString, Vocabulary vocabulary) {
-        Objects.requireNonNull(searchString);
-        Objects.requireNonNull(vocabulary);
-        TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
-                "?root a ?type ." +
-                "?vocabulary ?hasGlossary/?hasTerm ?root ." +
-                "?root ?hasChild* ?term ." +
-                "{\n ?term a ?type ;" +
-                "rdfs:label ?label ." +
-                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "}\n} ORDER BY ?label", Term.class);
-        query = setCommonFindAllRootsQueryParams(query, false);
-        try {
-            return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
-                                                    .setParameter("hasChild", URI.create(SKOS.NARROWER))
-                                                    .setParameter("searchString", searchString,
-                                                            config.get(ConfigParam.LANGUAGE)));
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
-    /**
-     * Finds root terms whose term subtree contains a term with label matching the specified search string.
-     * <p>
-     * The specified vocabulary represents the starting point of a transitive closure over the vocabulary import
-     * relationship. Terms from all vocabularies reached via this closure are taken into account in the search, so the
-     * returned root terms need not be in the specified vocabulary.
-     * <p>
-     * Currently, the match uses SPARQL {@code contains} function on lowercase label and search string. A more
-     * sophisticated matching can be added.
-     *
-     * @param searchString String to search term labels by
-     * @param vocabulary   Vocabulary whose terms should be returned
-     * @return List of root terms contain a matching term in subtree
-     */
-    public List<Term> findAllRootsIncludingImports(String searchString, Vocabulary vocabulary) {
-        Objects.requireNonNull(searchString);
-        Objects.requireNonNull(vocabulary);
-        TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
-                "?root a ?type ." +
-                "?vocabulary ?imports* ?parent ." +
-                "?parent ?hasGlossary/?hasTerm ?root." +
-                "?root ?hasChild* ?term ." +
-                "{\n ?term a ?type ;" +
-                "rdfs:label ?label ." +
-                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "}\n} ORDER BY ?label", Term.class);
-        query = setCommonFindAllRootsQueryParams(query, true);
-        try {
-            return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
-                                                    .setParameter("hasChild", URI.create(SKOS.NARROWER))
-                                                    .setParameter("searchString", searchString,
-                                                            config.get(ConfigParam.LANGUAGE)));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

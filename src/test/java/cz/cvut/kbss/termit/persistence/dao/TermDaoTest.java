@@ -331,7 +331,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllRootsIncludingImportsBySearchStringReturnsRootTermsFromVocabularyImportChain() {
+    void findAllIncludingImportsBySearchStringReturnsMatchingTermsFromVocabularyImportChain() {
         final Vocabulary parent = Generator.generateVocabularyWithId();
         vocabulary.setImportedVocabularies(Collections.singleton(parent.getUri()));
         final Vocabulary grandParent = Generator.generateVocabularyWithId();
@@ -343,10 +343,13 @@ class TermDaoTest extends BaseDaoTestRunner {
         });
         final List<Term> directTerms = generateTerms(4);
         addTermsAndSave(directTerms, vocabulary);
+        final List<Term> allTerms = new ArrayList<>(directTerms);
         final List<Term> parentTerms = generateTerms(3);
         addTermsAndSave(parentTerms, parent);
+        allTerms.addAll(parentTerms);
         final List<Term> grandParentTerms = generateTerms(2);
         addTermsAndSave(grandParentTerms, grandParent);
+        allTerms.addAll(grandParentTerms);
         transactional(() -> {
             directTerms.get(0).setParentTerms(Collections.singleton(parentTerms.get(0)));
             parentTerms.get(0).setParentTerms(Collections.singleton(grandParentTerms.get(0)));
@@ -371,10 +374,13 @@ class TermDaoTest extends BaseDaoTestRunner {
 
         final String searchString = directTerms.get(0).getLabel()
                                                .substring(0, directTerms.get(0).getLabel().length() - 2);
-        final List<Term> result = sut.findAllRootsIncludingImports(searchString, vocabulary);
+        final List<Term> result = sut.findAllIncludingImported(searchString, vocabulary);
         assertFalse(result.isEmpty());
         assertThat(result.size(), lessThan(directTerms.size() + parentTerms.size() + grandParentTerms.size()));
-        assertTrue(result.contains(grandParentTerms.get(0)));
+        final List<Term> matching = allTerms.stream().filter(t -> t.getLabel().toLowerCase()
+                                                                   .contains(searchString.toLowerCase())).collect(
+                Collectors.toList());
+        assertTrue(result.containsAll(matching));
     }
 
     @Test
@@ -537,10 +543,10 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllRootsIncludingImportsViaSearchStringLoadsSubTermsForResults() {
+    void findAllIncludingImportsBySearchStringLoadsSubTermsForResults() {
         final Term parent = persistParentWithChild();
-        final String searchString = parent.getSubTerms().iterator().next().getLabel();
-        final List<Term> result = sut.findAllRootsIncludingImports(searchString, vocabulary);
+        final String searchString = parent.getLabel();
+        final List<Term> result = sut.findAllIncludingImported(searchString, vocabulary);
         assertEquals(1, result.size());
         assertEquals(parent, result.get(0));
         assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());
