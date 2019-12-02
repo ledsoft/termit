@@ -65,8 +65,12 @@ public class TermController extends BaseController {
                     Turtle.MEDIA_TYPE})
     public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
                                  @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                                 @RequestParam(name = "searchString", required = false) String searchString,
                                  @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
+        if (searchString != null) {
+            return ResponseEntity.ok(termService.findAll(searchString, getVocabulary(vocabularyUri)));
+        }
         final Optional<ResponseEntity> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
         return export.orElse(ResponseEntity.ok(termService.findAll(getVocabulary(vocabularyUri))));
     }

@@ -127,38 +127,37 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllRootsBySearchStringReturnsRootTermsWithMatchingLabel() {
+    void findAllBySearchStringReturnsTermsWithMatchingLabel() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms), vocabulary);
 
-        final List<Term> result = sut.findAllRoots(terms.get(0).getLabel(), vocabulary);
+        final List<Term> result = sut.findAll(terms.get(0).getLabel(), vocabulary);
         assertEquals(1, result.size());
         assertTrue(terms.contains(result.get(0)));
     }
 
     @Test
-    void findAllRootsBySearchStringReturnsRootTermsWhoseDescendantsHaveMatchingLabel() {
+    void findAllBySearchStringReturnsTermsWithMatchingLabelWhichAreNotRoots() {
         final List<Term> terms = generateTerms(10);
         addTermsAndSave(new HashSet<>(terms), vocabulary);
         final Term root = terms.get(Generator.randomIndex(terms));
-        final Term child = new Term();
-        child.setUri(Generator.generateUri());
+        final Term child = Generator.generateTermWithId();
         child.setLabel("test");
         child.setParentTerms(Collections.singleton(root));
-        final Term matchingDesc = new Term();
-        matchingDesc.setUri(Generator.generateUri());
+        child.setVocabulary(vocabulary.getUri());
+        final Term matchingDesc = Generator.generateTermWithId();
         matchingDesc.setLabel("Metropolitan plan");
         matchingDesc.setParentTerms(Collections.singleton(child));
+        matchingDesc.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(child);
-            em.persist(matchingDesc);
-            em.merge(root);
+            em.persist(child, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(matchingDesc, DescriptorFactory.termDescriptor(vocabulary));
             insertNarrowerStatements(matchingDesc, child);
         });
 
-        final List<Term> result = sut.findAllRoots("plan", vocabulary);
+        final List<Term> result = sut.findAll("plan", vocabulary);
         assertEquals(1, result.size());
-        assertEquals(root, result.get(0));
+        assertEquals(matchingDesc, result.get(0));
     }
 
     /**
@@ -528,10 +527,10 @@ class TermDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void findAllRootsViaSearchStringLoadsSubTermsForResults() {
+    void findAllBySearchStringLoadsSubTermsForResults() {
         final Term parent = persistParentWithChild();
-        final String searchString = parent.getSubTerms().iterator().next().getLabel();
-        final List<Term> result = sut.findAllRoots(searchString, vocabulary);
+        final String searchString = parent.getLabel();
+        final List<Term> result = sut.findAll(searchString, vocabulary);
         assertEquals(1, result.size());
         assertEquals(parent, result.get(0));
         assertEquals(parent.getSubTerms(), result.get(0).getSubTerms());

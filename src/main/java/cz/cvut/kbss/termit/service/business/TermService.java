@@ -127,6 +127,12 @@ public class TermService {
         return repositoryService.findAllRootsIncludingImported(vocabulary, searchString);
     }
 
+    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
+        Objects.requireNonNull(vocabulary);
+        Objects.requireNonNull(searchString);
+        return repositoryService.findAll(searchString, vocabulary);
+    }
+
     /**
      * Gets vocabulary with the specified identifier.
      *

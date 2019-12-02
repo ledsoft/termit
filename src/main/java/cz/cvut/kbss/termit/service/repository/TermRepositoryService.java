@@ -189,6 +189,10 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         return termDao.findAllRootsIncludingImports(searchString, vocabulary);
     }
 
+    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
+        return termDao.findAll(searchString, vocabulary);
+    }
+
     /**
      * Checks whether a term with the specified label exists in a vocabulary with the specified URI.
      *
