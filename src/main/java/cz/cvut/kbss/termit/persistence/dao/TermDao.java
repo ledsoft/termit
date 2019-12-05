@@ -85,11 +85,12 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         try {
             return executeQueryAndLoadSubTerms(em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                    "GRAPH ?vocabulary { " +
                     "?term a ?type ;" +
                     "rdfs:label ?label ;" +
                     "?inVocabulary ?vocabulary ." +
                     "FILTER (lang(?label) = ?labelLang) ." +
-                    "} ORDER BY ?label", Term.class)
+                    "} } ORDER BY ?label", Term.class)
                                                  .setParameter("type", typeUri)
                                                  .setParameter("vocabulary", vocabulary.getUri())
                                                  .setParameter("inVocabulary",
@@ -144,11 +145,12 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         Objects.requireNonNull(pageSpec);
         TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                "GRAPH ?vocabulary { " +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
                 "FILTER (lang(?label) = ?labelLang) ." +
-                "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class);
+                "}} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class);
         query = setCommonFindAllRootsQueryParams(query, false);
         try {
             return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
@@ -217,11 +219,12 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(searchString);
         Objects.requireNonNull(vocabulary);
         final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
-                "?term a ?type ;\n" +
-                "      rdfs:label ?label ;\n" +
+                "GRAPH ?vocabulary { " +
+                "?term a ?type ; " +
+                "      rdfs:label ?label ; " +
                 "      ?inVocabulary ?vocabulary ." +
-                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) .\n" +
-                "} ORDER BY ?label", Term.class)
+                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
+                "}} ORDER BY ?label", Term.class)
                                          .setParameter("type", typeUri)
                                          .setParameter("inVocabulary", URI.create(
                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
