@@ -2,12 +2,15 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.termit.asset.provenance.ModifiesData;
 import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
@@ -22,10 +25,6 @@ public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastM
     public VocabularyDao(EntityManager em) {
         super(Vocabulary.class, em);
         refreshLastModified();
-    }
-
-    private void refreshLastModified() {
-        this.lastModified = System.currentTimeMillis();
     }
 
     @Override
@@ -74,16 +73,7 @@ public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastM
         }
     }
 
-    @Override
-    public void persist(Vocabulary entity) {
-        Objects.requireNonNull(entity);
-        try {
-            em.persist(entity, DescriptorFactory.vocabularyDescriptor(entity));
-        } catch (RuntimeException e) {
-            throw new PersistenceException(e);
-        }
-    }
-
+    @ModifiesData
     @Override
     public Vocabulary update(Vocabulary entity) {
         Objects.requireNonNull(entity);
@@ -91,6 +81,17 @@ public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastM
             // Evict possibly cached instance loaded from default context
             em.getEntityManagerFactory().getCache().evict(Vocabulary.class, entity.getUri(), null);
             return em.merge(entity, DescriptorFactory.vocabularyDescriptor(entity));
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
+    @ModifiesData
+    @Override
+    public void persist(Vocabulary entity) {
+        Objects.requireNonNull(entity);
+        try {
+            em.persist(entity, DescriptorFactory.vocabularyDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -142,5 +143,15 @@ public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastM
     @Override
     public long getLastModified() {
         return lastModified;
+    }
+
+    @Override
+    public void refreshLastModified() {
+        this.lastModified = System.currentTimeMillis();
+    }
+
+    @EventListener
+    public void refreshLastModified(RefreshLastModifiedEvent event) {
+        refreshLastModified();
     }
 }

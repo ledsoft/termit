@@ -11,4 +11,6 @@ public interface SupportsLastModification {
      * @return Timestamp of last modification in millis since epoch
      */
     long getLastModified();
+
+    default void refreshLastModified() {}
 }
