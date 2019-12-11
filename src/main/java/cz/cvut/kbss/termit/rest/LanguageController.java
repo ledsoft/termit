@@ -22,10 +22,7 @@ public class LanguageController extends BaseController {
     private final LanguageService service;
 
     @Autowired
-    public LanguageController(
-            IdentifierResolver idResolver,
-            Configuration config,
-            LanguageService service) {
+    public LanguageController(IdentifierResolver idResolver, Configuration config, LanguageService service) {
         super(idResolver, config);
         this.service = service;
     }

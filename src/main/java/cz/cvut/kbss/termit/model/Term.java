@@ -9,7 +9,7 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.HasTypes;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;

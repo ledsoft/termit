@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.model.Vocabulary;
 
 import java.net.URI;
@@ -8,7 +9,7 @@ import java.util.Collection;
 /**
  * Interface of business logic concerning vocabularies.
  */
-public interface VocabularyService extends CrudService<Vocabulary> {
+public interface VocabularyService extends CrudService<Vocabulary>, SupportsLastModification {
 
     /**
      * Generates a vocabulary identifier based on the specified label.

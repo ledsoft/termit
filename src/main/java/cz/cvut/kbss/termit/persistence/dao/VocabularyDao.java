@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
@@ -13,11 +14,18 @@ import java.net.URI;
 import java.util.*;
 
 @Repository
-public class VocabularyDao extends AssetDao<Vocabulary> {
+public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastModification {
+
+    private volatile long lastModified;
 
     @Autowired
     public VocabularyDao(EntityManager em) {
         super(Vocabulary.class, em);
+        refreshLastModified();
+    }
+
+    private void refreshLastModified() {
+        this.lastModified = System.currentTimeMillis();
     }
 
     @Override
@@ -129,5 +137,10 @@ public class VocabularyDao extends AssetDao<Vocabulary> {
                  .setParameter("importsVocabulary",
                          URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
                  .getSingleResult();
+    }
+
+    @Override
+    public long getLastModified() {
+        return lastModified;
     }
 }

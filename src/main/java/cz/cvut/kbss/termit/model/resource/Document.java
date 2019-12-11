@@ -5,7 +5,7 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.SupportsStorage;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.lang.reflect.Field;

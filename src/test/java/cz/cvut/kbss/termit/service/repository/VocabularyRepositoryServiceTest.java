@@ -217,4 +217,11 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void getLastModifiedReturnsInitializedValue() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
+    }
 }

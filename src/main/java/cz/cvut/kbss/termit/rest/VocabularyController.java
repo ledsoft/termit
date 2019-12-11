@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 
 import java.net.URI;
 import java.util.Collection;
@@ -36,8 +37,11 @@ public class VocabularyController extends BaseController {
     }
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Vocabulary> getAll() {
-        return vocabularyService.findAll();
+    public ResponseEntity<List<Vocabulary>> getAll(ServletWebRequest webRequest) {
+        if (webRequest.checkNotModified(vocabularyService.getLastModified())) {
+            return null;
+        }
+        return ResponseEntity.ok().lastModified(vocabularyService.getLastModified()).body(vocabularyService.findAll());
     }
 
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})

@@ -18,6 +18,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyDaoTest extends BaseDaoTestRunner {
@@ -276,5 +279,12 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertTrue(result.contains(importedVocabularyOne.getUri()));
         assertTrue(result.contains(importedVocabularyTwo.getUri()));
         assertTrue(result.contains(transitiveVocabulary.getUri()));
+    }
+
+    @Test
+    void initializesLastModificationTimestampToCurrentDateTimeOnInit() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
     }
 }
