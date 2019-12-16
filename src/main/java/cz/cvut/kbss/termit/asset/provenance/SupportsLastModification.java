@@ -12,5 +12,12 @@ public interface SupportsLastModification {
      */
     long getLastModified();
 
-    default void refreshLastModified() {}
+    /**
+     * Refreshes the last modified value.
+     * <p>
+     * This method is required only for implementations which actually store the last modified value. Those which act
+     * only as delegates need not implement it.
+     */
+    default void refreshLastModified() {
+    }
 }

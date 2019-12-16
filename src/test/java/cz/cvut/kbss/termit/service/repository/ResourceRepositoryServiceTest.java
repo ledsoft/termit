@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -358,5 +358,12 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertEquals(term.getUri(), result.get(0).getTerm());
         assertEquals(term.getLabel(), result.get(0).getTermLabel());
         assertEquals(resource.getUri(), result.get(0).getResource());
+    }
+
+    @Test
+    void getLastModifiedReturnsInitializedValue() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
     }
 }

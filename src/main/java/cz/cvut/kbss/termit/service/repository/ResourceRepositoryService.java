@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -25,7 +26,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource> {
+public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource>
+        implements SupportsLastModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
@@ -170,5 +172,10 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     public URI generateIdentifier(String label) {
         Objects.requireNonNull(label);
         return idResolver.generateIdentifier(ConfigParam.NAMESPACE_RESOURCE, label);
+    }
+
+    @Override
+    public long getLastModified() {
+        return resourceDao.getLastModified();
     }
 }

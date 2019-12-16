@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
@@ -28,7 +29,7 @@ import java.util.*;
  * Interface of business logic concerning resources.
  */
 @Service
-public class ResourceService implements CrudService<Resource> {
+public class ResourceService implements CrudService<Resource>, SupportsLastModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
 
@@ -308,5 +309,10 @@ public class ResourceService implements CrudService<Resource> {
      */
     public URI generateIdentifier(String label) {
         return repositoryService.generateIdentifier(label);
+    }
+
+    @Override
+    public long getLastModified() {
+        return repositoryService.getLastModified();
     }
 }

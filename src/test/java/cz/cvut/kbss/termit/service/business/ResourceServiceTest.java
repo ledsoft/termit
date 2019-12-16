@@ -366,4 +366,12 @@ class ResourceServiceTest {
         sut.remove(resource.getUri());
         verify(documentManager).remove(resource);
     }
+
+    @Test
+    void getLastModifiedReturnsValueFromRepositoryService() {
+        final long value = System.currentTimeMillis();
+        when(resourceRepositoryService.getLastModified()).thenReturn(value);
+        assertEquals(value, sut.getLastModified());
+        verify(resourceRepositoryService).getLastModified();
+    }
 }
