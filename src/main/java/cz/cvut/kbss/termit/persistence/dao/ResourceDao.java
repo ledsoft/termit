@@ -3,6 +3,9 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.asset.provenance.ModifiesData;
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
@@ -10,6 +13,7 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
@@ -17,10 +21,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class ResourceDao extends AssetDao<Resource> {
+public class ResourceDao extends AssetDao<Resource> implements SupportsLastModification {
+
+    private volatile long lastModified;
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
+        refreshLastModified();
     }
 
     /**
@@ -39,6 +46,7 @@ public class ResourceDao extends AssetDao<Resource> {
      * @param vocabulary Vocabulary providing context
      * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
      */
+    @ModifiesData
     public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(vocabulary);
@@ -63,6 +71,7 @@ public class ResourceDao extends AssetDao<Resource> {
         return descriptor;
     }
 
+    @ModifiesData
     @Override
     public Resource update(Resource entity) {
         try {
@@ -173,5 +182,20 @@ public class ResourceDao extends AssetDao<Resource> {
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    @Override
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    @Override
+    public void refreshLastModified() {
+        this.lastModified = System.currentTimeMillis();
+    }
+
+    @EventListener
+    public void refreshLastModified(RefreshLastModifiedEvent event) {
+        refreshLastModified();
     }
 }

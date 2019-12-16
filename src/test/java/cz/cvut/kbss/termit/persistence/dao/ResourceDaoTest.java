@@ -3,6 +3,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -364,5 +365,54 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         assertTrue(
                 em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(voc)).getFile(f.getLabel())
                   .isPresent());
+    }
+
+    @Test
+    void initializesLastModificationTimestampToCurrentDateTimeOnInit() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
+    }
+
+    @Test
+    void refreshLastModifiedUpdatesLastModifiedTimestampToCurrentDateTime() throws Exception {
+        final long before = sut.getLastModified();
+        Thread.sleep(100);  // force time to move on
+        sut.refreshLastModified(new RefreshLastModifiedEvent(this));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void persistRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Resource resource = Generator.generateResourceWithId();
+        transactional(() -> sut.persist(resource));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void removeRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Resource resource = generateResource();
+        transactional(() -> sut.remove(resource));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void updateRefreshesLastModifiedValue() throws Exception {
+        final Resource resource = generateResource();
+        final long before = sut.getLastModified();
+        final String newLabel = "New label";
+        resource.setLabel(newLabel);
+        Thread.sleep(100);  // force time to move on
+        transactional(() -> sut.update(resource));
+        final Optional<Resource> result = sut.find(resource.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(newLabel, result.get().getLabel());
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
     }
 }
