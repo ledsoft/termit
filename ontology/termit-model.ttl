@@ -40,9 +40,9 @@ termit-pojem:má-suffix-text-quote
 
 termit:model  a         owl:Ontology , <https://slovník.gov.cz/veřejný-sektor/pojem/model> ;
         rdfs:label      "Slovník systému TermIt - model"@cs , "Vocabulary of system TermIt - model"@en ;
-        <http://purl.org/dc/elements/1.1/creator>
+        <http://purl.org/dc/terms/creator>
                 "Michal Med" , " Martin Ledvinka" ;
-        <http://purl.org/dc/elements/1.1/title>
+        <http://purl.org/dc/terms/title>
                 "Slovník systému TermIt - model"@cs , "Vocabulary of system TermIt - model"@en ;
         <http://purl.org/dc/terms/created>
                 "25.04.2019" ;

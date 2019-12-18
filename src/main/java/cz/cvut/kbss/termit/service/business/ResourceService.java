@@ -17,6 +17,7 @@
  */
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
@@ -45,7 +46,7 @@ import java.util.*;
  * Interface of business logic concerning resources.
  */
 @Service
-public class ResourceService implements CrudService<Resource> {
+public class ResourceService implements CrudService<Resource>, SupportsLastModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceService.class);
 
@@ -89,7 +90,9 @@ public class ResourceService implements CrudService<Resource> {
      */
     @Transactional
     public void remove(URI identifier) {
-        repositoryService.remove(getRequiredReference(identifier));
+        final Resource toRemove = getRequiredReference(identifier);
+        documentManager.remove(toRemove);
+        repositoryService.remove(toRemove);
     }
 
     /**
@@ -231,11 +234,10 @@ public class ResourceService implements CrudService<Resource> {
         if (doc.getVocabulary() != null) {
             final Vocabulary vocabulary = vocabularyService.getRequiredReference(doc.getVocabulary());
             repositoryService.persist(file, vocabulary);
-            repositoryService.update(doc, vocabulary);
         } else {
             persist(file);
-            update(doc);
         }
+        update(doc);
     }
 
     /**
@@ -324,5 +326,10 @@ public class ResourceService implements CrudService<Resource> {
      */
     public URI generateIdentifier(String label) {
         return repositoryService.generateIdentifier(label);
+    }
+
+    @Override
+    public long getLastModified() {
+        return repositoryService.getLastModified();
     }
 }

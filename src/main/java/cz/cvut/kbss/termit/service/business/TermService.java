@@ -114,34 +114,30 @@ public class TermService {
     }
 
     /**
-     * Retrieves root terms (terms without parent) in whose subterm tree (including themselves as the root) is a term
-     * with label matching the specified search string.
-     * <p>
-     * Only terms from the specified vocabulary are matched.
+     * Finds all terms which match the specified search string in the specified vocabulary.
      *
-     * @param vocabulary   Vocabulary whose terms will be returned
-     * @param searchString String by which to search in term labels
+     * @param searchString Search string
+     * @param vocabulary   Vocabulary whose terms should be returned
      * @return Matching terms
      */
-    public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {
+    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
         Objects.requireNonNull(vocabulary);
         Objects.requireNonNull(searchString);
-        return repositoryService.findAllRoots(vocabulary, searchString);
+        return repositoryService.findAll(searchString, vocabulary);
     }
 
     /**
-     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
-     * (transitively) whose sub-terms or themselves match the specified search string.
+     * Finds all terms which match the specified search string in the specified vocabulary and any vocabularies it
+     * (transitively) imports.
      *
-     * @param vocabulary   Base vocabulary for the vocabulary import closure
      * @param searchString Search string
-     * @return Match root terms
-     * @see #findAllRoots(Vocabulary, String)
+     * @param vocabulary   Vocabulary whose terms should be returned
+     * @return Matching terms
      */
-    public List<Term> findAllRootsIncludingImports(Vocabulary vocabulary, String searchString) {
-        Objects.requireNonNull(vocabulary);
+    public List<Term> findAllIncludingImported(String searchString, Vocabulary vocabulary) {
         Objects.requireNonNull(searchString);
-        return repositoryService.findAllRootsIncludingImported(vocabulary, searchString);
+        Objects.requireNonNull(vocabulary);
+        return repositoryService.findAllIncludingImported(searchString, vocabulary);
     }
 
     /**
@@ -277,11 +273,12 @@ public class TermService {
     /**
      * Removes the specified term.
      *
-     * @param termUri Uri of the term
+     * @param term Term to remove
      */
     @Transactional
-    public void remove(URI termUri) {
-        repositoryService.remove(termUri);
+    public void remove(Term term) {
+        Objects.requireNonNull(term);
+        repositoryService.remove(term);
     }
 
     /**

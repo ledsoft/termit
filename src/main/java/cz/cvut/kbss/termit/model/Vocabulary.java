@@ -21,7 +21,7 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;

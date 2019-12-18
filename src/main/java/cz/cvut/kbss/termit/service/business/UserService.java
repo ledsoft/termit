@@ -20,6 +20,8 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.event.LoginAttemptsThresholdExceeded;
 import cz.cvut.kbss.termit.exception.AuthorizationException;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.UnsupportedOperationException;
+import cz.cvut.kbss.termit.exception.ValidationException;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.rest.dto.UserUpdateDto;
 import cz.cvut.kbss.termit.service.repository.UserRepositoryService;
@@ -57,7 +59,7 @@ public class UserService {
     /**
      * Gets accounts of all users in the system.
      *
-     * @return List of user accounts
+     * @return List of user accounts ordered by last name and first name
      */
     public List<UserAccount> findAll() {
         return repositoryService.findAll();
@@ -119,9 +121,15 @@ public class UserService {
     public void updateCurrent(UserUpdateDto update) {
         LOG.trace("Updating current user account.");
         Objects.requireNonNull(update);
-        if (!securityUtils.getCurrentUser().getUri().equals(update.getUri())) {
+        UserAccount currentUser = securityUtils.getCurrentUser();
+
+        if (!currentUser.getUri().equals(update.getUri())) {
             throw new AuthorizationException(
                     "User " + securityUtils.getCurrentUser() + " attempted to update a different user's account.");
+        }
+        if (!currentUser.getUsername().equals(update.getUsername())) {
+            throw new ValidationException(
+                    "User " + securityUtils.getCurrentUser() + " attempted to update his username.");
         }
         if (update.getPassword() != null) {
             securityUtils.verifyCurrentUserPassword(update.getOriginalPassword());
@@ -141,10 +149,17 @@ public class UserService {
     public void unlock(UserAccount account, String newPassword) {
         Objects.requireNonNull(account);
         Objects.requireNonNull(newPassword);
+        ensureNotOwnAccount(account, "unlock");
         LOG.trace("Unlocking user account {}.", account);
         account.unlock();
         account.setPassword(newPassword);
         repositoryService.update(account);
+    }
+
+    private void ensureNotOwnAccount(UserAccount account, String operation) {
+        if (securityUtils.getCurrentUser().equals(account)) {
+            throw new UnsupportedOperationException("Cannot " + operation + " your own account!");
+        }
     }
 
     /**
@@ -155,6 +170,7 @@ public class UserService {
     @Transactional
     public void disable(UserAccount account) {
         Objects.requireNonNull(account);
+        ensureNotOwnAccount(account, "disable");
         LOG.trace("Disabling user account {}.", account);
         account.disable();
         repositoryService.update(account);
@@ -168,6 +184,7 @@ public class UserService {
     @Transactional
     public void enable(UserAccount account) {
         Objects.requireNonNull(account);
+        ensureNotOwnAccount(account, "enable");
         LOG.trace("Enabling user account {}.", account);
         account.enable();
         repositoryService.update(account);

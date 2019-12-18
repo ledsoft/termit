@@ -185,7 +185,7 @@ class TextAnalysisServiceTest extends BaseServiceTestRunner {
         mockServer.expect(requestTo(config.get(TEXT_ANALYSIS_SERVICE_URL)))
                   .andExpect(method(HttpMethod.POST))
                   .andExpect(content().string(objectMapper.writeValueAsString(input)))
-                  .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
+                  .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
                   .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE))
                   .andRespond(withSuccess(CONTENT, MediaType.APPLICATION_XML));
         sut.analyzeFile(file);

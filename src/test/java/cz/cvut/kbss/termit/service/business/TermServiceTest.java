@@ -17,10 +17,10 @@
  */
 package cz.cvut.kbss.termit.service.business;
 
+import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
-import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
@@ -99,10 +99,10 @@ class TermServiceTest {
     }
 
     @Test
-    void findAllRootsWithSearchStringRetrievesRootTermsFromVocabularyUsingRepositoryService() {
+    void findAllBySearchStringRetrievesMatchingTermsFromVocabularyUsingRepositoryService() {
         final String searchString = "test";
-        sut.findAllRoots(vocabulary, searchString);
-        verify(termRepositoryService).findAllRoots(vocabulary, searchString);
+        sut.findAll(searchString, vocabulary);
+        verify(termRepositoryService).findAll(searchString, vocabulary);
     }
 
     @Test
@@ -190,9 +190,16 @@ class TermServiceTest {
     }
 
     @Test
-    void findAllRootsIncludingImportsWithSearchStringRetrievesRootTermsUsingRepositoryService() {
+    void findAllIncludingImportedBySearchStringRetrievesMatchingTermsUsingRepositoryService() {
         final String searchString = "test";
-        sut.findAllRootsIncludingImports(vocabulary, searchString);
-        verify(termRepositoryService).findAllRootsIncludingImported(vocabulary, searchString);
+        sut.findAllIncludingImported(searchString, vocabulary);
+        verify(termRepositoryService).findAllIncludingImported(searchString, vocabulary);
+    }
+
+    @Test
+    void removeRemovesTermViaRepositoryService() {
+        final Term toRemove = Generator.generateTermWithId();
+        sut.remove(toRemove);
+        verify(termRepositoryService).remove(toRemove);
     }
 }

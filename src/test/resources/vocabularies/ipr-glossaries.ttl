@@ -3,7 +3,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "plocha technické infrastruktury"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-II/cl-6/c-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/plocha> ;
@@ -16,7 +16,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkové prostranství"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-74/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/> ;
@@ -29,7 +29,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných vrchů"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-82/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -55,7 +55,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-I/cl-60/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/lokalita> ;
@@ -68,7 +68,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura zahradního města"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-68/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -81,7 +81,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů vybavenosti"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-71/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -94,7 +94,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový les"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-75/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/> ;
@@ -107,7 +107,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lesní krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-76/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -120,7 +120,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "modernistická struktura (zástavba)"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-II/cl-6/c-1/b-g" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/stavba> ;
@@ -133,7 +133,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "Index stabilizované části"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-III/cl-11/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/lokality> ;
@@ -146,7 +146,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stabilita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-II/cl-5/b-j" , "mpp/3.2/ca-3/h-III/cl-93/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/> ;
@@ -161,7 +161,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "hybridní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-65/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -174,7 +174,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "leso-zemědělská krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-77/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -192,7 +192,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "rostlá struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-63/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -205,7 +205,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "index návrhový"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-III/cl-11/c-4" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/lokality> ;
@@ -218,7 +218,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "koridor dopravní a technické infrastruktury"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-II/cl-6/c-2/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/plocha> ;
@@ -231,7 +231,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nestavební blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-1/h-II/cl-6/c-1/b-j" , "mpp/3.2/ca-2/h-II/cl-37/c-2" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/blok> ;
@@ -246,7 +246,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "bloková struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-64/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -259,7 +259,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina úzkých zaříznutých údolí v plošině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-80/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -272,7 +272,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový areál"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-73/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/> ;
@@ -285,7 +285,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lineární struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-72/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -298,7 +298,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných údolí"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-81/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -311,7 +311,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělská krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-79/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -324,7 +324,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělsko-rybniční krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-78/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -337,7 +337,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "heterogenní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-66/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -350,7 +350,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-I/cl-60/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/lokalita> ;
@@ -363,7 +363,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "vesnická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-67/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -376,7 +376,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "modernistická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-69/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -394,7 +394,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů produkce"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.2/ca-3/h-II/cl-70/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3/krajiny> ;
@@ -409,7 +409,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lineární struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-88/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -422,7 +422,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů vybavenosti"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-87/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -435,7 +435,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná rekreační lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-106/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -448,7 +448,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "modernistická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-85/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -461,7 +461,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "míra stability"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-109/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -474,7 +474,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelnost"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-75" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/charakter> ;
@@ -487,7 +487,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "rozvojová plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-IV/cl-115/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -500,7 +500,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělsko-rybniční krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-94/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -513,7 +513,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lesní krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-92/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -526,7 +526,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "vesnická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-83/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -539,7 +539,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "formální rozvoj krajiny"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-IV/cl-116/o-2" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -552,7 +552,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-1/h-III/cl-12/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -565,7 +565,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "formální rozvoj města"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-IV/cl-116/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -578,7 +578,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "určující charakter"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-I/cl-69/o-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/charakter> ;
@@ -591,7 +591,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkové prostranství"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-90/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -604,7 +604,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "rostlá struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-79/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -617,7 +617,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná rekreační lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-105/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -630,7 +630,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů produkce"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-86/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -643,7 +643,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "bloková struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-80/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -656,7 +656,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stabilita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-109/o-2" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -678,7 +678,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných vrchů"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-98/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -691,7 +691,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nestavební charakter"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-1/h-I/cl-2/b-l" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/charakter> ;
@@ -704,7 +704,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový les"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-91/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -717,7 +717,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná produkční lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-108/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -730,7 +730,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura zahradního města"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-84/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -743,7 +743,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "heterogenní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-82/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -756,7 +756,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina úzkých zaříznutých údolí v plošině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-96/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -774,7 +774,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "hybridní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-81/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -787,7 +787,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná produkční lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-103/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -800,7 +800,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stabilizovaná plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-IV/cl-113/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -813,7 +813,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "cílový charakter"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-I/cl-69/o-4" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/charakter> ;
@@ -826,7 +826,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělská krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-95/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -839,7 +839,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná obytná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-104/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -852,7 +852,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura zástavby"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-76" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavba> ;
@@ -865,7 +865,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných údolí"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-97/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -878,7 +878,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "transformační plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-IV/cl-114/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/> ;
@@ -891,7 +891,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový areál"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-89/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -922,7 +922,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-1/h-III/cl-11/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -935,7 +935,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "leso-zemědělská krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-II/cl-93/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/stavby> ;
@@ -948,7 +948,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná přírodní lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/2.2/ca-3/h-III/cl-107/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-2/lokalita> ;
@@ -968,7 +968,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stavební parcela"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "KZ/ca-1/p-2/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2013-256/parcela> ;
@@ -1001,7 +1001,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná přírodní plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-2/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1014,7 +1014,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "čára zastavěného území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-3/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/hranice> ;
@@ -1027,7 +1027,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "významná ulice"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-13/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/typ-ulice> ;
@@ -1049,7 +1049,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná obytná plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-1/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1085,7 +1085,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-1/p-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1098,7 +1098,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "transformační území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-4/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1120,7 +1120,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "rozvojové území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-4/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1133,7 +1133,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "míra využití území k zastavění"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-7" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1146,7 +1146,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stabilizované území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-4/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1159,7 +1159,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "čára zastavitelného území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-3/o-2" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/hranice> ;
@@ -1181,7 +1181,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelné území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-3/o-3/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1212,7 +1212,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná produkční plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-1/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1243,7 +1243,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-1/p-2/b-k" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1256,7 +1256,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stavební blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-12/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/blok> ;
@@ -1269,7 +1269,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelné produkční plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-2/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1282,7 +1282,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "uliční prostranství"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-12/o-2" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1295,7 +1295,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "přístupové ulice"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-13/b-d" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/typ-ulice> ;
@@ -1308,7 +1308,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná rekreační plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1321,7 +1321,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "městská třída"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-13/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/typ-ulice> ;
@@ -1334,7 +1334,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "uliční čára"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-12/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/hranice> ;
@@ -1365,7 +1365,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelné území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-3/o-3/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1378,7 +1378,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "charakter území"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-1/p-2/b-h" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1409,7 +1409,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nestavební blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-12/o-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/blok> ;
@@ -1440,7 +1440,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lokální ulice"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-II/p-13/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/typ-ulice> ;
@@ -1489,7 +1489,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná rekreační plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "PSP/c-2/h-I/p-6/o-1/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/psp-2016/> ;
@@ -1509,7 +1509,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných údolí"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-81/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1522,7 +1522,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "otevřená krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajina> ;
@@ -1535,7 +1535,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "metropolitní park"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-4/h-I/cl-113/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/ho-parku> ;
@@ -1548,7 +1548,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "index návrhový"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-IV/cl-11/c-4" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/lokality> ;
@@ -1574,7 +1574,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "Index stabilizované části"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-IV/cl-11/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/lokality> ;
@@ -1587,7 +1587,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lineární struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-72/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1600,7 +1600,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkové prostranství"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-74/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/> ;
@@ -1613,7 +1613,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "město"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-d" , "mpp/3.3/ca-2/h-II/cl-34/c-2/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/struktury> ;
@@ -1628,7 +1628,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "modernistická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-69/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1641,7 +1641,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "koridor dopravní a technické infrastruktury"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-2/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/plocha> ;
@@ -1654,7 +1654,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina úzkých zaříznutých údolí v plošině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-80/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1667,7 +1667,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "leso-zemědělská krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-77/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1680,7 +1680,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lesní krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-76/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1693,7 +1693,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "rostlá struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-63/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1706,7 +1706,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový areál"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-73/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/> ;
@@ -1719,7 +1719,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů vybavenosti"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-71/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1732,7 +1732,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "městská krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajina> ;
@@ -1745,7 +1745,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura areálů produkce"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-70/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1758,7 +1758,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "místní park"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-4/h-I/cl-113/c-6" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/ho-parku> ;
@@ -1771,7 +1771,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "parkový les"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-75/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/> ;
@@ -1784,7 +1784,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "park ve volné zástavbě"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-4/h-II/cl-122/c-1" , "mpp/3.3/ca-1/h-II/cl-6/c-1/b-h" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/park> ;
@@ -1799,7 +1799,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "periferie"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-d" , "mpp/3.3/ca-2/h-II/cl-34/c-2/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/struktury> ;
@@ -1814,7 +1814,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "struktura zahradního města"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-68/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1827,7 +1827,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajinné zázemí města"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-e" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajina> ;
@@ -1840,7 +1840,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "heterogenní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-66/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1853,7 +1853,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "čtvrťový park"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-4/h-I/cl-113/c-4" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/ho-parku> ;
@@ -1866,7 +1866,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "modernistická zástavba"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-g" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/stavba> ;
@@ -1879,7 +1879,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělská krajina v rovině"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-79/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1892,7 +1892,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "bloková struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-64/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1905,7 +1905,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "plocha dopravní a technické infrastruktury"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/plocha> ;
@@ -1918,7 +1918,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-I/cl-60/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/lokalita> ;
@@ -1931,7 +1931,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nestavební blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-2/h-II/cl-37/c-2" , "mpp/3.3/ca-1/h-II/cl-6/c-1/b-j" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/blok> ;
@@ -1946,7 +1946,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stavební blok"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-k" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/blok> ;
@@ -1959,7 +1959,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "vesnická struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-67/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1972,7 +1972,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelná lokalita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-I/cl-60/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/lokalita> ;
@@ -1985,7 +1985,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "hybridní struktura"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-65/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -1998,7 +1998,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stabilita"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-5/b-j" , "mpp/3.3/ca-3/h-IV/cl-93/c-3" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/> ;
@@ -2013,7 +2013,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "předměstí"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-d" , "mpp/3.3/ca-2/h-II/cl-34/c-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/struktury> ;
@@ -2028,7 +2028,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "lokalitní park"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-4/h-I/cl-113/c-5" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/ho-parku> ;
@@ -2041,7 +2041,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina za městem"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-1/h-II/cl-6/c-1/b-e" , "mpp/3.3/ca-1/h-II/cl-6/c-1/b-d" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/struktury> , <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajina> ;
@@ -2054,7 +2054,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "krajina výrazných vrchů"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-82/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -2067,7 +2067,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zemědělsko-rybniční krajina"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "mpp/3.3/ca-3/h-II/cl-78/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/mpp-3.3/krajiny> ;
@@ -2092,7 +2092,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavitelná plocha"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-j" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/plocha> ;
@@ -2105,7 +2105,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "plocha nadmístního, popřípadě republikového významu"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-h" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/plocha> ;
@@ -2118,7 +2118,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "nezastavitelný pozemek"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-e" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/pozemek> ;
@@ -2131,7 +2131,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "koridor"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-i" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/plocha> ;
@@ -2144,7 +2144,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "zastavěný stavební pozemek"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-c" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/pozemek> ;
@@ -2157,7 +2157,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "plocha přestavby"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/hl-3/d-3/odd-2/p-43/c-1" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/plocha> ;
@@ -2188,7 +2188,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "stavební pozemek"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-b" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/pozemek> ;
@@ -2201,7 +2201,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "veřejně prospěšná stavba"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "SZ/ca-1/p-2/b-l" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-z-2006-183/stavba> ;
@@ -2221,7 +2221,7 @@
             a       <http://www.w3.org/2004/02/skos/core#Concept> ;
             <http://www.w3.org/2000/01/rdf-schema#label>
                     "plochy s rozdílným způsobem využití"@cs ;
-            <http://purl.org/dc/elements/1.1/source>
+            <http://purl.org/dc/terms/source>
                     "V501/h-1/p-3/c-1/b-a" ;
             <http://www.w3.org/2004/02/skos/core#broader>
                     <http://data.iprpraha.cz/zdroj/slovnik/sb-v-2016-501/plocha> ;

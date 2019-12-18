@@ -24,7 +24,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,5 +69,17 @@ class UserAccountDaoTest extends BaseDaoTestRunner {
     @Test
     void existsByUsernameReturnsFalseForUnknownUsername() {
         assertFalse(sut.exists("unknownUsername"));
+    }
+
+    @Test
+    void findAllReturnsAccountsSortedByUserLastNameAndFirstName() {
+        final List<UserAccount> accounts = IntStream.range(0, 10)
+                                                    .mapToObj(i -> Generator.generateUserAccountWithPassword()).collect(
+                        Collectors.toList());
+        transactional(() -> accounts.forEach(em::persist));
+
+        final List<UserAccount> result = sut.findAll();
+        accounts.sort(Comparator.comparing(UserAccount::getLastName).thenComparing(UserAccount::getFirstName));
+        assertEquals(result, accounts);
     }
 }

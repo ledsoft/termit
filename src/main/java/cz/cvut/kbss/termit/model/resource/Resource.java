@@ -23,7 +23,7 @@ import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.Asset;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.io.Serializable;

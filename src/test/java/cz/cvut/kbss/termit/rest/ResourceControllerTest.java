@@ -51,6 +51,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -627,5 +629,37 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         final String resultContent = mvcResult.getResponse().getContentAsString();
         assertEquals(HTML_CONTENT, resultContent);
         assertEquals(MediaType.TEXT_HTML_VALUE, mvcResult.getResponse().getHeader(HttpHeaders.CONTENT_TYPE));
+    }
+
+    @Test
+    void getAllReturnsLastModifiedHeader() throws Exception {
+        final List<Resource> resources = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId())
+                                                  .collect(Collectors.toList());
+        when(resourceServiceMock.findAll()).thenReturn(resources);
+        final long lastModified = (System.currentTimeMillis() / 1000) * 1000;
+        when(resourceServiceMock.getLastModified()).thenReturn(lastModified);
+
+        final MvcResult mvcResult = mockMvc.perform(get(PATH)).andReturn();
+        final String lastModifiedHeader = mvcResult.getResponse().getHeader(HttpHeaders.LAST_MODIFIED);
+        assertNotNull(lastModifiedHeader);
+        ZonedDateTime zdt = ZonedDateTime.parse(lastModifiedHeader, DateTimeFormatter.RFC_1123_DATE_TIME);
+        assertEquals(lastModified, zdt.toInstant().toEpochMilli());
+    }
+
+    @Test
+    void getAllReturnsNotModifiedWhenLastModifiedDateIsBeforeIfModifiedSinceHeaderValue() throws Exception {
+        final List<Resource> resources = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId())
+                                                       .collect(Collectors.toList());
+        when(resourceServiceMock.findAll()).thenReturn(resources);
+        // Round to seconds
+        final long lastModified = (System.currentTimeMillis() - 60 * 1000);
+        when(resourceServiceMock.getLastModified()).thenReturn(lastModified);
+
+        mockMvc.perform(
+                get(PATH).header(HttpHeaders.IF_MODIFIED_SINCE,
+                        DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now())))
+               .andExpect(status().isNotModified());
+        verify(resourceServiceMock).getLastModified();
+        verify(resourceServiceMock, never()).findAll();
     }
 }

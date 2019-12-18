@@ -21,7 +21,7 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.resource.Document;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
@@ -34,7 +34,7 @@ public class DocumentVocabulary extends Vocabulary {
 
     @NotNull
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_popisuje_dokument, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_popisuje_dokument, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Document document;
 
     public Document getDocument() {

@@ -47,7 +47,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -301,20 +301,20 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void updateWithVocabularyUpdatesInstanceInVocabularyContext() {
+    void updateDocumentWithVocabularyUpdatesInstanceInVocabularyContext() {
         enableRdfsInference(em);
-        final File file = new File();
-        file.setLabel("test.html");
-        file.setUri(Generator.generateUri());
+        final Document document = Generator.generateDocumentWithId();
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+        document.setVocabulary(vocabulary.getUri());
+        transactional(() -> em.persist(document, DescriptorFactory.documentDescriptor(vocabulary)));
 
-        final String newLabel = "updated-test.html";
-        file.setLabel(newLabel);
+        final String newLabel = "Updated document";
+        document.setLabel(newLabel);
 
-        sut.update(file, vocabulary);
+        sut.update(document);
 
-        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
+        final Document result = em
+                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
@@ -375,5 +375,12 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         assertEquals(term.getUri(), result.get(0).getTerm());
         assertEquals(term.getLabel(), result.get(0).getTermLabel());
         assertEquals(resource.getUri(), result.get(0).getResource());
+    }
+
+    @Test
+    void getLastModifiedReturnsInitializedValue() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
     }
 }
