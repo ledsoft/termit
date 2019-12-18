@@ -164,29 +164,26 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
     }
 
     /**
-     * Finds all root terms (terms without parent term) in the specified vocabulary whose sub-terms or themselves match
-     * the specified search string.
+     * Finds all terms which match the specified search string in the specified vocabulary.
      *
-     * @param vocabulary   Vocabulary whose terms should be returned
      * @param searchString Search string
-     * @return Match root terms
-     * @see #findAllRootsIncludingImported(Vocabulary, String)
+     * @param vocabulary   Vocabulary whose terms should be returned
+     * @return Matching terms
      */
-    public List<Term> findAllRoots(Vocabulary vocabulary, String searchString) {
-        return termDao.findAllRoots(searchString, vocabulary);
+    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
+        return termDao.findAll(searchString, vocabulary);
     }
 
     /**
-     * Finds all root terms (terms without parent term) in the specified vocabulary or any vocabularies it imports
-     * (transitively) whose sub-terms or themselves match the specified search string.
+     * Finds all terms which match the specified search string in the specified vocabulary and any vocabularies it
+     * (transitively) imports.
      *
-     * @param vocabulary   Base vocabulary for the vocabulary import closure
      * @param searchString Search string
-     * @return Match root terms
-     * @see #findAllRoots(Vocabulary, String)
+     * @param vocabulary   Vocabulary whose terms should be returned
+     * @return Matching terms
      */
-    public List<Term> findAllRootsIncludingImported(Vocabulary vocabulary, String searchString) {
-        return termDao.findAllRootsIncludingImports(searchString, vocabulary);
+    public List<Term> findAllIncludingImported(String searchString, Vocabulary vocabulary) {
+        return termDao.findAllIncludingImported(searchString, vocabulary);
     }
 
     /**

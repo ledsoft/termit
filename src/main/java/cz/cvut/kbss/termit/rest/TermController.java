@@ -51,10 +51,12 @@ public class TermController extends BaseController {
     /**
      * Get all terms from vocabulary with the specified identification.
      * <p>
-     * This method also allows to export the terms into CSV or Excel by using HTTP content type negotiation.
+     * This method also allows to export the terms into CSV or Excel by using HTTP content type negotiation or filter
+     * terms by a search string.
      *
      * @param vocabularyIdFragment Vocabulary name
      * @param namespace            Vocabulary namespace. Optional
+     * @param searchString         String to filter term labels by. Optional
      * @return List of terms of the specific vocabulary
      */
     @GetMapping(value = "/vocabularies/{vocabularyIdFragment}/terms",
@@ -63,15 +65,23 @@ public class TermController extends BaseController {
                     CsvUtils.MEDIA_TYPE,
                     Excel.MEDIA_TYPE,
                     Turtle.MEDIA_TYPE})
-    public ResponseEntity getAll(@PathVariable String vocabularyIdFragment,
-                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
-                                 @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
+    public ResponseEntity<?> getAll(@PathVariable String vocabularyIdFragment,
+                                    @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
+                                    @RequestParam(name = "searchString", required = false) String searchString,
+                                    @RequestParam(name = "includeImported", required = false) boolean includeImported,
+                                    @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String acceptType) {
         URI vocabularyUri = getVocabularyUri(namespace, vocabularyIdFragment);
-        final Optional<ResponseEntity> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
+        if (searchString != null) {
+            return ResponseEntity.ok(includeImported ?
+                                     termService.findAllIncludingImported(searchString, getVocabulary(vocabularyUri)) :
+                                     termService.findAll(searchString, getVocabulary(vocabularyUri)));
+        }
+        final Optional<ResponseEntity<?>> export = exportTerms(vocabularyUri, vocabularyIdFragment, acceptType);
         return export.orElse(ResponseEntity.ok(termService.findAll(getVocabulary(vocabularyUri))));
     }
 
-    private Optional<ResponseEntity> exportTerms(URI vocabularyUri, String vocabularyNormalizedName, String mediaType) {
+    private Optional<ResponseEntity<?>> exportTerms(URI vocabularyUri, String vocabularyNormalizedName,
+                                                    String mediaType) {
         final Optional<TypeAwareResource> content =
                 termService.exportGlossary(getVocabulary(vocabularyUri), mediaType);
         return content.map(r -> {
@@ -103,7 +113,6 @@ public class TermController extends BaseController {
      * @param namespace            Vocabulary namespace. Optional
      * @param pageSize             Limit the number of elements in the returned page. Optional
      * @param pageNo               Number of the page to return. Optional
-     * @param searchString         String to filter term labels by. Optional
      * @param includeImported      Whether a transitive closure of vocabulary imports should be used when getting the
      *                             root terms. Optional, defaults to {@code false}
      * @return List of root terms of the specific vocabulary
@@ -114,14 +123,8 @@ public class TermController extends BaseController {
                                   @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                   @RequestParam(name = QueryParams.PAGE_SIZE, required = false) Integer pageSize,
                                   @RequestParam(name = QueryParams.PAGE, required = false) Integer pageNo,
-                                  @RequestParam(name = "searchString", required = false) String searchString,
                                   @RequestParam(name = "includeImported", required = false) boolean includeImported) {
         final Vocabulary vocabulary = getVocabulary(getVocabularyUri(namespace, vocabularyIdFragment));
-        if (searchString != null && !searchString.trim().isEmpty()) {
-            return includeImported ?
-                   termService.findAllRootsIncludingImports(vocabulary, searchString) :
-                   termService.findAllRoots(vocabulary, searchString);
-        }
         return includeImported ?
                termService.findAllRootsIncludingImports(vocabulary, createPageRequest(pageSize, pageNo)) :
                termService.findAllRoots(vocabulary, createPageRequest(pageSize, pageNo));
@@ -187,7 +190,7 @@ public class TermController extends BaseController {
                            @PathVariable("termIdFragment") String termIdFragment,
                            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
         final URI termUri = getTermUri(vocabularyIdFragment, termIdFragment, namespace);
-        termService.remove(termUri);
+        termService.remove(termService.getRequiredReference(termUri));
         LOG.debug("Term {} removed.", termUri);
     }
 
@@ -196,7 +199,7 @@ public class TermController extends BaseController {
     public void removeById(@PathVariable("termIdFragment") String termIdFragment,
                            @RequestParam(name = QueryParams.NAMESPACE) String namespace) {
         final URI termUri = idResolver.resolveIdentifier(namespace, termIdFragment);
-        termService.remove(termUri);
+        termService.remove(termService.getRequiredReference(termUri));
         LOG.debug("Term {} removed.", termUri);
     }
 

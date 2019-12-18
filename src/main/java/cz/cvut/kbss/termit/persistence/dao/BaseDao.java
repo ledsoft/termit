@@ -1,6 +1,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.asset.provenance.ModifiesData;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper;
 import cz.cvut.kbss.termit.model.util.HasIdentifier;
@@ -57,6 +58,7 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
         }
     }
 
+    @ModifiesData
     @Override
     public void persist(T entity) {
         Objects.requireNonNull(entity);
@@ -67,6 +69,7 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
         }
     }
 
+    @ModifiesData
     @Override
     public void persist(Collection<T> entities) {
         Objects.requireNonNull(entities);
@@ -77,6 +80,7 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
         }
     }
 
+    @ModifiesData
     @Override
     public T update(T entity) {
         Objects.requireNonNull(entity);
@@ -87,6 +91,7 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
         }
     }
 
+    @ModifiesData
     @Override
     public void remove(T entity) {
         Objects.requireNonNull(entity);
@@ -97,6 +102,7 @@ public abstract class BaseDao<T extends HasIdentifier> implements GenericDao<T> 
         }
     }
 
+    @ModifiesData
     @Override
     public void remove(URI id) {
         Objects.requireNonNull(id);

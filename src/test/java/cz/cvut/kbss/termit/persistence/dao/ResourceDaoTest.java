@@ -3,12 +3,16 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.XPathSelector;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -209,46 +213,68 @@ class ResourceDaoTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void updateDocumentWithVocabularyUpdatesDocumentInVocabularyContext() {
+    void updateDocumentWithRelatedVocabularyUpdatesDocumentInVocabularyContext() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Document doc = Generator.generateDocumentWithId();
 
-        transactional(() -> em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary)));
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary));
+        });
+        insertInferredDocumentVocabularyPropertyAssertions(doc, vocabulary);
+        doc.setVocabulary(vocabulary.getUri());
 
         final String newLabel = "new label";
         doc.setLabel(newLabel);
 
-        transactional(() -> sut.update(doc, vocabulary));
+        transactional(() -> sut.update(doc));
         final Document result = em
                 .find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
 
+    private void insertInferredDocumentVocabularyPropertyAssertions(Document document, Vocabulary vocabulary) {
+        transactional(() -> {
+            final Repository repository = em.unwrap(Repository.class);
+            try (final RepositoryConnection conn = repository.getConnection()) {
+                final ValueFactory vf = conn.getValueFactory();
+                conn.add(vf.createIRI(document.getUri().toString()),
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_dokumentovy_slovnik),
+                        vf.createIRI(vocabulary.getUri().toString()), vf.createIRI(vocabulary.getUri().toString()));
+                if (document.getFiles() != null) {
+                    document.getFiles().forEach(f -> conn.add(
+                            vf.createIRI(f.getUri().toString()),
+                            vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_casti_dokumentu),
+                            vf.createIRI(document.getUri().toString()), vf.createIRI(vocabulary.getUri().toString())
+                    ));
+                }
+            }
+        });
+    }
+
     @Test
-    void updateFileWithVocabularyUpdatesFileInVocabularyContext() {
+    void updateFileInDocumentWithRelatedVocabularyUpdatesFileInVocabularyContext() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        final File file = new File();
-        file.setLabel("test.html");
-        file.setUri(Generator.generateUri());
-        transactional(() -> em.persist(file, DescriptorFactory.fileDescriptor(vocabulary)));
+        final Document doc = Generator.generateDocumentWithId();
+        final File file = Generator.generateFileWithId("test.html");
+        doc.addFile(file);
+        transactional(() -> {
+            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+        });
+        insertInferredDocumentVocabularyPropertyAssertions(doc, vocabulary);
+        file.setDocument(doc);
+        doc.setVocabulary(vocabulary.getUri());
 
         final String newLabel = "new-test.html";
         file.setLabel(newLabel);
 
-        transactional(() -> sut.update(file, vocabulary));
-        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary.getUri()));
+        transactional(() -> sut.update(file));
+        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
-    }
-
-    @Test
-    void updateWithVocabularyThrowsIllegalArgumentForGenericResource() {
-        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        final Resource resource = Generator.generateResourceWithId();
-        transactional(() -> em.persist(resource, DescriptorFactory.fileDescriptor(vocabulary)));
-
-        assertThrows(IllegalArgumentException.class, () -> sut.update(resource, vocabulary));
     }
 
     @Test
@@ -308,5 +334,85 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             sut.detach(resource);
             assertFalse(sut.em.contains(resource));
         });
+    }
+
+    /**
+     * Bug #1000
+     */
+    @Test
+    void updateVocabularyDocumentWorksCorrectlyWithContexts() {
+        final Document doc = Generator.generateDocumentWithId();
+        final DocumentVocabulary voc = new DocumentVocabulary();
+        voc.setUri(Generator.generateUri());
+        voc.setLabel("Test vocabulary");
+        voc.setDocument(doc);
+        voc.setGlossary(new Glossary());
+        voc.setModel(new Model());
+
+        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        insertInferredDocumentVocabularyPropertyAssertions(doc, voc);
+        doc.setVocabulary(voc.getUri());
+
+        final File f = Generator.generateFileWithId("test.html");
+
+        transactional(() -> {
+            doc.addFile(f);
+            sut.persist(f, voc);
+            sut.update(doc);
+        });
+
+        assertNotNull(em.find(File.class, f.getUri(), DescriptorFactory.fileDescriptor(voc)));
+        assertTrue(
+                em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(voc)).getFile(f.getLabel())
+                  .isPresent());
+    }
+
+    @Test
+    void initializesLastModificationTimestampToCurrentDateTimeOnInit() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
+    }
+
+    @Test
+    void refreshLastModifiedUpdatesLastModifiedTimestampToCurrentDateTime() throws Exception {
+        final long before = sut.getLastModified();
+        Thread.sleep(100);  // force time to move on
+        sut.refreshLastModified(new RefreshLastModifiedEvent(this));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void persistRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Resource resource = Generator.generateResourceWithId();
+        transactional(() -> sut.persist(resource));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void removeRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Resource resource = generateResource();
+        transactional(() -> sut.remove(resource));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void updateRefreshesLastModifiedValue() throws Exception {
+        final Resource resource = generateResource();
+        final long before = sut.getLastModified();
+        final String newLabel = "New label";
+        resource.setLabel(newLabel);
+        Thread.sleep(100);  // force time to move on
+        transactional(() -> sut.update(resource));
+        final Optional<Resource> result = sut.find(resource.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(newLabel, result.get().getLabel());
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
     }
 }

@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service.provenance;
+package cz.cvut.kbss.termit.asset.provenance;
 
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
@@ -88,7 +88,7 @@ class ProvenanceManagerTest {
         assertNotNull(entity.getCreated());
         assertNotNull(entity.getLastEditor());
     }
-    
+
     @Test
     void postLoadClearsLastEditorDataForAnonymousAccess() {
         final Resource entity = Generator.generateResourceWithId();

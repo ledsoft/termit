@@ -5,6 +5,7 @@ import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -18,6 +19,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VocabularyDaoTest extends BaseDaoTestRunner {
@@ -40,8 +44,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     @Test
     void findAllReturnsVocabulariesOrderedByName() {
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> {
-            final Vocabulary vocab = Generator.generateVocabulary();
-            vocab.setUri(Generator.generateUri());
+            final Vocabulary vocab = Generator.generateVocabularyWithId();
             vocab.setAuthor(author);
             vocab.setCreated(new Date());
             return vocab;
@@ -57,10 +60,9 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void persistSavesVocabularyIntoContextGivenByItsIri() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setAuthor(author);
         vocabulary.setCreated(new Date());
-        vocabulary.setUri(Generator.generateUri());
         transactional(() -> sut.persist(vocabulary));
 
         final Descriptor descriptor = descriptorFor(vocabulary);
@@ -78,10 +80,9 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateUpdatesVocabularyInContextGivenByItsIri() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setAuthor(author);
         vocabulary.setCreated(new Date());
-        vocabulary.setUri(Generator.generateUri());
         final Descriptor descriptor = descriptorFor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
 
@@ -96,8 +97,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateEvictsPossiblyPreviouslyLoadedInstanceFromSecondLevelCache() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Descriptor descriptor = descriptorFor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         // This causes the second level cache to be initialized with the loaded vocabulary (in the default context)
@@ -145,8 +145,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateGlossaryMergesGlossaryIntoPersistenceContext() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
@@ -167,8 +166,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateGlossaryMergesGlossaryIntoCorrectRepositoryContext() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
@@ -186,8 +184,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Test
     void updateGlossaryReturnsManagedGlossaryInstance() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         transactional(() -> {
@@ -276,5 +273,55 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertTrue(result.contains(importedVocabularyOne.getUri()));
         assertTrue(result.contains(importedVocabularyTwo.getUri()));
         assertTrue(result.contains(transitiveVocabulary.getUri()));
+    }
+
+    @Test
+    void initializesLastModificationTimestampToCurrentDateTimeOnInit() {
+        final long result = sut.getLastModified();
+        assertThat(result, greaterThan(0L));
+        assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
+    }
+
+    @Test
+    void refreshLastModifiedUpdatesLastModifiedTimestampToCurrentDateTime() throws Exception {
+        final long before = sut.getLastModified();
+        Thread.sleep(100);  // force time to move on
+        sut.refreshLastModified(new RefreshLastModifiedEvent(this));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void persistRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Vocabulary voc = Generator.generateVocabularyWithId();
+        transactional(() -> sut.persist(voc));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void removeRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Vocabulary voc = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        transactional(() -> sut.remove(voc));
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void updateRefreshesLastModifiedValue() {
+        final long before = sut.getLastModified();
+        final Vocabulary voc = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        final String newLabel = "New vocabulary label";
+        voc.setLabel(newLabel);
+        transactional(() -> sut.update(voc));
+        final Optional<Vocabulary> result = sut.find(voc.getUri());
+        assertTrue(result.isPresent());
+        assertEquals(newLabel, result.get().getLabel());
+        final long after = sut.getLastModified();
+        assertThat(after, greaterThan(before));
     }
 }

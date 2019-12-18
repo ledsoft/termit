@@ -23,6 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -70,13 +72,8 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getAllReturnsAllExistingVocabularies() throws Exception {
-        final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> {
-            final Vocabulary vocab = Generator.generateVocabulary();
-            vocab.setAuthor(user);
-            vocab.setCreated(new Date());
-            vocab.setUri(Generator.generateUri());
-            return vocab;
-        }).collect(Collectors.toList());
+        final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> generateVocabulary())
+                                                       .collect(Collectors.toList());
         when(serviceMock.findAll()).thenReturn(vocabularies);
 
         final MvcResult mvcResult = mockMvc.perform(get(PATH)).andExpect(status().isOk()).andReturn();
@@ -86,6 +83,47 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         for (Vocabulary voc : vocabularies) {
             assertTrue(result.stream().anyMatch(v -> v.getUri().equals(voc.getUri())));
         }
+    }
+
+    private Vocabulary generateVocabulary() {
+        final Vocabulary vocab = Generator.generateVocabulary();
+        vocab.setAuthor(user);
+        vocab.setCreated(new Date());
+        vocab.setUri(Generator.generateUri());
+        return vocab;
+    }
+
+    @Test
+    void getAllReturnsLastModifiedHeader() throws Exception {
+        final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> generateVocabulary())
+                                                       .collect(Collectors.toList());
+        when(serviceMock.findAll()).thenReturn(vocabularies);
+        // Round to seconds
+        final long lastModified = (System.currentTimeMillis() / 1000) * 1000;
+        when(serviceMock.getLastModified()).thenReturn(lastModified);
+
+        final MvcResult mvcResult = mockMvc.perform(get(PATH)).andExpect(status().isOk()).andReturn();
+        final String lastModifiedHeader = mvcResult.getResponse().getHeader(HttpHeaders.LAST_MODIFIED);
+        assertNotNull(lastModifiedHeader);
+        ZonedDateTime zdt = ZonedDateTime.parse(lastModifiedHeader, DateTimeFormatter.RFC_1123_DATE_TIME);
+        assertEquals(lastModified, zdt.toInstant().toEpochMilli());
+    }
+
+    @Test
+    void getAllReturnsNotModifiedWhenLastModifiedDateIsBeforeIfModifiedSinceHeaderValue() throws Exception {
+        final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> generateVocabulary())
+                                                       .collect(Collectors.toList());
+        when(serviceMock.findAll()).thenReturn(vocabularies);
+        // Round to seconds
+        final long lastModified = (System.currentTimeMillis() - 60 * 1000);
+        when(serviceMock.getLastModified()).thenReturn(lastModified);
+
+        mockMvc.perform(
+                get(PATH).header(HttpHeaders.IF_MODIFIED_SINCE,
+                        DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now())))
+               .andExpect(status().isNotModified());
+        verify(serviceMock).getLastModified();
+        verify(serviceMock, never()).findAll();
     }
 
     @Test
@@ -114,8 +152,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getByIdLoadsVocabularyFromRepository() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = generateVocabulary();
         final String fragment = IdentifierResolver.extractIdentifierFragment(vocabulary.getUri());
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, fragment))
                 .thenReturn(vocabulary.getUri());
@@ -132,8 +169,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getByIdUsesSpecifiedNamespaceInsteadOfDefaultOneForResolvingIdentifier() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = generateVocabulary();
         final String fragment = IdentifierResolver.extractIdentifierFragment(vocabulary.getUri()).substring(1);
         final String namespace = vocabulary.getUri().toString()
                                            .substring(0, vocabulary.getUri().toString().lastIndexOf('/'));
@@ -174,9 +210,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void updateVocabularyUpdatesVocabularyUpdateToService() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setCreated(new Date());
+        final Vocabulary vocabulary = generateVocabulary();
         vocabulary.setUri(VOCABULARY_URI);
         when(idResolverMock.resolveIdentifier(eq(ConfigParam.NAMESPACE_VOCABULARY), any())).thenReturn(VOCABULARY_URI);
         when(serviceMock.exists(VOCABULARY_URI)).thenReturn(true);
@@ -187,10 +221,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void updateVocabularyThrowsValidationExceptionWhenVocabularyUriDiffersFromRequestBasedUri() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setCreated(new Date());
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = generateVocabulary();
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
         when(serviceMock.exists(VOCABULARY_URI)).thenReturn(false);
         final MvcResult mvcResult = mockMvc
@@ -205,9 +236,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void updateVocabularyThrowsVocabularyImportExceptionWithMessageIdWhenServiceThrowsException() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setCreated(new Date());
+        final Vocabulary vocabulary = generateVocabulary();
         vocabulary.setUri(VOCABULARY_URI);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
         final String errorMsg = "Error message";
@@ -226,9 +255,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getTransitiveImportsReturnsCollectionOfImportIdentifiersRetrievedFromService() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setCreated(new Date());
+        final Vocabulary vocabulary = generateVocabulary();
         vocabulary.setUri(VOCABULARY_URI);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
         final Set<URI> imports = IntStream.range(0, 5).mapToObj(i -> Generator.generateUri())
@@ -247,9 +274,7 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getTransitiveImportsReturnsEmptyCollectionWhenNoImportsAreFoundForVocabulary() throws Exception {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setAuthor(user);
-        vocabulary.setCreated(new Date());
+        final Vocabulary vocabulary = generateVocabulary();
         vocabulary.setUri(VOCABULARY_URI);
         when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
         when(serviceMock.getRequiredReference(VOCABULARY_URI)).thenReturn(vocabulary);

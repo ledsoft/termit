@@ -9,7 +9,7 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.util.HasTypes;
-import cz.cvut.kbss.termit.service.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
@@ -38,7 +38,7 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLAnnotationProperty(iri = SKOS.DEFINITION)
     private String definition;
 
-    @OWLDataProperty(iri = DC.Elements.SOURCE)
+    @OWLAnnotationProperty(iri = DC.Terms.SOURCE, simpleLiteral = true)
     private Set<String> sources;
 
     @OWLObjectProperty(iri = SKOS.BROADER, fetch = FetchType.EAGER)

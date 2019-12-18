@@ -1,4 +1,4 @@
-package cz.cvut.kbss.termit.service.provenance;
+package cz.cvut.kbss.termit.asset.provenance;
 
 import cz.cvut.kbss.jopa.model.annotations.PostLoad;
 import cz.cvut.kbss.jopa.model.annotations.PrePersist;

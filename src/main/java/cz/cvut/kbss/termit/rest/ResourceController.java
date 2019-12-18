@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -46,8 +47,11 @@ public class ResourceController extends BaseController {
     }
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Resource> getAll() {
-        return resourceService.findAll();
+    public ResponseEntity<List<Resource>> getAll(ServletWebRequest webRequest) {
+        if (webRequest.checkNotModified(resourceService.getLastModified())) {
+            return null;
+        }
+        return ResponseEntity.ok().lastModified(resourceService.getLastModified()).body(resourceService.findAll());
     }
 
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})

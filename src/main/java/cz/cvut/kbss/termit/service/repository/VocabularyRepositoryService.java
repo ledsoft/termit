@@ -91,4 +91,9 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
     public Collection<URI> getTransitivelyImportedVocabularies(Vocabulary entity) {
         return vocabularyDao.getTransitivelyImportedVocabularies(entity);
     }
+
+    @Override
+    public long getLastModified() {
+        return vocabularyDao.getLastModified();
+    }
 }

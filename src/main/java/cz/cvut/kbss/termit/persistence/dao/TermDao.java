@@ -85,11 +85,12 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         try {
             return executeQueryAndLoadSubTerms(em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                    "GRAPH ?vocabulary { " +
                     "?term a ?type ;" +
                     "rdfs:label ?label ;" +
                     "?inVocabulary ?vocabulary ." +
                     "FILTER (lang(?label) = ?labelLang) ." +
-                    "} ORDER BY ?label", Term.class)
+                    "} } ORDER BY ?label", Term.class)
                                                  .setParameter("type", typeUri)
                                                  .setParameter("vocabulary", vocabulary.getUri())
                                                  .setParameter("inVocabulary",
@@ -144,11 +145,12 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         Objects.requireNonNull(pageSpec);
         TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                "GRAPH ?vocabulary { " +
                 "?term a ?type ;" +
                 "rdfs:label ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
                 "FILTER (lang(?label) = ?labelLang) ." +
-                "} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class);
+                "}} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class);
         query = setCommonFindAllRootsQueryParams(query, false);
         try {
             return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
@@ -205,69 +207,75 @@ public class TermDao extends AssetDao<Term> {
     }
 
     /**
-     * Finds root terms whose term subtree contains a term with label matching the specified search string.
+     * Finds terms whose label contains the specified search string.
      * <p>
-     * Currently, the match uses SPARQL {@code contains} function on lowercase label and search string. A more
-     * sophisticated matching can be added.
+     * This method searches in the specified vocabulary only.
      *
-     * @param searchString String to search term labels by
-     * @param vocabulary   Vocabulary whose terms should be returned
-     * @return List of root terms contain a matching term in subtree
+     * @param searchString String the search term labels by
+     * @param vocabulary   Vocabulary whose terms should be searched
+     * @return List of matching terms
      */
-    public List<Term> findAllRoots(String searchString, Vocabulary vocabulary) {
+    public List<Term> findAll(String searchString, Vocabulary vocabulary) {
         Objects.requireNonNull(searchString);
         Objects.requireNonNull(vocabulary);
-        TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
-                "?root a ?type ." +
-                "?vocabulary ?hasGlossary/?hasTerm ?root ." +
-                "?root ?hasChild* ?term ." +
-                "{\n ?term a ?type ;" +
-                "rdfs:label ?label ." +
+        final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                "GRAPH ?vocabulary { " +
+                "?term a ?type ; " +
+                "      rdfs:label ?label ; " +
+                "      ?inVocabulary ?vocabulary ." +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "}\n} ORDER BY ?label", Term.class);
-        query = setCommonFindAllRootsQueryParams(query, false);
+                "}} ORDER BY ?label", Term.class)
+                                         .setParameter("type", typeUri)
+                                         .setParameter("inVocabulary", URI.create(
+                                                 cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                                         .setParameter("vocabulary", vocabulary.getUri())
+                                         .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE));
         try {
-            return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
-                                                    .setParameter("hasChild", URI.create(SKOS.NARROWER))
-                                                    .setParameter("searchString", searchString,
-                                                            config.get(ConfigParam.LANGUAGE)));
+            final List<Term> terms = executeQueryAndLoadSubTerms(query);
+            terms.forEach(this::loadParentSubTerms);
+            return terms;
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
     }
 
+    private void loadParentSubTerms(Term parent) {
+        loadSubTerms(parent);
+        if (parent.getParentTerms() != null) {
+            parent.getParentTerms().forEach(this::loadParentSubTerms);
+        }
+    }
+
     /**
-     * Finds root terms whose term subtree contains a term with label matching the specified search string.
+     * Finds terms whose label contains the specified search string.
      * <p>
-     * The specified vocabulary represents the starting point of a transitive closure over the vocabulary import
-     * relationship. Terms from all vocabularies reached via this closure are taken into account in the search, so the
-     * returned root terms need not be in the specified vocabulary.
-     * <p>
-     * Currently, the match uses SPARQL {@code contains} function on lowercase label and search string. A more
-     * sophisticated matching can be added.
+     * This method searches in the specified vocabulary and all the vocabularies it (transitively) imports.
      *
-     * @param searchString String to search term labels by
-     * @param vocabulary   Vocabulary whose terms should be returned
-     * @return List of root terms contain a matching term in subtree
+     * @param searchString String the search term labels by
+     * @param vocabulary   Vocabulary whose terms should be searched
+     * @return List of matching terms
      */
-    public List<Term> findAllRootsIncludingImports(String searchString, Vocabulary vocabulary) {
+    public List<Term> findAllIncludingImported(String searchString, Vocabulary vocabulary) {
         Objects.requireNonNull(searchString);
         Objects.requireNonNull(vocabulary);
-        TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?root WHERE {" +
-                "?root a ?type ." +
-                "?vocabulary ?imports* ?parent ." +
-                "?parent ?hasGlossary/?hasTerm ?root." +
-                "?root ?hasChild* ?term ." +
-                "{\n ?term a ?type ;" +
-                "rdfs:label ?label ." +
-                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
-                "}\n} ORDER BY ?label", Term.class);
-        query = setCommonFindAllRootsQueryParams(query, true);
+        final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
+                "?targetVocabulary ?imports* ?vocabulary ." +
+                "?term a ?type ;\n" +
+                "      rdfs:label ?label ;\n" +
+                "      ?inVocabulary ?vocabulary ." +
+                "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) .\n" +
+                "} ORDER BY ?label", Term.class)
+                                         .setParameter("type", typeUri)
+                                         .setParameter("inVocabulary", URI.create(
+                                                 cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
+                                         .setParameter("imports",
+                                                 URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik))
+                                         .setParameter("targetVocabulary", vocabulary.getUri())
+                                         .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE));
         try {
-            return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
-                                                    .setParameter("hasChild", URI.create(SKOS.NARROWER))
-                                                    .setParameter("searchString", searchString,
-                                                            config.get(ConfigParam.LANGUAGE)));
+            final List<Term> terms = executeQueryAndLoadSubTerms(query);
+            terms.forEach(this::loadParentSubTerms);
+            return terms;
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }

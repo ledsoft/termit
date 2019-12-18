@@ -25,13 +25,13 @@
     </repositories>
 
     <properties>
-        <org.springframework.version>5.1.8.RELEASE</org.springframework.version>
-        <org.springframework.security.version>5.1.5.RELEASE</org.springframework.security.version>
-        <org.springframework.data.version>2.1.9.RELEASE</org.springframework.data.version>
-        <com.fasterxml.jackson.version>2.9.9</com.fasterxml.jackson.version>
-        <org.hibernate.validator.version>6.0.16.Final</org.hibernate.validator.version>
-        <cz.cvut.kbss.jopa.version>0.13.1</cz.cvut.kbss.jopa.version>
-        <cz.cvut.kbss.jsonld.version>0.3.8</cz.cvut.kbss.jsonld.version>
+        <org.springframework.version>5.2.0.RELEASE</org.springframework.version>
+        <org.springframework.security.version>5.2.0.RELEASE</org.springframework.security.version>
+        <org.springframework.data.version>2.2.0.RELEASE</org.springframework.data.version>
+        <com.fasterxml.jackson.version>2.10.0</com.fasterxml.jackson.version>
+        <org.hibernate.validator.version>6.0.17.Final</org.hibernate.validator.version>
+        <cz.cvut.kbss.jopa.version>0.13.3</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jsonld.version>0.4.0</cz.cvut.kbss.jsonld.version>
         <org.aspectj.version>1.9.4</org.aspectj.version>
 
         <!-- Default value for deployment type property which should otherwise specified on command line -->
@@ -42,13 +42,13 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>4.2</version>
+            <version>4.6</version>
         </dependency>
 
         <dependency>
             <groupId>org.mitre.dsmiley.httpproxy</groupId>
             <artifactId>smiley-http-proxy-servlet</artifactId>
-            <version>1.10</version>
+            <version>1.11</version>
         </dependency>
 
         <!-- JOPA -->
@@ -65,7 +65,13 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.11.0</version>
+            <version>3.12.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -73,7 +79,7 @@
         <dependency>
             <groupId>com.github.ledsoft</groupId>
             <artifactId>jopa-spring-transaction</artifactId>
-            <version>0.0.6</version>
+            <version>0.0.7</version>
         </dependency>
 
         <!-- Spring -->
@@ -186,7 +192,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.11.3</version>
+            <version>1.12.1</version>
         </dependency>
 
         <!-- Logging -->
@@ -203,14 +209,14 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.0</version>
         </dependency>
 
         <!-- Java Melody Monitoring -->
         <dependency>
             <groupId>net.bull.javamelody</groupId>
             <artifactId>javamelody-core</artifactId>
-            <version>1.75.0</version>
+            <version>1.79.0</version>
         </dependency>
 
         <!-- Test dependencies -->

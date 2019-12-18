@@ -1,5 +1,6 @@
 package cz.cvut.kbss.termit.service.repository;
 
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
@@ -25,7 +26,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource> {
+public class ResourceRepositoryService extends BaseAssetRepositoryService<Resource>
+        implements SupportsLastModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceRepositoryService.class);
 
@@ -33,7 +35,6 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     private final TermOccurrenceDao termOccurrenceDao;
 
     private final TermAssignmentRepositoryService assignmentService;
-    private final VocabularyRepositoryService vocabularyService;
 
     private final IdentifierResolver idResolver;
 
@@ -41,12 +42,10 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     public ResourceRepositoryService(Validator validator, ResourceDao resourceDao,
                                      TermOccurrenceDao termOccurrenceDao,
                                      TermAssignmentRepositoryService assignmentService,
-                                     VocabularyRepositoryService vocabularyService,
                                      IdentifierResolver idResolver) {
         super(validator);
         this.resourceDao = resourceDao;
         this.termOccurrenceDao = termOccurrenceDao;
-        this.vocabularyService = vocabularyService;
         this.assignmentService = assignmentService;
         this.idResolver = idResolver;
     }
@@ -78,24 +77,6 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
         Objects.requireNonNull(vocabulary);
         prePersist(resource);
         resourceDao.persist(resource, vocabulary);
-    }
-
-    /**
-     * Updates the specified Resource in the context of the specified Vocabulary.
-     *
-     * @param resource   Resource to update
-     * @param vocabulary Vocabulary context
-     * @throws IllegalArgumentException If the specified Resource is neither a {@code Document} nor a {@code File}
-     */
-    @Transactional
-    public Resource update(Resource resource, Vocabulary vocabulary) {
-        Objects.requireNonNull(resource);
-        Objects.requireNonNull(vocabulary);
-        preUpdate(resource);
-        final Resource result = resourceDao.update(resource, vocabulary);
-        assert result != null;
-        postUpdate(resource);
-        return result;
     }
 
     /**
@@ -178,11 +159,7 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
             // which would cause issues because it was originally loaded from the default context
             resourceDao.detach(parent);
             parent.removeFile(file);
-            if (parent.getVocabulary() != null) {
-                resourceDao.update(parent, vocabularyService.getRequiredReference(parent.getVocabulary()));
-            } else {
-                resourceDao.update(parent);
-            }
+            resourceDao.update(parent);
         }
     }
 
@@ -195,5 +172,10 @@ public class ResourceRepositoryService extends BaseAssetRepositoryService<Resour
     public URI generateIdentifier(String label) {
         Objects.requireNonNull(label);
         return idResolver.generateIdentifier(ConfigParam.NAMESPACE_RESOURCE, label);
+    }
+
+    @Override
+    public long getLastModified() {
+        return resourceDao.getLastModified();
     }
 }

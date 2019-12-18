@@ -263,8 +263,9 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void findTermsBySearchString() {
+    void findTermsBySearchStringReturnsMatchingTerms() {
         final List<Term> terms = Generator.generateTermsWithIds(10);
+        terms.forEach(t -> t.setVocabulary(vocabulary.getUri()));
         final List<Term> matching = terms.subList(0, 5);
         matching.forEach(t -> t.setLabel("Result + " + t.getLabel()));
 
@@ -275,7 +276,7 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
             em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
-        List<Term> result = sut.findAllRoots(vocabulary, "Result");
+        List<Term> result = sut.findAll("Result", vocabulary);
         assertEquals(matching.size(), result.size());
         assertTrue(matching.containsAll(result));
     }
@@ -424,20 +425,21 @@ class TermRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void findAllRootsIncludingImportsBySearchStringReturnsMatchingRootTerms() {
+    void findAllIncludingImportedBySearchStringReturnsMatchingTerms() {
         final List<Term> terms = Generator.generateTermsWithIds(10);
         final String searchString = "Result";
         final List<Term> matching = terms.subList(0, 5);
         matching.forEach(t -> t.setLabel(searchString + " " + t.getLabel()));
 
         vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
+        terms.forEach(t -> t.setVocabulary(vocabulary.getUri()));
         final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             terms.forEach(t -> em.persist(t, termDescriptor));
             em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
         });
 
-        List<Term> result = sut.findAllRootsIncludingImported(vocabulary, searchString);
+        List<Term> result = sut.findAllIncludingImported(searchString, vocabulary);
         assertEquals(matching.size(), result.size());
         assertTrue(matching.containsAll(result));
     }

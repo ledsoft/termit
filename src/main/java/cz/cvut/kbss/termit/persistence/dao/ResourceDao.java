@@ -3,14 +3,17 @@ package cz.cvut.kbss.termit.persistence.dao;
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.termit.asset.provenance.ModifiesData;
+import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
+import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.exception.PersistenceException;
-import cz.cvut.kbss.termit.model.DocumentVocabulary;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Vocabulary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
@@ -18,10 +21,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class ResourceDao extends AssetDao<Resource> {
+public class ResourceDao extends AssetDao<Resource> implements SupportsLastModification {
+
+    private volatile long lastModified;
 
     public ResourceDao(EntityManager em) {
         super(Resource.class, em);
+        refreshLastModified();
     }
 
     /**
@@ -40,10 +46,11 @@ public class ResourceDao extends AssetDao<Resource> {
      * @param vocabulary Vocabulary providing context
      * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
      */
+    @ModifiesData
     public void persist(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+        final Descriptor descriptor = createDescriptor(resource, vocabulary.getUri());
         try {
             em.persist(resource, descriptor);
         } catch (RuntimeException e) {
@@ -51,12 +58,12 @@ public class ResourceDao extends AssetDao<Resource> {
         }
     }
 
-    private static Descriptor createDescriptor(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
+    private static Descriptor createDescriptor(Resource resource, URI vocabularyUri) {
         final Descriptor descriptor;
         if (resource instanceof Document) {
-            descriptor = DescriptorFactory.documentDescriptor(vocabulary);
+            descriptor = DescriptorFactory.documentDescriptor(vocabularyUri);
         } else if (resource instanceof File) {
-            descriptor = DescriptorFactory.fileDescriptor(vocabulary);
+            descriptor = DescriptorFactory.fileDescriptor(vocabularyUri);
         } else {
             throw new IllegalArgumentException(
                     "Resource " + resource + " cannot be persisted into vocabulary context.");
@@ -64,35 +71,37 @@ public class ResourceDao extends AssetDao<Resource> {
         return descriptor;
     }
 
-    /**
-     * Updates the specified Resource in the context of the specified Vocabulary.
-     *
-     * @param resource   Resource to update
-     * @param vocabulary Vocabulary providing context
-     * @throws IllegalArgumentException When the specified resource is neither a {@code Document} nor a {@code File}
-     */
-    public Resource update(Resource resource, cz.cvut.kbss.termit.model.Vocabulary vocabulary) {
-        Objects.requireNonNull(resource);
-        Objects.requireNonNull(vocabulary);
-        final Descriptor descriptor = createDescriptor(resource, vocabulary);
+    @ModifiesData
+    @Override
+    public Resource update(Resource entity) {
         try {
-            em.getEntityManagerFactory().getCache()
-              .evict(DocumentVocabulary.class, vocabulary.getUri(), vocabulary.getUri());
-            return em.merge(resource, descriptor);
+            final URI context = resolveVocabularyContext(entity);
+            if (context != null) {
+                // This evict is a bit overkill, but there are multiple relationships that would have to be evicted
+                em.getEntityManagerFactory().getCache().evict(context);
+                return em.merge(entity, createDescriptor(entity, context));
+            } else {
+                return em.merge(entity);
+            }
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
     }
 
-    @Override
-    public Resource update(Resource entity) {
-        if (entity instanceof Document) {
-            final Document doc = (Document) entity;
-            if (doc.getVocabulary() != null) {
-                em.getEntityManagerFactory().getCache().evict(doc.getVocabulary());
+    private URI resolveVocabularyContext(Resource resource) {
+        if (resource instanceof Document) {
+            return ((Document) resource).getVocabulary();
+        } else if (resource instanceof File) {
+            final File f = (File) resource;
+            if (f.getDocument() != null) {
+                // This is a workaround for the issue that GraphDB stores inferred statement (like File.document) in a separate
+                // context, so that it is not loaded during merge and JOPA acts as though File.document has changed (which it cannot, as it is inferred)
+                f.setDocument(em.find(Document.class, f.getDocument().getUri()));
+                return f.getDocument().getVocabulary();
             }
+            return null;
         }
-        return super.update(entity);
+        return null;
     }
 
     @Override
@@ -102,10 +111,13 @@ public class ResourceDao extends AssetDao<Resource> {
                     "?x a ?type ;" +
                     "rdfs:label ?label ." +
                     "FILTER NOT EXISTS {" +
-                    "?y ?hasFile ?x ." +
+                    "{ ?y ?hasFile ?x . }" +
+                    " UNION " +
+                    "{ ?x a ?vocabulary . }" +
                     "} } ORDER BY ?label", Resource.class)
                      .setParameter("type", typeUri)
-                     .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor)).getResultList();
+                     .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor))
+                     .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik)).getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -170,5 +182,20 @@ public class ResourceDao extends AssetDao<Resource> {
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    @Override
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    @Override
+    public void refreshLastModified() {
+        this.lastModified = System.currentTimeMillis();
+    }
+
+    @EventListener
+    public void refreshLastModified(RefreshLastModifiedEvent event) {
+        refreshLastModified();
     }
 }

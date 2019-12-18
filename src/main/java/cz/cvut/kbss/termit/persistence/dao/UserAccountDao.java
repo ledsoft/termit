@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,5 +59,22 @@ public class UserAccountDao extends BaseDao<UserAccount> {
                  .setParameter("type", typeUri)
                  .setParameter("hasUsername", URI.create(Vocabulary.s_p_ma_uzivatelske_jmeno))
                  .setParameter("username", username, config.get(ConfigParam.LANGUAGE)).getSingleResult();
+    }
+
+    @Override
+    public List<UserAccount> findAll() {
+        try {
+            return em.createNativeQuery("SELECT ?x WHERE {" +
+                    "?x a ?type ;" +
+                    "?hasLastName ?lastName ;" +
+                    "?hasFirstName ?firstName ." +
+                    "} ORDER BY ?lastName ?firstName", type)
+                     .setParameter("type", typeUri)
+                     .setParameter("hasLastName", URI.create(Vocabulary.s_p_ma_prijmeni))
+                     .setParameter("hasFirstName", URI.create(Vocabulary.s_p_ma_krestni_jmeno))
+                     .getResultList();
+        } catch (RuntimeException e) {
+            throw new PersistenceException(e);
+        }
     }
 }
