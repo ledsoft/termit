@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
@@ -273,7 +270,8 @@ class TermDaoTest extends BaseDaoTestRunner {
 
         final Term result = em.find(Term.class, term.getUri(), DescriptorFactory.termDescriptor(vocabulary));
         assertEquals(updatedLabel, result.getLabel());
-        assertFalse(em.createNativeQuery("ASK WHERE { ?x rdfs:label ?label }", Boolean.class)
+        assertFalse(em.createNativeQuery("ASK WHERE { ?x ?hasLabel ?label }", Boolean.class)
+                      .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                       .setParameter("label", oldLabel, Constants.DEFAULT_LANGUAGE).getSingleResult());
     }
 
@@ -294,11 +292,12 @@ class TermDaoTest extends BaseDaoTestRunner {
         final Repository repo = em.unwrap(Repository.class);
         try (final RepositoryConnection conn = repo.getConnection()) {
             final ValueFactory vf = conn.getValueFactory();
-            conn.remove(vf.createIRI(term.getUri().toString()), RDFS.LABEL, null);
-            conn.add(vf.createIRI(term.getUri().toString()), RDFS.LABEL, vf.createLiteral("Adios", "es"));
+            conn.remove(vf.createIRI(term.getUri().toString()), org.eclipse.rdf4j.model.vocabulary.SKOS.PREF_LABEL,
+                    null);
+            conn.add(vf.createIRI(term.getUri().toString()), org.eclipse.rdf4j.model.vocabulary.SKOS.PREF_LABEL,
+                    vf.createLiteral("Adios", "es"));
         }
     }
-
     @Test
     void findAllReturnsOnlyTermsWithMatchingLanguageLabel() {
         final List<Term> terms = generateTerms(5);

@@ -115,6 +115,7 @@ necessary to load the ontological models into the repository.
     * `ontology/termit-model.ttl`
     * `http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/model`
     * `http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/glosář`
+    * `http://www.w3.org/TR/skos-reference/skos.rdf`
 
 6. Deploy TermIt. It will generate a default admin account, write its credentials to standard output and into a hidden file in the current user's home.
 

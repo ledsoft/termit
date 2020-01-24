@@ -107,8 +107,9 @@ method available on both `BaseDaoTestRunner` and `BaseServiceTestRunner`. SPIN r
 
 ## Ontology
 
-The ontology on which TermIt is based can be found in the `ontology` folder. For proper inference functionality, `termit-model.ttl` and the 
-_popis-dat_ ontology model (http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model) need to be loaded into the repository 
+The ontology on which TermIt is based can be found in the `ontology` folder. For proper inference functionality, `termit-model.ttl`, the 
+_popis-dat_ ontology model (http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model) and the SKOS vocabulary model 
+(http://www.w3.org/TR/skos-reference/skos.rdf) need to be loaded into the repository 
 used by TermIt.
 
 ## Monitoring
