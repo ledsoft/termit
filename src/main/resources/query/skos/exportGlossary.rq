@@ -1,0 +1,18 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+    ?glossary a owl:Ontology ;
+              a skos:ConceptScheme ;
+              a <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> ;
+              rdfs:label ?label ;
+              owl:imports ?imported .
+} WHERE {
+    ?vocabulary pdp:má-glosář ?glossary ;
+                rdfs:label ?label .
+    OPTIONAL {
+        ?vocabulary pdp:importuje-slovník/pdp:má-glosář ?imported .
+    }
+}
