@@ -256,7 +256,7 @@ class SKOSVocabularyExporterTest extends VocabularyExporterTestBase {
     @Test
     void exportVocabularyGlossaryExportsCustomTypeAsBroader() throws Exception {
         final List<Term> terms = generateTerms();
-        final Term typed = terms.get(0);
+        final Term typed = terms.get(Generator.randomIndex(terms));
         final String type = "http://onto.fel.cvut.cz/ontologies/ufo/object-type";
         typed.addType(type);
         transactional(() -> em.merge(typed, DescriptorFactory.termDescriptor(typed)));
@@ -267,5 +267,54 @@ class SKOSVocabularyExporterTest extends VocabularyExporterTestBase {
                 hasItem(vf.createStatement(vf.createIRI(typed.getUri().toString()), SKOS.BROADER,
                         vf.createIRI(type))));
     }
-    // TODO Broader for other relationships (rdf:type, subclassOf, partOf etc.)
+
+    @Test
+    void exportVocabularyGlossaryExportsSuperClassesAsBroader() throws Exception {
+        final List<Term> terms = generateTerms();
+        final Term rdfsSubclass = terms.get(0);
+        final String supertype = Generator.generateUri().toString();
+        rdfsSubclass.setProperties(
+                Collections.singletonMap(RDFS.SUBCLASSOF.stringValue(), Collections.singleton(supertype)));
+        transactional(() -> em.merge(rdfsSubclass, DescriptorFactory.termDescriptor(rdfsSubclass)));
+
+        final TypeAwareResource result = sut.exportVocabularyGlossary(vocabulary);
+        final Model model = loadAsModel(result);
+        assertThat(model,
+                hasItem(vf.createStatement(vf.createIRI(rdfsSubclass.getUri().toString()), SKOS.BROADER,
+                        vf.createIRI(supertype))));
+    }
+
+    @Test
+    void exportVocabularyGlossaryExportsPartOfAsBroader() throws Exception {
+        final List<Term> terms = generateTerms();
+        final Term partOf = terms.get(0);
+        final Term hasPart = terms.get(1);
+        hasPart.setProperties(
+                Collections.singletonMap(cz.cvut.kbss.termit.util.Vocabulary.s_p_has_part,
+                        Collections.singleton(partOf.getUri().toString())));
+        transactional(() -> em.merge(hasPart, DescriptorFactory.termDescriptor(hasPart)));
+
+        final TypeAwareResource result = sut.exportVocabularyGlossary(vocabulary);
+        final Model model = loadAsModel(result);
+        assertThat(model,
+                hasItem(vf.createStatement(vf.createIRI(partOf.getUri().toString()), SKOS.BROADER,
+                        vf.createIRI(hasPart.getUri().toString()))));
+    }
+
+    @Test
+    void exportVocabularyGlossaryExportsParticipationAsBroader() throws Exception {
+        final List<Term> terms = generateTerms();
+        final Term participant = terms.get(0);
+        final Term parent = terms.get(1);
+        parent.setProperties(
+                Collections.singletonMap(cz.cvut.kbss.termit.util.Vocabulary.s_p_has_participant,
+                        Collections.singleton(participant.getUri().toString())));
+        transactional(() -> em.merge(parent, DescriptorFactory.termDescriptor(parent)));
+
+        final TypeAwareResource result = sut.exportVocabularyGlossary(vocabulary);
+        final Model model = loadAsModel(result);
+        assertThat(model,
+                hasItem(vf.createStatement(vf.createIRI(participant.getUri().toString()), SKOS.BROADER,
+                        vf.createIRI(parent.getUri().toString()))));
+    }
 }

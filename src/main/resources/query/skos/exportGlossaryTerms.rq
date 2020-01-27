@@ -13,7 +13,11 @@ CONSTRUCT {
         skos:related ?related ;
         dc:source ?source ;
         skos:broader ?parent ;
-        skos:topConceptOf ?topOf .
+        skos:topConceptOf ?topOf ;
+        skos:broader ?type ;
+        skos:broader ?supertype ;
+        skos:broader  ?owner ;
+        skos:broader ?parentEvent .
 } WHERE {
     ?term a pdp:term ;
         pdp:je-pojmem-ze-slovníku ?vocabulary ;
@@ -42,5 +46,18 @@ CONSTRUCT {
     # This ensures only parent-less terms become top concepts of their glossaries
         BIND(IF(EXISTS {?glossary pdp:obsahuje-kořenový-pojem ?term}, ?glossary, BNODE()) as ?topOf)
         FILTER (!ISBLANK(?topOf))
+    }
+    OPTIONAL {
+        ?term a ?type .
+        FILTER (?type != pdp:term && ?type != skos:Concept)
+    }
+    OPTIONAL {
+        ?term rdfs:subClassOf ?supertype .
+    }
+    OPTIONAL {
+        ?owner <http://onto.fel.cvut.cz/ontologies/ufo/has-part> ?term .
+    }
+    OPTIONAL {
+        ?parentEvent <http://onto.fel.cvut.cz/ontologies/ufo/has-participant> ?term .
     }
 }
