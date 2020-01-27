@@ -1,0 +1,46 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/terms/>
+
+CONSTRUCT {
+    ?term a skos:Concept ;
+        skos:inScheme ?glossary ;
+        skos:prefLabel ?prefLabel ;
+        skos:definition ?definition ;
+        skos:altLabel ?altLabel ;
+        skos:related ?related ;
+        dc:source ?source ;
+        skos:broader ?parent ;
+        skos:topConceptOf ?topOf .
+} WHERE {
+    ?term a pdp:term ;
+        pdp:je-pojmem-ze-slovníku ?vocabulary ;
+        skos:prefLabel ?prefLabel .
+    ?vocabulary pdp:má-glosář ?glossary .
+    OPTIONAL {
+        ?term skos:definition ?definition .
+    }
+    OPTIONAL {
+        ?term skos:altLabel ?altLabel .
+    }
+    OPTIONAL {
+        ?term skos:related ?related .
+    }
+    OPTIONAL {
+        ?term dc:source ?source .
+    }
+    OPTIONAL {
+        ?term skos:broader ?parent .
+        FILTER NOT EXISTS {
+            ?term skos:broader ?intermediate .
+            FILTER (?parent != ?intermediate)
+        }
+    }
+    OPTIONAL {
+    # This ensures only parent-less terms become top concepts of their glossaries
+        BIND(IF(EXISTS {?glossary pdp:obsahuje-kořenový-pojem ?term}, ?glossary, BNODE()) as ?topOf)
+        FILTER (!ISBLANK(?topOf))
+    }
+}

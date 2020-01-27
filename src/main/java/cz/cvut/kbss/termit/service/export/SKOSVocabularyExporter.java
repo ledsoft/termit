@@ -40,6 +40,7 @@ public class SKOSVocabularyExporter implements VocabularyExporter {
         Objects.requireNonNull(vocabulary);
         final SKOSExporter skosExporter = getSKOSExporter();
         skosExporter.exportGlossaryInstance(vocabulary);
+        skosExporter.exportGlossaryTerms(vocabulary);
         return new TypeAwareByteArrayResource(skosExporter.exportAsTtl(), MEDIA_TYPE, FILE_EXTENSION);
     }
 

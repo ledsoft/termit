@@ -24,6 +24,7 @@ import java.io.File;
 public class SKOSExporter {
 
     private static final String GLOSSARY_EXPORT_QUERY = "skos" + File.separator + "exportGlossary.rq";
+    private static final String TERMS_EXPORT_QUERY = "skos" + File.separator + "exportGlossaryTerms.rq";
 
     private org.eclipse.rdf4j.repository.Repository repository;
     private ValueFactory vf;
@@ -40,16 +41,24 @@ public class SKOSExporter {
         try (final RepositoryConnection conn = repository.getConnection()) {
             final GraphQuery gq = conn.prepareGraphQuery(Utils.loadQuery(GLOSSARY_EXPORT_QUERY));
             gq.setBinding("vocabulary", vf.createIRI(vocabulary.getUri().toString()));
-            try (GraphQueryResult gqResult = gq.evaluate()) {
-                while (gqResult.hasNext()) {
-                    model.add(gqResult.next());
-                }
+            evaluateAndAddToModel(gq);
+        }
+    }
+
+    private void evaluateAndAddToModel(GraphQuery gq) {
+        try (GraphQueryResult gqResult = gq.evaluate()) {
+            while (gqResult.hasNext()) {
+                model.add(gqResult.next());
             }
         }
     }
 
     public void exportGlossaryTerms(Vocabulary vocabulary) {
-
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            final GraphQuery gq = conn.prepareGraphQuery(Utils.loadQuery(TERMS_EXPORT_QUERY));
+            gq.setBinding("vocabulary", vf.createIRI(vocabulary.getUri().toString()));
+            evaluateAndAddToModel(gq);
+        }
     }
 
     public byte[] exportAsTtl() {
