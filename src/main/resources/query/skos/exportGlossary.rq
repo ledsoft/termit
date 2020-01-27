@@ -2,17 +2,43 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/terms/>
 
 CONSTRUCT {
     ?glossary a owl:Ontology ;
               a skos:ConceptScheme ;
               a <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> ;
               rdfs:label ?label ;
-              owl:imports ?imported .
+              dc:creator ?fullName ;
+              dc:created ?created ;
+              dc:rights ?rights ;
+              owl:imports ?imported ;
+              owl:versionIRI ?versionIri ;
+              <http://purl.org/vocab/vann/preferredNamespaceUri> ?nsUri ;
+              <http://purl.org/vocab/vann/preferredNamespacePrefix> ?nsPrefix ;
+              <http://purl.org/ontology/bibo/status> ?status .
 } WHERE {
     ?vocabulary pdp:má-glosář ?glossary ;
+                pdp:má-autora ?author ;
+                pdp:má-datum-a-čas-vytvoření ?created ;
                 rdfs:label ?label .
+    ?author pdp:má-křestní-jméno ?firstName ;
+            pdp:má-příjmení ?lastName .
     OPTIONAL {
         ?vocabulary pdp:importuje-slovník/pdp:má-glosář ?imported .
     }
+    OPTIONAL {
+        ?glossary owl:versionIRI ?versionIri .
+    }
+    OPTIONAL {
+        ?glossary dc:rights ?rights .
+    }
+    OPTIONAL {
+        ?glossary <http://purl.org/vocab/vann/preferredNamespaceUri> ?nsUri ;
+                  <http://purl.org/vocab/vann/preferredNamespacePrefix> ?nsPrefix .
+    }
+    OPTIONAL {
+        ?glossary <http://purl.org/ontology/bibo/status> ?status .
+    }
+    BIND (CONCAT(?firstName, ?lastName) as ?fullName)
 }
