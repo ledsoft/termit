@@ -21,9 +21,12 @@ CONSTRUCT {
     ?vocabulary pdp:má-glosář ?glossary ;
                 pdp:má-autora ?author ;
                 pdp:má-datum-a-čas-vytvoření ?created ;
-                rdfs:label ?label .
+                rdfs:label ?vocabularyLabel .
     ?author pdp:má-křestní-jméno ?firstName ;
             pdp:má-příjmení ?lastName .
+    OPTIONAL {
+        ?glossary rdfs:label ?glossaryLabel .
+    }
     OPTIONAL {
         ?vocabulary pdp:importuje-slovník/pdp:má-glosář ?imported .
     }
@@ -40,5 +43,6 @@ CONSTRUCT {
     OPTIONAL {
         ?glossary <http://purl.org/ontology/bibo/status> ?status .
     }
-    BIND (CONCAT(?firstName, ?lastName) as ?fullName)
+    BIND (CONCAT(?firstName, " ", ?lastName) AS ?fullName)
+    BIND (COALESCE(?glossaryLabel, ?vocabularyLabel) AS ?label)
 }

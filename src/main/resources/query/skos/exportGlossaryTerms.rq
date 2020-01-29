@@ -39,6 +39,7 @@ CONSTRUCT {
         ?term skos:broader ?parent .
         FILTER NOT EXISTS {
             ?term skos:broader ?intermediate .
+            ?intermediate skos:broader ?parent .
             FILTER (?parent != ?intermediate)
         }
     }
@@ -50,14 +51,34 @@ CONSTRUCT {
     OPTIONAL {
         ?term a ?type .
         FILTER (?type != pdp:term && ?type != skos:Concept)
+        FILTER NOT EXISTS {
+            ?term a ?intermediateType .
+            ?intermediateType rdfs:subClassOf ?type .
+            FILTER (?type != ?intermediateType)
+        }
     }
     OPTIONAL {
         ?term rdfs:subClassOf ?supertype .
+        FILTER ((!sameTerm(?term, ?supertype)) && NOT EXISTS {
+            ?term rdfs:subClassOf ?intermediateSupertype .
+            ?intermediateSupertype rdfs:subClassOf ?supertype .
+            FILTER (!sameTerm(?term, ?supertype) && !sameTerm(?term, ?intermediateSupertype) && !sameTerm(?supertype, ?intermediateSupertype))
+        })
     }
     OPTIONAL {
         ?owner <http://onto.fel.cvut.cz/ontologies/ufo/has-part> ?term .
+        FILTER NOT EXISTS {
+            ?intermediateOwner <http://onto.fel.cvut.cz/ontologies/ufo/has-part> ?term .
+            ?owner <http://onto.fel.cvut.cz/ontologies/ufo/has-part> ?intermediateOwner .
+            FILTER (?owner != ?intermediateOwner)
+        }
     }
     OPTIONAL {
         ?parentEvent <http://onto.fel.cvut.cz/ontologies/ufo/has-participant> ?term .
+        FILTER NOT EXISTS {
+            ?intermediateParentEvent <http://onto.fel.cvut.cz/ontologies/ufo/has-participant> ?term .
+            ?parenEvent <http://onto.fel.cvut.cz/ontologies/ufo/has-participant> ?intermediateParentEvent .
+            FILTER (?parentEvent != ?intermediateParentEvent)
+        }
     }
 }
