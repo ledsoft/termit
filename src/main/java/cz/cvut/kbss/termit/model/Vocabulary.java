@@ -23,6 +23,7 @@ import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -35,6 +36,11 @@ import java.util.stream.Collectors;
 @JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class Vocabulary extends Asset implements Serializable {
+
+    @NotBlank
+    @ParticipationConstraints(nonEmpty = true)
+    @OWLAnnotationProperty(iri = RDFS.LABEL)
+    private String label;
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
@@ -53,6 +59,16 @@ public class Vocabulary extends Asset implements Serializable {
 
     @Properties(fetchType = FetchType.EAGER)
     private Map<String, Set<String>> properties;
+
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public String getComment() {
         return comment;

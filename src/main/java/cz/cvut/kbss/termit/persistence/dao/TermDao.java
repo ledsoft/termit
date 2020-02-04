@@ -1,25 +1,21 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.TypedQuery;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.PersistenceException;
@@ -41,6 +37,8 @@ import java.util.stream.Stream;
 
 @Repository
 public class TermDao extends AssetDao<Term> {
+
+    private static final URI LABEL_PROP = URI.create(SKOS.PREF_LABEL);
 
     private final Configuration config;
 
@@ -104,12 +102,13 @@ public class TermDao extends AssetDao<Term> {
             return executeQueryAndLoadSubTerms(em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                     "GRAPH ?vocabulary { " +
                     "?term a ?type ;" +
-                    "rdfs:label ?label ;" +
+                    "?hasLabel ?label ;" +
                     "?inVocabulary ?vocabulary ." +
                     "FILTER (lang(?label) = ?labelLang) ." +
                     "} } ORDER BY ?label", Term.class)
                                                  .setParameter("type", typeUri)
                                                  .setParameter("vocabulary", vocabulary.getUri())
+                                                 .setParameter("hasLabel", LABEL_PROP)
                                                  .setParameter("inVocabulary",
                                                          URI.create(
                                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
@@ -136,12 +135,13 @@ public class TermDao extends AssetDao<Term> {
         final Stream<TermInfo> subTermsStream = em.createNativeQuery("SELECT ?entity ?label ?vocabulary WHERE {" +
                 "?parent ?narrower ?entity ." +
                 "?entity a ?type ;" +
-                "rdfs:label ?label ;" +
+                "?hasLabel ?label ;" +
                 "?inVocabulary ?vocabulary ." +
                 "FILTER (lang(?label) = ?labelLang) . }", "TermInfo")
                                                   .setParameter("type", typeUri)
                                                   .setParameter("narrower", URI.create(SKOS.NARROWER))
                                                   .setParameter("parent", parent.getUri())
+                                                  .setParameter("hasLabel", LABEL_PROP)
                                                   .setParameter("inVocabulary",
                                                           URI.create(
                                                                   cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
@@ -164,7 +164,7 @@ public class TermDao extends AssetDao<Term> {
         TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "GRAPH ?vocabulary { " +
                 "?term a ?type ;" +
-                "rdfs:label ?label ." +
+                "?hasLabel ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
                 "FILTER (lang(?label) = ?labelLang) ." +
                 "}} ORDER BY ?label OFFSET ?offset LIMIT ?limit", Term.class);
@@ -181,6 +181,7 @@ public class TermDao extends AssetDao<Term> {
 
     private <T> TypedQuery<T> setCommonFindAllRootsQueryParams(TypedQuery<T> query, boolean includeImports) {
         final TypedQuery<T> tq = query.setParameter("type", typeUri)
+                                      .setParameter("hasLabel", LABEL_PROP)
                                       .setParameter("hasGlossary",
                                               URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
                                       .setParameter("hasTerm", URI.create(
@@ -207,7 +208,7 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(pageSpec);
         TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?term a ?type ;" +
-                "rdfs:label ?label ." +
+                "?hasLabel ?label ." +
                 "?vocabulary ?imports* ?parent ." +
                 "?parent ?hasGlossary/?hasTerm ?term ." +
                 "FILTER (lang(?label) = ?labelLang) ." +
@@ -238,11 +239,12 @@ public class TermDao extends AssetDao<Term> {
         final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "GRAPH ?vocabulary { " +
                 "?term a ?type ; " +
-                "      rdfs:label ?label ; " +
+                "      ?hasLabel ?label ; " +
                 "      ?inVocabulary ?vocabulary ." +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) ." +
                 "}} ORDER BY ?label", Term.class)
                                          .setParameter("type", typeUri)
+                                         .setParameter("hasLabel", LABEL_PROP)
                                          .setParameter("inVocabulary", URI.create(
                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                                          .setParameter("vocabulary", vocabulary.getUri())
@@ -278,11 +280,12 @@ public class TermDao extends AssetDao<Term> {
         final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
                 "?targetVocabulary ?imports* ?vocabulary ." +
                 "?term a ?type ;\n" +
-                "      rdfs:label ?label ;\n" +
+                "      ?hasLabel ?label ;\n" +
                 "      ?inVocabulary ?vocabulary ." +
                 "FILTER CONTAINS(LCASE(?label), LCASE(?searchString)) .\n" +
                 "} ORDER BY ?label", Term.class)
                                          .setParameter("type", typeUri)
+                                         .setParameter("hasLabel", LABEL_PROP)
                                          .setParameter("inVocabulary", URI.create(
                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                                          .setParameter("imports",
@@ -317,7 +320,7 @@ public class TermDao extends AssetDao<Term> {
                     "?inVocabulary ?vocabulary ." +
                     "FILTER (LCASE(?label) = LCASE(?searchString)) . }", Boolean.class)
                      .setParameter("type", typeUri)
-                     .setParameter("hasLabel", URI.create(RDFS.LABEL))
+                     .setParameter("hasLabel", LABEL_PROP)
                      .setParameter("inVocabulary",
                              URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                      .setParameter("vocabulary", vocabulary.getUri())

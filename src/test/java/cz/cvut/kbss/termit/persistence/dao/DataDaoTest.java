@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
@@ -33,6 +30,7 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -116,6 +114,7 @@ class DataDaoTest extends BaseDaoTestRunner {
 
     @Test
     void getLabelReturnsLabelWithMatchingLanguageOfSpecifiedIdentifier() {
+        enableRdfsInference(em);    // skos:prefLabel is a subPropertyOf rdfs:label
         final Term term = Generator.generateTermWithId();
         transactional(() -> em.persist(term));
 
@@ -126,13 +125,15 @@ class DataDaoTest extends BaseDaoTestRunner {
 
     @Test
     void getLabelReturnsLabelWithoutLanguageTagWhenMatchingLanguageTagDoesNotExist() {
+        enableRdfsInference(em);    // skos:prefLabel is a subPropertyOf rdfs:label
         final Term term = Generator.generateTermWithId();
         transactional(() -> {
             final Repository repo = em.unwrap(Repository.class);
             final ValueFactory vf = repo.getValueFactory();
             try (final RepositoryConnection connection = repo.getConnection()) {
                 connection.add(vf.createIRI(term.getUri().toString()), RDF.TYPE, vf.createIRI(Vocabulary.s_c_term));
-                connection.add(vf.createIRI(term.getUri().toString()), RDFS.LABEL, vf.createLiteral(term.getLabel()));
+                connection.add(vf.createIRI(term.getUri().toString()), SKOS.PREF_LABEL,
+                        vf.createLiteral(term.getLabel()));
                 connection.commit();
             }
         });

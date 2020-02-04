@@ -31,6 +31,7 @@ import cz.cvut.kbss.termit.util.CsvUtils;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.apache.poi.ss.usermodel.Row;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -48,6 +49,11 @@ public class Term extends Asset implements HasTypes, Serializable {
     public static final List<String> EXPORT_COLUMNS = Collections
             .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "Parent term",
                     "SubTerms"));
+
+    @NotBlank
+    @ParticipationConstraints(nonEmpty = true)
+    @OWLAnnotationProperty(iri = SKOS.PREF_LABEL)
+    private String label;
 
     @OWLAnnotationProperty(iri = RDFS.COMMENT)
     private String comment;
@@ -73,6 +79,16 @@ public class Term extends Asset implements HasTypes, Serializable {
 
     @Types
     private Set<String> types;
+
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public String getComment() {
         return comment;

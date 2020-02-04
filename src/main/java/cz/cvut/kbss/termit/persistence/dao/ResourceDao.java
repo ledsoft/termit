@@ -1,25 +1,23 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.asset.provenance.ModifiesData;
 import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
@@ -153,12 +151,12 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
         try {
             return em.createNativeQuery("SELECT DISTINCT ?x WHERE {" +
                     "?x a ?term ;" +
-                    "?has-label ?label ." +
+                    "?hasLabel ?label ." +
                     "?assignment ?is-assignment-of ?x ;" +
                     "?has-target/?has-source ?resource ." +
                     "} ORDER BY ?label", Term.class)
                      .setParameter("term", URI.create(Vocabulary.s_c_term))
-                     .setParameter("has-label", URI.create(RDFS.LABEL))
+                     .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                      .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                      .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
                      .setParameter("has-source", URI.create(Vocabulary.s_p_ma_zdroj))

@@ -18,6 +18,7 @@
 package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.dto.assignment.ResourceTermAssignments;
 import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.model.Target;
@@ -156,13 +157,14 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
     private List<ResourceTermAssignments> getAssignments(Resource resource) {
         return em.createNativeQuery("SELECT DISTINCT ?term ?label ?vocabulary ?res ?suggested WHERE {" +
                 ASSIGNMENTS_CONDITION +
-                "  ?term rdfs:label ?label ;" +
+                "  ?term ?hasLabel ?label ;" +
                 "  ?inVocabulary ?vocabulary ." +
                 "FILTER langMatches(lang(?label), ?lang)" +
                 "BIND (?resource AS ?res)" +
                 "} ORDER BY ?label", "ResourceTermAssignments")
                  .setParameter("suggestedAssignment", URI.create(Vocabulary.s_c_navrzene_prirazeni_termu))
                  .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
+                 .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("inVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
@@ -174,7 +176,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
     private List<ResourceTermAssignments> getOccurrences(Resource resource) {
         return em.createNativeQuery("SELECT ?term ?label ?vocabulary (count(?x) as ?cnt) ?res ?suggested WHERE {" +
                         OCCURRENCES_CONDITION +
-                        "  ?term rdfs:label ?label ;" +
+                        "  ?term ?hasLabel ?label ;" +
                         "    ?inVocabulary ?vocabulary ." +
                         "FILTER langMatches(lang(?label), ?lang)" +
                         "BIND (?resource AS ?res)" +
@@ -182,6 +184,7 @@ public class TermAssignmentDao extends BaseDao<TermAssignment> {
                 "ResourceTermOccurrences")
                  .setParameter("suggestedOccurrence", URI.create(Vocabulary.s_c_navrzeny_vyskyt_termu))
                  .setParameter("hasTerm", URI.create(Vocabulary.s_p_je_prirazenim_termu))
+                 .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                  .setParameter("hasTarget", URI.create(Vocabulary.s_p_ma_cil))
                  .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
                  .setParameter("inVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))

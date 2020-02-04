@@ -36,11 +36,6 @@ public abstract class Asset extends HasProvenanceData implements HasIdentifier {
     @Id
     private URI uri;
 
-    @NotBlank
-    @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
-    private String label;
-
     public URI getUri() {
         return uri;
     }
@@ -49,11 +44,7 @@ public abstract class Asset extends HasProvenanceData implements HasIdentifier {
         this.uri = uri;
     }
 
-    public String getLabel() {
-        return label;
-    }
+    public abstract String getLabel();
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+    public abstract void setLabel(String label);
 }

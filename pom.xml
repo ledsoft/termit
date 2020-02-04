@@ -252,6 +252,13 @@
             <version>${org.springframework.security.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- For loading SKOS model from W3C site -->
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-rdfxml</artifactId>
+            <version>3.0.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

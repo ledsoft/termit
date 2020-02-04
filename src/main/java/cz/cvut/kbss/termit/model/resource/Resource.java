@@ -17,15 +17,15 @@
  */
 package cz.cvut.kbss.termit.model.resource;
 
-import cz.cvut.kbss.jopa.model.annotations.EntityListeners;
-import cz.cvut.kbss.jopa.model.annotations.OWLClass;
-import cz.cvut.kbss.jopa.model.annotations.OWLDataProperty;
+import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -34,8 +34,23 @@ import java.util.Objects;
 @JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 public class Resource extends Asset implements Serializable {
 
+    @NotBlank
+    @ParticipationConstraints(nonEmpty = true)
+    @OWLAnnotationProperty(iri = RDFS.LABEL)
+    private String label;
+
     @OWLDataProperty(iri = DC.Terms.DESCRIPTION)
     private String description;
+
+    @Override
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public String getDescription() {
         return description;
