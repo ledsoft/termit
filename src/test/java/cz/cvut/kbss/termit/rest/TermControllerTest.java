@@ -1,30 +1,31 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.jsonldjava.utils.JsonUtils;
+import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
+import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.TermService;
@@ -49,10 +50,13 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static cz.cvut.kbss.termit.util.Constants.DEFAULT_PAGE_SPEC;
 import static cz.cvut.kbss.termit.util.Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR;
@@ -726,5 +730,54 @@ class TermControllerTest extends BaseControllerTestRunner {
                 delete(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME))
                .andExpect(status().isNotFound());
         verify(termServiceMock, never()).remove(any());
+    }
+
+    @Test
+    void getHistoryReturnsListOfChangeRecordsForSpecifiedTerm() throws Exception {
+        final URI termUri = initTermUriResolution();
+        final Term term = Generator.generateTerm();
+        term.setUri(termUri);
+        when(termServiceMock.getRequiredReference(term.getUri())).thenReturn(term);
+        final List<AbstractChangeRecord> records = generateChangeRecords(term);
+        when(termServiceMock.getChanges(term)).thenReturn(records);
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + VOCABULARY_NAME + "/terms/" + TERM_NAME + "/history"))
+                .andExpect(status().isOk()).andReturn();
+        final List<AbstractChangeRecord> result = readValue(mvcResult, new TypeReference<List<AbstractChangeRecord>>() {
+        });
+        assertNotNull(result);
+        assertEquals(records, result);
+    }
+
+    private List<AbstractChangeRecord> generateChangeRecords(Term term) {
+        final User author = Generator.generateUserWithId();
+        return IntStream.range(0, 5).mapToObj(i -> {
+            final UpdateChangeRecord record = new UpdateChangeRecord(term);
+            record.setAuthor(author);
+            record.setChangedAttribute(URI.create(SKOS.PREF_LABEL));
+            record.setTimestamp(Instant.ofEpochSecond(System.currentTimeMillis() + i * 1000));
+            return record;
+        }).collect(Collectors.toList());
+    }
+
+    @Test
+    void getHistoryStandaloneReturnsListOfChangeRecordsForSpecifiedTerm() throws Exception {
+        final URI termUri = URI.create(NAMESPACE + TERM_NAME);
+        final Term term = Generator.generateTerm();
+        term.setUri(termUri);
+        when(idResolverMock.resolveIdentifier(NAMESPACE, TERM_NAME)).thenReturn(termUri);
+        when(termServiceMock.getRequiredReference(termUri)).thenReturn(term);
+        final List<AbstractChangeRecord> records = generateChangeRecords(term);
+        when(termServiceMock.getChanges(term)).thenReturn(records);
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get("/terms/" + TERM_NAME + "/history").param(QueryParams.NAMESPACE, NAMESPACE))
+                .andExpect(status().isOk())
+                .andReturn();
+        final List<AbstractChangeRecord> result = readValue(mvcResult, new TypeReference<List<AbstractChangeRecord>>() {
+        });
+        assertNotNull(result);
+        assertEquals(records, result);
     }
 }

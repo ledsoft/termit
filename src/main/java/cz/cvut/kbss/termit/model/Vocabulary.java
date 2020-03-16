@@ -22,6 +22,7 @@ import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.model.changetracking.Audited;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -32,6 +33,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Audited
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
 @JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)

@@ -20,6 +20,7 @@ package cz.cvut.kbss.termit.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import cz.cvut.kbss.jsonld.JsonLd;
 import cz.cvut.kbss.jsonld.jackson.JsonLdModule;
 import cz.cvut.kbss.termit.util.AdjustedUriTemplateProxyServlet;
@@ -71,6 +72,8 @@ public class WebAppConfig implements WebMvcConfigurer {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // JSR 310 (Java 8 DateTime API)
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }
 

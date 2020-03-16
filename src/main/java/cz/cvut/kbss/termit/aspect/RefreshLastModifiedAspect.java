@@ -6,13 +6,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Ensures corresponding last modified timestamp is refreshed when a data modifying operation is invoked for an asset.
  */
 @Aspect
-@Component
 public class RefreshLastModifiedAspect {
 
     private static final Logger LOG = LoggerFactory.getLogger(RefreshLastModifiedAspect.class);

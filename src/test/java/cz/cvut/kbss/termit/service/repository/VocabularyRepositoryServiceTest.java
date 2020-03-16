@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.service.repository;
 
@@ -28,6 +25,7 @@ import cz.cvut.kbss.termit.exception.VocabularyImportException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -42,6 +40,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -69,8 +68,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistSetsVocabularyAuthorAndCreationDate() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         sut.persist(vocabulary);
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
@@ -81,8 +79,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsValidationExceptionWhenVocabularyNameIsBlank() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setLabel("");
         final ValidationException exception = assertThrows(ValidationException.class, () -> sut.persist(vocabulary));
         assertThat(exception.getMessage(), containsString("label must not be blank"));
@@ -101,8 +98,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistDoesNotGenerateIdentifierWhenInstanceAlreadyHasOne() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         final URI originalUri = vocabulary.getUri();
         sut.persist(vocabulary);
         assertNotNull(vocabulary.getUri());
@@ -125,8 +121,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalAlreadyIriExists() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setAuthor(user.toUser());
         vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
@@ -138,8 +133,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateThrowsValidationExceptionForEmptyName() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setAuthor(user.toUser());
         vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
@@ -158,8 +152,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void updateSavesUpdatedVocabulary() {
-        final Vocabulary vocabulary = Generator.generateVocabulary();
-        vocabulary.setUri(Generator.generateUri());
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         vocabulary.setAuthor(user.toUser());
         vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
@@ -240,5 +233,13 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final long result = sut.getLastModified();
         assertThat(result, greaterThan(0L));
         assertThat(result, lessThanOrEqualTo(System.currentTimeMillis()));
+    }
+
+    @Test
+    void getChangesRetrievesChangesForVocabulary() {
+        final Vocabulary vocabulary = Generator.generateVocabularyWithId();
+        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        final List<AbstractChangeRecord> changes = sut.getChanges(vocabulary);
+        assertTrue(changes.isEmpty());
     }
 }

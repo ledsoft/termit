@@ -17,11 +17,13 @@
  */
 package cz.cvut.kbss.termit.environment.config;
 
+import cz.cvut.kbss.termit.aspect.ChangeTrackingAspect;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.service.Services;
 import cz.cvut.kbss.termit.service.document.html.DummySelectorGenerator;
 import cz.cvut.kbss.termit.service.document.html.HtmlSelectorGenerators;
+import org.aspectj.lang.Aspects;
 import org.jsoup.nodes.Element;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -80,5 +82,10 @@ public class TestServiceConfig {
     @Bean
     public ClassPathResource languageSpecification() {
         return new ClassPathResource("languages/language.ttl");
+    }
+
+    @Bean
+    ChangeTrackingAspect changeTrackingAspect() {
+        return Aspects.aspectOf(ChangeTrackingAspect.class);
     }
 }

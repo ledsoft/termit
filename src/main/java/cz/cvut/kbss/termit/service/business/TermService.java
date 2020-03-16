@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.service.business;
 
@@ -21,7 +18,10 @@ import cz.cvut.kbss.termit.dto.assignment.TermAssignments;
 import cz.cvut.kbss.termit.exception.NotFoundException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.service.changetracking.ChangeRecordProvider;
 import cz.cvut.kbss.termit.service.export.VocabularyExporters;
+import cz.cvut.kbss.termit.service.repository.ChangeRecordService;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * Service for term-related business logic.
  */
 @Service
-public class TermService {
+public class TermService implements ChangeRecordProvider<Term> {
 
     private final VocabularyExporters exporters;
 
@@ -48,12 +48,15 @@ public class TermService {
 
     private final TermRepositoryService repositoryService;
 
+    private final ChangeRecordService changeRecordService;
+
     @Autowired
     public TermService(VocabularyExporters exporters, VocabularyService vocabularyService,
-                       TermRepositoryService repositoryService) {
+                       TermRepositoryService repositoryService, ChangeRecordService changeRecordService) {
         this.exporters = exporters;
         this.vocabularyService = vocabularyService;
         this.repositoryService = repositoryService;
+        this.changeRecordService = changeRecordService;
     }
 
     /**
@@ -290,5 +293,10 @@ public class TermService {
      */
     public URI generateIdentifier(URI vocabularyUri, String termLabel) {
         return repositoryService.generateIdentifier(vocabularyUri, termLabel);
+    }
+
+    @Override
+    public List<AbstractChangeRecord> getChanges(Term term) {
+        return changeRecordService.getChanges(term);
     }
 }

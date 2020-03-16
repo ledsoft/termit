@@ -95,6 +95,11 @@ public class Constants {
     public static final String DEFAULT_TERM_NAMESPACE_SEPARATOR = "/pojem";
 
     /**
+     * Default value of the {@link ConfigParam#CHANGE_TRACKING_CONTEXT_EXTENSION} configuration.
+     */
+    public static final String DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION = "/zmeny";
+
+    /**
      * Path to directory containing queries used by the system.
      * <p>
      * The path should be relative to the classpath, so that queries from it can be loaded using {@link

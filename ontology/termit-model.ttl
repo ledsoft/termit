@@ -4,6 +4,7 @@
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cht: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/sledovani-zmen/pojem/> .
 
 <http://onto.fel.cvut.cz/ontologies/ufo/pojem/object>
         a       owl:Class .
@@ -177,3 +178,30 @@ termit-pojem:má-přesný-text-quote
 termit-pojem:selektor-text-quote
         a                <https://slovník.gov.cz/základní/pojem/typ-objektu> , owl:Class ;
         rdfs:subClassOf  termit-pojem:selektor-termu .
+
+cht:změna
+        a               owl:Class .
+
+cht:vytvoření-záznamu
+        a               owl:Class ;
+        rdfs:subClassOf cht:změna .
+
+cht:úprava-záznamu
+        a               owl:Class ;
+        rdfs:subClassOf cht:změna .
+
+cht:má-změněný-záznam
+        a       owl:ObjectProperty ;
+        rdfs:domain cht:změna .
+
+cht:má-změněný-atribut
+        a       owl:ObjectProperty ;
+        rdfs:domain cht:úprava-záznamu .
+
+cht:má-původní-hodnotu
+        a       owl:ObjectProperty ;
+        rdfs:domain cht:úprava-záznamu .
+
+cht:má-novou-hodnotu
+        a       owl:ObjectProperty ;
+        rdfs:domain cht:úprava-záznamu .

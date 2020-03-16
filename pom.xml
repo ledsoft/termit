@@ -28,11 +28,11 @@
         <org.springframework.version>5.2.0.RELEASE</org.springframework.version>
         <org.springframework.security.version>5.2.0.RELEASE</org.springframework.security.version>
         <org.springframework.data.version>2.2.0.RELEASE</org.springframework.data.version>
-        <com.fasterxml.jackson.version>2.10.0</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.version>2.10.2</com.fasterxml.jackson.version>
         <org.hibernate.validator.version>6.0.17.Final</org.hibernate.validator.version>
-        <cz.cvut.kbss.jopa.version>0.13.3</cz.cvut.kbss.jopa.version>
-        <cz.cvut.kbss.jsonld.version>0.4.0</cz.cvut.kbss.jsonld.version>
-        <org.aspectj.version>1.9.4</org.aspectj.version>
+        <cz.cvut.kbss.jopa.version>0.14.0</cz.cvut.kbss.jopa.version>
+        <cz.cvut.kbss.jsonld.version>0.5.0</cz.cvut.kbss.jsonld.version>
+        <org.aspectj.version>1.9.5</org.aspectj.version>
 
         <!-- Default value for deployment type property which should otherwise specified on command line -->
         <deployment>DEV</deployment>
@@ -156,6 +156,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>${com.fasterxml.jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${com.fasterxml.jackson.version}</version>
+        </dependency>
         <!-- JSON-LD support -->
         <dependency>
             <groupId>cz.cvut.kbss.jsonld</groupId>
@@ -256,7 +261,7 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-rdfxml</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,28 +1,28 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.VocabularyImportException;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
 import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.VocabularyService;
@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -103,10 +104,9 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
     }
 
     private Vocabulary generateVocabulary() {
-        final Vocabulary vocab = Generator.generateVocabulary();
+        final Vocabulary vocab = Generator.generateVocabularyWithId();
         vocab.setAuthor(user);
         vocab.setCreated(new Date());
-        vocab.setUri(Generator.generateUri());
         return vocab;
     }
 
@@ -305,5 +305,33 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
         assertTrue(result.isEmpty());
         verify(serviceMock).getRequiredReference(VOCABULARY_URI);
         verify(serviceMock).getTransitivelyImportedVocabularies(vocabulary);
+    }
+
+    @Test
+    void getHistoryReturnsListOfChangeRecordsForSpecifiedVocabulary() throws Exception {
+        final Vocabulary vocabulary = generateVocabulary();
+        vocabulary.setUri(VOCABULARY_URI);
+        when(idResolverMock.resolveIdentifier(ConfigParam.NAMESPACE_VOCABULARY, FRAGMENT)).thenReturn(VOCABULARY_URI);
+        when(serviceMock.getRequiredReference(VOCABULARY_URI)).thenReturn(vocabulary);
+        final List<AbstractChangeRecord> records = generateChangeRecords(vocabulary);
+        when(serviceMock.getChanges(vocabulary)).thenReturn(records);
+
+        final MvcResult mvcResult = mockMvc.perform(get(PATH + "/" + FRAGMENT + "/history")).andExpect(status().isOk())
+                                           .andReturn();
+        final List<AbstractChangeRecord> result = readValue(mvcResult, new TypeReference<List<AbstractChangeRecord>>() {
+        });
+        assertNotNull(result);
+        assertEquals(records, result);
+        verify(serviceMock).getChanges(vocabulary);
+    }
+
+    private List<AbstractChangeRecord> generateChangeRecords(Vocabulary vocabulary) {
+        return IntStream.range(0, 5).mapToObj(i -> {
+            final UpdateChangeRecord record = new UpdateChangeRecord(vocabulary);
+            record.setAuthor(user);
+            record.setChangedAttribute(URI.create(RDFS.LABEL));
+            record.setTimestamp(Instant.ofEpochSecond(System.currentTimeMillis() + i * 1000));
+            return record;
+        }).collect(Collectors.toList());
     }
 }

@@ -55,13 +55,6 @@ public class TermDao extends AssetDao<Term> {
         return result;
     }
 
-    /**
-     * Persists the specified term into the specified vocabulary's context.
-     * <p>
-     * Note that this is the preferred way of persisting terms.
-     *
-     * @param entity The instance to persist
-     */
     @Override
     public void persist(Term entity) {
         Objects.requireNonNull(entity);
