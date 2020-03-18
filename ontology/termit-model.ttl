@@ -182,11 +182,11 @@ termit-pojem:selektor-text-quote
 cht:změna
         a               owl:Class .
 
-cht:vytvoření-záznamu
+cht:vytvoření-entity
         a               owl:Class ;
         rdfs:subClassOf cht:změna .
 
-cht:úprava-záznamu
+cht:úprava-entity
         a               owl:Class ;
         rdfs:subClassOf cht:změna .
 

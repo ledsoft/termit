@@ -299,19 +299,19 @@ cht:změna
         <http://www.w3.org/2004/02/skos/core#prefLabel>
                         "Change"@en , "Změna"@cs .
 
-cht:vytvoření-záznamu
+cht:vytvoření-entity
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#broader>
                 cht:změna ;
                 <http://www.w3.org/2004/02/skos/core#prefLabel>
-                                "Asset creation"@en , "Vytvoření záznamu"@cs .
+                                "Entity creation"@en , "Vytvoření entity"@cs .
 
-cht:úprava-záznamu
+cht:úprava-entity
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
         <http://www.w3.org/2004/02/skos/core#broader>
                 cht:změna ;
                 <http://www.w3.org/2004/02/skos/core#prefLabel>
-                                "Asset update"@en , "Úprava záznamu"@cs .
+                                "Entity update"@en , "Úprava entity"@cs .
 
 cht:má-změněnou-entitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;

@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
 
-@OWLClass(iri = Vocabulary.s_c_uprava_zaznamu)
+@OWLClass(iri = Vocabulary.s_c_uprava_entity)
 public class UpdateChangeRecord extends AbstractChangeRecord {
 
     @ParticipationConstraints(nonEmpty = true)
