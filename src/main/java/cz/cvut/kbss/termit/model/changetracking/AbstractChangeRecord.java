@@ -29,7 +29,7 @@ public class AbstractChangeRecord extends AbstractEntity {
     private User author;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_i_ma_zmenenou_entitu)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zmenenou_entitu)
     private URI changedEntity;
 
     public AbstractChangeRecord() {
