@@ -60,7 +60,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         assertEquals(1, result.size());
         final AbstractChangeRecord record = result.get(0);
         assertThat(record, instanceOf(PersistChangeRecord.class));
-        assertEquals(newTerm.getUri(), record.getChangedAsset());
+        assertEquals(newTerm.getUri(), record.getChangedEntity());
         assertEquals(author, record.getAuthor());
         assertNotNull(record.getTimestamp());
     }
@@ -98,7 +98,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> result = findRecords();
         assertEquals(1, result.size());
         final AbstractChangeRecord record = result.get(0);
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertThat(record, instanceOf(UpdateChangeRecord.class));
         assertEquals(SKOS.DEFINITION, ((UpdateChangeRecord) record).getChangedAttribute().toString());
     }
@@ -118,7 +118,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> result = findRecords();
         assertEquals(2, result.size());
         result.forEach(record -> {
-            assertEquals(original.getUri(), record.getChangedAsset());
+            assertEquals(original.getUri(), record.getChangedEntity());
             assertThat(record, instanceOf(UpdateChangeRecord.class));
             assertThat(((UpdateChangeRecord) record).getChangedAttribute().toString(), anyOf(equalTo(SKOS.DEFINITION),
                     equalTo(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku)));

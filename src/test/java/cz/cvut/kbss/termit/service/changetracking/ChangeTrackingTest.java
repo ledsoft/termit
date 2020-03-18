@@ -61,7 +61,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(vocabulary);
         assertEquals(1, result.size());
-        assertEquals(vocabulary.getUri(), result.get(0).getChangedAsset());
+        assertEquals(vocabulary.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(PersistChangeRecord.class));
     }
 
@@ -74,7 +74,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
         assertEquals(1, result.size());
-        assertEquals(term.getUri(), result.get(0).getChangedAsset());
+        assertEquals(term.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(PersistChangeRecord.class));
     }
 
@@ -87,7 +87,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(vocabulary);
         assertEquals(1, result.size());
-        assertEquals(vocabulary.getUri(), result.get(0).getChangedAsset());
+        assertEquals(vocabulary.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
         assertEquals(RDFS.LABEL, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
     }
@@ -107,7 +107,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(vocabulary);
         assertEquals(2, result.size());
         result.forEach(chr -> {
-            assertEquals(vocabulary.getUri(), chr.getChangedAsset());
+            assertEquals(vocabulary.getUri(), chr.getChangedEntity());
             assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
             assertThat(((UpdateChangeRecord) chr).getChangedAttribute().toString(), anyOf(equalTo(RDFS.LABEL),
                     equalTo(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik)));
@@ -128,7 +128,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
         assertEquals(1, result.size());
-        assertEquals(term.getUri(), result.get(0).getChangedAsset());
+        assertEquals(term.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
         assertEquals(SKOS.DEFINITION, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
     }
@@ -150,7 +150,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
         assertEquals(1, result.size());
-        assertEquals(term.getUri(), result.get(0).getChangedAsset());
+        assertEquals(term.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
         assertEquals(SKOS.BROADER, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
     }

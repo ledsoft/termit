@@ -66,7 +66,7 @@ class ChangeRecordDaoTest extends BaseDaoTestRunner {
         final PersistChangeRecord record = new PersistChangeRecord();
         record.setAuthor(author);
         record.setTimestamp(timestamp);
-        record.setChangedAsset(changedObject);
+        record.setChangedEntity(changedObject);
         return record;
     }
 
@@ -74,7 +74,7 @@ class ChangeRecordDaoTest extends BaseDaoTestRunner {
         final UpdateChangeRecord record = new UpdateChangeRecord();
         record.setAuthor(author);
         record.setTimestamp(timestamp);
-        record.setChangedAsset(changedObject);
+        record.setChangedEntity(changedObject);
         record.setChangedAttribute(URI.create(SKOS.PREF_LABEL));
         return record;
     }

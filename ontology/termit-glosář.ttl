@@ -313,10 +313,10 @@ cht:úprava-záznamu
                 <http://www.w3.org/2004/02/skos/core#prefLabel>
                                 "Asset update"@en , "Úprava záznamu"@cs .
 
-cht:má-změněný-záznam
+cht:má-změněnou-entitu
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;
                 <http://www.w3.org/2004/02/skos/core#prefLabel>
-                                "Has changed asset"@en , "Má změněný záznam"@cs .
+                                "Has changed entity"@en , "Má změněnou entitu"@cs .
 
 cht:má-změněný-atribut
         a       <http://www.w3.org/2004/02/skos/core#Concept> ;

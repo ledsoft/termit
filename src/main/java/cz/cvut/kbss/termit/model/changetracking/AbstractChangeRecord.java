@@ -29,14 +29,14 @@ public class AbstractChangeRecord extends AbstractEntity {
     private User author;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = Vocabulary.s_p_ma_zmeneny_zaznam)
-    private URI changedAsset;
+    @OWLObjectProperty(iri = Vocabulary.s_i_ma_zmenenou_entitu)
+    private URI changedEntity;
 
     public AbstractChangeRecord() {
     }
 
-    protected AbstractChangeRecord(Asset changedAsset) {
-        this.changedAsset = Objects.requireNonNull(changedAsset).getUri();
+    protected AbstractChangeRecord(Asset changedEntity) {
+        this.changedEntity = Objects.requireNonNull(changedEntity).getUri();
     }
 
     public Instant getTimestamp() {
@@ -55,12 +55,12 @@ public class AbstractChangeRecord extends AbstractEntity {
         this.author = author;
     }
 
-    public URI getChangedAsset() {
-        return changedAsset;
+    public URI getChangedEntity() {
+        return changedEntity;
     }
 
-    public void setChangedAsset(URI changedAsset) {
-        this.changedAsset = changedAsset;
+    public void setChangedEntity(URI changedEntity) {
+        this.changedEntity = changedEntity;
     }
 
     @Override
@@ -73,12 +73,12 @@ public class AbstractChangeRecord extends AbstractEntity {
         }
         AbstractChangeRecord that = (AbstractChangeRecord) o;
         return Objects.equals(timestamp, that.timestamp) &&
-                Objects.equals(changedAsset, that.changedAsset);
+                Objects.equals(changedEntity, that.changedEntity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timestamp, changedAsset);
+        return Objects.hash(timestamp, changedEntity);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class AbstractChangeRecord extends AbstractEntity {
         return "<" + getUri() + ">" +
                 ", timestamp=" + timestamp +
                 ", author=" + author +
-                ", changedObject=" + changedAsset;
+                ", changedEntity=" + changedEntity;
     }
 
     public static Field getAuthorField() {

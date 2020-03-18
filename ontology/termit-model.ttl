@@ -190,7 +190,7 @@ cht:úprava-záznamu
         a               owl:Class ;
         rdfs:subClassOf cht:změna .
 
-cht:má-změněný-záznam
+cht:má-změněnou-entitu
         a       owl:ObjectProperty ;
         rdfs:domain cht:změna .
 

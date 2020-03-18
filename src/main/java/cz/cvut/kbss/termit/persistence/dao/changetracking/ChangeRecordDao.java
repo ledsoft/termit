@@ -60,7 +60,7 @@ public class ChangeRecordDao {
                     "OPTIONAL { ?r ?hasChangedAttribute ?attribute . }" +
                     "} ORDER BY DESC(?timestamp) ?attribute", AbstractChangeRecord.class)
                      .setParameter("changeRecord", et.getIRI().toURI())
-                     .setParameter("relatesTo", et.getAttribute("changedAsset").getIRI().toURI())
+                     .setParameter("relatesTo", et.getAttribute("changedEntity").getIRI().toURI())
                      .setParameter("hasChangedAttribute", updateEt.getAttribute("changedAttribute").getIRI().toURI())
                      .setParameter("hasTime", et.getAttribute("timestamp").getIRI().toURI())
                      .setParameter("asset", asset.getUri()).getResultList();

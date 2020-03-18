@@ -120,7 +120,7 @@ public class MetamodelBasedChangeCalculator implements ChangeCalculator {
 
     private UpdateChangeRecord createChangeRecord(URI assetId, URI property) {
         final UpdateChangeRecord record = new UpdateChangeRecord();
-        record.setChangedAsset(assetId);
+        record.setChangedEntity(assetId);
         record.setChangedAttribute(property);
         return record;
     }

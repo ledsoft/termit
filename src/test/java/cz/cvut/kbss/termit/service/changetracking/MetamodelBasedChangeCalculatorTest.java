@@ -40,7 +40,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(RDFS.LABEL), record.getChangedAttribute());
     }
 
@@ -67,7 +67,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar), record.getChangedAttribute());
     }
 
@@ -80,7 +80,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(DC.Terms.SOURCE), record.getChangedAttribute());
     }
 
@@ -106,7 +106,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(SKOS.BROADER), record.getChangedAttribute());
     }
 
@@ -119,7 +119,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku),
                 record.getChangedAttribute());
     }
@@ -136,7 +136,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik),
                 record.getChangedAttribute());
     }
@@ -172,7 +172,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(SKOS.BROADER), record.getChangedAttribute());
     }
 
@@ -185,7 +185,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(URI.create(RDF.TYPE), record.getChangedAttribute());
     }
 
@@ -199,7 +199,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(property, record.getChangedAttribute());
     }
 
@@ -213,7 +213,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(property, record.getChangedAttribute());
     }
 
@@ -228,7 +228,7 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
-        assertEquals(original.getUri(), record.getChangedAsset());
+        assertEquals(original.getUri(), record.getChangedEntity());
         assertEquals(property, record.getChangedAttribute());
     }
 
