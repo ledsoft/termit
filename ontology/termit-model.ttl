@@ -196,12 +196,12 @@ cht:má-změněnou-entitu
 
 cht:má-změněný-atribut
         a       owl:ObjectProperty ;
-        rdfs:domain cht:úprava-záznamu .
+        rdfs:domain cht:úprava-entity .
 
 cht:má-původní-hodnotu
         a       owl:ObjectProperty ;
-        rdfs:domain cht:úprava-záznamu .
+        rdfs:domain cht:úprava-entity .
 
 cht:má-novou-hodnotu
         a       owl:ObjectProperty ;
-        rdfs:domain cht:úprava-záznamu .
+        rdfs:domain cht:úprava-entity .
