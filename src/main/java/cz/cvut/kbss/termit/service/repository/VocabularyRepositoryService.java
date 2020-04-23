@@ -23,10 +23,12 @@ import cz.cvut.kbss.termit.persistence.dao.AssetDao;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.VocabularyService;
+import cz.cvut.kbss.termit.service.importer.VocabularyImportService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Validator;
 import java.net.URI;
@@ -42,13 +44,17 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
 
     private final ChangeRecordService changeRecordService;
 
+    final VocabularyImportService importService;
+
     @Autowired
     public VocabularyRepositoryService(VocabularyDao vocabularyDao, IdentifierResolver idResolver,
-                                       ChangeRecordService changeRecordService, Validator validator) {
+                                       ChangeRecordService changeRecordService, Validator validator,
+                                       VocabularyImportService importService) {
         super(validator);
         this.vocabularyDao = vocabularyDao;
         this.idResolver = idResolver;
         this.changeRecordService = changeRecordService;
+        this.importService = importService;
     }
 
     @Override
@@ -110,6 +116,12 @@ public class VocabularyRepositoryService extends BaseAssetRepositoryService<Voca
     @Override
     public List<AbstractChangeRecord> getChanges(Vocabulary asset) {
         return changeRecordService.getChanges(asset);
+    }
+
+    @Override
+    public Vocabulary importVocabulary(MultipartFile file) {
+        Objects.requireNonNull(file);
+        return importService.importVocabulary(file);
     }
 
     @Override

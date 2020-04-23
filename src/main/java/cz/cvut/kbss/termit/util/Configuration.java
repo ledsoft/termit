@@ -104,6 +104,8 @@ public class Configuration {
         map.put(ConfigParam.TERM_ASSIGNMENT_MIN_SCORE, Double.toString(Double.MAX_VALUE));
         map.put(ConfigParam.TERM_NAMESPACE_SEPARATOR, Constants.DEFAULT_TERM_NAMESPACE_SEPARATOR);
         map.put(ConfigParam.CHANGE_TRACKING_CONTEXT_EXTENSION, Constants.DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION);
+        map.put(ConfigParam.WORKING_VOCABULARY_CONTEXT_EXTENSION,
+                Constants.DEFAULT_WORKING_VOCABULARY_CONTEXT_EXTENSION);
         return map;
     }
 }

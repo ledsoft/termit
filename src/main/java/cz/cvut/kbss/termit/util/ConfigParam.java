@@ -114,9 +114,15 @@ public enum ConfigParam {
     TERM_ASSIGNMENT_MIN_SCORE("term.assignment.minScore"),
 
     /**
-     * Extension appended to asset identifier (presumably a vocabulary ID) to denote its change tracking context identifier.
+     * Extension appended to asset identifier (presumably a vocabulary ID) to denote its change tracking context
+     * identifier.
      */
-    CHANGE_TRACKING_CONTEXT_EXTENSION("changetracking.context.extension");
+    CHANGE_TRACKING_CONTEXT_EXTENSION("changetracking.context.extension"),
+
+    /**
+     * Extension appended to the identifier of a repository context in which working version of a vocabulary is stored.
+     */
+    WORKING_VOCABULARY_CONTEXT_EXTENSION("vocabulary.working.extension");
 
     private final String parameter;
 
