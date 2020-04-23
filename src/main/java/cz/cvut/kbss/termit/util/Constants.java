@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.util;
 
@@ -100,12 +97,22 @@ public class Constants {
     public static final String DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION = "/zmeny";
 
     /**
+     * Default value of the {@link ConfigParam#WORKING_VOCABULARY_CONTEXT_EXTENSION} configuration.
+     */
+    public static final String DEFAULT_WORKING_VOCABULARY_CONTEXT_EXTENSION = "/aktualni";
+
+    /**
      * Path to directory containing queries used by the system.
      * <p>
      * The path should be relative to the classpath, so that queries from it can be loaded using {@link
      * ClassLoader#getResourceAsStream(String)}.
      */
     public static final String QUERY_DIRECTORY = "query";
+
+    /**
+     * MIME type for ZIP files.
+     */
+    public static final String ZIP_MEDIA_TYPE = "application/zip";
 
     private Constants() {
         throw new AssertionError();

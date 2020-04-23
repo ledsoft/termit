@@ -28,6 +28,7 @@ import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.VocabularyService;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.util.Constants;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
@@ -165,6 +167,20 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
                 post(PATH).content(toJson(vocabulary)).contentType(MediaType.APPLICATION_JSON_VALUE))
                                            .andExpect(status().isCreated()).andReturn();
         verifyLocationEquals(PATH + "/" + fragment, mvcResult);
+    }
+
+    @Test
+    void createVocabularyRunsImportWhenFileIsUploaded() throws Exception {
+        final Vocabulary vocabulary = Generator.generateVocabulary();
+        vocabulary.setUri(URI.create(NAMESPACE + FRAGMENT));
+        when(serviceMock.importVocabulary(any())).thenReturn(vocabulary);
+
+        final MockMultipartFile upload = new MockMultipartFile("file", "test-glossary.ttl",
+                Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"));
+        final MvcResult mvcResult = mockMvc.perform(multipart(PATH + "/import").file(upload)).andExpect(status().isCreated())
+                                           .andReturn();
+        verifyLocationEquals(PATH + "/" + FRAGMENT, mvcResult);
+        verify(serviceMock).importVocabulary(upload);
     }
 
     @Test

@@ -17,6 +17,7 @@ package cz.cvut.kbss.termit.service.business;
 import cz.cvut.kbss.termit.asset.provenance.SupportsLastModification;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.service.changetracking.ChangeRecordProvider;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.Collection;
@@ -42,4 +43,15 @@ public interface VocabularyService
      * @return Collection of (transitively) imported vocabularies
      */
     Collection<URI> getTransitivelyImportedVocabularies(Vocabulary entity);
+
+    /**
+     * Imports vocabulary from the specified file.
+     * <p>
+     * The file could be a text file containing RDF, or it could be a ZIP file containing separate vocabulary, glossary
+     * and model files.
+     *
+     * @param file File from which to import the vocabulary
+     * @return The imported vocabulary metadata
+     */
+    Vocabulary importVocabulary(MultipartFile file);
 }
