@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.service.changetracking;
 
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDF;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Glossary;
@@ -41,13 +40,13 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
         assertEquals(original.getUri(), record.getChangedEntity());
-        assertEquals(URI.create(RDFS.LABEL), record.getChangedAttribute());
+        assertEquals(URI.create(DC.Terms.TITLE), record.getChangedAttribute());
     }
 
     private static Vocabulary cloneOf(Vocabulary original) {
         final Vocabulary clone = new Vocabulary();
         clone.setUri(original.getUri());
-        clone.setComment(original.getComment());
+        clone.setDescription(original.getDescription());
         clone.setModel(original.getModel());
         clone.setGlossary(original.getGlossary());
         clone.setLabel(original.getLabel());

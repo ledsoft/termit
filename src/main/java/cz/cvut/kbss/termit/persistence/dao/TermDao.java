@@ -177,8 +177,7 @@ public class TermDao extends AssetDao<Term> {
                                       .setParameter("hasLabel", LABEL_PROP)
                                       .setParameter("hasGlossary",
                                               URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar))
-                                      .setParameter("hasTerm", URI.create(
-                                              cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_korenovy_pojem));
+                                      .setParameter("hasTerm", URI.create(SKOS.HAS_TOP_CONCEPT));
         if (includeImports) {
             tq.setParameter("imports", URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik));
         }
