@@ -297,6 +297,7 @@ class TermDaoTest extends BaseDaoTestRunner {
                     vf.createLiteral("Adios", "es"));
         }
     }
+
     @Test
     void findAllReturnsOnlyTermsWithMatchingLanguageLabel() {
         final List<Term> terms = generateTerms(5);

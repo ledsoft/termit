@@ -44,7 +44,7 @@ class SKOSVocabularyExporterTest extends VocabularyExporterTestBase {
     @Autowired
     private Configuration config;
 
-    private ValueFactory vf = SimpleValueFactory.getInstance();
+    private final ValueFactory vf = SimpleValueFactory.getInstance();
 
     @BeforeEach
     void setUp() {
@@ -70,7 +70,7 @@ class SKOSVocabularyExporterTest extends VocabularyExporterTestBase {
         assertThat(model, hasItem(vf
                 .createStatement(glossaryIri(vocabulary), RDF.TYPE, OWL.ONTOLOGY)));
         assertThat(model, hasItem(vf
-                .createStatement(glossaryIri(vocabulary), RDFS.LABEL,
+                .createStatement(glossaryIri(vocabulary), DCTERMS.TITLE,
                         vf.createLiteral(vocabulary.getLabel(), lang()))));
     }
 

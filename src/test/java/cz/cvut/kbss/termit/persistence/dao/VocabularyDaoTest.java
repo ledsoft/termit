@@ -153,11 +153,11 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         });
 
         final String newComment = "New comment";
-        vocabulary.setComment(newComment);
+        vocabulary.setDescription(newComment);
         transactional(() -> sut.update(vocabulary));
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri(), vocabularyDescriptor);
-        assertEquals(newComment, result.getComment());
+        assertEquals(newComment, result.getDescription());
     }
 
     @Test

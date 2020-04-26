@@ -8,7 +8,7 @@ CONSTRUCT {
     ?glossary a owl:Ontology ;
               a skos:ConceptScheme ;
               a <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> ;
-              rdfs:label ?label ;
+              dc:title ?label ;
               dc:creator ?fullName ;
               dc:created ?created ;
               dc:rights ?rights ;
@@ -21,11 +21,11 @@ CONSTRUCT {
     ?vocabulary pdp:má-glosář ?glossary ;
                 pdp:má-autora ?author ;
                 pdp:má-datum-a-čas-vytvoření ?created ;
-                rdfs:label ?vocabularyLabel .
+                dc:title ?vocabularyLabel .
     ?author pdp:má-křestní-jméno ?firstName ;
             pdp:má-příjmení ?lastName .
     OPTIONAL {
-        ?glossary rdfs:label ?glossaryLabel .
+        ?glossary dc:title ?glossaryLabel .
     }
     OPTIONAL {
         ?vocabulary pdp:importuje-slovník/pdp:má-glosář ?imported .

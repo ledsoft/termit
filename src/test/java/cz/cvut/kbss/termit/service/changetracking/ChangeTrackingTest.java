@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.changetracking;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
@@ -89,7 +89,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         assertEquals(1, result.size());
         assertEquals(vocabulary.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
-        assertEquals(RDFS.LABEL, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
+        assertEquals(DC.Terms.TITLE, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         result.forEach(chr -> {
             assertEquals(vocabulary.getUri(), chr.getChangedEntity());
             assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
-            assertThat(((UpdateChangeRecord) chr).getChangedAttribute().toString(), anyOf(equalTo(RDFS.LABEL),
+            assertThat(((UpdateChangeRecord) chr).getChangedAttribute().toString(), anyOf(equalTo(DC.Terms.TITLE),
                     equalTo(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik)));
         });
     }

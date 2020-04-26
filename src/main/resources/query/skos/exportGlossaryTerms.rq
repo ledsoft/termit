@@ -45,7 +45,7 @@ CONSTRUCT {
     }
     OPTIONAL {
     # This ensures only parent-less terms become top concepts of their glossaries
-        BIND(IF(EXISTS {?glossary pdp:obsahuje-kořenový-pojem ?term}, ?glossary, BNODE()) as ?topOf)
+        BIND(IF(EXISTS {?glossary skos:hasTopConcept ?term}, ?glossary, BNODE()) as ?topOf)
         FILTER (!ISBLANK(?topOf))
     }
     OPTIONAL {

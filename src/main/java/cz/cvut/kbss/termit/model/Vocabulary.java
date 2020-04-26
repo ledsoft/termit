@@ -1,27 +1,27 @@
 /**
  * TermIt
  * Copyright (C) 2019 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.model;
 
 import cz.cvut.kbss.jopa.model.annotations.*;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
-import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
+import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.changetracking.Audited;
 
 import javax.validation.constraints.NotBlank;
@@ -35,25 +35,26 @@ import java.util.stream.Collectors;
 
 @Audited
 @OWLClass(iri = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik)
-@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
+@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class Vocabulary extends Asset implements Serializable {
 
     @NotBlank
     @ParticipationConstraints(nonEmpty = true)
-    @OWLAnnotationProperty(iri = RDFS.LABEL)
+    @OWLAnnotationProperty(iri = DC.Terms.TITLE)
     private String label;
 
-    @OWLAnnotationProperty(iri = RDFS.COMMENT)
-    private String comment;
+    @OWLAnnotationProperty(iri = DC.Terms.DESCRIPTION)
+    private String description;
 
     @ParticipationConstraints(nonEmpty = true)
-    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar, cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar, cascade = CascadeType.PERSIST,
+                       fetch = FetchType.EAGER)
     private Glossary glossary;
 
     @ParticipationConstraints(nonEmpty = true)
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_model, cascade = CascadeType.PERSIST,
-            fetch = FetchType.EAGER)
+                       fetch = FetchType.EAGER)
     private Model model;
 
     @OWLObjectProperty(iri = cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik, fetch = FetchType.EAGER)
@@ -72,12 +73,12 @@ public class Vocabulary extends Asset implements Serializable {
         this.label = label;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Glossary getGlossary() {
@@ -136,8 +137,8 @@ public class Vocabulary extends Asset implements Serializable {
                 " <" + getUri() + '>' +
                 ", glossary=" + glossary +
                 (importedVocabularies != null ?
-                 ", importedVocabularies = [" + importedVocabularies.stream().map(p -> "<" + p + ">").collect(
-                         Collectors.joining(", ")) + "]" : "") +
+                        ", importedVocabularies = [" + importedVocabularies.stream().map(p -> "<" + p + ">").collect(
+                                Collectors.joining(", ")) + "]" : "") +
                 '}';
     }
 
