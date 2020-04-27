@@ -35,6 +35,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
+import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
+
 @Repository
 public class ResourceDao extends AssetDao<Resource> implements SupportsLastModification {
 
@@ -132,7 +134,9 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
                     "} } ORDER BY ?label", Resource.class)
                      .setParameter("type", typeUri)
                      .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor))
-                     .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik)).getResultList();
+                     .setParameter("vocabulary",
+                             URI.create(getOwlClassForEntity(cz.cvut.kbss.termit.model.Vocabulary.class)))
+                     .getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -155,7 +159,7 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
                     "?assignment ?is-assignment-of ?x ;" +
                     "?has-target/?has-source ?resource ." +
                     "} ORDER BY ?label", Term.class)
-                     .setParameter("term", URI.create(Vocabulary.s_c_term))
+                     .setParameter("term", URI.create(getOwlClassForEntity(Term.class)))
                      .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                      .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                      .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))

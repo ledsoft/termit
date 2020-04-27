@@ -1,24 +1,22 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao.lucene;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.FullTextSearchResult;
+import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.persistence.dao.SearchDao;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -31,6 +29,8 @@ import org.springframework.stereotype.Repository;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+
+import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
 
 /**
  * {@link SearchDao} extension for Lucene-based repositories. These support rich search strings with wildcards and
@@ -61,8 +61,9 @@ public class LuceneSearchDao extends SearchDao {
         LOG.trace("Running full text search for search string \"{}\", using wildcard variant \"{}\".", searchString,
                 wildcardString);
         return (List<FullTextSearchResult>) em.createNativeQuery(ftsQuery, "FullTextSearchResult")
-                                              .setParameter("term", URI.create(Vocabulary.s_c_term))
-                                              .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
+                                              .setParameter("term", URI.create(getOwlClassForEntity(Term.class)))
+                                              .setParameter("vocabulary", URI.create(getOwlClassForEntity(
+                                                      cz.cvut.kbss.termit.model.Vocabulary.class)))
                                               .setParameter("inVocabulary",
                                                       URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
                                               .setParameter("searchString", searchString, null)

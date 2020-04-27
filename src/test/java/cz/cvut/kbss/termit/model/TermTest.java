@@ -43,7 +43,7 @@ class TermTest {
     @Test
     void toCsvOutputsAllColumnsEvenIfNotAllAttributesArePresent() {
         final Term term = Generator.generateTermWithId();
-        term.setComment(null);
+        term.setDescription(null);
         final String result = term.toCsv();
         int count = 0;
         for (int i = 0; i < result.length(); i++) {
@@ -63,15 +63,15 @@ class TermTest {
         assertEquals(term.getUri().toString(), items[0]);
         assertEquals(term.getLabel(), items[1]);
         assertEquals(term.getDefinition(), items[2]);
-        assertEquals(term.getComment(), items[3]);
+        assertEquals(term.getDescription(), items[3]);
     }
 
     @Test
     void toCsvPutsCommentInQuotesToEscapeCommas() {
         final Term term = Generator.generateTermWithId();
-        term.setComment("Comment, with a comma");
+        term.setDescription("Comment, with a comma");
         final String result = term.toCsv();
-        assertThat(result, containsString("\"" + term.getComment() + "\""));
+        assertThat(result, containsString("\"" + term.getDescription() + "\""));
     }
 
     @Test
@@ -145,7 +145,7 @@ class TermTest {
         assertEquals(term.getUri().toString(), row.getCell(0).getStringCellValue());
         assertEquals(term.getLabel(), row.getCell(1).getStringCellValue());
         assertEquals(term.getDefinition(), row.getCell(2).getStringCellValue());
-        assertEquals(term.getComment(), row.getCell(3).getStringCellValue());
+        assertEquals(term.getDescription(), row.getCell(3).getStringCellValue());
         assertEquals(term.getTypes().iterator().next(), row.getCell(4).getStringCellValue());
         assertTrue(row.getCell(5).getStringCellValue().matches(".+;.+"));
         term.getSources().forEach(s -> assertTrue(row.getCell(5).getStringCellValue().contains(s)));
@@ -160,7 +160,7 @@ class TermTest {
     @Test
     void toExcelHandlesEmptyOptionalAttributeValues() {
         final Term term = Generator.generateTermWithId();
-        term.setComment(null);
+        term.setDescription(null);
         term.setDefinition(null);
         final XSSFWorkbook wb = new XSSFWorkbook();
         final XSSFSheet sheet = wb.createSheet("test");
@@ -174,7 +174,7 @@ class TermTest {
     @Test
     void toExcelHandlesSkippingEmptyColumns() {
         final Term term = Generator.generateTermWithId();
-        term.setComment(null);
+        term.setDescription(null);
         term.setSources(new LinkedHashSet<>(
                 Arrays.asList(Generator.generateUri().toString(), "PSP/c-1/p-2/b-c", "PSP/c-1/p-2/b-f")));
         final XSSFWorkbook wb = new XSSFWorkbook();

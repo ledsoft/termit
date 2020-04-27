@@ -80,7 +80,7 @@ public class LanguageServiceJena extends LanguageService {
 
                  final Statement st = c.getProperty(RDFS.comment, lang);
                  if (st != null) {
-                     t.setComment(st.getObject().asLiteral().getString());
+                     t.setDescription(st.getObject().asLiteral().getString());
                  }
                  t.setSubTerms(c.listProperties(SKOS.narrower)
                                 .mapWith(s -> new TermInfo(URI.create(s.getObject().asResource().getURI()))).toSet());
