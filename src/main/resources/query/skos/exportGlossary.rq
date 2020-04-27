@@ -7,7 +7,7 @@ PREFIX dc: <http://purl.org/dc/terms/>
 CONSTRUCT {
     ?glossary a owl:Ontology ;
               a skos:ConceptScheme ;
-              a <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> ;
+              a pdp:glosář ;
               dc:title ?label ;
               dc:creator ?fullName ;
               dc:created ?created ;

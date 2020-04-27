@@ -50,7 +50,7 @@ CONSTRUCT {
     }
     OPTIONAL {
         ?term a ?type .
-        FILTER (?type != pdp:term && ?type != skos:Concept)
+        FILTER (?type != skos:Concept)
         FILTER(!STRSTARTS(STR(?type), "http://www.w3.org/2002/07/owl#"))
         FILTER NOT EXISTS {
             ?term a ?intermediateType .
