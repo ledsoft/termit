@@ -17,7 +17,6 @@ package cz.cvut.kbss.termit.model;
 import cz.cvut.kbss.jopa.model.annotations.Properties;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
@@ -37,8 +36,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Audited
-@OWLClass(iri = Vocabulary.s_c_term)
-@JsonLdAttributeOrder({"uri", "label", "comment", "author", "lastEditor"})
+@OWLClass(iri = SKOS.CONCEPT)
+@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
 @EntityListeners(ProvenanceManager.class)
 public class Term extends Asset implements HasTypes, Serializable {
 
@@ -46,7 +45,7 @@ public class Term extends Asset implements HasTypes, Serializable {
      * Names of columns used in term export.
      */
     public static final List<String> EXPORT_COLUMNS = Collections
-            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Comment", "Types", "Sources", "Parent term",
+            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Description", "Types", "Sources", "Parent term",
                     "SubTerms"));
 
     @NotBlank
@@ -54,8 +53,8 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLAnnotationProperty(iri = SKOS.PREF_LABEL)
     private String label;
 
-    @OWLAnnotationProperty(iri = RDFS.COMMENT)
-    private String comment;
+    @OWLAnnotationProperty(iri = DC.Terms.DESCRIPTION)
+    private String description;
 
     @OWLAnnotationProperty(iri = SKOS.DEFINITION)
     private String definition;
@@ -89,12 +88,12 @@ public class Term extends Asset implements HasTypes, Serializable {
         this.label = label;
     }
 
-    public String getComment() {
-        return comment;
+    public String getDescription() {
+        return description;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getDefinition() {
@@ -173,7 +172,7 @@ public class Term extends Asset implements HasTypes, Serializable {
         final StringBuilder sb = new StringBuilder(CsvUtils.sanitizeString(getUri().toString()));
         sb.append(',').append(CsvUtils.sanitizeString(getLabel()));
         sb.append(',').append(CsvUtils.sanitizeString(definition));
-        sb.append(',').append(CsvUtils.sanitizeString(comment));
+        sb.append(',').append(CsvUtils.sanitizeString(description));
         sb.append(',');
         if (types != null && !types.isEmpty()) {
             sb.append(exportCollection(types));
@@ -213,8 +212,8 @@ public class Term extends Asset implements HasTypes, Serializable {
         if (definition != null) {
             row.createCell(2).setCellValue(definition);
         }
-        if (comment != null) {
-            row.createCell(3).setCellValue(comment);
+        if (description != null) {
+            row.createCell(3).setCellValue(description);
         }
         if (types != null) {
             row.createCell(4).setCellValue(String.join(";", types));

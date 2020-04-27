@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
@@ -35,6 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -75,7 +73,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matching.size(), result.size());
         for (FullTextSearchResult item : result) {
-            assertTrue(item.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_term));
+            assertTrue(item.getTypes().contains(getOwlClassForEntity(Term.class)));
             assertTrue(matching.stream().anyMatch(t -> t.getUri().equals(item.getUri())));
         }
     }
@@ -103,7 +101,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matching.size(), result.size());
         for (FullTextSearchResult item : result) {
-            assertTrue(item.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik));
+            assertTrue(item.getTypes().contains(getOwlClassForEntity(Vocabulary.class)));
             assertTrue(matching.stream().anyMatch(t -> t.getUri().equals(item.getUri())));
         }
     }
@@ -140,7 +138,7 @@ class SearchDaoTest extends BaseDaoTestRunner {
         final List<FullTextSearchResult> result = sut.fullTextSearch("matching");
         assertEquals(matchingTerms.size() + matchingVocabularies.size(), result.size());
         for (FullTextSearchResult item : result) {
-            if (item.getTypes().contains(cz.cvut.kbss.termit.util.Vocabulary.s_c_term)) {
+            if (item.getTypes().contains(getOwlClassForEntity(Term.class))) {
                 assertTrue(matchingTerms.stream().anyMatch(t -> t.getUri().equals(item.getUri())));
             } else {
                 assertTrue(matchingVocabularies.stream().anyMatch(v -> v.getUri().equals(item.getUri())));

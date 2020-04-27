@@ -190,7 +190,7 @@ public class Generator {
         final Term term = new Term();
         term.setLabel("Term" + randomInt());
         term.setDefinition("Normative definition of term " + term.getLabel());
-        term.setComment("Comment" + randomInt());
+        term.setDescription("Comment" + randomInt());
         return term;
     }
 
