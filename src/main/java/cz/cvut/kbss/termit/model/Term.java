@@ -19,7 +19,6 @@ import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
-import cz.cvut.kbss.termit.asset.provenance.ProvenanceManager;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.changetracking.Audited;
@@ -37,8 +36,7 @@ import java.util.stream.Collectors;
 
 @Audited
 @OWLClass(iri = SKOS.CONCEPT)
-@JsonLdAttributeOrder({"uri", "label", "description", "author", "lastEditor"})
-@EntityListeners(ProvenanceManager.class)
+@JsonLdAttributeOrder({"uri", "label", "description", "subTerms"})
 public class Term extends Asset implements HasTypes, Serializable {
 
     /**

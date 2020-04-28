@@ -1,22 +1,20 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.environment;
 
+import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
@@ -29,9 +27,11 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
+
 public class Generator {
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     private Generator() {
         throw new AssertionError();
@@ -242,5 +242,10 @@ public class Generator {
         file.setLabel(fileName);
         file.setUri(Generator.generateUri());
         return file;
+    }
+
+    public static RecentlyModifiedAsset toRecentlyModifiedAsset(Asset asset) {
+        return new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), asset.getLastModifiedOrCreated(),
+                asset.getAuthor() != null ? asset.getAuthor().getUri() : null, getOwlClassForEntity(asset.getClass()));
     }
 }
