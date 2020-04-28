@@ -14,20 +14,23 @@
  */
 package cz.cvut.kbss.termit.environment;
 
-import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
+import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 
+import java.lang.reflect.Field;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
 
 public class Generator {
 
@@ -244,8 +247,37 @@ public class Generator {
         return file;
     }
 
-    public static RecentlyModifiedAsset toRecentlyModifiedAsset(Asset asset) {
-        return new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), asset.getLastModifiedOrCreated(),
-                asset.getAuthor() != null ? asset.getAuthor().getUri() : null, getOwlClassForEntity(asset.getClass()));
+    public static PersistChangeRecord generatePersistChange(Asset asset) {
+        final PersistChangeRecord record = new PersistChangeRecord(asset);
+        record.setTimestamp(Instant.now());
+        if (Environment.getCurrentUser() != null) {
+            record.setAuthor(Environment.getCurrentUser().toUser());
+        }
+        return record;
+    }
+
+    /**
+     * Generates a change record indicating change of the specified asset's label from nothing to the current value.
+     *
+     * @param asset Changed asset
+     * @return Change record
+     */
+    public static UpdateChangeRecord generateUpdateChange(Asset asset) {
+        final UpdateChangeRecord record = new UpdateChangeRecord(asset);
+        record.setTimestamp(Instant.now());
+        if (Environment.getCurrentUser() != null) {
+            record.setAuthor(Environment.getCurrentUser().toUser());
+        }
+        try {
+            final Class<?> cls = asset.getClass();
+            final Field labelField = cls.getDeclaredField("label");
+            if (labelField.getAnnotation(OWLAnnotationProperty.class) != null) {
+                record.setChangedAttribute(URI.create(labelField.getAnnotation(OWLAnnotationProperty.class).iri()));
+            }
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Unable to generate update record.");
+        }
+        record.setNewValue(Collections.singleton(asset.getLabel()));
+        return record;
     }
 }

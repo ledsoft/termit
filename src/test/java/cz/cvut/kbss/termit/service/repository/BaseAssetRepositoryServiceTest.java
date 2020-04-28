@@ -1,32 +1,29 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
+import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.persistence.dao.VocabularyDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +32,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.Validator;
+import java.time.Instant;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
 
 class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
 
@@ -80,45 +75,25 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> Generator.generateVocabularyWithId())
                                                        .collect(Collectors.toList());
         transactional(() -> vocabularies.forEach(em::persist));
-        transactional(() -> setCreated(vocabularies));
+        final List<PersistChangeRecord> persistRecords = vocabularies.stream().map(Generator::generatePersistChange)
+                                                                     .collect(
+                                                                             Collectors.toList());
+        setCreated(persistRecords);
+
         em.getEntityManagerFactory().getCache().evictAll();
 
         final int count = 2;
-        final List<Vocabulary> all = sut.findAll();
-        all.sort(Comparator.comparing(Vocabulary::getLastModifiedOrCreated).reversed());
-        final List<Vocabulary> result = sut.findLastEdited(count);
+        final List<RecentlyModifiedAsset> result = sut.findLastEdited(count);
+        persistRecords.sort(Comparator.comparing(AbstractChangeRecord::getTimestamp).reversed());
         assertEquals(count, result.size());
-        assertEquals(all.subList(0, count), result);
+        assertEquals(persistRecords.subList(0, count).stream().map(AbstractChangeRecord::getChangedEntity)
+                                   .collect(Collectors.toList()),
+                result.stream().map(RecentlyModifiedAsset::getUri).collect(Collectors.toList()));
     }
 
-    private void setCreated(List<Vocabulary> vocabularies) {
-        final Repository repo = em.unwrap(Repository.class);
-        final ValueFactory vf = repo.getValueFactory();
-        try (final RepositoryConnection con = repo.getConnection()) {
-            con.begin();
-            for (int i = 0; i < vocabularies.size(); i++) {
-                final Vocabulary r = vocabularies.get(i);
-                con.remove(vf.createIRI(r.getUri().toString()),
-                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_datum_a_cas_vytvoreni), null);
-                con.add(vf.createIRI(r.getUri().toString()),
-                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_datum_a_cas_vytvoreni),
-                        vf.createLiteral(new Date(System.currentTimeMillis() - i * 1000 * 60)));
-            }
-            con.commit();
+    private void setCreated(List<? extends AbstractChangeRecord> changeRecords) {
+        for (int i = 0; i < changeRecords.size(); i++) {
+            changeRecords.get(i).setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis() - i * 1000 * 60));
         }
-    }
-
-    @Test
-    void findRecentlyEditedInvokesPostLoadForEachLoadedItem() {
-        final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> Generator.generateVocabularyWithId())
-                                                       .collect(Collectors.toList());
-        final VocabularyDao vocabularyDao = mock(VocabularyDao.class);
-        when(vocabularyDao.findLastEdited(anyInt())).thenReturn(vocabularies);
-        final BaseAssetRepositoryService<Vocabulary> localSut = spy(
-                new BaseAssetRepositoryServiceImpl(vocabularyDao, mock(Validator.class)));
-        final int count = 117;
-        localSut.findLastEdited(count);
-        verify(vocabularyDao).findLastEdited(count);
-        vocabularies.forEach(v -> verify(localSut).postLoad(v));
     }
 }

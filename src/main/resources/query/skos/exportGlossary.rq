@@ -19,8 +19,6 @@ CONSTRUCT {
               <http://purl.org/ontology/bibo/status> ?status .
 } WHERE {
     ?vocabulary pdp:má-glosář ?glossary ;
-                pdp:má-autora ?author ;
-                pdp:má-datum-a-čas-vytvoření ?created ;
                 dc:title ?vocabularyLabel .
     ?author pdp:má-křestní-jméno ?firstName ;
             pdp:má-příjmení ?lastName .
@@ -42,6 +40,12 @@ CONSTRUCT {
     }
     OPTIONAL {
         ?glossary <http://purl.org/ontology/bibo/status> ?status .
+    }
+    OPTIONAL {
+        ?createRecord a pdp:vytvoření-entity ;
+            pdp:má-změněnou-entitu ?vocabulary ;
+            pdp:má-editora ?author ;
+            pdp:má-datum-a-čas-modifikace ?created .
     }
     BIND (CONCAT(?firstName, " ", ?lastName) AS ?fullName)
     BIND (COALESCE(?glossaryLabel, ?vocabularyLabel) AS ?label)

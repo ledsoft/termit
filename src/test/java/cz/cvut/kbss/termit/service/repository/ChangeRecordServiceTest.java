@@ -31,12 +31,14 @@ class ChangeRecordServiceTest extends BaseServiceTestRunner {
     @Autowired
     private ChangeRecordService sut;
 
+    private User author;
+
     private Vocabulary asset;
 
     @BeforeEach
     void setUp() {
         this.asset = Generator.generateVocabularyWithId();
-        final User author = Generator.generateUserWithId();
+        this.author = Generator.generateUserWithId();
         Environment.setCurrentUser(author);
         transactional(() -> {
             em.persist(author);
@@ -58,7 +60,7 @@ class ChangeRecordServiceTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> records = IntStream.range(0, 5).mapToObj(i -> {
             final UpdateChangeRecord r = new UpdateChangeRecord(asset);
             r.setChangedAttribute(URI.create(RDFS.LABEL));
-            r.setAuthor(asset.getAuthor());
+            r.setAuthor(author);
             r.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis() - i * 10000));
             return r;
         }).collect(Collectors.toList());

@@ -46,7 +46,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,8 +106,6 @@ class VocabularyControllerTest extends BaseControllerTestRunner {
 
     private Vocabulary generateVocabulary() {
         final Vocabulary vocab = Generator.generateVocabularyWithId();
-        vocab.setAuthor(user);
-        vocab.setCreated(new Date());
         return vocab;
     }
 
