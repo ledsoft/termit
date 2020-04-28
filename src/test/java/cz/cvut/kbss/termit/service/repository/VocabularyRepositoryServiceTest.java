@@ -144,11 +144,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     private Descriptor descriptorFor(Vocabulary entity) {
-        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
-        descriptor.addAttributeDescriptor(
-                em.getMetamodel().entity(Vocabulary.class).getAttribute("author").getJavaField(),
-                new EntityDescriptor(null));
-        return descriptor;
+        return new EntityDescriptor(entity.getUri());
     }
 
     @Test

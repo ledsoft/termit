@@ -2,6 +2,7 @@ package cz.cvut.kbss.termit.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -26,8 +27,7 @@ public class RecentlyModifiedAsset implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String label;
 
-    // TODO Add to JOPA
-    @OWLAnnotationProperty(iri = "http://purl.org/dc/terms/modified")
+    @OWLAnnotationProperty(iri = DC.Terms.MODIFIED)
     private Date modified;
 
     @JsonIgnore
