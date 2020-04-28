@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -90,8 +89,6 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         clone.setDefinition(original.getDefinition());
         clone.setDescription(original.getDescription());
         clone.setVocabulary(original.getVocabulary());
-        clone.setAuthor(original.getAuthor());
-        clone.setCreated(original.getCreated());
         return clone;
     }
 
@@ -244,17 +241,6 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(RDF.TYPE))));
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(SKOS.BROADER))));
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(SKOS.PREF_LABEL))));
-    }
-
-    @Test
-    void calculateChangesSkipsProvenanceAttributes() {
-        final Term original = Generator.generateTermWithId();
-        final Term changed = cloneOf(original);
-        changed.setAuthor(Generator.generateUserWithId());
-        changed.setCreated(new Date());
-
-        final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
-        assertTrue(result.isEmpty());
     }
 
     @Test

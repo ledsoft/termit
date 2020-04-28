@@ -19,7 +19,6 @@ import cz.cvut.kbss.jopa.model.query.TypedQuery;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.dto.TermInfo;
-import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.Term;
@@ -62,13 +61,7 @@ class TermDaoTest extends BaseDaoTestRunner {
     void setUp() {
         this.vocabulary = Generator.generateVocabulary();
         vocabulary.setUri(Generator.generateUri());
-        vocabulary.setCreated(new Date());
-        vocabulary.setAuthor(Generator.generateUserWithId());
-        Environment.setCurrentUser(vocabulary.getAuthor());
-        transactional(() -> {
-            em.persist(vocabulary.getAuthor());
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-        });
+        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
     }
 
     @Test
@@ -113,8 +106,6 @@ class TermDaoTest extends BaseDaoTestRunner {
         addTermsAndSave(new HashSet<>(terms), vocabulary);
         final Vocabulary another = Generator.generateVocabulary();
         another.setUri(Generator.generateUri());
-        another.setAuthor(vocabulary.getAuthor());
-        another.setCreated(new Date());
         another.getGlossary().setRootTerms(generateTerms(4).stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> em.persist(another));
 

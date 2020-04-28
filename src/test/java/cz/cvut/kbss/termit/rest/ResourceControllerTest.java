@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.rest;
 
@@ -31,7 +28,6 @@ import cz.cvut.kbss.termit.rest.handler.ErrorInfo;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.ResourceService;
 import cz.cvut.kbss.termit.service.document.util.TypeAwareFileSystemResource;
-import cz.cvut.kbss.termit.service.security.SecurityUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
@@ -86,9 +82,6 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private IdentifierResolver identifierResolverMock;
-
-    @Mock
-    private SecurityUtils securityUtilsMock;
 
     @InjectMocks
     private ResourceController sut;
@@ -156,33 +149,8 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         assertEquals(related, result);
     }
 
-    @Test
-    void getRelatedResourcesReturnsResourcesWithAuthorInformationWhenUserIsAuthenticated() throws Exception {
-        final User author = Generator.generateUserWithId();
-        final Resource resource = Generator.generateResourceWithId();
-        when(resourceServiceMock.getRequiredReference(resource.getUri())).thenReturn(resource);
-        final List<Resource> related = generateRelatedResources(author);
-        when(resourceServiceMock.findRelated(resource)).thenReturn(related);
-        when(securityUtilsMock.isAuthenticated()).thenReturn(true);
-        final MvcResult mvcResult = mockMvc
-                .perform(get(PATH + "/resource/related").param(IRI_PARAM, resource.getUri().toString()))
-                .andExpect(status().isOk()).andReturn();
-        final List<Resource> result = readValue(mvcResult, new TypeReference<List<Resource>>() {
-        });
-        assertEquals(related.size(), result.size());
-        result.forEach(r -> {
-            assertEquals(author, r.getAuthor());
-            assertNotNull(r.getCreated());
-        });
-    }
-
-    private List<Resource> generateRelatedResources(User author) {
-        return IntStream.range(0, 5).mapToObj(i -> {
-            final Resource r = Generator.generateResourceWithId();
-            r.setAuthor(author);
-            r.setCreated(new Date());
-            return r;
-        }).collect(Collectors.toList());
+    private List<Resource> generateRelatedResources() {
+        return IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId()).collect(Collectors.toList());
     }
 
     @Test
@@ -469,7 +437,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         resource.setLabel(RESOURCE_NAME);
         when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(RESOURCE_URI);
         when(resourceServiceMock.getRequiredReference(RESOURCE_URI)).thenReturn(resource);
-        final List<Resource> related = generateRelatedResources(author);
+        final List<Resource> related = generateRelatedResources();
         when(resourceServiceMock.findRelated(resource)).thenReturn(related);
 
         final MvcResult mvcResult = mockMvc
@@ -602,7 +570,8 @@ class ResourceControllerTest extends BaseControllerTestRunner {
         when(resourceServiceMock.getAssignmentInfo(resource)).thenReturn(assignmentInfo);
 
         final MvcResult mvcResult = mockMvc.perform(
-                get(PATH + "/" + RESOURCE_NAME + "/assignments/aggregated").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+                get(PATH + "/" + RESOURCE_NAME + "/assignments/aggregated")
+                        .param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
                                            .andExpect(status().isOk()).andReturn();
         final List<ResourceTermAssignments> result = readValue(mvcResult,
                 new TypeReference<List<ResourceTermAssignments>>() {
@@ -649,7 +618,7 @@ class ResourceControllerTest extends BaseControllerTestRunner {
     @Test
     void getAllReturnsNotModifiedWhenLastModifiedDateIsBeforeIfModifiedSinceHeaderValue() throws Exception {
         final List<Resource> resources = IntStream.range(0, 5).mapToObj(i -> Generator.generateResourceWithId())
-                                                       .collect(Collectors.toList());
+                                                  .collect(Collectors.toList());
         when(resourceServiceMock.findAll()).thenReturn(resources);
         // Round to seconds
         final long lastModified = (System.currentTimeMillis() - 60 * 1000);

@@ -26,6 +26,7 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
@@ -39,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -67,14 +67,19 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistSetsVocabularyAuthorAndCreationDate() {
+    void persistGeneratesPersistChangeRecord() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         sut.persist(vocabulary);
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertEquals(user.toUser(), result.getAuthor());
-        assertNotNull(result.getCreated());
+
+        final PersistChangeRecord record = em
+                .createQuery("SELECT r FROM PersistChangeRecord r WHERE r.changedEntity = :vocabularyIri",
+                        PersistChangeRecord.class).setParameter("vocabularyIri", vocabulary.getUri()).getSingleResult();
+        assertNotNull(record);
+        assertEquals(user.toUser(), record.getAuthor());
+        assertNotNull(record.getTimestamp());
     }
 
     @Test
@@ -120,10 +125,8 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalAlreadyIriExists() {
+    void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalIdentifierAlreadyIriExists() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         final Vocabulary toPersist = Generator.generateVocabulary();
@@ -134,8 +137,6 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateThrowsValidationExceptionForEmptyName() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         vocabulary.setLabel("");
@@ -153,8 +154,6 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateSavesUpdatedVocabulary() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
 
         final String newName = "Updated name";

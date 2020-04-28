@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -112,8 +111,6 @@ class SearchDaoTest extends BaseDaoTestRunner {
                                                                Collectors.toList());
         vocabularies.forEach(v -> {
             v.setUri(Generator.generateUri());
-            v.setAuthor(user);
-            v.setCreated(new Date());
             if (Generator.randomBoolean()) {
                 v.setLabel("Matching label " + Generator.randomInt());
             }
