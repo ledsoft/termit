@@ -79,11 +79,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     }
 
     private Descriptor descriptorFor(Vocabulary vocabulary) {
-        final Descriptor descriptor = new EntityDescriptor(vocabulary.getUri());
-        descriptor.addAttributeDescriptor(
-                em.getMetamodel().entity(Vocabulary.class).getAttribute("author").getJavaField(),
-                new EntityDescriptor(null));
-        return descriptor;
+        return new EntityDescriptor(vocabulary.getUri());
     }
 
     @Test
