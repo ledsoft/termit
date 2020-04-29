@@ -50,22 +50,30 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
         final List<URI> recentlyModifiedUniqueAssets = findUniqueLastModifiedEntities(limit);
         final List<RecentlyModifiedAsset> modified = recentlyModifiedUniqueAssets.stream().map(asset -> {
                     return (RecentlyModifiedAsset) em
-                            .createNativeQuery("SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?type WHERE {" +
-                                    "?x a ?change ;" +
-                                    "?hasModifiedEntity ?ent ;" +
-                                    "?hasEditor ?modifiedBy ;" +
-                                    "?hasModificationDate ?modified ." +
-                                    "?ent ?hasLabel ?label ." +
-                                    "BIND (?cls as ?type)" +
-                                    "BIND (?ent as ?entity)" +
-                                    "FILTER (lang(?label) = ?language)" +
-                                    "}", "RecentlyModifiedAsset")
+                            .createNativeQuery(
+                                    "SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?vocabulary ?type ?changeType WHERE {" +
+                                            "?x a ?change ;" +
+                                            "   a ?chType ;" +
+                                            "?hasModifiedEntity ?ent ;" +
+                                            "?hasEditor ?modifiedBy ;" +
+                                            "?hasModificationDate ?modified ." +
+                                            "?ent ?hasLabel ?label ." +
+                                            "OPTIONAL { ?ent ?isFromVocabulary ?vocabulary . }" +
+                                            "BIND (?cls as ?type)" +
+                                            "BIND (?ent as ?entity)" +
+                                            "FILTER (?chType != ?change)" +
+                                            "BIND (IF(?chType = ?persist, ?persist, ?update) as ?changeType)" +
+                                            "FILTER (lang(?label) = ?language)" +
+                                            "} ORDER BY DESC(?modified)", "RecentlyModifiedAsset")
                             .setParameter("cls", typeUri)
                             .setParameter("ent", asset)
-                            .setParameter("change", URI.create(Vocabulary.s_c_zmena_A))
+                            .setParameter("change", URI.create(Vocabulary.s_c_zmena))
                             .setParameter("hasLabel", labelProperty())
                             .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
                             .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                            .setParameter("isFromVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
+                            .setParameter("persist", URI.create(Vocabulary.s_c_vytvoreni_entity))
+                            .setParameter("update", URI.create(Vocabulary.s_c_uprava_entity))
                             .setParameter("language", config.get(ConfigParam.LANGUAGE)).setMaxResults(1).getSingleResult();
                 }
         ).collect(Collectors.toList());
@@ -79,7 +87,7 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
                 "?hasModificationDate ?modified ;" +
                 "?hasModifiedEntity ?entity ." +
                 "?entity a ?type ." +
-                "} ORDER BY DESC(?modified)", URI.class).setParameter("change", URI.create(Vocabulary.s_c_zmena_A))
+                "} ORDER BY DESC(?modified)", URI.class).setParameter("change", URI.create(Vocabulary.s_c_zmena))
                  .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
                  .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
                  .setParameter("type", typeUri).setMaxResults(limit).getResultList();

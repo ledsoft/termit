@@ -17,7 +17,9 @@ import java.util.*;
                 @VariableResult(name = "label", type = String.class),
                 @VariableResult(name = "modified", type = Date.class),
                 @VariableResult(name = "modifiedBy", type = URI.class),
+                @VariableResult(name = "vocabulary", type = URI.class),
                 @VariableResult(name = "type", type = String.class),
+                @VariableResult(name = "changeType", type = String.class),
         })})
 public class RecentlyModifiedAsset implements Serializable {
 
@@ -36,18 +38,23 @@ public class RecentlyModifiedAsset implements Serializable {
     @OWLAnnotationProperty(iri = Vocabulary.s_p_ma_editora)
     private User editor;
 
+    // In case the modified asset is a term, we want its vocabulary as well
+    @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
+    private URI vocabulary;
+
     @Types
     private Set<String> types;
 
     public RecentlyModifiedAsset() {
     }
 
-    public RecentlyModifiedAsset(URI entity, String label, Date modified, URI modifiedBy, String type) {
+    public RecentlyModifiedAsset(URI entity, String label, Date modified, URI modifiedBy, URI vocabulary, String type, String changeType) {
         this.uri = entity;
         this.label = label;
         this.modified = modified;
         this.modifiedBy = modifiedBy;
-        this.types = new HashSet<>(Collections.singleton(type));
+        this.vocabulary = vocabulary;
+        this.types = new HashSet<>(Arrays.asList(type, changeType));
     }
 
     public URI getUri() {
@@ -90,6 +97,14 @@ public class RecentlyModifiedAsset implements Serializable {
         this.editor = editor;
     }
 
+    public URI getVocabulary() {
+        return vocabulary;
+    }
+
+    public void setVocabulary(URI vocabulary) {
+        this.vocabulary = vocabulary;
+    }
+
     public Set<String> getTypes() {
         return types;
     }
@@ -120,11 +135,12 @@ public class RecentlyModifiedAsset implements Serializable {
         return Objects.equals(uri, that.uri) &&
                 Objects.equals(label, that.label) &&
                 Objects.equals(modified, that.modified) &&
+                Objects.equals(vocabulary, that.vocabulary) &&
                 Objects.equals(types, that.types);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, label, modified, types);
+        return Objects.hash(uri, label, modified, vocabulary, types);
     }
 }

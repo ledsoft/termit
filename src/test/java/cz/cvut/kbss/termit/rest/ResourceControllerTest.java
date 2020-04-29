@@ -432,7 +432,6 @@ class ResourceControllerTest extends BaseControllerTestRunner {
 
     @Test
     void getRelatedResourcesRetrievesResourcesRelatedToResource() throws Exception {
-        final User author = Generator.generateUserWithId();
         final Resource resource = Generator.generateResource();
         resource.setUri(RESOURCE_URI);
         resource.setLabel(RESOURCE_NAME);

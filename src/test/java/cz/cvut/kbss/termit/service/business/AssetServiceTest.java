@@ -82,20 +82,20 @@ class AssetServiceTest {
             switch (i % 3) {
                 case 0:
                     asset = Generator.generateResourceWithId();
-                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(),
-                            cz.cvut.kbss.termit.util.Vocabulary.s_c_resource);
+                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(), null,
+                            cz.cvut.kbss.termit.util.Vocabulary.s_c_resource, Vocabulary.s_c_vytvoreni_entity);
                     resources.add(rma);
                     break;
                 case 1:
                     asset = Generator.generateTermWithId();
-                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(),
-                            SKOS.CONCEPT);
+                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(), null,
+                            SKOS.CONCEPT, Vocabulary.s_c_vytvoreni_entity);
                     terms.add(rma);
                     break;
                 case 2:
                     asset = Generator.generateVocabularyWithId();
-                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(),
-                            Vocabulary.s_c_slovnik);
+                    rma = new RecentlyModifiedAsset(asset.getUri(), asset.getLabel(), new Date(), author.getUri(), null,
+                            Vocabulary.s_c_slovnik, Vocabulary.s_c_vytvoreni_entity);
                     vocabularies.add(rma);
                     break;
             }

@@ -72,9 +72,10 @@ class AssetControllerTest extends BaseControllerTestRunner {
     private static List<RecentlyModifiedAsset> generateRecentlyModifiedAssetRecords() {
         final User user = Generator.generateUserWithId();
         return IntStream.range(0, 5).mapToObj(i -> new RecentlyModifiedAsset(Generator.generateUri(), "Test " + i,
-                new Date(), user.getUri(), Generator.randomBoolean() ?
-                                           Vocabulary.s_c_slovnik :
-                                           SKOS.CONCEPT)).collect(Collectors.toList());
+                new Date(), user.getUri(), null, Generator.randomBoolean() ?
+                                                 Vocabulary.s_c_slovnik :
+                                                 SKOS.CONCEPT, Vocabulary.s_c_vytvoreni_entity))
+                        .collect(Collectors.toList());
     }
 
     @Test
