@@ -54,6 +54,7 @@ class AssetDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findRecentlyEditedLoadsSpecifiedCountOfRecentlyEditedResources() {
+        enableRdfsInference(em);
         final List<Resource> resources = IntStream.range(0, 10).mapToObj(i -> Generator.generateResourceWithId())
                                                   .collect(Collectors.toList());
         transactional(() -> resources.forEach(em::persist));
@@ -72,6 +73,7 @@ class AssetDaoTest extends BaseDaoTestRunner {
 
     @Test
     void findRecentlyEditedUsesLastModifiedDateWhenAvailable() {
+        enableRdfsInference(em);
         final List<Resource> resources = IntStream.range(0, 10).mapToObj(i -> Generator.generateResourceWithId())
                                                   .collect(Collectors.toList());
         transactional(() -> resources.forEach(em::persist));
