@@ -21,6 +21,7 @@ import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.UnsupportedAssetOperationException;
 import cz.cvut.kbss.termit.model.*;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
@@ -630,5 +631,25 @@ class ResourceControllerTest extends BaseControllerTestRunner {
                .andExpect(status().isNotModified());
         verify(resourceServiceMock).getLastModified();
         verify(resourceServiceMock, never()).findAll();
+    }
+
+    @Test
+    void getHistoryReturnsListOfChangeRecordsForSpecifiedVocabulary() throws Exception {
+        final Resource resource = Generator.generateResourceWithId();
+        resource.setUri(RESOURCE_URI);
+        when(identifierResolverMock.resolveIdentifier(RESOURCE_NAMESPACE, RESOURCE_NAME)).thenReturn(resource.getUri());
+        when(resourceServiceMock.getRequiredReference(RESOURCE_URI)).thenReturn(resource);
+        final List<AbstractChangeRecord> records = Collections.singletonList(Generator.generatePersistChange(resource));
+        when(resourceServiceMock.getChanges(resource)).thenReturn(records);
+
+        final MvcResult mvcResult = mockMvc
+                .perform(get(PATH + "/" + RESOURCE_NAME + "/history").param(QueryParams.NAMESPACE, RESOURCE_NAMESPACE))
+                .andExpect(status().isOk())
+                .andReturn();
+        final List<AbstractChangeRecord> result = readValue(mvcResult, new TypeReference<List<AbstractChangeRecord>>() {
+        });
+        assertNotNull(result);
+        assertEquals(records, result);
+        verify(resourceServiceMock).getChanges(resource);
     }
 }

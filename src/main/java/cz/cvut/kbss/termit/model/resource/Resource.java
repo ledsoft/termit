@@ -22,12 +22,14 @@ import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.model.Asset;
+import cz.cvut.kbss.termit.model.changetracking.Audited;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Audited
 @OWLClass(iri = Vocabulary.s_c_zdroj)
 @JsonLdAttributeOrder({"uri", "label", "description"})
 public class Resource extends Asset implements Serializable {

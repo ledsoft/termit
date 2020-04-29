@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.rest;
 
@@ -23,11 +20,11 @@ import cz.cvut.kbss.termit.exception.TermItException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.TermAssignment;
 import cz.cvut.kbss.termit.model.TextAnalysisRecord;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.service.business.ResourceService;
-import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Constants.QueryParams;
 import cz.cvut.kbss.termit.util.TypeAwareResource;
@@ -47,6 +44,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
+
+import static cz.cvut.kbss.termit.util.ConfigParam.NAMESPACE_RESOURCE;
 
 @RestController
 @RequestMapping("/resources")
@@ -75,13 +74,13 @@ public class ResourceController extends BaseController {
     public ResponseEntity<Void> createResource(@RequestBody Resource resource) {
         resourceService.persist(resource);
         LOG.debug("Resource {} created.", resource);
-        return ResponseEntity.created(generateLocation(resource.getUri(), ConfigParam.NAMESPACE_RESOURCE)).build();
+        return ResponseEntity.created(generateLocation(resource.getUri(), NAMESPACE_RESOURCE)).build();
     }
 
     @GetMapping(value = "/{normalizedName}", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public Resource getResource(@PathVariable String normalizedName,
                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         return resourceService.findRequired(identifier);
     }
 
@@ -90,7 +89,7 @@ public class ResourceController extends BaseController {
     public void updateResource(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                @RequestBody Resource resource) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         verifyRequestAndEntityIdentifier(resource, identifier);
         resourceService.update(resource);
         LOG.debug("Resource {} updated.", resource);
@@ -144,7 +143,7 @@ public class ResourceController extends BaseController {
     @GetMapping(value = "/{normalizedName}/files", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<File> getFiles(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         return resourceService.getFiles(resourceService.getRequiredReference(identifier));
     }
 
@@ -152,14 +151,14 @@ public class ResourceController extends BaseController {
     public ResponseEntity<Void> addFileToDocument(@PathVariable String normalizedName,
                                                   @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace,
                                                   @RequestBody File file) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         resourceService.addFileToDocument(resourceService.findRequired(identifier), file);
         LOG.debug("File {} successfully added to document {}.", file, identifier);
         return ResponseEntity.created(createFileLocation(file.getUri(), normalizedName)).build();
     }
 
     private URI createFileLocation(URI childUri, String parentIdFragment) {
-        final String u = generateLocation(childUri, ConfigParam.NAMESPACE_RESOURCE).toString();
+        final String u = generateLocation(childUri, NAMESPACE_RESOURCE).toString();
         return URI.create(u.replace("/" + parentIdFragment + "/files", ""));
     }
 
@@ -210,14 +209,14 @@ public class ResourceController extends BaseController {
     @GetMapping(value = "/{normalizedName}/related", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Resource> getRelatedResources(@PathVariable String normalizedName,
                                               @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         return resourceService.findRelated(resourceService.getRequiredReference(identifier));
     }
 
     @GetMapping(value = "/{normalizedName}/terms", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
     public List<Term> getTerms(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         return resourceService.findTags(resourceService.getRequiredReference(identifier));
     }
 
@@ -234,7 +233,7 @@ public class ResourceController extends BaseController {
             JsonLd.MEDIA_TYPE})
     public List<TermAssignment> getAssignments(@PathVariable String normalizedName,
                                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         final Resource resource = resourceService.getRequiredReference(identifier);
         return resourceService.findAssignments(resource);
     }
@@ -243,16 +242,27 @@ public class ResourceController extends BaseController {
             JsonLd.MEDIA_TYPE})
     public List<ResourceTermAssignments> getAssignmentInfo(@PathVariable String normalizedName,
                                                            @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         final Resource resource = resourceService.getRequiredReference(identifier);
         return resourceService.getAssignmentInfo(resource);
+    }
+
+    /**
+     * Gets the change history of a vocabulary with the specified identification
+     */
+    @GetMapping(value = "/{fragment}/history", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
+    public List<AbstractChangeRecord> getHistory(@PathVariable String fragment,
+                                                 @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
+        final Resource resource = resourceService
+                .getRequiredReference(resolveIdentifier(namespace, fragment, NAMESPACE_RESOURCE));
+        return resourceService.getChanges(resource);
     }
 
     @DeleteMapping(value = "/{normalizedName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeResource(@PathVariable String normalizedName,
                                @RequestParam(name = QueryParams.NAMESPACE, required = false) String namespace) {
-        final URI identifier = resolveIdentifier(namespace, normalizedName, ConfigParam.NAMESPACE_RESOURCE);
+        final URI identifier = resolveIdentifier(namespace, normalizedName, NAMESPACE_RESOURCE);
         final Resource toRemove = resourceService.getRequiredReference(identifier);
         resourceService.remove(identifier);
         LOG.debug("Resource {} removed.", toRemove);
