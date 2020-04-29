@@ -40,12 +40,14 @@ public class TermDao extends AssetDao<Term> {
 
     private static final URI LABEL_PROP = URI.create(SKOS.PREF_LABEL);
 
-    private final Configuration config;
-
     @Autowired
     public TermDao(EntityManager em, Configuration config) {
-        super(Term.class, em);
-        this.config = config;
+        super(Term.class, em, config);
+    }
+
+    @Override
+    protected URI labelProperty() {
+        return LABEL_PROP;
     }
 
     @Override

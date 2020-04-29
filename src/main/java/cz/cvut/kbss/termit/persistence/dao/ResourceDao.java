@@ -27,6 +27,7 @@ import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
@@ -40,11 +41,18 @@ import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassF
 @Repository
 public class ResourceDao extends AssetDao<Resource> implements SupportsLastModification {
 
+    private static final URI LABEL_PROPERTY = URI.create(RDFS.LABEL);
+
     private volatile long lastModified;
 
-    public ResourceDao(EntityManager em) {
-        super(Resource.class, em);
+    public ResourceDao(EntityManager em, Configuration config) {
+        super(Resource.class, em, config);
         refreshLastModified();
+    }
+
+    @Override
+    protected URI labelProperty() {
+        return LABEL_PROPERTY;
     }
 
     /**

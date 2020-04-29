@@ -72,6 +72,7 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Test
     void findRecentlyEditedLoadsRecentlyEditedItems() {
+        enableRdfsInference(em);
         final List<Vocabulary> vocabularies = IntStream.range(0, 5).mapToObj(i -> Generator.generateVocabularyWithId())
                                                        .collect(Collectors.toList());
         transactional(() -> vocabularies.forEach(em::persist));
@@ -79,6 +80,7 @@ class BaseAssetRepositoryServiceTest extends BaseServiceTestRunner {
                                                                      .collect(
                                                                              Collectors.toList());
         setCreated(persistRecords);
+        transactional(() -> persistRecords.forEach(em::persist));
 
         em.getEntityManagerFactory().getCache().evictAll();
 

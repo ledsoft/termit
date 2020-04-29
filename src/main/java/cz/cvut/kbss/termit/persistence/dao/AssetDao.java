@@ -18,10 +18,13 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.util.ConfigParam;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Base DAO implementation for assets managed by the application.
@@ -30,8 +33,11 @@ import java.util.List;
  */
 public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
 
-    AssetDao(Class<T> type, EntityManager em) {
+    protected final Configuration config;
+
+    AssetDao(Class<T> type, EntityManager em, Configuration config) {
         super(type, em);
+        this.config = config;
     }
 
     /**
@@ -41,31 +47,52 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
      * @return List of recently added/edited assets
      */
     public List<RecentlyModifiedAsset> findLastEdited(int limit) {
-        final List<RecentlyModifiedAsset> modified = em
-                .createNativeQuery("SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?type WHERE {" +
-                        "?entity a ?cls ;" +
-                        "?dateCreated ?created ;" +
-                        "rdfs:label ?label ;" +
-                        "?createdBy ?author ." +
-                        "OPTIONAL { " +
-                        "?entity ?lastModified ?lastEdited ; " +
-                        "?lastModifiedBy ?lastEditor ." +
-                        "}" +
-                        "BIND (COALESCE(?lastEdited, ?created) as ?modified)" +
-                        "BIND (COALESCE(?lastEditor, ?author) as ?modifiedBy)" +
-                        "BIND (?cls as ?type)" +
-                        "} ORDER BY DESC(?modified) LIMIT ?limit", "RecentlyModifiedAsset")
-                .setParameter("cls", typeUri)
-                .setParameter("dateCreated", URI.create(Vocabulary.s_p_ma_datum_a_cas_vytvoreni))
-                .setParameter("createdBy", URI.create(Vocabulary.s_p_ma_autora))
-                .setParameter("lastModified", URI.create(Vocabulary.s_p_ma_datum_a_cas_posledni_modifikace))
-                .setParameter("lastModifiedBy", URI.create(Vocabulary.s_p_ma_posledniho_editora))
-                .setUntypedParameter("limit", limit).getResultList();
+        final List<URI> recentlyModifiedUniqueAssets = findUniqueLastModifiedEntities(limit);
+        final List<RecentlyModifiedAsset> modified = recentlyModifiedUniqueAssets.stream().map(asset -> {
+                    return (RecentlyModifiedAsset) em
+                            .createNativeQuery("SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?type WHERE {" +
+                                    "?x a ?change ;" +
+                                    "?hasModifiedEntity ?ent ;" +
+                                    "?hasEditor ?modifiedBy ;" +
+                                    "?hasModificationDate ?modified ." +
+                                    "?ent ?hasLabel ?label ." +
+                                    "BIND (?cls as ?type)" +
+                                    "BIND (?ent as ?entity)" +
+                                    "FILTER (lang(?label) = ?language)" +
+                                    "}", "RecentlyModifiedAsset")
+                            .setParameter("cls", typeUri)
+                            .setParameter("ent", asset)
+                            .setParameter("change", URI.create(Vocabulary.s_c_zmena_A))
+                            .setParameter("hasLabel", labelProperty())
+                            .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
+                            .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                            .setParameter("language", config.get(ConfigParam.LANGUAGE)).setMaxResults(1).getSingleResult();
+                }
+        ).collect(Collectors.toList());
         loadLastEditors(modified);
         return modified;
+    }
+
+    private List<URI> findUniqueLastModifiedEntities(int limit) {
+        return em.createNativeQuery("SELECT DISTINCT ?entity WHERE {" +
+                "?x a ?change ;" +
+                "?hasModificationDate ?modified ;" +
+                "?hasModifiedEntity ?entity ." +
+                "?entity a ?type ." +
+                "} ORDER BY DESC(?modified)", URI.class).setParameter("change", URI.create(Vocabulary.s_c_zmena_A))
+                 .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                 .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
+                 .setParameter("type", typeUri).setMaxResults(limit).getResultList();
     }
 
     private void loadLastEditors(List<RecentlyModifiedAsset> modified) {
         modified.forEach(m -> m.setEditor(em.find(User.class, m.getModifiedBy())));
     }
+
+    /**
+     * Identifier of an RDF property representing this assets label.
+     *
+     * @return RDF property identifier
+     */
+    protected abstract URI labelProperty();
 }
