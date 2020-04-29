@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.jopa.model.annotations.*;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
 import cz.cvut.kbss.termit.exception.TermItException;
+import cz.cvut.kbss.termit.model.changetracking.Audited;
 import cz.cvut.kbss.termit.model.util.SupportsStorage;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.Vocabulary;
@@ -26,6 +27,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Set;
 
+@Audited
 @OWLClass(iri = Vocabulary.s_c_soubor)
 @JsonLdAttributeOrder({"uri", "label", "description"})
 public class File extends Resource implements SupportsStorage {

@@ -16,8 +16,10 @@ package cz.cvut.kbss.termit.model.resource;
 
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jsonld.annotation.JsonLdAttributeOrder;
+import cz.cvut.kbss.termit.model.changetracking.Audited;
 import cz.cvut.kbss.termit.util.Vocabulary;
 
+@Audited
 @OWLClass(iri = Vocabulary.s_c_dataset)
 @JsonLdAttributeOrder({"uri", "label", "description"})
 public class Dataset extends Resource {

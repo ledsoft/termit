@@ -11,9 +11,11 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
+import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.changetracking.ChangeRecordDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
     @Autowired
     private TermRepositoryService termService;
+
+    @Autowired
+    private ResourceRepositoryService resourceService;
 
     private User author;
 
@@ -194,5 +199,17 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
         assertNull(((UpdateChangeRecord) result.get(0)).getOriginalValue());
         assertEquals(Collections.singleton(parent.getUri()), ((UpdateChangeRecord) result.get(0)).getNewValue());
+    }
+
+    @Test
+    void persistingFileCreatesPersistChangeRecord() {
+        enableRdfsInference(em);
+        final File file = Generator.generateFileWithId("test.html");
+        transactional(() -> resourceService.persist(file));
+
+        final List<AbstractChangeRecord> result = changeRecordDao.findAll(file);
+        assertEquals(1, result.size());
+        assertEquals(file.getUri(), result.get(0).getChangedEntity());
+        assertThat(result.get(0), instanceOf(PersistChangeRecord.class));
     }
 }
