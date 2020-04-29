@@ -22,6 +22,7 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
 import cz.cvut.kbss.termit.model.resource.Resource;
+import cz.cvut.kbss.termit.util.Vocabulary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AssetDaoTest extends BaseDaoTestRunner {
 
@@ -99,5 +101,19 @@ class AssetDaoTest extends BaseDaoTestRunner {
 
     private void setOldCreated(List<PersistChangeRecord> old) {
         old.forEach(r -> r.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis() - 24 * 3600 * 1000)));
+    }
+
+    @Test
+    void findRecentlyEditedReturnsAlsoTypeOfChange() {
+        enableRdfsInference(em);
+        final Resource resource = Generator.generateResourceWithId();
+        transactional(() -> em.persist(resource));
+        final PersistChangeRecord persistRecord = Generator.generatePersistChange(resource);
+        transactional(() -> em.persist(persistRecord));
+
+        final int count = 3;
+        final List<RecentlyModifiedAsset> result = sut.findLastEdited(count);
+        assertFalse(result.isEmpty());
+        result.forEach(rma -> assertThat(rma.getTypes(), hasItem(Vocabulary.s_c_vytvoreni_entity)));
     }
 }

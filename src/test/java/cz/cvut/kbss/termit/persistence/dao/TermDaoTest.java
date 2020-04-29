@@ -18,11 +18,13 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.query.TypedQuery;
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
+import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
 import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.util.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Constants;
 import org.eclipse.rdf4j.common.iteration.Iterations;
@@ -604,5 +606,24 @@ class TermDaoTest extends BaseDaoTestRunner {
                 }
             });
         }
+    }
+
+    @Test
+    void findLastEditedLoadsVocabularyForTerms() {
+        enableRdfsInference(em);
+        final Term term = Generator.generateTermWithId();
+        term.setVocabulary(vocabulary.getUri());
+        final PersistChangeRecord persistRecord = Generator.generatePersistChange(term);
+        persistRecord.setAuthor(Generator.generateUserWithId());
+        transactional(() -> {
+            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(persistRecord.getAuthor());
+            em.persist(persistRecord);
+        });
+
+        final List<RecentlyModifiedAsset> result = sut.findLastEdited(1);
+        assertFalse(result.isEmpty());
+        assertEquals(term.getUri(), result.get(0).getUri());
+        assertEquals(term.getVocabulary(), result.get(0).getVocabulary());
     }
 }
