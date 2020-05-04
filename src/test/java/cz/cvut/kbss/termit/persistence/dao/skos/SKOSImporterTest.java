@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -178,6 +179,26 @@ class SKOSImporterTest extends BaseDaoTestRunner {
                                                        .findFirst();
                 assertTrue(ctx.isPresent());
                 assertThat(ctx.get().stringValue(), containsString(Integer.toString(workspace.hashCode())));
+            }
+        });
+    }
+
+    @Test
+    void importGeneratesRelationshipsBetweenTermsAndVocabularyBasedOnSKOSInScheme() {
+        final String workspace = Vocabulary.ONTOLOGY_IRI_model_A + "/test-workspace";
+        transactional(() -> {
+            final SKOSImporter sut = context.getBean(SKOSImporter.class);
+            sut.setContextIriDiscriminator(workspace);
+            sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"),
+                    Environment.loadFile("data/test-vocabulary.ttl"));
+        });
+        transactional(() -> {
+            try (final RepositoryConnection conn = em.unwrap(Repository.class).getConnection()) {
+                final List<Resource> terms = Iterations.stream(conn.getStatements(null, RDF.TYPE, SKOS.CONCEPT))
+                                                       .map(Statement::getSubject).collect(Collectors.toList());
+                assertFalse(terms.isEmpty());
+                terms.forEach(t -> assertTrue(conn.getStatements(t, vf.createIRI(Vocabulary.s_p_je_pojmem_ze_slovniku),
+                        vf.createIRI(VOCABULARY_IRI)).hasNext()));
             }
         });
     }

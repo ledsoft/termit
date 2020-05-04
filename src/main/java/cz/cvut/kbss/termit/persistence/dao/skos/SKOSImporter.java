@@ -6,14 +6,12 @@ import cz.cvut.kbss.termit.exception.UnsupportedImportMediaTypeException;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -32,6 +30,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -67,6 +66,7 @@ public class SKOSImporter {
         parseDataFromStreams(mediaType, inputStreams);
         resolveVocabularyIri();
         LOG.trace("Vocabulary identifier resolved to {}.", vocabularyIri);
+        insertTermVocabularyMembership();
         addDataIntoRepository();
         return constructVocabularyInstance();
     }
@@ -126,6 +126,15 @@ public class SKOSImporter {
                     ((Literal) s.getObject()).getLanguage().orElse(config.get(ConfigParam.LANGUAGE)));
         }).findAny().ifPresent(s -> instance.setLabel(s.getObject().stringValue()));
         return instance;
+    }
+
+    private void insertTermVocabularyMembership() {
+        LOG.trace("Generating vocabulary membership statements for terms.");
+        final IRI vocabularyId = vf.createIRI(vocabularyIri);
+        model.addAll(model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream()
+                          .map(s -> vf.createStatement(s.getSubject(), vf.createIRI(
+                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku), vocabularyId))
+                          .collect(Collectors.toList()));
     }
 
     /**
