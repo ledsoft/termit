@@ -51,7 +51,7 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLAnnotationProperty(iri = SKOS.PREF_LABEL)
     private String label;
 
-    @OWLAnnotationProperty(iri = DC.Terms.DESCRIPTION)
+    @OWLAnnotationProperty(iri = SKOS.SCOPE_NOTE)
     private String description;
 
     @OWLAnnotationProperty(iri = SKOS.DEFINITION)
