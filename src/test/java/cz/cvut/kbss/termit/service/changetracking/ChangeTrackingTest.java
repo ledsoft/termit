@@ -12,7 +12,7 @@ import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
 import cz.cvut.kbss.termit.model.resource.File;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.changetracking.ChangeRecordDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
@@ -34,6 +34,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private DescriptorFactory descriptorFactory;
 
     @Autowired
     private ChangeRecordDao changeRecordDao;
@@ -73,7 +76,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     @Test
     void persistingTermCreatesCreationChangeRecord() {
         enableRdfsInference(em);
-        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        transactional(() -> em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary)));
         final Term term = Generator.generateTermWithId();
         transactional(() -> termService.addRootTermToVocabulary(term, vocabulary));
 
@@ -86,7 +89,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     @Test
     void updatingVocabularyLiteralAttributeCreatesUpdateChangeRecord() {
         enableRdfsInference(em);
-        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        transactional(() -> em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary)));
         vocabulary.setLabel("Updated vocabulary label");
         transactional(() -> vocabularyService.update(vocabulary));
 
@@ -102,8 +105,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Vocabulary imported = Generator.generateVocabularyWithId();
         transactional(() -> {
-            em.persist(imported, DescriptorFactory.vocabularyDescriptor(imported));
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(imported, descriptorFactory.vocabularyDescriptor(imported));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
         });
         vocabulary.setLabel("Updated vocabulary label");
         vocabulary.setImportedVocabularies(Collections.singleton(imported.getUri()));
@@ -125,8 +128,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.setDefinition("Updated term definition.");
         transactional(() -> termService.update(term));
@@ -146,9 +149,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, DescriptorFactory.termDescriptor(parent));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(parent, descriptorFactory.termDescriptor(parent));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.addParentTerm(parent);
         transactional(() -> termService.update(term));
@@ -167,8 +170,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final String originalDefinition = term.getDefinition();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         final String newDefinition = "Updated term definition.";
         term.setDefinition(newDefinition);
@@ -189,9 +192,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, DescriptorFactory.termDescriptor(parent));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(parent, descriptorFactory.termDescriptor(parent));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.addParentTerm(parent);
         transactional(() -> termService.update(term));

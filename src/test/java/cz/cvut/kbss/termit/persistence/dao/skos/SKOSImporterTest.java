@@ -163,32 +163,9 @@ class SKOSImporterTest extends BaseDaoTestRunner {
     }
 
     @Test
-    void importAppendsHashOfSpecifiedContextBaseToVocabularyContextIri() {
-        final String workspace = Vocabulary.ONTOLOGY_IRI_model_A + "/test-workspace";
-        transactional(() -> {
-            final SKOSImporter sut = context.getBean(SKOSImporter.class);
-            sut.setContextIriDiscriminator(workspace);
-            sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"),
-                    Environment.loadFile("data/test-vocabulary.ttl"));
-        });
-        transactional(() -> {
-            try (final RepositoryConnection conn = em.unwrap(Repository.class).getConnection()) {
-                final List<Resource> contexts = Iterations.asList(conn.getContextIDs());
-                assertFalse(contexts.isEmpty());
-                final Optional<Resource> ctx = contexts.stream().filter(r -> r.stringValue().contains(VOCABULARY_IRI))
-                                                       .findFirst();
-                assertTrue(ctx.isPresent());
-                assertThat(ctx.get().stringValue(), containsString(Integer.toString(workspace.hashCode())));
-            }
-        });
-    }
-
-    @Test
     void importGeneratesRelationshipsBetweenTermsAndVocabularyBasedOnSKOSInScheme() {
-        final String workspace = Vocabulary.ONTOLOGY_IRI_model_A + "/test-workspace";
         transactional(() -> {
             final SKOSImporter sut = context.getBean(SKOSImporter.class);
-            sut.setContextIriDiscriminator(workspace);
             sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"),
                     Environment.loadFile("data/test-vocabulary.ttl"));
         });

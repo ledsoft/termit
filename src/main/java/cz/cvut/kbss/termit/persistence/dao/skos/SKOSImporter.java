@@ -4,13 +4,14 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.exception.DataImportException;
 import cz.cvut.kbss.termit.exception.UnsupportedImportMediaTypeException;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.persistence.PersistenceUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -41,19 +42,19 @@ public class SKOSImporter {
     private static final Logger LOG = LoggerFactory.getLogger(SKOSImporter.class);
 
     private final Configuration config;
+    private final PersistenceUtils persistenceUtils;
 
     private final Repository repository;
     private final ValueFactory vf;
 
     private final Model model = new LinkedHashModel();
 
-    private String contextIriDiscriminator;
-
     private String vocabularyIri;
 
     @Autowired
-    public SKOSImporter(Configuration config, EntityManager em) {
+    public SKOSImporter(Configuration config, PersistenceUtils persistenceUtils, EntityManager em) {
         this.config = config;
+        this.persistenceUtils = persistenceUtils;
         this.repository = em.unwrap(org.eclipse.rdf4j.repository.Repository.class);
         vf = repository.getValueFactory();
     }
@@ -112,14 +113,13 @@ public class SKOSImporter {
     }
 
     private String generateContextIri(String baseIri) {
-        final String contextIri = baseIri + config.get(ConfigParam.WORKING_VOCABULARY_CONTEXT_EXTENSION);
-        return contextIriDiscriminator != null ? contextIri + "#" + contextIriDiscriminator.hashCode() : contextIri;
+        return persistenceUtils.resolveVocabularyContext(URI.create(baseIri)).toString();
     }
 
     private Vocabulary constructVocabularyInstance() {
         final Vocabulary instance = new Vocabulary();
         instance.setUri(URI.create(vocabularyIri));
-        final Set<Statement> labels = model.filter(vf.createIRI(vocabularyIri), RDFS.LABEL, null);
+        final Set<Statement> labels = model.filter(vf.createIRI(vocabularyIri), DCTERMS.TITLE, null);
         labels.stream().filter(s -> {
             assert s.getObject() instanceof Literal;
             return Objects.equals(config.get(ConfigParam.LANGUAGE),
@@ -149,19 +149,5 @@ public class SKOSImporter {
         return Rio.getParserFormatForFileName(fileName)
                   .orElseThrow(() -> new UnsupportedImportMediaTypeException("Unsupported type of file " + fileName))
                   .getDefaultMIMEType();
-    }
-
-    /**
-     * Sets value of the context identifier discriminator.
-     * <p>
-     * The discriminator can be used in cases when a vocabulary is imported multiple times, so that the context IRI
-     * (which is determined by the vocabulary identifier) can be parameterized and collisions are avoided.
-     * <p>
-     * The value is hashed when generating the context identifier.
-     *
-     * @param contextIriDiscriminator Value of the discriminator (will be hashed)
-     */
-    public void setContextIriDiscriminator(String contextIriDiscriminator) {
-        this.contextIriDiscriminator = contextIriDiscriminator;
     }
 }
