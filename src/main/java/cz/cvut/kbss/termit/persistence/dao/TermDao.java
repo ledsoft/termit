@@ -21,7 +21,8 @@ import cz.cvut.kbss.termit.dto.TermInfo;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.PersistenceUtils;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,13 @@ public class TermDao extends AssetDao<Term> {
 
     private static final URI LABEL_PROP = URI.create(SKOS.PREF_LABEL);
 
+    private final PersistenceUtils persistenceUtils;
+
     @Autowired
-    public TermDao(EntityManager em, Configuration config) {
-        super(Term.class, em, config);
+    public TermDao(EntityManager em, Configuration config, DescriptorFactory descriptorFactory,
+                   PersistenceUtils persistenceUtils) {
+        super(Term.class, em, config, descriptorFactory);
+        this.persistenceUtils = persistenceUtils;
     }
 
     @Override
@@ -63,7 +68,7 @@ public class TermDao extends AssetDao<Term> {
         assert entity.getVocabulary() != null;
 
         try {
-            em.persist(entity, DescriptorFactory.termDescriptor(entity));
+            em.persist(entity, descriptorFactory.termDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -77,7 +82,7 @@ public class TermDao extends AssetDao<Term> {
         try {
             // Evict possibly cached instance loaded from default context
             em.getEntityManagerFactory().getCache().evict(Term.class, entity.getUri(), null);
-            return em.merge(entity, DescriptorFactory.termDescriptor(entity));
+            return em.merge(entity, descriptorFactory.termDescriptor(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -95,7 +100,7 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         try {
             return executeQueryAndLoadSubTerms(em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
-                    "GRAPH ?vocabulary { " +
+                    "GRAPH ?g { " +
                     "?term a ?type ;" +
                     "?hasLabel ?label ;" +
                     "?inVocabulary ?vocabulary ." +
@@ -103,6 +108,8 @@ public class TermDao extends AssetDao<Term> {
                     "} } ORDER BY ?label", Term.class)
                                                  .setParameter("type", typeUri)
                                                  .setParameter("vocabulary", vocabulary.getUri())
+                                                 .setParameter("g",
+                                                         persistenceUtils.resolveVocabularyContext(vocabulary.getUri()))
                                                  .setParameter("hasLabel", LABEL_PROP)
                                                  .setParameter("inVocabulary",
                                                          URI.create(
@@ -157,7 +164,7 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(vocabulary);
         Objects.requireNonNull(pageSpec);
         TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
-                "GRAPH ?vocabulary { " +
+                "GRAPH ?g { " +
                 "?term a ?type ;" +
                 "?hasLabel ?label ." +
                 "?vocabulary ?hasGlossary/?hasTerm ?term ." +
@@ -166,6 +173,8 @@ public class TermDao extends AssetDao<Term> {
         query = setCommonFindAllRootsQueryParams(query, false);
         try {
             return executeQueryAndLoadSubTerms(query.setParameter("vocabulary", vocabulary.getUri())
+                                                    .setParameter("g",
+                                                            persistenceUtils.resolveVocabularyContext(vocabulary.getUri()))
                                                     .setParameter("labelLang", config.get(ConfigParam.LANGUAGE))
                                                     .setUntypedParameter("offset", pageSpec.getOffset())
                                                     .setUntypedParameter("limit", pageSpec.getPageSize()));
@@ -231,7 +240,7 @@ public class TermDao extends AssetDao<Term> {
         Objects.requireNonNull(searchString);
         Objects.requireNonNull(vocabulary);
         final TypedQuery<Term> query = em.createNativeQuery("SELECT DISTINCT ?term WHERE {" +
-                "GRAPH ?vocabulary { " +
+                "GRAPH ?g { " +
                 "?term a ?type ; " +
                 "      ?hasLabel ?label ; " +
                 "      ?inVocabulary ?vocabulary ." +
@@ -242,6 +251,8 @@ public class TermDao extends AssetDao<Term> {
                                          .setParameter("inVocabulary", URI.create(
                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku))
                                          .setParameter("vocabulary", vocabulary.getUri())
+                                         .setParameter("g",
+                                                 persistenceUtils.resolveVocabularyContext(vocabulary.getUri()))
                                          .setParameter("searchString", searchString, config.get(ConfigParam.LANGUAGE));
         try {
             final List<Term> terms = executeQueryAndLoadSubTerms(query);

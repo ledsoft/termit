@@ -22,7 +22,7 @@ import cz.cvut.kbss.termit.exception.AnnotationGenerationException;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.TermDao;
 import cz.cvut.kbss.termit.persistence.dao.TermOccurrenceDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
@@ -66,6 +66,9 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
     private EntityManager em;
 
     @Autowired
+    private DescriptorFactory descriptorFactory;
+
+    @Autowired
     private TermOccurrenceDao termOccurrenceDao;
 
     @Autowired
@@ -107,7 +110,7 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.setDocument(document);
         vocabulary.getGlossary().addRootTerm(term);
         vocabulary.getGlossary().addRootTerm(termTwo);
-        this.vocabDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        this.vocabDescriptor = descriptorFactory.vocabularyDescriptor(vocabulary);
         this.file = new File();
         file.setUri(Generator.generateUri());
         file.setLabel("rdfa-simple.html");
@@ -117,10 +120,10 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         transactional(() -> {
             em.persist(author);
             em.persist(vocabulary, vocabDescriptor);
-            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
-            em.persist(file, DescriptorFactory.documentDescriptor(vocabulary));
-            em.persist(term, DescriptorFactory.termDescriptor(vocabulary));
-            em.persist(termTwo, DescriptorFactory.termDescriptor(vocabulary));
+            em.persist(document, descriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, descriptorFactory.documentDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(vocabulary));
+            em.persist(termTwo, descriptorFactory.termDescriptor(vocabulary));
         });
     }
 
@@ -230,10 +233,10 @@ class AnnotationGeneratorTest extends BaseServiceTestRunner {
         vocabulary.getGlossary().addRootTerm(ma);
         vocabulary.getGlossary().addRootTerm(area);
         transactional(() -> {
-            em.persist(mp, DescriptorFactory.termDescriptor(vocabulary));
-            em.persist(ma, DescriptorFactory.termDescriptor(vocabulary));
-            em.persist(area, DescriptorFactory.termDescriptor(vocabulary));
-            em.merge(vocabulary.getGlossary(), DescriptorFactory.glossaryDescriptor(vocabulary));
+            em.persist(mp, descriptorFactory.termDescriptor(vocabulary));
+            em.persist(ma, descriptorFactory.termDescriptor(vocabulary));
+            em.persist(area, descriptorFactory.termDescriptor(vocabulary));
+            em.merge(vocabulary.getGlossary(), descriptorFactory.glossaryDescriptor(vocabulary));
         });
 
         final InputStream content = loadFile("data/rdfa-large.html");

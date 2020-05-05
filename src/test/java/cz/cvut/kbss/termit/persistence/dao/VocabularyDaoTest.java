@@ -16,14 +16,13 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
-import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +41,9 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private DescriptorFactory descriptorFactory;
 
     @Autowired
     private VocabularyDao sut;
@@ -79,7 +81,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     }
 
     private Descriptor descriptorFor(Vocabulary vocabulary) {
-        return new EntityDescriptor(vocabulary.getUri());
+        return descriptorFactory.vocabularyDescriptor(vocabulary);
     }
 
     @Test
@@ -129,8 +131,8 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         file.setUri(Generator.generateUri());
         doc.addFile(file);
         vocabulary.setDocument(doc);
-        final Descriptor vocabularyDescriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
-        final Descriptor docDescriptor = DescriptorFactory.documentDescriptor(vocabulary);
+        final Descriptor vocabularyDescriptor = descriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor docDescriptor = descriptorFactory.documentDescriptor(vocabulary);
         transactional(() -> {
             em.persist(file, docDescriptor);
             em.persist(doc, docDescriptor);
@@ -148,11 +150,11 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     @Test
     void updateGlossaryMergesGlossaryIntoPersistenceContext() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = descriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
         vocabulary.getGlossary().addRootTerm(term);
-        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        final Descriptor termDescriptor = descriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             em.persist(term, termDescriptor);
             sut.updateGlossary(vocabulary);
@@ -169,25 +171,25 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     @Test
     void updateGlossaryMergesGlossaryIntoCorrectRepositoryContext() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = descriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         final Term term = Generator.generateTermWithId();
         vocabulary.getGlossary().addRootTerm(term);
-        final Descriptor termDescriptor = DescriptorFactory.termDescriptor(vocabulary);
+        final Descriptor termDescriptor = descriptorFactory.termDescriptor(vocabulary);
         transactional(() -> {
             em.persist(term, termDescriptor);
             sut.updateGlossary(vocabulary);
         });
 
         final Glossary result = em.find(Glossary.class, vocabulary.getGlossary().getUri(),
-                DescriptorFactory.glossaryDescriptor(vocabulary));
+                descriptorFactory.glossaryDescriptor(vocabulary));
         assertTrue(result.getRootTerms().contains(term.getUri()));
     }
 
     @Test
     void updateGlossaryReturnsManagedGlossaryInstance() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        final Descriptor descriptor = DescriptorFactory.vocabularyDescriptor(vocabulary);
+        final Descriptor descriptor = descriptorFactory.vocabularyDescriptor(vocabulary);
         transactional(() -> em.persist(vocabulary, descriptor));
         transactional(() -> {
             final Glossary merged = sut.updateGlossary(vocabulary);
@@ -200,8 +202,8 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
         final Vocabulary targetVocabulary = Generator.generateVocabularyWithId();
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
         });
 
         assertFalse(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
@@ -220,10 +222,10 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         targetVocabulary.getGlossary().addRootTerm(parentTerm);
         parentTerm.setVocabulary(targetVocabulary.getUri());
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, DescriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, descriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
         });
 
         assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
@@ -244,11 +246,11 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         transitiveVocabulary.getGlossary().addRootTerm(parentTerm);
         parentTerm.setVocabulary(transitiveVocabulary.getUri());
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(transitiveVocabulary, DescriptorFactory.vocabularyDescriptor(transitiveVocabulary));
-            em.persist(child, DescriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(transitiveVocabulary, descriptorFactory.vocabularyDescriptor(transitiveVocabulary));
+            em.persist(child, descriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
         });
 
         assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
@@ -264,10 +266,10 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
                 new HashSet<>(Arrays.asList(importedVocabularyOne.getUri(), importedVocabularyTwo.getUri())));
         importedVocabularyOne.setImportedVocabularies(Collections.singleton(transitiveVocabulary.getUri()));
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(importedVocabularyOne, DescriptorFactory.vocabularyDescriptor(importedVocabularyOne));
-            em.persist(importedVocabularyTwo, DescriptorFactory.vocabularyDescriptor(importedVocabularyTwo));
-            em.persist(transitiveVocabulary, DescriptorFactory.vocabularyDescriptor(transitiveVocabulary));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(importedVocabularyOne, descriptorFactory.vocabularyDescriptor(importedVocabularyOne));
+            em.persist(importedVocabularyTwo, descriptorFactory.vocabularyDescriptor(importedVocabularyTwo));
+            em.persist(transitiveVocabulary, descriptorFactory.vocabularyDescriptor(transitiveVocabulary));
         });
 
         final Collection<URI> result = sut.getTransitivelyImportedVocabularies(subjectVocabulary);
@@ -306,7 +308,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void removeRefreshesLastModifiedValue() {
         final long before = sut.getLastModified();
         final Vocabulary voc = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        transactional(() -> em.persist(voc, descriptorFactory.vocabularyDescriptor(voc)));
         transactional(() -> sut.remove(voc));
         final long after = sut.getLastModified();
         assertThat(after, greaterThan(before));
@@ -316,7 +318,7 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
     void updateRefreshesLastModifiedValue() {
         final long before = sut.getLastModified();
         final Vocabulary voc = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        transactional(() -> em.persist(voc, descriptorFactory.vocabularyDescriptor(voc)));
         final String newLabel = "New vocabulary label";
         voc.setLabel(newLabel);
         transactional(() -> sut.update(voc));
