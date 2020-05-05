@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,6 +69,7 @@ public class SKOSImporter {
         resolveVocabularyIri();
         LOG.trace("Vocabulary identifier resolved to {}.", vocabularyIri);
         insertTermVocabularyMembership();
+        insertTopConceptAssertions();
         addDataIntoRepository();
         return constructVocabularyInstance();
     }
@@ -135,6 +137,30 @@ public class SKOSImporter {
                           .map(s -> vf.createStatement(s.getSubject(), vf.createIRI(
                                   cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku), vocabularyId))
                           .collect(Collectors.toList()));
+    }
+
+    private void insertTopConceptAssertions() {
+        LOG.trace("Generating top concept assertions.");
+        final IRI vocabularyId = vf.createIRI(vocabularyIri);
+        final List<Value> glossary = model
+                .filter(vocabularyId, vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_glosar), null).stream()
+                .map(Statement::getObject).collect(Collectors.toList());
+        if (glossary.size() == 0) {
+            LOG.debug("No glossary found for imported vocabulary {}, top concepts will not be identified.",
+                    vocabularyId);
+        }
+        assert glossary.size() == 1;
+        final List<Resource> terms = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().map(Statement::getSubject)
+                                          .collect(Collectors.toList());
+        terms.forEach(t -> {
+            final List<Value> parent = model.filter(t, SKOS.BROADER, null).stream().map(Statement::getObject)
+                                            .collect(Collectors.toList());
+            final boolean hasParent = parent.stream()
+                                            .anyMatch(p -> model.contains((Resource) p, RDF.TYPE, SKOS.CONCEPT));
+            if (!hasParent) {
+                model.add((Resource) glossary.get(0), SKOS.HAS_TOP_CONCEPT, t);
+            }
+        });
     }
 
     /**

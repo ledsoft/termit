@@ -11,6 +11,7 @@ import cz.cvut.kbss.termit.util.Vocabulary;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -176,6 +177,22 @@ class SKOSImporterTest extends BaseDaoTestRunner {
                 assertFalse(terms.isEmpty());
                 terms.forEach(t -> assertTrue(conn.getStatements(t, vf.createIRI(Vocabulary.s_p_je_pojmem_ze_slovniku),
                         vf.createIRI(VOCABULARY_IRI)).hasNext()));
+            }
+        });
+    }
+
+    @Test
+    void importGeneratesTopConceptAssertions() {
+        transactional(() -> {
+            final SKOSImporter sut = context.getBean(SKOSImporter.class);
+            sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"),
+                    Environment.loadFile("data/test-vocabulary.ttl"));
+        });
+        transactional(() -> {
+            try (final RepositoryConnection conn = em.unwrap(Repository.class).getConnection()) {
+                final List<Value> terms = Iterations.stream(conn.getStatements(null, SKOS.HAS_TOP_CONCEPT, null))
+                                                    .map(Statement::getObject).collect(Collectors.toList());
+                assertFalse(terms.isEmpty());
             }
         });
     }

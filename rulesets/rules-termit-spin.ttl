@@ -13,7 +13,7 @@ pdp:dokument a rdfs:Class ;
 	           WHERE { ?vocabulary pdp:popisuje-dokument ?this . }"""
 ] .
 
-pdp:term a rdfs:Class ;
+skos:Concept a rdfs:Class ;
 # InverseOf between je-vyskytem-termu and ma-vyskyt-termu
 	spin:rule [
 		a sp:Construct ;
@@ -31,15 +31,6 @@ pdp:term a rdfs:Class ;
 	           WHERE { ?vocabulary pdp:má-glosář ?glossary .
 	                   ?this pdp:je-pojmem-ze-slovníku ?vocabulary . }"""
     ];
-# Term is a skos:Concept
-# REPLACE BY RDFS inference
-	spin:rule [
-		a sp:Construct ;
-	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
-	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#> .
-	           CONSTRUCT { ?this a skos:Concept . }
-	           WHERE { ?this a pdp:term . }"""
-    ];
 
     # InverseOf between skos:broader and skos:narrower
     spin:rule [
@@ -47,7 +38,7 @@ pdp:term a rdfs:Class ;
     sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/> .
                PREFIX skos: <http://www.w3.org/2004/02/skos/core#> .
                CONSTRUCT { ?parent skos:narrower ?this . }
-               WHERE { ?this a pdp:term ;
+               WHERE { ?this a skos:Concept ;
                         skos:broader ?parent . }"""
     ]
 .
