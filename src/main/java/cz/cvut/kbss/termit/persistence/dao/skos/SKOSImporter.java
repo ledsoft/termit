@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SKOSImporter {
 
-    private static final String VOCABULARY_TYPE = "https://slovník.gov.cz/veřejný-sektor/pojem/slovník";
+    private static final String VOCABULARY_TYPE = cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnik;
 
     private static final Logger LOG = LoggerFactory.getLogger(SKOSImporter.class);
 
