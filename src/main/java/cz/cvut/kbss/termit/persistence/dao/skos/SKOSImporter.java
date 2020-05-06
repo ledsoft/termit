@@ -100,14 +100,14 @@ public class SKOSImporter {
     }
 
     private void resolveVocabularyIri() {
-        final Model res = model.filter(null, RDF.TYPE, OWL.ONTOLOGY);
-        if (res.size() == 1) {
-            this.vocabularyIri = res.iterator().next().getSubject().stringValue();
-            return;
-        }
         final Model resVocabulary = model.filter(null, RDF.TYPE, vf.createIRI(VOCABULARY_TYPE));
         if (resVocabulary.size() == 1) {
             this.vocabularyIri = resVocabulary.iterator().next().getSubject().stringValue();
+            return;
+        }
+        final Model res = model.filter(null, RDF.TYPE, OWL.ONTOLOGY);
+        if (res.size() == 1) {
+            this.vocabularyIri = res.iterator().next().getSubject().stringValue();
             return;
         }
         throw new IllegalArgumentException(
@@ -148,16 +148,21 @@ public class SKOSImporter {
         if (glossary.size() == 0) {
             LOG.debug("No glossary found for imported vocabulary {}, top concepts will not be identified.",
                     vocabularyId);
+            return;
         }
         assert glossary.size() == 1;
         final List<Resource> terms = model.filter(null, RDF.TYPE, SKOS.CONCEPT).stream().map(Statement::getSubject)
                                           .collect(Collectors.toList());
         terms.forEach(t -> {
-            final List<Value> parent = model.filter(t, SKOS.BROADER, null).stream().map(Statement::getObject)
+            final List<Value> broader = model.filter(t, SKOS.BROADER, null).stream().map(Statement::getObject)
                                             .collect(Collectors.toList());
-            final boolean hasParent = parent.stream()
+            final boolean hasBroader = broader.stream()
                                             .anyMatch(p -> model.contains((Resource) p, RDF.TYPE, SKOS.CONCEPT));
-            if (!hasParent) {
+            final List<Value> narrower = model.filter(null, SKOS.NARROWER, t).stream().map(Statement::getObject)
+                                                 .collect(Collectors.toList());
+            final boolean isNarrower = narrower.stream()
+                                               .anyMatch(p -> model.contains((Resource) p, RDF.TYPE, SKOS.CONCEPT));
+            if (!hasBroader && !isNarrower) {
                 model.add((Resource) glossary.get(0), SKOS.HAS_TOP_CONCEPT, t);
             }
         });
