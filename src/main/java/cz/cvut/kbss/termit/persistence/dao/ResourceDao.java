@@ -217,6 +217,22 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
     }
 
     @Override
+    List<URI> findUniqueLastModifiedEntities(int limit) {
+        // Must ensure vocabularies (which are technically also resources) are not included
+        return em.createNativeQuery("SELECT DISTINCT ?entity WHERE {" +
+                "?x a ?change ;" +
+                "?hasModificationDate ?modified ;" +
+                "?hasModifiedEntity ?entity ." +
+                "?entity a ?type ." +
+                "FILTER NOT EXISTS { ?entity a ?vocabulary . }" +
+                "} ORDER BY DESC(?modified)", URI.class).setParameter("change", URI.create(Vocabulary.s_c_zmena))
+                 .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                 .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
+                 .setParameter("type", typeUri).setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
+                 .setMaxResults(limit).getResultList();
+    }
+
+    @Override
     public long getLastModified() {
         return lastModified;
     }
