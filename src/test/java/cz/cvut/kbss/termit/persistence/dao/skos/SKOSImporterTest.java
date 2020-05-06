@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SKOSImporterTest extends BaseDaoTestRunner {
@@ -192,7 +193,25 @@ class SKOSImporterTest extends BaseDaoTestRunner {
             try (final RepositoryConnection conn = em.unwrap(Repository.class).getConnection()) {
                 final List<Value> terms = Iterations.stream(conn.getStatements(null, SKOS.HAS_TOP_CONCEPT, null))
                                                     .map(Statement::getObject).collect(Collectors.toList());
-                assertFalse(terms.isEmpty());
+                assertEquals(1, terms.size());
+                assertThat(terms, hasItem(vf.createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
+            }
+        });
+    }
+
+    @Test
+    void importGeneratesTopConceptAssertionsForGlossaryUsingNarrowerProperty() {
+        transactional(() -> {
+            final SKOSImporter sut = context.getBean(SKOSImporter.class);
+            sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary-narrower.ttl"),
+                    Environment.loadFile("data/test-vocabulary.ttl"));
+        });
+        transactional(() -> {
+            try (final RepositoryConnection conn = em.unwrap(Repository.class).getConnection()) {
+                final List<Value> terms = Iterations.stream(conn.getStatements(null, SKOS.HAS_TOP_CONCEPT, null))
+                                                    .map(Statement::getObject).collect(Collectors.toList());
+                assertEquals(1, terms.size());
+                assertThat(terms, hasItem(vf.createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
             }
         });
     }
