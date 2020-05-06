@@ -2,7 +2,11 @@ package cz.cvut.kbss.termit.persistence.dao.skos;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.environment.Environment;
+import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.UnsupportedImportMediaTypeException;
+import cz.cvut.kbss.termit.model.User;
+import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.persistence.dao.BaseDaoTestRunner;
 import cz.cvut.kbss.termit.util.ConfigParam;
 import cz.cvut.kbss.termit.util.Configuration;
@@ -18,18 +22,20 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SKOSImporterTest extends BaseDaoTestRunner {
@@ -47,6 +53,13 @@ class SKOSImporterTest extends BaseDaoTestRunner {
     private Configuration config;
 
     private final ValueFactory vf = SimpleValueFactory.getInstance();
+
+    @BeforeEach
+    void setUp() {
+        final User author = Generator.generateUserWithId();
+        Environment.setCurrentUser(author);
+        transactional(() -> em.persist(author));
+    }
 
     @Test
     void importVocabularyImportsGlossaryFromSpecifiedStream() {
@@ -79,6 +92,13 @@ class SKOSImporterTest extends BaseDaoTestRunner {
 
     @Test
     void importInsertsImportedDataIntoContextBasedOnOntologyIdentifier() {
+        final AtomicInteger existingStatementCount = new AtomicInteger(0);
+        transactional(() -> {
+            final Repository repo = em.unwrap(Repository.class);
+            try (final RepositoryConnection conn = repo.getConnection()) {
+                existingStatementCount.set(Iterations.asList(conn.getStatements(null, null, null, false)).size());
+            }
+        });
         transactional(() -> {
             final SKOSImporter sut = context.getBean(SKOSImporter.class);
             sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary.ttl"));
@@ -95,7 +115,7 @@ class SKOSImporterTest extends BaseDaoTestRunner {
                         containsString(config.get(ConfigParam.WORKING_VOCABULARY_CONTEXT_EXTENSION)));
                 final List<Statement> inAll = Iterations.asList(conn.getStatements(null, null, null, false));
                 final List<Statement> inCtx = Iterations.asList(conn.getStatements(null, null, null, false, ctx.get()));
-                assertEquals(inAll.size(), inCtx.size());
+                assertEquals(inAll.size() - existingStatementCount.get(), inCtx.size());
             }
         });
     }
@@ -111,8 +131,9 @@ class SKOSImporterTest extends BaseDaoTestRunner {
             final Repository repo = em.unwrap(Repository.class);
             try (final RepositoryConnection conn = repo.getConnection()) {
                 final List<Resource> contexts = Iterations.asList(conn.getContextIDs());
-                assertEquals(1, contexts.size());
-                assertThat(contexts.get(0).stringValue(), containsString(VOCABULARY_IRI));
+                assertFalse(contexts.isEmpty());
+                contexts.forEach(ctx -> assertThat(ctx.stringValue(), containsString(VOCABULARY_IRI)));
+
             }
         });
     }
@@ -194,7 +215,8 @@ class SKOSImporterTest extends BaseDaoTestRunner {
                 final List<Value> terms = Iterations.stream(conn.getStatements(null, SKOS.HAS_TOP_CONCEPT, null))
                                                     .map(Statement::getObject).collect(Collectors.toList());
                 assertEquals(1, terms.size());
-                assertThat(terms, hasItem(vf.createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
+                assertThat(terms, hasItem(vf
+                        .createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
             }
         });
     }
@@ -211,8 +233,26 @@ class SKOSImporterTest extends BaseDaoTestRunner {
                 final List<Value> terms = Iterations.stream(conn.getStatements(null, SKOS.HAS_TOP_CONCEPT, null))
                                                     .map(Statement::getObject).collect(Collectors.toList());
                 assertEquals(1, terms.size());
-                assertThat(terms, hasItem(vf.createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
+                assertThat(terms, hasItem(vf
+                        .createIRI("http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu")));
             }
         });
+    }
+
+    @Test
+    void importGeneratesPersistChangeRecordForVocabularyBasedOnCreatedDateInData() {
+        enableRdfsInference(em);
+        transactional(() -> {
+            final SKOSImporter sut = context.getBean(SKOSImporter.class);
+            sut.importVocabulary(Constants.Turtle.MEDIA_TYPE, Environment.loadFile("data/test-glossary-narrower.ttl"),
+                    Environment.loadFile("data/test-vocabulary.ttl"));
+        });
+
+        final List<AbstractChangeRecord> changeRecords = em
+                .createQuery("SELECT r FROM AbstractChangeRecord r", AbstractChangeRecord.class).getResultList();
+        assertEquals(1, changeRecords.size());
+        final AbstractChangeRecord r = changeRecords.get(0);
+        assertThat(r, instanceOf(PersistChangeRecord.class));
+        assertEquals(URI.create(VOCABULARY_IRI), r.getChangedEntity());
     }
 }

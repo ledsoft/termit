@@ -35,7 +35,7 @@ public class RecentlyModifiedAsset implements Serializable {
     @JsonIgnore
     private transient URI modifiedBy;
 
-    @OWLAnnotationProperty(iri = Vocabulary.s_p_ma_editora)
+    @OWLObjectProperty(iri = Vocabulary.s_p_ma_editora)
     private User editor;
 
     // In case the modified asset is a term, we want its vocabulary as well

@@ -16,6 +16,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
+import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.persistence.DescriptorFactory;
@@ -51,41 +52,46 @@ public abstract class AssetDao<T extends Asset> extends BaseDao<T> {
      * @return List of recently added/edited assets
      */
     public List<RecentlyModifiedAsset> findLastEdited(int limit) {
-        final List<URI> recentlyModifiedUniqueAssets = findUniqueLastModifiedEntities(limit);
-        final List<RecentlyModifiedAsset> modified = recentlyModifiedUniqueAssets.stream().map(asset -> {
-                    return (RecentlyModifiedAsset) em
-                            .createNativeQuery(
-                                    "SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?vocabulary ?type ?changeType WHERE {" +
-                                            "?x a ?change ;" +
-                                            "   a ?chType ;" +
-                                            "?hasModifiedEntity ?ent ;" +
-                                            "?hasEditor ?modifiedBy ;" +
-                                            "?hasModificationDate ?modified ." +
-                                            "?ent ?hasLabel ?label ." +
-                                            "OPTIONAL { ?ent ?isFromVocabulary ?vocabulary . }" +
-                                            "BIND (?cls as ?type)" +
-                                            "BIND (?ent as ?entity)" +
-                                            "FILTER (?chType != ?change)" +
-                                            "BIND (IF(?chType = ?persist, ?persist, ?update) as ?changeType)" +
-                                            "FILTER (lang(?label) = ?language)" +
-                                            "} ORDER BY DESC(?modified)", "RecentlyModifiedAsset")
-                            .setParameter("cls", typeUri)
-                            .setParameter("ent", asset)
-                            .setParameter("change", URI.create(Vocabulary.s_c_zmena))
-                            .setParameter("hasLabel", labelProperty())
-                            .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
-                            .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
-                            .setParameter("isFromVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
-                            .setParameter("persist", URI.create(Vocabulary.s_c_vytvoreni_entity))
-                            .setParameter("update", URI.create(Vocabulary.s_c_uprava_entity))
-                            .setParameter("language", config.get(ConfigParam.LANGUAGE)).setMaxResults(1).getSingleResult();
-                }
-        ).collect(Collectors.toList());
-        loadLastEditors(modified);
-        return modified;
+        try {
+            final List<URI> recentlyModifiedUniqueAssets = findUniqueLastModifiedEntities(limit);
+            final List<RecentlyModifiedAsset> modified = recentlyModifiedUniqueAssets.stream().map(asset -> {
+                        return (RecentlyModifiedAsset) em
+                                .createNativeQuery(
+                                        "SELECT DISTINCT ?entity ?label ?modified ?modifiedBy ?vocabulary ?type ?changeType WHERE {" +
+                                                "?x a ?change ;" +
+                                                "   a ?chType ;" +
+                                                "?hasModifiedEntity ?ent ;" +
+                                                "?hasEditor ?modifiedBy ;" +
+                                                "?hasModificationDate ?modified ." +
+                                                "?ent ?hasLabel ?label ." +
+                                                "OPTIONAL { ?ent ?isFromVocabulary ?vocabulary . }" +
+                                                "BIND (?cls as ?type)" +
+                                                "BIND (?ent as ?entity)" +
+                                                "FILTER (?chType != ?change)" +
+                                                "BIND (IF(?chType = ?persist, ?persist, ?update) as ?changeType)" +
+                                                "FILTER (lang(?label) = ?language)" +
+                                                "} ORDER BY DESC(?modified)", "RecentlyModifiedAsset")
+                                .setParameter("cls", typeUri)
+                                .setParameter("ent", asset)
+                                .setParameter("change", URI.create(Vocabulary.s_c_zmena))
+                                .setParameter("hasLabel", labelProperty())
+                                .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
+                                .setParameter("hasEditor", URI.create(Vocabulary.s_p_ma_editora))
+                                .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                                .setParameter("isFromVocabulary", URI.create(Vocabulary.s_p_je_pojmem_ze_slovniku))
+                                .setParameter("persist", URI.create(Vocabulary.s_c_vytvoreni_entity))
+                                .setParameter("update", URI.create(Vocabulary.s_c_uprava_entity))
+                                .setParameter("language", config.get(ConfigParam.LANGUAGE)).setMaxResults(1).getSingleResult();
+                    }
+            ).collect(Collectors.toList());
+            loadLastEditors(modified);
+            return modified;
+        } catch (RuntimeException e) {
+            throw new PersistenceException( e);
+        }
     }
 
-    private List<URI> findUniqueLastModifiedEntities(int limit) {
+    List<URI> findUniqueLastModifiedEntities(int limit) {
         return em.createNativeQuery("SELECT DISTINCT ?entity WHERE {" +
                 "?x a ?change ;" +
                 "?hasModificationDate ?modified ;" +
