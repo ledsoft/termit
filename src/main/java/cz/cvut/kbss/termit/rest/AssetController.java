@@ -18,7 +18,7 @@
 package cz.cvut.kbss.termit.rest;
 
 import cz.cvut.kbss.jsonld.JsonLd;
-import cz.cvut.kbss.termit.model.Asset;
+import cz.cvut.kbss.termit.dto.RecentlyModifiedAsset;
 import cz.cvut.kbss.termit.security.SecurityConstants;
 import cz.cvut.kbss.termit.service.business.AssetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class AssetController {
     }
 
     @RequestMapping(value = "/last-edited", produces = {MediaType.APPLICATION_JSON_VALUE, JsonLd.MEDIA_TYPE})
-    public List<Asset> getLastEdited(
+    public List<RecentlyModifiedAsset> getLastEdited(
             @RequestParam(name = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit) {
         return assetService.findLastEdited(limit);
     }

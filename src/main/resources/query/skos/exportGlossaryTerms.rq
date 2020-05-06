@@ -19,7 +19,7 @@ CONSTRUCT {
         skos:broader  ?owner ;
         skos:broader ?parentEvent .
 } WHERE {
-    ?term a pdp:term ;
+    ?term a skos:Concept ;
         pdp:je-pojmem-ze-slovníku ?vocabulary ;
         skos:prefLabel ?prefLabel .
     ?vocabulary pdp:má-glosář ?glossary .
@@ -45,12 +45,12 @@ CONSTRUCT {
     }
     OPTIONAL {
     # This ensures only parent-less terms become top concepts of their glossaries
-        BIND(IF(EXISTS {?glossary pdp:obsahuje-kořenový-pojem ?term}, ?glossary, BNODE()) as ?topOf)
+        BIND(IF(EXISTS {?glossary skos:hasTopConcept ?term}, ?glossary, BNODE()) as ?topOf)
         FILTER (!ISBLANK(?topOf))
     }
     OPTIONAL {
         ?term a ?type .
-        FILTER (?type != pdp:term && ?type != skos:Concept)
+        FILTER (?type != skos:Concept)
         FILTER(!STRSTARTS(STR(?type), "http://www.w3.org/2002/07/owl#"))
         FILTER NOT EXISTS {
             ?term a ?intermediateType .

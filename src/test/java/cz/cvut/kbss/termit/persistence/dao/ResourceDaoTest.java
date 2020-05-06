@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.persistence.dao;
 
@@ -26,7 +23,7 @@ import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.XPathSelector;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -46,6 +43,9 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private DescriptorFactory descriptorFactory;
 
     @Autowired
     private ResourceDao sut;
@@ -71,8 +71,6 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
     private Resource generateResource() {
         final Resource resource = Generator.generateResourceWithId();
-        resource.setAuthor(user);
-        resource.setCreated(new Date());
         transactional(() -> em.persist(resource));
         return resource;
     }
@@ -204,7 +202,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
         transactional(() -> sut.persist(doc, vocabulary));
         final Document result = em
-                .find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+                .find(Document.class, doc.getUri(), descriptorFactory.documentDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(doc, result);
     }
@@ -217,7 +215,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         file.setUri(Generator.generateUri());
 
         transactional(() -> sut.persist(file, vocabulary));
-        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary.getUri()));
+        final File result = em.find(File.class, file.getUri(), descriptorFactory.fileDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(file, result);
     }
@@ -235,8 +233,8 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final Document doc = Generator.generateDocumentWithId();
 
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(doc, descriptorFactory.documentDescriptor(vocabulary));
         });
         insertInferredDocumentVocabularyPropertyAssertions(doc, vocabulary);
         doc.setVocabulary(vocabulary.getUri());
@@ -246,7 +244,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
         transactional(() -> sut.update(doc));
         final Document result = em
-                .find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(vocabulary.getUri()));
+                .find(Document.class, doc.getUri(), descriptorFactory.documentDescriptor(vocabulary.getUri()));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
@@ -258,12 +256,14 @@ class ResourceDaoTest extends BaseDaoTestRunner {
                 final ValueFactory vf = conn.getValueFactory();
                 conn.add(vf.createIRI(document.getUri().toString()),
                         vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_ma_dokumentovy_slovnik),
-                        vf.createIRI(vocabulary.getUri().toString()), vf.createIRI(vocabulary.getUri().toString()));
+                        vf.createIRI(vocabulary.getUri().toString()),
+                        vf.createIRI(descriptorFactory.vocabularyDescriptor(vocabulary).getContext().toString()));
                 if (document.getFiles() != null) {
                     document.getFiles().forEach(f -> conn.add(
                             vf.createIRI(f.getUri().toString()),
                             vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_casti_dokumentu),
-                            vf.createIRI(document.getUri().toString()), vf.createIRI(vocabulary.getUri().toString())
+                            vf.createIRI(document.getUri().toString()),
+                            vf.createIRI(descriptorFactory.vocabularyDescriptor(vocabulary).getContext().toString())
                     ));
                 }
             }
@@ -277,9 +277,9 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         final File file = Generator.generateFileWithId("test.html");
         doc.addFile(file);
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(doc, DescriptorFactory.documentDescriptor(vocabulary));
-            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(doc, descriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, descriptorFactory.fileDescriptor(vocabulary));
         });
         insertInferredDocumentVocabularyPropertyAssertions(doc, vocabulary);
         file.setDocument(doc);
@@ -289,7 +289,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         file.setLabel(newLabel);
 
         transactional(() -> sut.update(file));
-        final File result = em.find(File.class, file.getUri(), DescriptorFactory.fileDescriptor(vocabulary));
+        final File result = em.find(File.class, file.getUri(), descriptorFactory.fileDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
@@ -310,9 +310,9 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         file.setDocument(document);
         document.addFile(file);
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
-            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(document, descriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, descriptorFactory.fileDescriptor(vocabulary));
         });
 
         transactional(() -> {
@@ -324,7 +324,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
 
         transactional(() -> {
             final DocumentVocabulary result = em.find(DocumentVocabulary.class, vocabulary.getUri(),
-                    DescriptorFactory.vocabularyDescriptor(vocabulary));
+                    descriptorFactory.vocabularyDescriptor(vocabulary));
             assertThat(result.getDocument().getFiles(), anyOf(nullValue(), empty()));
         });
     }
@@ -366,7 +366,7 @@ class ResourceDaoTest extends BaseDaoTestRunner {
         voc.setGlossary(new Glossary());
         voc.setModel(new Model());
 
-        transactional(() -> em.persist(voc, DescriptorFactory.vocabularyDescriptor(voc)));
+        transactional(() -> em.persist(voc, descriptorFactory.vocabularyDescriptor(voc)));
         insertInferredDocumentVocabularyPropertyAssertions(doc, voc);
         doc.setVocabulary(voc.getUri());
 
@@ -378,9 +378,9 @@ class ResourceDaoTest extends BaseDaoTestRunner {
             sut.update(doc);
         });
 
-        assertNotNull(em.find(File.class, f.getUri(), DescriptorFactory.fileDescriptor(voc)));
+        assertNotNull(em.find(File.class, f.getUri(), descriptorFactory.fileDescriptor(voc)));
         assertTrue(
-                em.find(Document.class, doc.getUri(), DescriptorFactory.documentDescriptor(voc)).getFile(f.getLabel())
+                em.find(Document.class, doc.getUri(), descriptorFactory.documentDescriptor(voc)).getFile(f.getLabel())
                   .isPresent());
     }
 

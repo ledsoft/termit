@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.service.repository;
 
@@ -29,7 +26,7 @@ import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
 import cz.cvut.kbss.termit.model.selector.TermSelector;
 import cz.cvut.kbss.termit.model.selector.TextQuoteSelector;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -56,6 +53,9 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private Configuration config;
+
+    @Autowired
+    private DescriptorFactory descriptorFactory;
 
     @Autowired
     private EntityManager em;
@@ -295,7 +295,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         sut.persist(document, vocabulary);
 
         final Document result = em
-                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
+                .find(Document.class, document.getUri(), descriptorFactory.documentDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(document, result);
     }
@@ -306,7 +306,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         final Document document = Generator.generateDocumentWithId();
         final cz.cvut.kbss.termit.model.Vocabulary vocabulary = Generator.generateVocabularyWithId();
         document.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(document, DescriptorFactory.documentDescriptor(vocabulary)));
+        transactional(() -> em.persist(document, descriptorFactory.documentDescriptor(vocabulary)));
 
         final String newLabel = "Updated document";
         document.setLabel(newLabel);
@@ -314,7 +314,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         sut.update(document);
 
         final Document result = em
-                .find(Document.class, document.getUri(), DescriptorFactory.documentDescriptor(vocabulary));
+                .find(Document.class, document.getUri(), descriptorFactory.documentDescriptor(vocabulary));
         assertNotNull(result);
         assertEquals(newLabel, result.getLabel());
     }
@@ -339,10 +339,10 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         fileTwo.setDocument(document);
         document.addFile(fileTwo);
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(document, DescriptorFactory.documentDescriptor(vocabulary));
-            em.persist(file, DescriptorFactory.fileDescriptor(vocabulary));
-            em.persist(fileTwo, DescriptorFactory.fileDescriptor(vocabulary));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(document, descriptorFactory.documentDescriptor(vocabulary));
+            em.persist(file, descriptorFactory.fileDescriptor(vocabulary));
+            em.persist(fileTwo, descriptorFactory.fileDescriptor(vocabulary));
         });
 
         transactional(() -> {
@@ -351,7 +351,7 @@ class ResourceRepositoryServiceTest extends BaseServiceTestRunner {
         });
 
         final DocumentVocabulary result = em.find(DocumentVocabulary.class, vocabulary.getUri(),
-                DescriptorFactory.vocabularyDescriptor(vocabulary));
+                descriptorFactory.vocabularyDescriptor(vocabulary));
         assertEquals(1, result.getDocument().getFiles().size());
         assertTrue(result.getDocument().getFiles().contains(fileTwo));
     }

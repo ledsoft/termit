@@ -6,6 +6,7 @@ PREFIX : <http://www.ontotext.com/connectors/lucene#>
 PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/terms/>
 
 SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?score {
   {
@@ -15,11 +16,15 @@ SELECT DISTINCT ?entity ?label ?type ?vocabularyUri ?snippetText ?snippetField ?
   {
     ?search a inst:defcom_index .
   }
+  {
+    ?entity rdfs:label ?label .
+  } UNION {
+    ?entity dc:title ?label .
+  }
     ?search :query ?wildCardSearchString ;
           :snippetSize 2000 ;
           :entities ?entity .
-  ?entity rdfs:label ?label ;
-          a ?type ;
+  ?entity a ?type ;
           :score ?initScore ;
           :snippets _:s .
   _:s :snippetText ?snippetText ;

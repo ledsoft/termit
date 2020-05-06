@@ -7,8 +7,8 @@ PREFIX dc: <http://purl.org/dc/terms/>
 CONSTRUCT {
     ?glossary a owl:Ontology ;
               a skos:ConceptScheme ;
-              a <https://slovník.gov.cz/veřejný-sektor/pojem/glosář> ;
-              rdfs:label ?label ;
+              a pdp:glosář ;
+              dc:title ?label ;
               dc:creator ?fullName ;
               dc:created ?created ;
               dc:rights ?rights ;
@@ -19,13 +19,11 @@ CONSTRUCT {
               <http://purl.org/ontology/bibo/status> ?status .
 } WHERE {
     ?vocabulary pdp:má-glosář ?glossary ;
-                pdp:má-autora ?author ;
-                pdp:má-datum-a-čas-vytvoření ?created ;
-                rdfs:label ?vocabularyLabel .
+                dc:title ?vocabularyLabel .
     ?author pdp:má-křestní-jméno ?firstName ;
             pdp:má-příjmení ?lastName .
     OPTIONAL {
-        ?glossary rdfs:label ?glossaryLabel .
+        ?glossary dc:title ?glossaryLabel .
     }
     OPTIONAL {
         ?vocabulary pdp:importuje-slovník/pdp:má-glosář ?imported .
@@ -42,6 +40,12 @@ CONSTRUCT {
     }
     OPTIONAL {
         ?glossary <http://purl.org/ontology/bibo/status> ?status .
+    }
+    OPTIONAL {
+        ?createRecord a pdp:vytvoření-entity ;
+            pdp:má-změněnou-entitu ?vocabulary ;
+            pdp:má-editora ?author ;
+            pdp:má-datum-a-čas-modifikace ?created .
     }
     BIND (CONCAT(?firstName, " ", ?lastName) AS ?fullName)
     BIND (COALESCE(?glossaryLabel, ?vocabularyLabel) AS ?label)

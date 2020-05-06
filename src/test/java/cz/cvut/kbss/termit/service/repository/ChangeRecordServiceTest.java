@@ -8,7 +8,7 @@ import cz.cvut.kbss.termit.model.User;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,18 +29,23 @@ class ChangeRecordServiceTest extends BaseServiceTestRunner {
     private EntityManager em;
 
     @Autowired
+    private DescriptorFactory descriptorFactory;
+
+    @Autowired
     private ChangeRecordService sut;
+
+    private User author;
 
     private Vocabulary asset;
 
     @BeforeEach
     void setUp() {
         this.asset = Generator.generateVocabularyWithId();
-        final User author = Generator.generateUserWithId();
+        this.author = Generator.generateUserWithId();
         Environment.setCurrentUser(author);
         transactional(() -> {
             em.persist(author);
-            em.persist(asset, DescriptorFactory.vocabularyDescriptor(asset));
+            em.persist(asset, descriptorFactory.vocabularyDescriptor(asset));
         });
     }
 
@@ -58,7 +63,7 @@ class ChangeRecordServiceTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> records = IntStream.range(0, 5).mapToObj(i -> {
             final UpdateChangeRecord r = new UpdateChangeRecord(asset);
             r.setChangedAttribute(URI.create(RDFS.LABEL));
-            r.setAuthor(asset.getAuthor());
+            r.setAuthor(author);
             r.setTimestamp(Instant.ofEpochMilli(System.currentTimeMillis() - i * 10000));
             return r;
         }).collect(Collectors.toList());

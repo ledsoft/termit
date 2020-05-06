@@ -5,14 +5,13 @@
 @prefix termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-termit:slovník  a       <https://slovník.gov.cz/veřejný-sektor/pojem/slovník> , owl:Ontology ;
-        rdfs:label      "Vocabulary of system TermIt - vocabulary"@en , "Slovník systému TermIt - slovník"@cs ;
+termit:slovník  a       <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovník> , owl:Ontology ;
         <http://purl.org/dc/terms/creator>
                 " Martin Ledvinka" , "Michal Med" ;
         <http://purl.org/dc/terms/title>
                 "Vocabulary of system TermIt - vocabulary"@en , "Slovník systému TermIt - slovník"@cs ;
         <http://purl.org/dc/terms/created>
-                "25.03.2019" ;
+                "2019-03-29" ;
         <http://purl.org/ontology/bibo/status>
                 "Specification"@en , "Specifikace"@cs ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
@@ -21,7 +20,7 @@ termit:slovník  a       <https://slovník.gov.cz/veřejný-sektor/pojem/slovní
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
         owl:imports     termit:glosář , termit:model ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/slovník/verze/1.1.1> ;
-        <https://slovník.gov.cz/veřejný-sektor/pojem/má-glosář>
+        <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/má-glosář>
                 termit:glosář ;
-        <https://slovník.gov.cz/veřejný-sektor/pojem/má-model>
+        <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/má-model>
                 termit:model .

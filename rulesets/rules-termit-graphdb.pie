@@ -13,7 +13,7 @@ Prefices
 Axioms
 {
     <skos:narrower> <rdfs:subPropertyOf> <skos:narrowerTransitive>
-    <skos:narrowerTransitive> <psys:transitiveOver> <skos:narrower> 
+    <skos:narrowerTransitive> <psys:transitiveOver> <skos:narrower>
 }
 
 Rules
@@ -52,7 +52,7 @@ Rules
 
   Id: pdp_dokument_1
 
-    vocabulary <pdp:popisuje-dokument> this   
+    vocabulary <pdp:popisuje-dokument> this
     -------------------------------
     this <pdp:má-dokumentový-slovník> vocabulary
 
@@ -70,12 +70,6 @@ Rules
     glossary <pdp:obsahuje-pojem> this
     this <skos:inScheme> glossary
 
-  Id: pdp_term_3
-
-    this <rdf:type> <pdp:term>
-    -------------------------------
-    this <rdf:type> <skos:Concept>
-
   Id: pdp_term_4
 
     this <rdf:type> <pdp:dokumentový-slovník>
@@ -90,7 +84,7 @@ Rules
 
   Id: pdp_term_6
 
-    this <rdf:type> <pdp:term>
+    this <rdf:type> <skos:Concept>
     this <skos:broader> parent
     -------------------------------
     parent <skos:narrower> this

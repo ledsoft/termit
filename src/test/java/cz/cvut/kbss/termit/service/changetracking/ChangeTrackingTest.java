@@ -1,7 +1,7 @@
 package cz.cvut.kbss.termit.service.changetracking;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
+import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
@@ -11,9 +11,11 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.model.resource.File;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.persistence.dao.changetracking.ChangeRecordDao;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
+import cz.cvut.kbss.termit.service.repository.ResourceRepositoryService;
 import cz.cvut.kbss.termit.service.repository.TermRepositoryService;
 import cz.cvut.kbss.termit.service.repository.VocabularyRepositoryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     private EntityManager em;
 
     @Autowired
+    private DescriptorFactory descriptorFactory;
+
+    @Autowired
     private ChangeRecordDao changeRecordDao;
 
     @Autowired
@@ -41,6 +46,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
 
     @Autowired
     private TermRepositoryService termService;
+
+    @Autowired
+    private ResourceRepositoryService resourceService;
 
     private User author;
 
@@ -68,7 +76,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     @Test
     void persistingTermCreatesCreationChangeRecord() {
         enableRdfsInference(em);
-        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        transactional(() -> em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary)));
         final Term term = Generator.generateTermWithId();
         transactional(() -> termService.addRootTermToVocabulary(term, vocabulary));
 
@@ -81,7 +89,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     @Test
     void updatingVocabularyLiteralAttributeCreatesUpdateChangeRecord() {
         enableRdfsInference(em);
-        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        transactional(() -> em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary)));
         vocabulary.setLabel("Updated vocabulary label");
         transactional(() -> vocabularyService.update(vocabulary));
 
@@ -89,7 +97,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         assertEquals(1, result.size());
         assertEquals(vocabulary.getUri(), result.get(0).getChangedEntity());
         assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
-        assertEquals(RDFS.LABEL, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
+        assertEquals(DC.Terms.TITLE, ((UpdateChangeRecord) result.get(0)).getChangedAttribute().toString());
     }
 
     @Test
@@ -97,8 +105,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Vocabulary imported = Generator.generateVocabularyWithId();
         transactional(() -> {
-            em.persist(imported, DescriptorFactory.vocabularyDescriptor(imported));
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(imported, descriptorFactory.vocabularyDescriptor(imported));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
         });
         vocabulary.setLabel("Updated vocabulary label");
         vocabulary.setImportedVocabularies(Collections.singleton(imported.getUri()));
@@ -109,7 +117,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         result.forEach(chr -> {
             assertEquals(vocabulary.getUri(), chr.getChangedEntity());
             assertThat(result.get(0), instanceOf(UpdateChangeRecord.class));
-            assertThat(((UpdateChangeRecord) chr).getChangedAttribute().toString(), anyOf(equalTo(RDFS.LABEL),
+            assertThat(((UpdateChangeRecord) chr).getChangedAttribute().toString(), anyOf(equalTo(DC.Terms.TITLE),
                     equalTo(cz.cvut.kbss.termit.util.Vocabulary.s_p_importuje_slovnik)));
         });
     }
@@ -120,8 +128,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.setDefinition("Updated term definition.");
         transactional(() -> termService.update(term));
@@ -141,9 +149,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, DescriptorFactory.termDescriptor(parent));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(parent, descriptorFactory.termDescriptor(parent));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.addParentTerm(parent);
         transactional(() -> termService.update(term));
@@ -162,8 +170,8 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final String originalDefinition = term.getDefinition();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         final String newDefinition = "Updated term definition.";
         term.setDefinition(newDefinition);
@@ -184,9 +192,9 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final Term term = Generator.generateTermWithId();
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, DescriptorFactory.termDescriptor(parent));
-            em.persist(term, DescriptorFactory.termDescriptor(term));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(parent, descriptorFactory.termDescriptor(parent));
+            em.persist(term, descriptorFactory.termDescriptor(term));
         });
         term.addParentTerm(parent);
         transactional(() -> termService.update(term));
@@ -194,5 +202,17 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
         assertNull(((UpdateChangeRecord) result.get(0)).getOriginalValue());
         assertEquals(Collections.singleton(parent.getUri()), ((UpdateChangeRecord) result.get(0)).getNewValue());
+    }
+
+    @Test
+    void persistingFileCreatesPersistChangeRecord() {
+        enableRdfsInference(em);
+        final File file = Generator.generateFileWithId("test.html");
+        transactional(() -> resourceService.persist(file));
+
+        final List<AbstractChangeRecord> result = changeRecordDao.findAll(file);
+        assertEquals(1, result.size());
+        assertEquals(file.getUri(), result.get(0).getChangedEntity());
+        assertThat(result.get(0), instanceOf(PersistChangeRecord.class));
     }
 }

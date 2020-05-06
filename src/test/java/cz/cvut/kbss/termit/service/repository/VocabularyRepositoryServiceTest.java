@@ -16,7 +16,6 @@ package cz.cvut.kbss.termit.service.repository;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
-import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.ResourceExistsException;
@@ -26,7 +25,8 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.UserAccount;
 import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import cz.cvut.kbss.termit.service.IdentifierResolver;
 import cz.cvut.kbss.termit.util.ConfigParam;
@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +49,9 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private Configuration config;
+
+    @Autowired
+    private DescriptorFactory descriptorFactory;
 
     @Autowired
     private EntityManager em;
@@ -67,14 +69,19 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistSetsVocabularyAuthorAndCreationDate() {
+    void persistGeneratesPersistChangeRecord() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
         sut.persist(vocabulary);
 
         final Vocabulary result = em.find(Vocabulary.class, vocabulary.getUri());
         assertNotNull(result);
-        assertEquals(user.toUser(), result.getAuthor());
-        assertNotNull(result.getCreated());
+
+        final PersistChangeRecord record = em
+                .createQuery("SELECT r FROM PersistChangeRecord r WHERE r.changedEntity = :vocabularyIri",
+                        PersistChangeRecord.class).setParameter("vocabularyIri", vocabulary.getUri()).getSingleResult();
+        assertNotNull(record);
+        assertEquals(user.toUser(), record.getAuthor());
+        assertNotNull(record.getTimestamp());
     }
 
     @Test
@@ -120,10 +127,8 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     @Test
-    void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalAlreadyIriExists() {
+    void persistThrowsResourceExistsExceptionWhenAnotherVocabularyWithIdenticalIdentifierAlreadyIriExists() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         final Vocabulary toPersist = Generator.generateVocabulary();
@@ -134,8 +139,6 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void updateThrowsValidationExceptionForEmptyName() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary));
 
         vocabulary.setLabel("");
@@ -143,18 +146,12 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     }
 
     private Descriptor descriptorFor(Vocabulary entity) {
-        final EntityDescriptor descriptor = new EntityDescriptor(entity.getUri());
-        descriptor.addAttributeDescriptor(
-                em.getMetamodel().entity(Vocabulary.class).getAttribute("author").getJavaField(),
-                new EntityDescriptor(null));
-        return descriptor;
+        return descriptorFactory.vocabularyDescriptor(entity);
     }
 
     @Test
     void updateSavesUpdatedVocabulary() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        vocabulary.setAuthor(user.toUser());
-        vocabulary.setCreated(new Date());
         transactional(() -> em.persist(vocabulary, descriptorFor(vocabulary)));
 
         final String newName = "Updated name";
@@ -185,10 +182,10 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         targetVocabulary.getGlossary().addRootTerm(parentTerm);
         parentTerm.setVocabulary(targetVocabulary.getUri());
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, DescriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, descriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
         });
 
         subjectVocabulary.setImportedVocabularies(Collections.emptySet());
@@ -207,10 +204,10 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         targetVocabulary.getGlossary().addRootTerm(parentTerm);
         parentTerm.setVocabulary(targetVocabulary.getUri());
         transactional(() -> {
-            em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary));
-            em.persist(targetVocabulary, DescriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, DescriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, DescriptorFactory.termDescriptor(parentTerm));
+            em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
+            em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
+            em.persist(child, descriptorFactory.termDescriptor(child));
+            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
         });
 
         subjectVocabulary.setImportedVocabularies(Collections.emptySet());
@@ -222,7 +219,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void getTransitivelyImportedVocabulariesReturnsEmptyCollectionsWhenVocabularyHasNoImports() {
         final Vocabulary subjectVocabulary = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(subjectVocabulary, DescriptorFactory.vocabularyDescriptor(subjectVocabulary)));
+        transactional(() -> em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary)));
         final Collection<URI> result = sut.getTransitivelyImportedVocabularies(subjectVocabulary);
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -238,7 +235,7 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void getChangesRetrievesChangesForVocabulary() {
         final Vocabulary vocabulary = Generator.generateVocabularyWithId();
-        transactional(() -> em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary)));
+        transactional(() -> em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary)));
         final List<AbstractChangeRecord> changes = sut.getChanges(vocabulary);
         assertTrue(changes.isEmpty());
     }

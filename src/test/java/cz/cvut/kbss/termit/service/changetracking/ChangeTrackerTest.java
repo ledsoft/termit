@@ -10,7 +10,7 @@ import cz.cvut.kbss.termit.model.Vocabulary;
 import cz.cvut.kbss.termit.model.changetracking.AbstractChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
 import cz.cvut.kbss.termit.model.changetracking.UpdateChangeRecord;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,9 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
     private EntityManager em;
 
     @Autowired
+    private DescriptorFactory descriptorFactory;
+
+    @Autowired
     private ChangeTracker sut;
 
     private User author;
@@ -42,7 +45,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         this.vocabulary = Generator.generateVocabularyWithId();
         transactional(() -> {
             em.persist(author);
-            em.persist(vocabulary, DescriptorFactory.vocabularyDescriptor(vocabulary));
+            em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
         });
     }
 
@@ -52,7 +55,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         final Term newTerm = Generator.generateTermWithId();
         newTerm.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(newTerm, DescriptorFactory.termDescriptor(newTerm));
+            em.persist(newTerm, descriptorFactory.termDescriptor(newTerm));
             sut.recordAddEvent(newTerm);
         });
 
@@ -76,7 +79,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
         original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, DescriptorFactory.termDescriptor(original)));
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
 
         final Term update = cloneOf(original);
         transactional(() -> sut.recordUpdateEvent(update, original));
@@ -89,7 +92,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
         original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, DescriptorFactory.termDescriptor(original)));
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
 
         final Term update = cloneOf(original);
         update.setDefinition("Updated definition of this term.");
@@ -108,7 +111,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
         original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, DescriptorFactory.termDescriptor(original)));
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
 
         final Term update = cloneOf(original);
         update.setDefinition("Updated definition of this term.");

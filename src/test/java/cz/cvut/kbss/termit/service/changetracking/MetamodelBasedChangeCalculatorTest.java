@@ -2,7 +2,6 @@ package cz.cvut.kbss.termit.service.changetracking;
 
 import cz.cvut.kbss.jopa.vocabulary.DC;
 import cz.cvut.kbss.jopa.vocabulary.RDF;
-import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.jopa.vocabulary.SKOS;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.model.Glossary;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,13 +39,13 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         assertEquals(1, result.size());
         final UpdateChangeRecord record = result.iterator().next();
         assertEquals(original.getUri(), record.getChangedEntity());
-        assertEquals(URI.create(RDFS.LABEL), record.getChangedAttribute());
+        assertEquals(URI.create(DC.Terms.TITLE), record.getChangedAttribute());
     }
 
     private static Vocabulary cloneOf(Vocabulary original) {
         final Vocabulary clone = new Vocabulary();
         clone.setUri(original.getUri());
-        clone.setComment(original.getComment());
+        clone.setDescription(original.getDescription());
         clone.setModel(original.getModel());
         clone.setGlossary(original.getGlossary());
         clone.setLabel(original.getLabel());
@@ -89,10 +87,8 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         clone.setUri(original.getUri());
         clone.setLabel(original.getLabel());
         clone.setDefinition(original.getDefinition());
-        clone.setComment(original.getComment());
+        clone.setDescription(original.getDescription());
         clone.setVocabulary(original.getVocabulary());
-        clone.setAuthor(original.getAuthor());
-        clone.setCreated(original.getCreated());
         return clone;
     }
 
@@ -245,17 +241,6 @@ class MetamodelBasedChangeCalculatorTest extends BaseServiceTestRunner {
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(RDF.TYPE))));
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(SKOS.BROADER))));
         assertTrue(result.stream().anyMatch(r -> r.getChangedAttribute().equals(URI.create(SKOS.PREF_LABEL))));
-    }
-
-    @Test
-    void calculateChangesSkipsProvenanceAttributes() {
-        final Term original = Generator.generateTermWithId();
-        final Term changed = cloneOf(original);
-        changed.setAuthor(Generator.generateUserWithId());
-        changed.setCreated(new Date());
-
-        final Collection<UpdateChangeRecord> result = sut.calculateChanges(changed, original);
-        assertTrue(result.isEmpty());
     }
 
     @Test

@@ -26,7 +26,9 @@ import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.model.resource.Resource;
-import cz.cvut.kbss.termit.model.util.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.DescriptorFactory;
+import cz.cvut.kbss.termit.persistence.PersistenceUtils;
+import cz.cvut.kbss.termit.util.Configuration;
 import cz.cvut.kbss.termit.util.Vocabulary;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
@@ -35,14 +37,27 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
+import static cz.cvut.kbss.termit.model.util.EntityToOwlClassMapper.getOwlClassForEntity;
+
 @Repository
 public class ResourceDao extends AssetDao<Resource> implements SupportsLastModification {
 
+    private static final URI LABEL_PROPERTY = URI.create(RDFS.LABEL);
+
     private volatile long lastModified;
 
-    public ResourceDao(EntityManager em) {
-        super(Resource.class, em);
+    private final PersistenceUtils persistenceUtils;
+
+    public ResourceDao(EntityManager em, Configuration config, DescriptorFactory descriptorFactory,
+                       PersistenceUtils persistenceUtils) {
+        super(Resource.class, em, config, descriptorFactory);
+        this.persistenceUtils = persistenceUtils;
         refreshLastModified();
+    }
+
+    @Override
+    protected URI labelProperty() {
+        return LABEL_PROPERTY;
     }
 
     /**
@@ -73,12 +88,12 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
         }
     }
 
-    private static Descriptor createDescriptor(Resource resource, URI vocabularyUri) {
+    private Descriptor createDescriptor(Resource resource, URI vocabularyUri) {
         final Descriptor descriptor;
         if (resource instanceof Document) {
-            descriptor = DescriptorFactory.documentDescriptor(vocabularyUri);
+            descriptor = descriptorFactory.documentDescriptor(vocabularyUri);
         } else if (resource instanceof File) {
-            descriptor = DescriptorFactory.fileDescriptor(vocabularyUri);
+            descriptor = descriptorFactory.fileDescriptor(vocabularyUri);
         } else {
             throw new IllegalArgumentException(
                     "Resource " + resource + " cannot be persisted into vocabulary context.");
@@ -90,11 +105,11 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
     @Override
     public Resource update(Resource entity) {
         try {
-            final URI context = resolveVocabularyContext(entity);
-            if (context != null) {
+            final URI vocabularyId = resolveVocabularyId(entity);
+            if (vocabularyId != null) {
                 // This evict is a bit overkill, but there are multiple relationships that would have to be evicted
-                em.getEntityManagerFactory().getCache().evict(context);
-                return em.merge(entity, createDescriptor(entity, context));
+                em.getEntityManagerFactory().getCache().evict(persistenceUtils.resolveVocabularyContext(vocabularyId));
+                return em.merge(entity, createDescriptor(entity, vocabularyId));
             } else {
                 return em.merge(entity);
             }
@@ -103,7 +118,7 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
         }
     }
 
-    private URI resolveVocabularyContext(Resource resource) {
+    private URI resolveVocabularyId(Resource resource) {
         if (resource instanceof Document) {
             return ((Document) resource).getVocabulary();
         } else if (resource instanceof File) {
@@ -132,7 +147,9 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
                     "} } ORDER BY ?label", Resource.class)
                      .setParameter("type", typeUri)
                      .setParameter("hasFile", URI.create(Vocabulary.s_p_ma_soubor))
-                     .setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik)).getResultList();
+                     .setParameter("vocabulary",
+                             URI.create(getOwlClassForEntity(cz.cvut.kbss.termit.model.Vocabulary.class)))
+                     .getResultList();
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
@@ -155,7 +172,7 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
                     "?assignment ?is-assignment-of ?x ;" +
                     "?has-target/?has-source ?resource ." +
                     "} ORDER BY ?label", Term.class)
-                     .setParameter("term", URI.create(Vocabulary.s_c_term))
+                     .setParameter("term", URI.create(getOwlClassForEntity(Term.class)))
                      .setParameter("hasLabel", URI.create(SKOS.PREF_LABEL))
                      .setParameter("is-assignment-of", URI.create(Vocabulary.s_p_je_prirazenim_termu))
                      .setParameter("has-target", URI.create(Vocabulary.s_p_ma_cil))
@@ -197,6 +214,22 @@ public class ResourceDao extends AssetDao<Resource> implements SupportsLastModif
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
         }
+    }
+
+    @Override
+    List<URI> findUniqueLastModifiedEntities(int limit) {
+        // Must ensure vocabularies (which are technically also resources) are not included
+        return em.createNativeQuery("SELECT DISTINCT ?entity WHERE {" +
+                "?x a ?change ;" +
+                "?hasModificationDate ?modified ;" +
+                "?hasModifiedEntity ?entity ." +
+                "?entity a ?type ." +
+                "FILTER NOT EXISTS { ?entity a ?vocabulary . }" +
+                "} ORDER BY DESC(?modified)", URI.class).setParameter("change", URI.create(Vocabulary.s_c_zmena))
+                 .setParameter("hasModificationDate", URI.create(Vocabulary.s_p_ma_datum_a_cas_modifikace))
+                 .setParameter("hasModifiedEntity", URI.create(Vocabulary.s_p_ma_zmenenou_entitu))
+                 .setParameter("type", typeUri).setParameter("vocabulary", URI.create(Vocabulary.s_c_slovnik))
+                 .setMaxResults(limit).getResultList();
     }
 
     @Override

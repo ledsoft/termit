@@ -29,8 +29,8 @@ public class SKOSExporter {
     private static final String GLOSSARY_EXPORT_QUERY = "skos" + File.separator + "exportGlossary.rq";
     private static final String TERMS_EXPORT_QUERY = "skos" + File.separator + "exportGlossaryTerms.rq";
 
-    private org.eclipse.rdf4j.repository.Repository repository;
-    private ValueFactory vf;
+    private final org.eclipse.rdf4j.repository.Repository repository;
+    private final ValueFactory vf;
 
     private final Model model = new LinkedHashModel();
 
