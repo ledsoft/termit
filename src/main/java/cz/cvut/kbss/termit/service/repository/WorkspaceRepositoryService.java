@@ -5,6 +5,8 @@ import cz.cvut.kbss.termit.exception.workspace.WorkspaceNotSetException;
 import cz.cvut.kbss.termit.model.Workspace;
 import cz.cvut.kbss.termit.persistence.dao.WorkspaceDao;
 import cz.cvut.kbss.termit.service.business.WorkspaceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import java.net.URI;
 
 @Service
 public class WorkspaceRepositoryService implements WorkspaceService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRepositoryService.class);
 
     static final String WORKSPACE_ATT = "workspace";
 
@@ -28,8 +32,10 @@ public class WorkspaceRepositoryService implements WorkspaceService {
 
     @Override
     public Workspace loadWorkspace(URI id) {
+        LOG.trace("Loading workspace {}.", id);
         final Workspace ws = workspaceDao.find(id).orElseThrow(
                 () -> NotFoundException.create(Workspace.class.getSimpleName(), id));
+        LOG.trace("Storing workspace in session.");
         session.setAttribute(WORKSPACE_ATT, ws);
         return ws;
     }

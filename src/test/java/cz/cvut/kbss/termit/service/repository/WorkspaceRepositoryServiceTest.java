@@ -9,17 +9,12 @@ import cz.cvut.kbss.termit.model.Workspace;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.servlet.http.HttpSession;
 
 import static cz.cvut.kbss.termit.service.repository.WorkspaceRepositoryService.WORKSPACE_ATT;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ContextConfiguration(classes = WorkspaceRepositoryServiceTest.Config.class)
 class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
@@ -30,14 +25,6 @@ class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private WorkspaceRepositoryService sut;
-
-    @Configuration
-    static class Config {
-        @Bean
-        public HttpSession httpSession() {
-            return new MockHttpSession();
-        }
-    }
 
     @Test
     void loadWorkspaceByIdRetrievesWorkspaceFromRepository() {
