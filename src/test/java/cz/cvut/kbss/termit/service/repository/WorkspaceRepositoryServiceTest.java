@@ -4,21 +4,40 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.exception.NotFoundException;
+import cz.cvut.kbss.termit.exception.workspace.WorkspaceNotSetException;
 import cz.cvut.kbss.termit.model.Workspace;
 import cz.cvut.kbss.termit.service.BaseServiceTestRunner;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import javax.servlet.http.HttpSession;
 
+import static cz.cvut.kbss.termit.service.repository.WorkspaceRepositoryService.WORKSPACE_ATT;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ContextConfiguration(classes = WorkspaceRepositoryServiceTest.Config.class)
 class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private EntityManager em;
 
     @Autowired
+    private HttpSession session;
+
+    @Autowired
     private WorkspaceRepositoryService sut;
+
+    @Configuration
+    static class Config {
+        @Bean
+        public HttpSession httpSession() {
+            return new MockHttpSession();
+        }
+    }
 
     @Test
     void loadWorkspaceByIdRetrievesWorkspaceFromRepository() {
@@ -38,5 +57,25 @@ class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
     @Test
     void loadWorkspaceByIdThrowsNotFoundExceptionWhenWorkspaceDoesNotExist() {
         assertThrows(NotFoundException.class, () -> sut.loadWorkspace(Generator.generateUri()));
+    }
+
+    @Test
+    void loadWorkspaceByIdStoresLoadedWorkspaceInSession() {
+        final Workspace expected = generateWorkspace();
+        sut.loadWorkspace(expected.getUri());
+        assertEquals(expected, session.getAttribute(WORKSPACE_ATT));
+    }
+
+    @Test
+    void getCurrentWorkspaceRetrievesCurrentWorkspaceFromSession() {
+        final Workspace expected = generateWorkspace();
+        session.setAttribute(WORKSPACE_ATT, expected);
+        assertEquals(expected, sut.getCurrentWorkspace());
+    }
+
+    @Test
+    void getCurrentWorkspaceThrowsWorkspaceNotSetExceptionWhenNoWorkspaceIsSelected() {
+        assertNull(session.getAttribute(WORKSPACE_ATT));
+        assertThrows(WorkspaceNotSetException.class, () -> sut.getCurrentWorkspace());
     }
 }

@@ -36,23 +36,9 @@ public class WorkspaceDao {
      *
      * @param user User for which workspace should be retrieved
      * @return Current workspace of the specified user (if it is set)
-     * @see #setCurrentWorkspace(UserAccount, Workspace)
      */
     public Optional<Workspace> findCurrentForUser(UserAccount user) {
         // TODO
         return Optional.empty();
-    }
-
-    /**
-     * Saves the specified workspace as current for the specified user.
-     * <p>
-     * This information may be useful for later retrieval (e.g., returning to the application).
-     *
-     * @param user      User
-     * @param workspace Workspace to set as current for the user
-     * @see #findCurrentForUser(UserAccount)
-     */
-    public void setCurrentWorkspace(UserAccount user, Workspace workspace) {
-        // TODO
     }
 }
