@@ -18,7 +18,10 @@ public class WorkspaceRepositoryService implements WorkspaceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRepositoryService.class);
 
-    static final String WORKSPACE_ATT = "workspace";
+    /**
+     * Session attribute denoting the current user's workspace
+     */
+    public static final String WORKSPACE_SESSION_ATT = "workspace";
 
     private final HttpSession session;
 
@@ -36,7 +39,7 @@ public class WorkspaceRepositoryService implements WorkspaceService {
         final Workspace ws = workspaceDao.find(id).orElseThrow(
                 () -> NotFoundException.create(Workspace.class.getSimpleName(), id));
         LOG.trace("Storing workspace in session.");
-        session.setAttribute(WORKSPACE_ATT, ws);
+        session.setAttribute(WORKSPACE_SESSION_ATT, ws);
         return ws;
     }
 
@@ -48,7 +51,7 @@ public class WorkspaceRepositoryService implements WorkspaceService {
 
     @Override
     public Workspace getCurrentWorkspace() {
-        final Object workspace = session.getAttribute(WORKSPACE_ATT);
+        final Object workspace = session.getAttribute(WORKSPACE_SESSION_ATT);
         if (workspace == null) {
             throw new WorkspaceNotSetException("No workspace is currently selected!");
         }
