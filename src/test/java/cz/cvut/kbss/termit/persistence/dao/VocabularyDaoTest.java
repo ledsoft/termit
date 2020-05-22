@@ -16,6 +16,7 @@ package cz.cvut.kbss.termit.persistence.dao;
 
 import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.descriptors.Descriptor;
+import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.cvut.kbss.termit.environment.Environment;
 import cz.cvut.kbss.termit.environment.Generator;
 import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
@@ -23,6 +24,11 @@ import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.resource.Document;
 import cz.cvut.kbss.termit.model.resource.File;
 import cz.cvut.kbss.termit.persistence.DescriptorFactory;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -327,5 +333,51 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         assertEquals(newLabel, result.get().getLabel());
         final long after = sut.getLastModified();
         assertThat(after, greaterThan(before));
+    }
+
+    @Test
+    void findAllByWorkspaceLoadsVocabulariesInWorkspace() {
+        enableRdfsInference(em);
+        final List<Vocabulary> vocabularies = IntStream.range(0, 10).mapToObj(i -> Generator.generateVocabularyWithId())
+                                                       .collect(Collectors.toList());
+        final Workspace workspace = new Workspace();
+        workspace.setLabel("test workspace");
+        workspace.setUri(Generator.generateUri());
+        transactional(() -> {
+            vocabularies.forEach(v -> em.persist(v, descriptorFactory.vocabularyDescriptor(v)));
+            em.persist(workspace, new EntityDescriptor(workspace.getUri()));
+        });
+        final List<Vocabulary> inWorkspace = vocabularies.stream().filter(v -> Generator.randomBoolean())
+                                                         .collect(Collectors.toList());
+        addWorkspaceReference(inWorkspace, workspace);
+
+        final List<Vocabulary> result = sut.findAll(workspace);
+        inWorkspace.sort(Comparator.comparing(Vocabulary::getLabel));
+        assertEquals(inWorkspace, result);
+    }
+
+    private void addWorkspaceReference(Collection<Vocabulary> vocabularies, Workspace workspace) {
+        transactional(() -> {
+            final Repository repo = em.unwrap(Repository.class);
+            try (final RepositoryConnection conn = repo.getConnection()) {
+                final ValueFactory vf = conn.getValueFactory();
+                conn.begin();
+                final IRI ws = vf.createIRI(workspace.getUri().toString());
+                conn.add(ws, RDF.TYPE, vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_c_metadatovy_kontext), ws);
+                final IRI hasContext = vf
+                        .createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_odkazuje_na_kontext);
+                final IRI vocContext = vf
+                        .createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnikovy_kontext);
+                final IRI hasVocabulary = vf
+                        .createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_slovnik);
+                vocabularies.forEach(v -> {
+                    final IRI vocCtx = vf.createIRI(descriptorFactory.vocabularyDescriptor(v).getContext().toString());
+                    conn.add(ws, hasContext, vocCtx, ws);
+                    conn.add(vocCtx, RDF.TYPE, vocContext, ws);
+                    conn.add(vocCtx, hasVocabulary, vf.createIRI(v.getUri().toString()), ws);
+                });
+                conn.commit();
+            }
+        });
     }
 }

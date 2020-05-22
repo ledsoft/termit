@@ -5,12 +5,13 @@ import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.jopa.model.annotations.OWLClass;
 import cz.cvut.kbss.jopa.vocabulary.RDFS;
 import cz.cvut.kbss.termit.model.util.HasIdentifier;
+import cz.cvut.kbss.termit.util.Vocabulary;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Objects;
 
-@OWLClass(iri = "https://slovník.gov.cz/datový/pracovní-prostor/pojem/metadatový-kontext")
+@OWLClass(iri = Vocabulary.s_c_metadatovy_kontext)
 public class Workspace implements Serializable, HasIdentifier {
 
     @Id
