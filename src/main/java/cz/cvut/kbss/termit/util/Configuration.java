@@ -106,6 +106,7 @@ public class Configuration {
         map.put(ConfigParam.CHANGE_TRACKING_CONTEXT_EXTENSION, Constants.DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION);
         map.put(ConfigParam.WORKING_VOCABULARY_CONTEXT_EXTENSION,
                 Constants.DEFAULT_WORKING_VOCABULARY_CONTEXT_EXTENSION);
+        map.put(ConfigParam.CORS_ALLOWED_ORIGIN, "*");
         return map;
     }
 }
