@@ -5,23 +5,23 @@
 @prefix termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-termit:slovník  a       <https://slovník.gov.cz/veřejný-sektor/pojem/slovník> , owl:Ontology ;
-        rdfs:label      "Vocabulary of system TermIt - vocabulary"@en , "Slovník systému TermIt - slovník"@cs ;
+<http://onto.fel.cvut.cz/ontologies/application/termit>
+        a               <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/slovník> , owl:Ontology ;
+        <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/má-glosář>
+                termit:glosář ;
+        <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/má-model>
+                termit:model ;
+        <http://purl.org/dc/terms/created>
+                "2020-05-26" ;
         <http://purl.org/dc/terms/creator>
                 " Martin Ledvinka" , "Michal Med" ;
         <http://purl.org/dc/terms/title>
-                "Vocabulary of system TermIt - vocabulary"@en , "Slovník systému TermIt - slovník"@cs ;
-        <http://purl.org/dc/terms/created>
-                "25.03.2019" ;
+                "Slovník systému TermIt - slovník"@cs , "Vocabulary of system TermIt - vocabulary"@en ;
         <http://purl.org/ontology/bibo/status>
-                "Specification"@en , "Specifikace"@cs ;
+                "Specifikace"@cs , "Specification"@en ;
         <http://purl.org/vocab/vann/preferredNamespacePrefix>
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     termit:glosář , termit:model ;
-        owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/slovník/verze/1.1.1> ;
-        <https://slovník.gov.cz/veřejný-sektor/pojem/má-glosář>
-                termit:glosář ;
-        <https://slovník.gov.cz/veřejný-sektor/pojem/má-model>
-                termit:model .
+        owl:imports     termit:model , termit:glosář ;
+        owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/verze/1.1.2> .
