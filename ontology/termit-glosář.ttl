@@ -90,7 +90,7 @@ termit:glosář  a        owl:Ontology , <https://slovník.gov.cz/veřejný-sekt
                 "termit-pojem" ;
         <http://purl.org/vocab/vann/preferredNamespaceUri>
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
-        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/glosář> ;
+        owl:imports     <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/glosář> , <https://slovník.gov.cz/datový/pracovní-prostor/glosář> ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/glosář/verze/1.1.1> .
 
 termit-pojem:je-přiřazením-termu

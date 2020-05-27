@@ -23,6 +23,7 @@ import cz.cvut.kbss.termit.event.RefreshLastModifiedEvent;
 import cz.cvut.kbss.termit.exception.PersistenceException;
 import cz.cvut.kbss.termit.model.Glossary;
 import cz.cvut.kbss.termit.model.Vocabulary;
+import cz.cvut.kbss.termit.model.Workspace;
 import cz.cvut.kbss.termit.persistence.DescriptorFactory;
 import cz.cvut.kbss.termit.util.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,37 @@ public class VocabularyDao extends AssetDao<Vocabulary> implements SupportsLastM
     @Override
     public List<Vocabulary> findAll() {
         final List<Vocabulary> result = super.findAll();
+        result.sort(Comparator.comparing(Vocabulary::getLabel));
+        return result;
+    }
+
+    /**
+     * Finds vocabularies contained in the specified workspace.
+     * <p>
+     * This method should be used in preference to {@link #findAll()} in most scenarios, as it is aware of workspaces.
+     *
+     * @param workspace Workspace to get vocabularies from.
+     * @return List of vocabularies sorted by label
+     */
+    public List<Vocabulary> findAll(Workspace workspace) {
+        final List<Vocabulary> result = em.createNativeQuery("SELECT ?v WHERE { " +
+                "?mc a ?metadataCtx ; " +
+                "?referencesCtx [ " +
+                "a ?vocabularyCtx ;" +
+                "?containsVoc ?v " +
+                "] ." +
+                "?v a ?type ." +
+                "}", Vocabulary.class).setParameter("mc", workspace.getUri())
+                                          .setParameter("metadataCtx",
+                                                  URI.create(
+                                                          cz.cvut.kbss.termit.util.Vocabulary.s_c_metadatovy_kontext))
+                                          .setParameter("referencesCtx", URI.create(
+                                                  cz.cvut.kbss.termit.util.Vocabulary.s_p_odkazuje_na_kontext))
+                                          .setParameter("vocabularyCtx", URI.create(
+                                                  cz.cvut.kbss.termit.util.Vocabulary.s_c_slovnikovy_kontext))
+                                          .setParameter("containsVoc",
+                                                  URI.create(cz.cvut.kbss.termit.util.Vocabulary.s_p_obsahuje_slovnik))
+                                          .setParameter("type", typeUri).getResultList();
         result.sort(Comparator.comparing(Vocabulary::getLabel));
         return result;
     }

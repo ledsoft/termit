@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
 
-import static cz.cvut.kbss.termit.service.repository.WorkspaceRepositoryService.WORKSPACE_ATT;
+import static cz.cvut.kbss.termit.service.repository.WorkspaceRepositoryService.WORKSPACE_SESSION_ATT;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
@@ -50,19 +50,19 @@ class WorkspaceRepositoryServiceTest extends BaseServiceTestRunner {
     void loadWorkspaceByIdStoresLoadedWorkspaceInSession() {
         final Workspace expected = generateWorkspace();
         sut.loadWorkspace(expected.getUri());
-        assertEquals(expected, session.getAttribute(WORKSPACE_ATT));
+        assertEquals(expected, session.getAttribute(WORKSPACE_SESSION_ATT));
     }
 
     @Test
     void getCurrentWorkspaceRetrievesCurrentWorkspaceFromSession() {
         final Workspace expected = generateWorkspace();
-        session.setAttribute(WORKSPACE_ATT, expected);
+        session.setAttribute(WORKSPACE_SESSION_ATT, expected);
         assertEquals(expected, sut.getCurrentWorkspace());
     }
 
     @Test
     void getCurrentWorkspaceThrowsWorkspaceNotSetExceptionWhenNoWorkspaceIsSelected() {
-        assertNull(session.getAttribute(WORKSPACE_ATT));
+        assertNull(session.getAttribute(WORKSPACE_SESSION_ATT));
         assertThrows(WorkspaceNotSetException.class, () -> sut.getCurrentWorkspace());
     }
 }
