@@ -18,6 +18,7 @@ import cz.cvut.kbss.jopa.exceptions.OWLPersistenceException;
 import cz.cvut.kbss.jsonld.exception.JsonLdException;
 import cz.cvut.kbss.termit.exception.UnsupportedOperationException;
 import cz.cvut.kbss.termit.exception.*;
+import cz.cvut.kbss.termit.exception.workspace.WorkspaceNotSetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -144,5 +145,11 @@ public class RestExceptionHandler {
                                                                          UnsupportedImportMediaTypeException e) {
         logException(e);
         return new ResponseEntity<>(errorInfo(request, e), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @ExceptionHandler(WorkspaceNotSetException.class)
+    public ResponseEntity<ErrorInfo> workspaceNotSetException(HttpServletRequest request, WorkspaceNotSetException e) {
+        logException(e);
+        return new ResponseEntity<>(errorInfo(request, e), HttpStatus.CONFLICT);
     }
 }
