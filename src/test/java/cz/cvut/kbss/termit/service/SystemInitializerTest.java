@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(initializers = PropertyMockingApplicationContextInitializer.class)
 class SystemInitializerTest extends BaseServiceTestRunner {
 
-    private static final URI ADMIN_URI = URI.create(Vocabulary.ONTOLOGY_IRI_slovnik + "/system-admin-user");
+    private static final URI ADMIN_URI = URI.create(Vocabulary.ONTOLOGY_IRI_termit + "/system-admin-user");
 
     @Autowired
     private Environment environment;

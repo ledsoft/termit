@@ -130,7 +130,7 @@ class SKOSVocabularyExporterTest extends VocabularyExporterTestBase {
                 conn.add(glossaryIri(vocabulary), vf.createIRI("http://purl.org/vocab/vann/preferredNamespacePrefix"),
                         vf.createLiteral("termit:"));
                 conn.add(glossaryIri(vocabulary), vf.createIRI("http://purl.org/vocab/vann/preferredNamespaceUri"),
-                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_slovnik));
+                        vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.ONTOLOGY_IRI_termit));
                 conn.add(glossaryIri(vocabulary), DCTERMS.RIGHTS,
                         vf.createIRI("https://creativecommons.org/licenses/by-nc-nd/4.0"));
                 conn.add(glossaryIri(vocabulary), vf.createIRI("http://purl.org/ontology/bibo/status"),

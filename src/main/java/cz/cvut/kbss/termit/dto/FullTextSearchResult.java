@@ -1,19 +1,16 @@
 /**
- * TermIt
- * Copyright (C) 2019 Czech Technical University in Prague
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * TermIt Copyright (C) 2019 Czech Technical University in Prague
+ * <p>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <https://www.gnu.org/licenses/>.
  */
 package cz.cvut.kbss.termit.dto;
 
@@ -45,13 +42,13 @@ public class FullTextSearchResult implements Serializable {
     @OWLAnnotationProperty(iri = RDFS.LABEL)
     private String label;
 
-    @OWLDataProperty(iri =  Vocabulary.ONTOLOGY_IRI_slovnik + "/fts/snippet-text")
+    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_termit + "/fts/snippet-text")
     private String snippetText;
 
-    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_slovnik + "/fts/snippet-field")
+    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_termit + "/fts/snippet-field")
     private String snippetField;
 
-    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_slovnik + "/fts/score")
+    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_termit + "/fts/score")
     private Double score;
 
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
@@ -63,7 +60,8 @@ public class FullTextSearchResult implements Serializable {
     public FullTextSearchResult() {
     }
 
-    public FullTextSearchResult(URI uri, String label, URI vocabulary, String type, String snippetField, String snippetText, Double score) {
+    public FullTextSearchResult(URI uri, String label, URI vocabulary, String type, String snippetField,
+                                String snippetText, Double score) {
         this.uri = uri;
         this.label = label;
         this.vocabulary = vocabulary;
