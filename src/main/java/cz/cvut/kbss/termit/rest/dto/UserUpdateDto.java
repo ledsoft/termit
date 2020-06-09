@@ -31,7 +31,7 @@ import java.util.Objects;
 @OWLClass(iri = Vocabulary.s_c_uzivatel_termitu)
 public class UserUpdateDto extends UserAccount {
 
-    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_slovnik + "/original-password")
+    @OWLDataProperty(iri = Vocabulary.ONTOLOGY_IRI_termit + "/original-password")
     private String originalPassword;
 
     public String getOriginalPassword() {

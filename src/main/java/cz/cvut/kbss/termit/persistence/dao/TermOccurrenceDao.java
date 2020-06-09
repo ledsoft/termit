@@ -99,7 +99,7 @@ public class TermOccurrenceDao extends BaseDao<TermOccurrence> {
           .setParameter("occurrenceTarget", URI.create(Vocabulary.s_c_cil_vyskytu))
           .setParameter("hasSource", URI.create(Vocabulary.s_p_ma_zdroj))
           .setParameter("resource", resource.getUri())
-          .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor_termu)).executeUpdate();
+          .setParameter("hasSelector", URI.create(Vocabulary.s_p_ma_selektor)).executeUpdate();
     }
 
     /**

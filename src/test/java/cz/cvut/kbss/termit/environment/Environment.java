@@ -57,7 +57,7 @@ import static cz.cvut.kbss.termit.service.repository.WorkspaceRepositoryService.
 
 public class Environment {
 
-    public static final String BASE_URI = Vocabulary.ONTOLOGY_IRI_slovnik;
+    public static final String BASE_URI = Vocabulary.ONTOLOGY_IRI_termit;
 
     private static UserAccount currentUser;
 
@@ -189,7 +189,7 @@ public class Environment {
         final Repository repo = em.unwrap(Repository.class);
         try (final RepositoryConnection conn = repo.getConnection()) {
             conn.begin();
-            conn.add(new URL("http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/model"), BASE_URI,
+            conn.add(new URL(Vocabulary.ONTOLOGY_IRI_model_A), BASE_URI,
                     RDFFormat.TURTLE);
             conn.add(new File("ontology/termit-model.ttl"), BASE_URI, RDFFormat.TURTLE);
             // TODO Update the URI once the ontology is publicly available at its correct location

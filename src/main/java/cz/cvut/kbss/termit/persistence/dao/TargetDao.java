@@ -49,7 +49,7 @@ public class TargetDao extends BaseDao<Target> {
                             + "FILTER NOT EXISTS {?x ?hasSelector ?selector} }", Target.class)
                                          .setParameter("type", typeUri).setParameter("hasSource",
                             URI.create(Vocabulary.s_p_ma_zdroj)).setParameter("hasSelector",
-                            URI.create(Vocabulary.s_p_ma_selektor_termu))
+                            URI.create(Vocabulary.s_p_ma_selektor))
                                          .setParameter("resource", resource.getUri())
                                          .getSingleResult());
         } catch (NoResultException e) {

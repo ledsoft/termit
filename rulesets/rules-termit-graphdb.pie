@@ -5,7 +5,7 @@ Prefices
     owl  :  http://www.w3.org/2002/07/owl#
     xsd  :  http://www.w3.org/2001/XMLSchema#
     skos :  http://www.w3.org/2004/02/skos/core#
-    pdp  :  http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/
+    pdp  :  http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/
     psys :  http://proton.semanticweb.org/protonsys#
     termit : http://onto.fel.cvut.cz/ontologies/application/termit/pojem/
 }

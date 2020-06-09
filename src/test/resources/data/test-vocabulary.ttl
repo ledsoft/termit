@@ -5,7 +5,7 @@
 @prefix termit-pojem: <http://onto.fel.cvut.cz/ontologies/application/termit/pojem/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 
-termit:slovník  a       <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/slovník> , owl:Ontology ;
+termit:slovník  a       <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/slovník> , owl:Ontology ;
         <http://purl.org/dc/terms/creator>
                 " Martin Ledvinka" , "Michal Med" ;
         <http://purl.org/dc/terms/title>
@@ -20,7 +20,7 @@ termit:slovník  a       <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/po
                 "http://onto.fel.cvut.cz/ontologies/application/termit/pojem/" ;
         owl:imports     termit:glosář , termit:model ;
         owl:versionIRI  <http://onto.fel.cvut.cz/ontologies/application/termit/slovník/verze/1.1.1> ;
-        <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/má-glosář>
+        <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/má-glosář>
                 termit:glosář ;
-        <http://onto.fel.cvut.cz/ontologies/slovnik/agendovy/popis-dat/pojem/má-model>
+        <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/má-model>
                 termit:model .
