@@ -3,13 +3,14 @@ package cz.cvut.kbss.termit.persistence.dao.changetracking;
 import cz.cvut.kbss.termit.model.Asset;
 import cz.cvut.kbss.termit.model.Term;
 import cz.cvut.kbss.termit.model.Vocabulary;
-import cz.cvut.kbss.termit.util.ConfigParam;
-import cz.cvut.kbss.termit.util.Configuration;
+import cz.cvut.kbss.termit.workspace.WorkspaceMetadataCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.Objects;
+
+import static cz.cvut.kbss.termit.util.Constants.DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION;
 
 /**
  * Determines repository context into which change tracking records are stored.
@@ -17,11 +18,11 @@ import java.util.Objects;
 @Component
 public class ChangeTrackingContextResolver {
 
-    private final String contextExtension;
+    private final WorkspaceMetadataCache workspaceMetadataCache;
 
     @Autowired
-    public ChangeTrackingContextResolver(Configuration config) {
-        this.contextExtension = config.get(ConfigParam.CHANGE_TRACKING_CONTEXT_EXTENSION);
+    public ChangeTrackingContextResolver(WorkspaceMetadataCache workspaceMetadataCache) {
+        this.workspaceMetadataCache = workspaceMetadataCache;
     }
 
     /**
@@ -36,10 +37,13 @@ public class ChangeTrackingContextResolver {
     public URI resolveChangeTrackingContext(Asset changedAsset) {
         Objects.requireNonNull(changedAsset);
         if (changedAsset instanceof Vocabulary) {
-            return URI.create(changedAsset.getUri().toString().concat(contextExtension));
+            return workspaceMetadataCache.getCurrentWorkspaceMetadata().getVocabularyInfo(changedAsset.getUri())
+                                         .getChangeTrackingContext();
         } else if (changedAsset instanceof Term) {
-            return URI.create(((Term) changedAsset).getVocabulary().toString().concat(contextExtension));
+            final Term t = (Term) changedAsset;
+            return workspaceMetadataCache.getCurrentWorkspaceMetadata().getVocabularyInfo(t.getVocabulary())
+                                         .getChangeTrackingContext();
         }
-        return URI.create(changedAsset.getUri().toString().concat(contextExtension));
+        return URI.create(changedAsset.getUri().toString().concat(DEFAULT_CHANGE_TRACKING_CONTEXT_EXTENSION));
     }
 }
