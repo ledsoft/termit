@@ -88,5 +88,13 @@ Rules
     this <skos:broader> parent
     -------------------------------
     parent <skos:narrower> this
+
+  Id: pdp_term_7
+
+      this <rdf:type> <skos:Concept>
+      this <skos:inScheme> glossary
+      vocabulary <pdp:má-glosář> glossary
+      -------------------------------
+      this <pdp:je-pojmem-ze-slovníku> vocabulary
 }
 

@@ -206,9 +206,9 @@ class TermTest {
     void hasParentInSameVocabularyReturnsTrueWhenTermHasParentWithSameVocabulary() {
         final Term sut = Generator.generateTermWithId();
         final URI vocabularyUri = Generator.generateUri();
-        sut.setVocabulary(vocabularyUri);
+        sut.setGlossary(vocabularyUri);
         final Term parent = Generator.generateTermWithId();
-        parent.setVocabulary(vocabularyUri);
+        parent.setGlossary(vocabularyUri);
         sut.addParentTerm(parent);
 
         assertTrue(sut.hasParentInSameVocabulary());
@@ -217,9 +217,9 @@ class TermTest {
     @Test
     void hasParentInSameVocabularyReturnsFalseWhenTermHasParentWithDifferentVocabulary() {
         final Term sut = Generator.generateTermWithId();
-        sut.setVocabulary(Generator.generateUri());
+        sut.setGlossary(Generator.generateUri());
         final Term parent = Generator.generateTermWithId();
-        parent.setVocabulary(Generator.generateUri());
+        parent.setGlossary(Generator.generateUri());
         sut.addParentTerm(parent);
 
         assertFalse(sut.hasParentInSameVocabulary());

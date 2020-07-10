@@ -221,7 +221,9 @@ public class DescriptorFactory {
      */
     public Descriptor termDescriptor(URI vocabularyUri) {
         final EntityDescriptor descriptor = assetDescriptor(vocabularyUri);
-        descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(vocabularyUri));
+        descriptor.addAttributeDescriptor(Term.getParentTermsField(), new EntityDescriptor(null));
+        // Vocabulary field is inferred, so it cannot be in any specific context
+        descriptor.addAttributeContext(Term.getVocabularyField(), null);
         return descriptor;
     }
 
@@ -247,6 +249,8 @@ public class DescriptorFactory {
         } else {
             descriptor.addAttributeDescriptor(Term.getParentTermsField(), assetDescriptor(term.getVocabulary()));
         }
+        // Vocabulary field is inferred, so it cannot be in any specific context
+        descriptor.addAttributeContext(Term.getVocabularyField(), null);
         return descriptor;
     }
 }

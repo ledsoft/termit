@@ -129,7 +129,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
             em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, descriptorFactory.termDescriptor(term));
+            em.persist(term, descriptorFactory.termDescriptor(vocabulary));
         });
         term.setDefinition("Updated term definition.");
         transactional(() -> termService.update(term));
@@ -145,15 +145,19 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     void updatingTermReferenceAttributeCreatesChangeRecord() {
         enableRdfsInference(em);
         final Term parent = Generator.generateTermWithId();
-        parent.setVocabulary(vocabulary.getUri());
         final Term term = Generator.generateTermWithId();
-        term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
             em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, descriptorFactory.termDescriptor(parent));
-            em.persist(term, descriptorFactory.termDescriptor(term));
+            term.setGlossary(vocabulary.getGlossary().getUri());
+            parent.setGlossary(vocabulary.getGlossary().getUri());
+            em.persist(parent, descriptorFactory.termDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(vocabulary));
+            Generator.addTermInVocabularyRelationship(parent, vocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(term, vocabulary.getUri(), em);
         });
         term.addParentTerm(parent);
+        // This is normally inferred
+        term.setVocabulary(vocabulary.getUri());
         transactional(() -> termService.update(term));
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);
@@ -171,7 +175,7 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
         term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
             em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(term, descriptorFactory.termDescriptor(term));
+            em.persist(term, descriptorFactory.termDescriptor(vocabulary));
         });
         final String newDefinition = "Updated term definition.";
         term.setDefinition(newDefinition);
@@ -188,15 +192,19 @@ public class ChangeTrackingTest extends BaseServiceTestRunner {
     void updatingTermReferenceAttributeCreatesChangeRecordWithOriginalAndNewValue() {
         enableRdfsInference(em);
         final Term parent = Generator.generateTermWithId();
-        parent.setVocabulary(vocabulary.getUri());
         final Term term = Generator.generateTermWithId();
-        term.setVocabulary(vocabulary.getUri());
         transactional(() -> {
             em.persist(vocabulary, descriptorFactory.vocabularyDescriptor(vocabulary));
-            em.persist(parent, descriptorFactory.termDescriptor(parent));
-            em.persist(term, descriptorFactory.termDescriptor(term));
+            parent.setGlossary(vocabulary.getGlossary().getUri());
+            term.setGlossary(vocabulary.getGlossary().getUri());
+            em.persist(parent, descriptorFactory.termDescriptor(vocabulary));
+            em.persist(term, descriptorFactory.termDescriptor(vocabulary));
+            Generator.addTermInVocabularyRelationship(parent, vocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(term, vocabulary.getUri(), em);
         });
         term.addParentTerm(parent);
+        // This is normally inferred
+        term.setVocabulary(vocabulary.getUri());
         transactional(() -> termService.update(term));
 
         final List<AbstractChangeRecord> result = changeRecordDao.findAll(term);

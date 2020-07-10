@@ -232,14 +232,16 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final Term parentTerm = Generator.generateTermWithId();
         child.addParentTerm(parentTerm);
         subjectVocabulary.getGlossary().addRootTerm(child);
-        child.setVocabulary(subjectVocabulary.getUri());
         targetVocabulary.getGlossary().addRootTerm(parentTerm);
-        parentTerm.setVocabulary(targetVocabulary.getUri());
         transactional(() -> {
             em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
             em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, descriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
+            child.setGlossary(subjectVocabulary.getGlossary().getUri());
+            em.persist(child, descriptorFactory.termDescriptor(subjectVocabulary));
+            parentTerm.setGlossary(targetVocabulary.getGlossary().getUri());
+            em.persist(parentTerm, descriptorFactory.termDescriptor(targetVocabulary));
+            Generator.addTermInVocabularyRelationship(child, subjectVocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(parentTerm, targetVocabulary.getUri(), em);
         });
 
         assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));
@@ -256,15 +258,17 @@ class VocabularyDaoTest extends BaseDaoTestRunner {
         final Term parentTerm = Generator.generateTermWithId();
         child.addParentTerm(parentTerm);
         subjectVocabulary.getGlossary().addRootTerm(child);
-        child.setVocabulary(subjectVocabulary.getUri());
         transitiveVocabulary.getGlossary().addRootTerm(parentTerm);
-        parentTerm.setVocabulary(transitiveVocabulary.getUri());
         transactional(() -> {
             em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
             em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
             em.persist(transitiveVocabulary, descriptorFactory.vocabularyDescriptor(transitiveVocabulary));
-            em.persist(child, descriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
+            child.setGlossary(subjectVocabulary.getGlossary().getUri());
+            em.persist(child, descriptorFactory.termDescriptor(subjectVocabulary));
+            parentTerm.setGlossary(transitiveVocabulary.getGlossary().getUri());
+            em.persist(parentTerm, descriptorFactory.termDescriptor(transitiveVocabulary));
+            Generator.addTermInVocabularyRelationship(child, subjectVocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(parentTerm, transitiveVocabulary.getUri(), em);
         });
 
         assertTrue(sut.hasInterVocabularyTermRelationships(subjectVocabulary.getUri(), targetVocabulary.getUri()));

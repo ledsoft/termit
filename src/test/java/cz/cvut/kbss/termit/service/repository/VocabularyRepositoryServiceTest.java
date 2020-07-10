@@ -42,7 +42,6 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.net.URI;
 import java.util.Collection;
@@ -67,9 +66,6 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
 
     @Autowired
     private EntityManager em;
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private WorkspaceMetadataCache workspaceMetadataCache;
@@ -196,14 +192,16 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         final Term parentTerm = Generator.generateTermWithId();
         child.addParentTerm(parentTerm);
         subjectVocabulary.getGlossary().addRootTerm(child);
-        child.setVocabulary(subjectVocabulary.getUri());
         targetVocabulary.getGlossary().addRootTerm(parentTerm);
-        parentTerm.setVocabulary(targetVocabulary.getUri());
         transactional(() -> {
             em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
             em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, descriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
+            child.setGlossary(subjectVocabulary.getGlossary().getUri());
+            em.persist(child, descriptorFactory.termDescriptor(subjectVocabulary));
+            parentTerm.setGlossary(targetVocabulary.getGlossary().getUri());
+            em.persist(parentTerm, descriptorFactory.termDescriptor(targetVocabulary));
+            Generator.addTermInVocabularyRelationship(child, subjectVocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(parentTerm, targetVocabulary.getUri(), em);
         });
 
         subjectVocabulary.setImportedVocabularies(Collections.emptySet());
@@ -224,8 +222,12 @@ class VocabularyRepositoryServiceTest extends BaseServiceTestRunner {
         transactional(() -> {
             em.persist(subjectVocabulary, descriptorFactory.vocabularyDescriptor(subjectVocabulary));
             em.persist(targetVocabulary, descriptorFactory.vocabularyDescriptor(targetVocabulary));
-            em.persist(child, descriptorFactory.termDescriptor(child));
-            em.persist(parentTerm, descriptorFactory.termDescriptor(parentTerm));
+            child.setGlossary(subjectVocabulary.getGlossary().getUri());
+            em.persist(child, descriptorFactory.termDescriptor(subjectVocabulary));
+            parentTerm.setGlossary(targetVocabulary.getGlossary().getUri());
+            em.persist(parentTerm, descriptorFactory.termDescriptor(targetVocabulary));
+            Generator.addTermInVocabularyRelationship(child, subjectVocabulary.getUri(), em);
+            Generator.addTermInVocabularyRelationship(parentTerm, targetVocabulary.getUri(), em);
         });
 
         subjectVocabulary.setImportedVocabularies(Collections.emptySet());

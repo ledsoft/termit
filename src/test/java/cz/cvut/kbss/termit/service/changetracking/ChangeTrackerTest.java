@@ -55,7 +55,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         final Term newTerm = Generator.generateTermWithId();
         newTerm.setVocabulary(vocabulary.getUri());
         transactional(() -> {
-            em.persist(newTerm, descriptorFactory.termDescriptor(newTerm));
+            em.persist(newTerm, descriptorFactory.termDescriptor(vocabulary));
             sut.recordAddEvent(newTerm);
         });
 
@@ -79,7 +79,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
         original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(vocabulary)));
 
         final Term update = cloneOf(original);
         transactional(() -> sut.recordUpdateEvent(update, original));
@@ -92,7 +92,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
         original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(vocabulary)));
 
         final Term update = cloneOf(original);
         update.setDefinition("Updated definition of this term.");
@@ -110,12 +110,12 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
     void recordUpdateRecordsMultipleChangesToAttributes() {
         enableRdfsInference(em);
         final Term original = Generator.generateTermWithId();
-        original.setVocabulary(vocabulary.getUri());
-        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(original)));
+        original.setGlossary(vocabulary.getUri());
+        transactional(() -> em.persist(original, descriptorFactory.termDescriptor(vocabulary.getUri())));
 
         final Term update = cloneOf(original);
         update.setDefinition("Updated definition of this term.");
-        update.setVocabulary(Generator.generateUri());
+        update.setGlossary(Generator.generateUri());
         transactional(() -> sut.recordUpdateEvent(update, original));
 
         final List<AbstractChangeRecord> result = findRecords();
@@ -124,7 +124,7 @@ class ChangeTrackerTest extends BaseServiceTestRunner {
             assertEquals(original.getUri(), record.getChangedEntity());
             assertThat(record, instanceOf(UpdateChangeRecord.class));
             assertThat(((UpdateChangeRecord) record).getChangedAttribute().toString(), anyOf(equalTo(SKOS.DEFINITION),
-                    equalTo(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku)));
+                    equalTo(SKOS.IN_SCHEME)));
         });
     }
 }

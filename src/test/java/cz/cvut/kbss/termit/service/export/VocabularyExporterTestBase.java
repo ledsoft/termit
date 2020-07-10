@@ -59,12 +59,13 @@ abstract class VocabularyExporterTestBase extends BaseServiceTestRunner {
                 term.setSources(Collections.singleton("PSP/c-1/p-2/b-c"));
             }
             terms.add(term);
-            term.setVocabulary(vocabulary.getUri());
+            term.setGlossary(vocabulary.getGlossary().getUri());
         }
         vocabulary.getGlossary().setRootTerms(terms.stream().map(Asset::getUri).collect(Collectors.toSet()));
         transactional(() -> {
             em.merge(vocabulary.getGlossary(), descriptorFactory.glossaryDescriptor(vocabulary));
             terms.forEach(t -> em.persist(t, descriptorFactory.termDescriptor(vocabulary)));
+            terms.forEach(t -> Generator.addTermInVocabularyRelationship(t, vocabulary.getUri(), em));
         });
         return terms;
     }

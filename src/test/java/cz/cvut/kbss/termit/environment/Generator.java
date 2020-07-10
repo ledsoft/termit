@@ -14,6 +14,7 @@
  */
 package cz.cvut.kbss.termit.environment;
 
+import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.annotations.OWLAnnotationProperty;
 import cz.cvut.kbss.termit.model.*;
 import cz.cvut.kbss.termit.model.changetracking.PersistChangeRecord;
@@ -26,6 +27,8 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -308,5 +311,21 @@ public class Generator {
         ws.setLabel("Workspace " + randomInt(0, 10000));
         ws.setDescription("Description of workspace " + ws.getLabel());
         return ws;
+    }
+
+    /**
+     * Simulates inference of the "je-pojmem-ze-slovniku" relationship between a term and its vocabulary.
+     * @param term Term in vocabulary
+     * @param vocabularyIri Vocabulary identifier
+     * @param em Transactional entity manager to unwrap repository connection from
+     */
+    public static void addTermInVocabularyRelationship(Term term, URI vocabularyIri, EntityManager em) {
+        final Repository repo = em.unwrap(Repository.class);
+        try (RepositoryConnection conn = repo.getConnection()) {
+            final ValueFactory vf = conn.getValueFactory();
+            conn.add(vf.createIRI(term.getUri().toString()),
+                    vf.createIRI(cz.cvut.kbss.termit.util.Vocabulary.s_p_je_pojmem_ze_slovniku),
+                    vf.createIRI(vocabularyIri.toString()));
+        }
     }
 }

@@ -43,8 +43,9 @@ public class Term extends Asset implements HasTypes, Serializable {
      * Names of columns used in term export.
      */
     public static final List<String> EXPORT_COLUMNS = Collections
-            .unmodifiableList(Arrays.asList("IRI", "Label", "Definition", "Description", "Types", "Sources", "Parent term",
-                    "SubTerms"));
+            .unmodifiableList(
+                    Arrays.asList("IRI", "Label", "Definition", "Description", "Types", "Sources", "Parent term",
+                            "SubTerms"));
 
     @NotBlank
     @ParticipationConstraints(nonEmpty = true)
@@ -67,6 +68,10 @@ public class Term extends Asset implements HasTypes, Serializable {
     @OWLObjectProperty(iri = SKOS.NARROWER) // But map the property for JSON-LD serialization
     private Set<TermInfo> subTerms;
 
+    @OWLObjectProperty(iri = SKOS.IN_SCHEME)
+    private URI glossary;
+
+    @Inferred
     @OWLObjectProperty(iri = Vocabulary.s_p_je_pojmem_ze_slovniku)
     private URI vocabulary;
 
@@ -131,6 +136,14 @@ public class Term extends Asset implements HasTypes, Serializable {
 
     public void setSources(Set<String> source) {
         this.sources = source;
+    }
+
+    public URI getGlossary() {
+        return glossary;
+    }
+
+    public void setGlossary(URI glossary) {
+        this.glossary = glossary;
     }
 
     public URI getVocabulary() {
@@ -238,7 +251,7 @@ public class Term extends Asset implements HasTypes, Serializable {
      * term at all
      */
     public boolean hasParentInSameVocabulary() {
-        return parentTerms != null && parentTerms.stream().anyMatch(p -> p.getVocabulary().equals(vocabulary));
+        return parentTerms != null && parentTerms.stream().anyMatch(p -> p.getGlossary().equals(glossary));
     }
 
     @Override
@@ -272,6 +285,14 @@ public class Term extends Asset implements HasTypes, Serializable {
             return Term.class.getDeclaredField("parentTerms");
         } catch (NoSuchFieldException e) {
             throw new TermItException("Fatal error! Unable to retrieve \"parentTerms\" field.", e);
+        }
+    }
+
+    public static Field getVocabularyField() {
+        try {
+            return Term.class.getDeclaredField("vocabulary");
+        } catch (NoSuchFieldException e) {
+            throw new TermItException("Fatal error! Unable to retrieve \"vocabulary\" field.", e);
         }
     }
 }

@@ -22,14 +22,14 @@ skos:Concept a rdfs:Class ;
 	           WHERE { ?occurrence termit:je-přiřazením-termu ?this ;
 	                                a termit:výskyt-termu . }"""
     ];
-# InverseOf between je-pojmem-ze-slovníku and property chain má-glosář -> obsahuje-pojem
+# InverseOf between je-pojmem-ze-slovníku and má-glosář + skos:inScheme
 	spin:rule [
 		a sp:Construct ;
 	sp:text """PREFIX pdp: <http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/>
 	           PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-	           CONSTRUCT { ?glossary pdp:obsahuje-pojem ?this . ?this skos:inScheme ?glossary.}
-	           WHERE { ?vocabulary pdp:má-glosář ?glossary .
-	                   ?this pdp:je-pojmem-ze-slovníku ?vocabulary . }"""
+	           CONSTRUCT { ?this pdp:je-pojmem-ze-slovníku ?vocabulary . }
+	           WHERE {  ?this skos:inScheme ?glossary .
+	                    ?vocabulary pdp:má-glosář ?glossary . }"""
     ];
 
     # InverseOf between skos:broader and skos:narrower

@@ -20,9 +20,8 @@ CONSTRUCT {
         skos:broader ?parentEvent .
 } WHERE {
     ?term a skos:Concept ;
-        pdp:je-pojmem-ze-slovníku ?vocabulary ;
+        skos:inScheme ?glossary ;
         skos:prefLabel ?prefLabel .
-    ?vocabulary pdp:má-glosář ?glossary .
     OPTIONAL {
         ?term skos:definition ?definition .
     }

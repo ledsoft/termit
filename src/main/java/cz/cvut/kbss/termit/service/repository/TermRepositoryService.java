@@ -1,17 +1,17 @@
 /**
  * TermIt
  * Copyright (C) 2019 Czech Technical University in Prague
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -90,9 +90,9 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
             instance.setUri(generateIdentifier(vocabulary.getUri(), instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
-        instance.setVocabulary(vocabulary.getUri());
-        addTermAsRootToGlossary(instance);
-        termDao.persist(instance);
+        instance.setGlossary(vocabulary.getGlossary().getUri());
+        addTermAsRootToGlossary(instance, vocabulary.getUri());
+        termDao.persist(instance, vocabulary);
     }
 
     /**
@@ -110,9 +110,10 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
                 termLabel);
     }
 
-    private void addTermAsRootToGlossary(Term instance) {
+    private void addTermAsRootToGlossary(Term instance, URI vocabularyIri) {
         // Load vocabulary so that it is managed and changes to it (resp. the glossary) are persisted on commit
-        final Vocabulary toUpdate = vocabularyService.getRequiredReference(instance.getVocabulary());
+        final Vocabulary toUpdate = vocabularyService.getRequiredReference(vocabularyIri);
+        instance.setGlossary(toUpdate.getGlossary().getUri());
         toUpdate.getGlossary().addRootTerm(instance);
     }
 
@@ -121,20 +122,19 @@ public class TermRepositoryService extends BaseAssetRepositoryService<Term> {
         validate(instance);
         Objects.requireNonNull(instance);
         Objects.requireNonNull(parentTerm);
-        if (instance.getVocabulary() == null) {
-            instance.setVocabulary(parentTerm.getVocabulary());
-        }
+        final URI vocabularyIri =
+                instance.getVocabulary() != null ? instance.getVocabulary() : parentTerm.getVocabulary();
         if (instance.getUri() == null) {
-            instance.setUri(generateIdentifier(instance.getVocabulary(), instance.getLabel()));
+            instance.setUri(generateIdentifier(vocabularyIri, instance.getLabel()));
         }
         verifyIdentifierUnique(instance);
 
         instance.addParentTerm(parentTerm);
         if (!instance.hasParentInSameVocabulary()) {
-            addTermAsRootToGlossary(instance);
+            addTermAsRootToGlossary(instance, vocabularyIri);
         }
 
-        termDao.persist(instance);
+        termDao.persist(instance, vocabularyService.getRequiredReference(vocabularyIri));
     }
 
     /**
