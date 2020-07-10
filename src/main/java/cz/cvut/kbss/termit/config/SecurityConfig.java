@@ -98,7 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .addFilter(
                     new JwtAuthorizationFilter(authenticationManager(), jwtUtils, securityUtils, userDetailsService,
                             objectMapper))
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
     }
 
     @Bean
